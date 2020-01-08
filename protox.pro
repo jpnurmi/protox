@@ -60,5 +60,3 @@ HEADERS += \
 	main.h \
 	tools.h \
 	tox.h
-
-ANDROID_EXTRA_LIBS = /home/monsterovich/Distfiles/projects/protox/protox/libs/libtoxcore.so /home/monsterovich/Distfiles/projects/protox/protox/libs/libtoxencryptsave.so $$PWD/libs/libsodium.so
