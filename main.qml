@@ -4,7 +4,7 @@ import QtQuick.Controls.Material 2.2
 
 import QtQuick.Layouts 1.3
 
-import QtQuick.Window 2.12
+import QtNotification 1.0
 
 ApplicationWindow {
     id: window
@@ -12,6 +12,10 @@ ApplicationWindow {
     height: 520
     visible: true
     title: qsTr("Side Panel")
+
+    Notification {
+        id: notification
+    }
 
     FontLoader { 
         id: dejavuSans; 
@@ -25,7 +29,18 @@ ApplicationWindow {
     readonly property int z_overlay_header: 1
 
     // function callbacks
-    function insertMessage(text, friend_number, self, message_id, time, unique_id, failed) {
+    function chatScrollToEnd() {
+        chatFlickable.scrollToEnd()
+    }
+
+    function insertMessage(text, friend_number, self, message_id, time, unique_id, failed, history) {
+        if (!self && !history && (!window.visibility || (window.visibility && bridge.getCurrentFriendNumber() !== friend_number))) {
+            notification.show({
+                              caption : text,
+                              title : qsTr("New message from ") + bridge.getFriendNickname(friend_number),
+                              id : friend_number
+                            });
+        }
         if (bridge.getCurrentFriendNumber() !== friend_number)
             return
         messagesModel.append({"msgText": text, 
@@ -35,7 +50,8 @@ ApplicationWindow {
                                  "msgTime" : time, 
                                  "msgUniqueId" : unique_id,
                                  "msgFailed" : failed})
-        chatFlickable.scrollToEnd()
+        if (!history)
+            chatFlickable.scrollToEnd()
     }
     function insertFriend(friend_number, nickName) {
         friendsModel.append({"friendNumber" : friend_number, "nickName" : nickName})
@@ -85,7 +101,9 @@ ApplicationWindow {
             text: "\u2630"
             font.family: dejavuSans.name
             font.pointSize: 30
+            font.bold: true
             onClicked: {
+                highlighted = true
                 drawer.open()
             }
             anchors.left: parent.left
@@ -105,16 +123,18 @@ ApplicationWindow {
             }
 
             MenuItem {
-                text: qsTr("Copy ToxID")
+                text: qsTr("Copy My ToxID")
                 onClicked: {
                     bridge.copyToxIdToClipboard()
                 }
             }
+            /*
             MenuItem {
                 text: qsTr("Test action")
                 onClicked: {
                 }
             }
+            */
             MenuItem {
                 text: qsTr("Quit")
                 onClicked: {
@@ -127,12 +147,11 @@ ApplicationWindow {
             text: "\u22EE"
             font.family: dejavuSans.name
             font.pointSize: 30
-
+            font.bold: true
             onClicked: {
                 highlighted = true
                 contextMenuRight.popup(window.width - contextMenuRight.implicitWidth, overlayHeader.height)
             }
-
             anchors.right: parent.right
             anchors.top: parent.top
             anchors.bottom: parent.bottom
@@ -176,6 +195,9 @@ ApplicationWindow {
         onOpened: {
             chatMessage.focus = false
         }
+        onClosed: {
+            leftOverlayButton.highlighted = false
+        }
 
         ListModel {
             id: friendsModel
@@ -187,6 +209,7 @@ ApplicationWindow {
                     Repeater {
                         id: friends
                         model: friendsModel
+
                         delegate: RowLayout {
                             id: friendLayout
                             Rectangle {
@@ -220,12 +243,24 @@ ApplicationWindow {
                                     setCurrentFriendConnStatus(friend_number, bridge.getFriendConnStatus(friend_number))
                                     messagesModel.clear()
                                     bridge.retrieveChatLog()
+                                    chatScrollToEnd()
                                 }
                             }
                         }
                     }
                 }
             ScrollIndicator.vertical: ScrollIndicator { }
+        }
+        RowLayout {
+            y: window.height - height
+            ToolButton {
+                id: addFriendButton
+                text: "\uFF0B"
+                font.family: dejavuSans.name
+                font.pointSize: 30
+                font.bold: true
+                antialiasing: true
+            }
         }
     }
     ColumnLayout {
@@ -247,7 +282,6 @@ ApplicationWindow {
             boundsMovement: Flickable.StopAtBounds
 
             function scrollToEnd() {
-                //contentY = contentHeight - flickable_margin
                 if (contentHeight > height)
                     contentY = contentHeight
                 returnToBounds()
@@ -272,30 +306,25 @@ ApplicationWindow {
                         property int cloud_margin: 5
                         color: !msgSelf ? "lightblue" : "lightgray"
                         radius: 10
-                        visible: false
+                        opacity: 0
                         function setCloudColor(newColor) {
                             color = newColor
-                            cloudCornerRemover.color = newColor
-                            cloudCornerRemover.requestPaint()
                             cloudTail.color = newColor
                             cloudTail.requestPaint()
                         }
-
-                        Canvas {
+                        Rectangle {
                             id: cloudCornerRemover
                             z: z_cloud
                             width: parent.radius
                             height: width
-                            renderStrategy: Canvas.Cooperative
-                            property variant color: parent.color
+                            color: parent.color
+                            anchors.top: parent.top
                             Component.onCompleted: {
-                                if (msgSelf)
+                                if (msgSelf) {
                                     anchors.right = parent.right
-                            }
-                            onPaint: {
-                                var ctx = getContext("2d");
-                                ctx.fillStyle = color
-                                ctx.fillRect(0, 0, width, height);
+                                } else {
+                                    anchors.left = parent.left
+                                }
                             }
                         }
                         Canvas {
@@ -324,8 +353,9 @@ ApplicationWindow {
                                 cxt.fillStyle = color;
                                 cxt.fill();
                             }
+                            // fixme: canvas draws with delay
                             onPainted: {
-                                parent.visible = true
+                                parent.opacity = 1.0
                             }
                         }
                         Component.onCompleted: {
@@ -354,7 +384,6 @@ ApplicationWindow {
                             text: msgTime
                             font.pointSize: 10
                             Component.onCompleted: {
-                                //parent.implicitWidth = Math.max(parent.implicitWidth, contentWidth)
                                 if (!msgSelf) {
                                     anchors.left = parent.left
                                 } else {

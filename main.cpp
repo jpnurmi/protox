@@ -1,10 +1,9 @@
-
-
-
 #include "main.h"
 
 #include "tools.h"
 #include "db.h"
+
+#include "QtNotification.h"
 
 QPointer <QmlCBridge> qmlbridge;
 QPointer <ChatDataBase> chat_db;
@@ -22,7 +21,7 @@ void QmlCBridge::setComponent(QObject *_component)
 	component = _component;
 }
 
-void QmlCBridge::insertMessage(const QString &message, quint32 friend_number, bool self, quint32 message_id, quint64 unique_id, QDateTime dt, bool failed)
+void QmlCBridge::insertMessage(const QString &message, quint32 friend_number, bool self, quint32 message_id, quint64 unique_id, QDateTime dt, bool history, bool failed)
 {
 	QVariant returnedValue;
 	if (!friends_once[friend_number]) {
@@ -35,7 +34,8 @@ void QmlCBridge::insertMessage(const QString &message, quint32 friend_number, bo
 							  Q_ARG(QVariant, message_id),
 							  Q_ARG(QVariant, dt.toString("d MMMM hh:mm:ss")),
 							  Q_ARG(QVariant, unique_id),
-							  Q_ARG(QVariant, failed));
+							  Q_ARG(QVariant, failed),
+							  Q_ARG(QVariant, history));
 }
 
 void QmlCBridge::insertFriend(qint32 friend_number, const QString nickName)
@@ -70,7 +70,7 @@ void QmlCBridge::sendMessage(const QString message)
 	quint32 message_id = toxcore_send_message(tox, current_friend_number, message, failed);
 	quint64 new_unique_id = chat_db->getMessagesCountFriend(friend_pk) + 1;
 	QDateTime dt = QDateTime::currentDateTime();
-	insertMessage(message, current_friend_number, true, message_id, new_unique_id, dt, failed);
+	insertMessage(message, current_friend_number, true, message_id, new_unique_id, dt, false, failed);
 	messages_id_uid[message_id] = new_unique_id;
 	chat_db->insertMessage(message, dt, friend_pk, true, new_unique_id, failed);
 }
@@ -100,9 +100,26 @@ void QmlCBridge::retrieveChatLog()
 	ToxMessages messages = chat_db->getFriendMessagesFromDateTime(toxcore_get_friend_public_key(tox, current_friend_number), 
 											QDateTime::fromSecsSinceEpoch(0));
 	for (auto msg : messages) {
-		insertMessage(msg.message, current_friend_number, msg.self, 0, msg.unique_id, msg.dt);
+		insertMessage(msg.message, current_friend_number, msg.self, 0, msg.unique_id, msg.dt, true);
 	if (!msg.self || msg.received)
 		setMessageReceived(current_friend_number, 0, true, msg.unique_id);
+	}
+}
+
+static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler(0);
+
+void customMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString & msg)
+{
+	switch (type) {
+	case QtWarningMsg: {
+		if (!msg.contains("Detected anchors on an item that is managed by a layout.")){
+			(*QT_DEFAULT_MESSAGE_HANDLER)(type, context, msg);
+		}
+	}
+	break;
+	default:
+		(*QT_DEFAULT_MESSAGE_HANDLER)(type, context, msg);
+		break;
 	}
 }
 
@@ -117,6 +134,7 @@ int main(int argc, char *argv[])
 	QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 	
 	QGuiApplication app(argc, argv);
+	qInstallMessageHandler(customMessageHandler);
 	
 	QQmlApplicationEngine engine;
 	const QUrl url(QStringLiteral(QML_MAIN));
@@ -129,6 +147,7 @@ int main(int argc, char *argv[])
 	qmlbridge = new QmlCBridge(tox);
 	QQmlContext *root = engine.rootContext();
 	root->setContextProperty("bridge", qmlbridge);
+	QtNotification::declareQML();
 	engine.load(url);
 	QObject *component = engine.rootObjects().first();
 	qmlbridge->setComponent(component);
@@ -139,6 +158,7 @@ int main(int argc, char *argv[])
 	}
 
 	qmlbridge->retrieveChatLog();
+	QMetaObject::invokeMethod(component, "chatScrollToEnd");
 
 	QTimer *toxcore_timer = toxcore_create_qtimer(tox);
 	toxcore_timer->start();
@@ -147,6 +167,6 @@ int main(int argc, char *argv[])
 	toxcore_destroy(tox);
 	delete qmlbridge;
 	delete chat_db;
-	Debug("Program exited.");
+	Debug("Program exited successfully.");
 	return result;
 }

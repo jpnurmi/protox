@@ -4,6 +4,9 @@
 #include <QFuture>
 #include <QtConcurrent/QtConcurrent>
 
+#define DATABASE_VERSION 1
+#define APPLICATION_ID ('P' << 24) + ('T' << 16) + ('O' << 8) + 'X'
+
 ChatDataBase::ChatDataBase(const QString fileName)
 {
 	commitRequests = 0;
@@ -13,6 +16,8 @@ ChatDataBase::ChatDataBase(const QString fileName)
 	db.open();
 
 	QSqlQuery query;
+	query = db.exec(QString("PRAGMA application_id=%1").arg(APPLICATION_ID));
+	query = db.exec(QString("PRAGMA user_version=%1").arg(DATABASE_VERSION));
 	const QString create_command_messages =
 			"CREATE TABLE IF NOT EXISTS Messages\n"
 			"(\n"

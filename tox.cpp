@@ -3,7 +3,7 @@
 #include "tools.h"
 #include "db.h"
 
-#define PROFILE_DATA_PATH "/sdcard/test_profile.tox"
+#define DEFAULT_PROFILE "profile.tox"
 
 extern QPointer <QmlCBridge> qmlbridge;
 extern QPointer <ChatDataBase> chat_db;
@@ -44,7 +44,7 @@ static void toxcore_cb_friend_request(Tox *m, const uint8_t *public_key, const u
 		return;
 	}
 
-	toxcore_save_data(m, QString(PROFILE_DATA_PATH));
+	toxcore_save_data(m, GetProgDir() + DEFAULT_PROFILE);
 	qmlbridge->insertFriend(friend_number, toxcore_get_friend_name(m, friend_number));
 }
 
@@ -270,9 +270,7 @@ Tox *toxcore_create(void)
 	memset(&tox_opts, 0, sizeof(struct Tox_Options));
 	tox_options_default(&tox_opts);
 
-	char data_file[32];
-	sprintf(data_file, PROFILE_DATA_PATH);
-	Tox *m = toxcore_load_tox(&tox_opts, data_file);
+	Tox *m = toxcore_load_tox(&tox_opts, GetProgDir() + DEFAULT_PROFILE);
 
 	if (!m) {
 		return NULL;
@@ -326,6 +324,6 @@ ToxId toxcore_get_self_address(Tox *m)
 
 void toxcore_destroy(Tox *m)
 {
-	toxcore_save_data(m, QString(PROFILE_DATA_PATH));
+	toxcore_save_data(m, GetProgDir() + DEFAULT_PROFILE);
 	tox_kill(m);
 }
