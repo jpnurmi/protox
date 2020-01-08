@@ -49,8 +49,8 @@ contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
 		$$PWD/android
 
 	ANDROID_EXTRA_LIBS = \
-		/home/monsterovich/Distfiles/projects/protox/protox/libs/libtoxcore.so \
-		/home/monsterovich/Distfiles/projects/protox/protox/libs/libtoxencryptsave.so \
+		$$PWD/libs/libtoxcore.so \
+		$$PWD/libs/libtoxencryptsave.so \
 		$$PWD/libs/libsodium.so
 }
 
