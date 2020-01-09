@@ -77,6 +77,15 @@ static void toxcore_cb_friend_message(Tox *m, quint32 friend_number, TOX_MESSAGE
 	qmlbridge->insertMessage(message, friend_number);
 }
 
+static void toxcore_cb_friend_name(Tox *m, uint32_t friend_number, const uint8_t *name, size_t length, void *user_data)
+{
+	Q_UNUSED(user_data)
+	QString nickName = QString::fromUtf8((char*)name, length);;
+	if (nickName.isEmpty()) {
+		nickName = ToxId_To_QString(toxcore_get_friend_public_key(m, friend_number));
+	}
+	qmlbridge->updateFriendNickName(friend_number, nickName);
+}
 
 static void toxcore_cb_friend_connection_change(Tox *m, uint32_t friend_number, TOX_CONNECTION connection_status, void *userdata)
 {
@@ -151,6 +160,22 @@ quint32 toxcore_send_message(Tox *m, quint32 friend_number, const QString messag
 		break;
 	}
 	return message_id;
+}
+
+int toxcore_make_friend_request(Tox *m, ToxId id, const QString friendMessage)
+{
+	TOX_ERR_FRIEND_ADD error;
+	QByteArray msgData(friendMessage.toUtf8());
+	quint32 friend_number = tox_friend_add(m, (uint8_t*)id.data(), (uint8_t*)msgData.data(), msgData.length(), &error);
+	if (!error) {
+		qmlbridge->insertFriend(friend_number, ToxId_To_QString(toxcore_get_friend_public_key(m, friend_number)));
+	}
+	return error;
+}
+
+void toxcore_delete_friend(Tox *m, quint32 friend_number)
+{
+	tox_friend_delete(m, friend_number, nullptr);
 }
 
 bool toxcore_save_data(Tox *m, const QString path)
@@ -280,6 +305,7 @@ Tox *toxcore_create(void)
 	tox_callback_friend_connection_status(m, toxcore_cb_friend_connection_change);
 	tox_callback_friend_request(m, toxcore_cb_friend_request);
 	tox_callback_friend_message(m, toxcore_cb_friend_message);
+	tox_callback_friend_name(m, toxcore_cb_friend_name);
 	//tox_callback_conference_invite(m, cb_group_invite);
 	//tox_callback_conference_title(m, cb_group_titlechange);
 	tox_callback_friend_read_receipt(m, toxcore_cb_friend_read_receipt);

@@ -13,6 +13,7 @@ public:
 	void setMessageReceived(quint64 unique_id, ToxPk public_key);
 	ToxMessages getFriendMessagesFromDateTime(ToxPk public_key, QDateTime dt);
 	quint64 getMessagesCountFriend(ToxPk public_key);
+	void clearFriendChatHistory(ToxPk public_key);
 	//void insertFriend(ToxPk public_key, const QString name);
 	~ChatDataBase();
 private:

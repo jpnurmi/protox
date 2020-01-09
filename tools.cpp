@@ -5,6 +5,7 @@ void Debug(const QString msg)
 	qDebug() << msg;
 }
 
+
 char *String_To_ToxPk(const char *hex_string)
 {
 	size_t len = strlen(hex_string);
@@ -16,6 +17,11 @@ char *String_To_ToxPk(const char *hex_string)
 		sscanf(hex_string, "%2hhx", &val[i]);
 	}
 	return val;
+}
+
+ToxId QString_To_ToxId(const QString str)
+{
+	return ToxId(String_To_ToxPk(str.toStdString().c_str()), tox_address_size());
 }
 
 const QString ToxId_To_QString(ToxId user_id)

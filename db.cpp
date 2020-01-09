@@ -1,9 +1,6 @@
 #include "db.h"
 #include "tools.h"
 
-#include <QFuture>
-#include <QtConcurrent/QtConcurrent>
-
 #define DATABASE_VERSION 1
 #define APPLICATION_ID ('P' << 24) + ('T' << 16) + ('O' << 8) + 'X'
 
@@ -143,7 +140,20 @@ ToxMessages ChatDataBase::getFriendMessagesFromDateTime(ToxPk public_key, QDateT
 									  query.value(3).toBool(),
 									  query.value(4).toULongLong()));
 	}
+	std::sort(messages.begin(), messages.end(), [](const auto &a, const auto &b) { return a.unique_id > b.unique_id; });
 	return messages;
+}
+
+void ChatDataBase::clearFriendChatHistory(ToxPk public_key)
+{
+	QSqlQuery query(db);
+	query.prepare("DELETE FROM Messages WHERE public_key = :public_key");
+	query.bindValue(":public_key", public_key);
+	query.exec();
+	query.prepare("DELETE FROM LastMessage WHERE public_key = :public_key");
+	query.bindValue(":public_key", public_key);
+	query.exec();
+	asyncCommit();
 }
 
 /*

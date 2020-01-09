@@ -106,6 +106,43 @@ void QmlCBridge::retrieveChatLog()
 	}
 }
 
+void QmlCBridge::copyToxIdToClipboard()
+{
+	QClipboard *clipboard = QGuiApplication::clipboard(); 
+	clipboard->setText(ToxId_To_QString(toxcore_get_self_address(tox)));
+}
+
+void QmlCBridge::copyTextToClipboard(const QString text)
+{
+	QClipboard *clipboard = QGuiApplication::clipboard(); 
+	clipboard->setText(text);
+}
+
+void QmlCBridge::makeFriendRequest(const QString toxId, const QString friendMessage)
+{
+	int error = toxcore_make_friend_request(tox, QString_To_ToxId(toxId), friendMessage);
+	QVariant returnedValue;
+	QMetaObject::invokeMethod(component, "sendFriendRequestStatus",
+		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, error));
+}
+
+void QmlCBridge::deleteFriend(quint32 friend_number)
+{
+	toxcore_delete_friend(tox, friend_number);
+}
+
+void QmlCBridge::clearFriendChatHistory(quint32 friend_number)
+{
+	chat_db->clearFriendChatHistory(toxcore_get_friend_public_key(tox, friend_number));
+}
+
+void QmlCBridge::updateFriendNickName(quint32 friend_number, const QString nickname)
+{
+	QVariant returnedValue;
+	QMetaObject::invokeMethod(component, "updateFriendNickName",
+		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, friend_number), Q_ARG(QVariant, nickname));
+}
+
 static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler(0);
 
 void customMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString & msg)
@@ -156,9 +193,6 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < friends.count(); i++) {
 		qmlbridge->insertFriend(friends[i], toxcore_get_friend_name(tox, friends[i]));
 	}
-
-	qmlbridge->retrieveChatLog();
-	QMetaObject::invokeMethod(component, "chatScrollToEnd");
 
 	QTimer *toxcore_timer = toxcore_create_qtimer(tox);
 	toxcore_timer->start();
