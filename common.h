@@ -19,6 +19,13 @@
 #include <QFuture>
 #include <QtConcurrent/QtConcurrent>
 
+#if defined (Q_OS_ANDROID)
+#include <QAndroidService>
+#include <QtAndroid>
+#include <QAndroidJniObject>
+#include <QAndroidJniEnvironment>
+#endif
+
 // Toxcore
 #include "tox/tox.h"
 #include "tox/toxencryptsave.h"

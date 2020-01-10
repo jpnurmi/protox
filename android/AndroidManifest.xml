@@ -8,7 +8,7 @@
             </intent-filter>
 
             <!-- Application arguments -->
-            <!-- meta-data android:name="android.app.arguments" android:value="arg1 arg2 arg3"/ -->
+            <!--meta-data android:name="android.app.arguments" android:value=""/-->
             <!-- Application arguments -->
 
             <meta-data android:name="android.app.lib_name" android:value="protox"/>
@@ -61,11 +61,19 @@
             <!-- extract android style -->
     </activity>
 
-    <!-- For adding service(s) please check: https://wiki.qt.io/AndroidServices -->
 
+    <!-- For adding service(s) please check: https://wiki.qt.io/AndroidServices -->
+    <service android:process=":qt" android:name=".QtAndroidServices">
+        <meta-data android:name="android.app.arguments" android:value="-service"/>
+        <meta-data android:name="android.app.lib_name" android:value="protox"/>
+        <!-- Background running -->
+        <meta-data android:name="android.app.background_running" android:value="true"/>
+        <!-- Background running -->
+    </service>
     </application>
 
-    <uses-sdk android:minSdkVersion="22" android:targetSdkVersion="17"/>
+
+    <uses-sdk android:minSdkVersion="22" android:targetSdkVersion="25"/>
     <supports-screens android:largeScreens="true" android:normalScreens="true" android:anyDensity="true" android:smallScreens="true"/>
 
     <!-- The following comment will be replaced upon deployment with default permissions based on the dependencies of the application.

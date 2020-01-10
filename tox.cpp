@@ -73,7 +73,9 @@ static void toxcore_cb_friend_message(Tox *m, quint32 friend_number, TOX_MESSAGE
 	}
 
 	QString message(QByteArray((char*)string, length));
-	chat_db->insertMessage(message, QDateTime::currentDateTime(), toxcore_get_friend_public_key(m, friend_number));
+	ToxPk friend_pk = toxcore_get_friend_public_key(m, friend_number);
+	quint64 new_unique_id = chat_db->getMessagesCountFriend(friend_pk) + 1;
+	chat_db->insertMessage(message, QDateTime::currentDateTime(), friend_pk, false, new_unique_id);
 	qmlbridge->insertMessage(message, friend_number);
 }
 

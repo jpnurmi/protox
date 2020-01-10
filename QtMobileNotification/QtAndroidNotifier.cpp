@@ -13,7 +13,7 @@ bool QtAndroidNotifier::show(const QVariant &notificationParameters)
 	QAndroidJniObject jni_caption = QAndroidJniObject::fromString(caption);
 	QAndroidJniObject jni_title = QAndroidJniObject::fromString(title);
 
-	QAndroidJniObject::callStaticMethod<void>("notifications/javalib/QtAndroidNotifications",
+	QAndroidJniObject::callStaticMethod<void>("notifications/QtAndroidNotifications",
 											  "show",
 											  "(Ljava/lang/String;Ljava/lang/String;I)V",
 											  jni_title.object<jstring>(),

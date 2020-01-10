@@ -51,7 +51,7 @@ ChatDataBase::ChatDataBase(const QString fileName)
 			"";
 	query = db.exec(create_command_friends);
 	*/
-	asyncCommit();
+	db.commit();
 }
 
 void ChatDataBase::asyncCommit()
@@ -94,6 +94,7 @@ quint64 ChatDataBase::getMessagesCountFriend(ToxPk public_key)
 
 void ChatDataBase::insertMessage(const QString message, QDateTime dt, ToxPk public_key, bool self, quint64 unique_id, bool failed)
 {
+	Debug("message: " + message + " uid:" + QString::number(unique_id));
 	QSqlQuery query(db);
 	query.prepare("INSERT INTO Messages (public_key, message, self, received, datetime, unique_id) "
 				  "VALUES (:public_key, :message, :self, :received, :datetime, :unique_id)");
@@ -105,14 +106,14 @@ void ChatDataBase::insertMessage(const QString message, QDateTime dt, ToxPk publ
 	query.bindValue(":unique_id", unique_id);
 	query.bindValue(":failed", failed);
 	query.exec();
+	Debug("error: " + query.lastError().text());
 
 	query.prepare("INSERT OR REPLACE INTO LastMessage (public_key, datetime) "
 				  "VALUES (:public_key, :datetime)");
 	query.bindValue(":public_key", public_key);
 	query.bindValue(":datetime", dt.toSecsSinceEpoch());
 	query.exec();
-	Debug("error: " + query.lastError().text());
-	asyncCommit();
+	db.commit();
 }
 
 void ChatDataBase::setMessageReceived(quint64 unique_id, ToxPk public_key)
@@ -122,7 +123,7 @@ void ChatDataBase::setMessageReceived(quint64 unique_id, ToxPk public_key)
 	query.bindValue(":unique_id", unique_id);
 	query.bindValue(":public_key", public_key);
 	query.exec();
-	asyncCommit();
+	db.commit();
 }
 
 ToxMessages ChatDataBase::getFriendMessagesFromDateTime(ToxPk public_key, QDateTime dt)
@@ -140,7 +141,7 @@ ToxMessages ChatDataBase::getFriendMessagesFromDateTime(ToxPk public_key, QDateT
 									  query.value(3).toBool(),
 									  query.value(4).toULongLong()));
 	}
-	std::sort(messages.begin(), messages.end(), [](const auto &a, const auto &b) { return a.unique_id > b.unique_id; });
+	std::sort(messages.begin(), messages.end(), [](const auto &a, const auto &b) { return a.unique_id < b.unique_id; });
 	return messages;
 }
 
@@ -153,7 +154,7 @@ void ChatDataBase::clearFriendChatHistory(ToxPk public_key)
 	query.prepare("DELETE FROM LastMessage WHERE public_key = :public_key");
 	query.bindValue(":public_key", public_key);
 	query.exec();
-	asyncCommit();
+	db.commit();
 }
 
 /*

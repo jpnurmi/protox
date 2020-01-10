@@ -101,8 +101,8 @@ void QmlCBridge::retrieveChatLog()
 											QDateTime::fromSecsSinceEpoch(0));
 	for (auto msg : messages) {
 		insertMessage(msg.message, current_friend_number, msg.self, 0, msg.unique_id, msg.dt, true);
-	if (!msg.self || msg.received)
-		setMessageReceived(current_friend_number, 0, true, msg.unique_id);
+		if (!msg.self || msg.received)
+			setMessageReceived(current_friend_number, 0, true, msg.unique_id);
 	}
 }
 
@@ -160,19 +160,40 @@ void customMessageHandler(QtMsgType type, const QMessageLogContext &context, con
 	}
 }
 
+//QAndroidJniEnvironment env;
+//jclass _class = env.findClass("services/QtAndroidServices");
+
+//JNINativeMethod methods[] = {
+//		{"ToxIterate", "(I)V", reinterpret_cast<void*>(toxcore_tick)}
+//};
+//env->RegisterNatives(_class, methods, sizeof(methods) / sizeof(methods[0]));
+
 int main(int argc, char *argv[])
 {
+	if (QString(argv[1]) == "-service")
+	{
+		Debug("THIS IS A SERVICE!");
+		return 0;
+	}
+#if defined (Q_OS_ANDROID)
+	QAndroidJniObject::callStaticMethod<void>("services/QtAndroidServices",
+											  "startService",
+											  "(Landroid/content/Context;)V",
+											  QtAndroid::androidActivity().object());
+#endif
+
 	Tox *tox = toxcore_create();
 	toxcore_bootstrap_DHT(tox);
 	Debug("My address: " + ToxId_To_QString(toxcore_get_self_address(tox)));
 
 	chat_db = new ChatDataBase("chat.db");
 
+	Debug("App started.");
 	QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 	
 	QGuiApplication app(argc, argv);
 	qInstallMessageHandler(customMessageHandler);
-	
+
 	QQmlApplicationEngine engine;
 	const QUrl url(QStringLiteral(QML_MAIN));
 	QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
@@ -196,11 +217,13 @@ int main(int argc, char *argv[])
 
 	QTimer *toxcore_timer = toxcore_create_qtimer(tox);
 	toxcore_timer->start();
+
 	int result = app.exec();
 	toxcore_timer->stop();
 	toxcore_destroy(tox);
 	delete qmlbridge;
 	delete chat_db;
 	Debug("Program exited successfully.");
+
 	return result;
 }

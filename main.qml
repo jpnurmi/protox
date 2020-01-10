@@ -6,6 +6,8 @@ import QtQuick.Layouts 1.3
 import QtNotification 1.0
 
 
+
+
 ApplicationWindow {
     id: window
     width: 360
@@ -30,6 +32,7 @@ ApplicationWindow {
     readonly property int z_menu: 3
 
     // function callbacks
+    //function isAppActive
     function updateFriendNickName(friend_number, nickname) {
         for (var i = 0; i < friendsModel.count; i++) {
             var friend = friendsModel.get(i)
@@ -189,6 +192,7 @@ ApplicationWindow {
             selectByMouse: true
             font.pixelSize: 20
             leftPadding: 10
+            rightPadding: leftPadding
             verticalAlignment: TextInput.AlignVCenter
             width: parent.width
             text: ""
@@ -205,6 +209,7 @@ ApplicationWindow {
             selectByMouse: true
             font.pixelSize: 20
             leftPadding: 10
+            rightPadding: leftPadding
             verticalAlignment: TextInput.AlignVCenter
             width: parent.width
             text: "Add me to your friends. Maybe?"
@@ -298,6 +303,7 @@ ApplicationWindow {
             MenuItem {
                 text: qsTr("Quit")
                 onClicked: {
+                    window.visible = false
                     Qt.quit()
                 }
             }
@@ -604,11 +610,10 @@ ApplicationWindow {
         }
     }
 
-    Keys.onPressed: {
-        if (event.key === Qt.Key_Back) {
-            Qt.quit()
-        }
+    onClosing: {
+        close.accepted = false
     }
+
     Component.onCompleted: {
         initTimer.start()
     }

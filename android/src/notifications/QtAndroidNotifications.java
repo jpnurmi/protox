@@ -1,4 +1,4 @@
-package notifications.javalib;
+package notifications;
 
 // Qt
 import org.qtproject.qt5.android.QtNative;

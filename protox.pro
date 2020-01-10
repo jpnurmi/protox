@@ -45,7 +45,8 @@ DISTFILES += \
 	android/gradlew \
 	android/gradlew.bat \
 	android/res/values/libs.xml \
-	android/src/notifications/javalib/QtAndroidNotifications.java
+	android/src/notifications/QtAndroidNotifications.java \
+	android/src/services/QtAndroidServices.java
 
 contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
 	ANDROID_PACKAGE_SOURCE_DIR = \
@@ -63,3 +64,8 @@ HEADERS += \
 	main.h \
 	tools.h \
 	tox.h
+
+
+
+
+
