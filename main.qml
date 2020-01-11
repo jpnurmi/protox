@@ -30,6 +30,7 @@ ApplicationWindow {
     readonly property int z_drawer: 2
     readonly property int z_overlay_header: 1
     readonly property int z_menu: 3
+    readonly property int z_splash: Number.MAX_VALUE
 
     // function callbacks
     //function isAppActive
@@ -550,6 +551,7 @@ ApplicationWindow {
                             anchors.fill: parent
                             onClicked: {
                                 bridge.copyTextToClipboard(cloudText.text)
+                                a
                             }
                         }
                     }
@@ -624,7 +626,28 @@ ApplicationWindow {
         interval: 1
         onTriggered: {
             bridge.retrieveChatLog()
+            splashImageDestroyAnimation.start()
             chatFlickable.scrollToEnd()
         }
     }
+    
+    Image {
+        id: splashImage
+        source: "splash.png"
+        anchors.fill: parent
+        asynchronous: true
+        z: z_splash
+        NumberAnimation on opacity {
+            id: splashImageDestroyAnimation
+            to: 0
+            duration: 200
+            running: false
+            onRunningChanged: {
+                 if (!running) {
+                     splashImage.destroy();
+                 }
+            }
+        }
+    }
+
 }

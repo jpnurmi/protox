@@ -4,5 +4,6 @@
         <file>qtquickcontrols2.conf</file>
         <file>send-button.png</file>
         <file>DejaVuSans.ttf</file>
+        <file>splash.png</file>
     </qresource>
 </RCC>

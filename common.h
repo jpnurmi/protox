@@ -24,6 +24,7 @@
 #include <QtAndroid>
 #include <QAndroidJniObject>
 #include <QAndroidJniEnvironment>
+#include <QAndroidIntent>
 #endif
 
 // Toxcore

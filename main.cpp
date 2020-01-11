@@ -168,16 +168,21 @@ void customMessageHandler(QtMsgType type, const QMessageLogContext &context, con
 //};
 //env->RegisterNatives(_class, methods, sizeof(methods) / sizeof(methods[0]));
 
+int service_main(int &argc, char *argv[])
+{
+	QAndroidService service(argc, argv);
+	QDir dir;
+	return service.exec();
+}
+
 int main(int argc, char *argv[])
 {
-	if (QString(argv[1]) == "-service")
-	{
-		Debug("THIS IS A SERVICE!");
-		return 0;
-	}
+	if (QString(argv[1]).contains("service"))
+		return service_main(argc, argv);
+
 #if defined (Q_OS_ANDROID)
-	QAndroidJniObject::callStaticMethod<void>("services/QtAndroidServices",
-											  "startService",
+	QAndroidJniObject::callStaticMethod<void>("org/protox/services/QtAndroidServices",
+											  "_startService",
 											  "(Landroid/content/Context;)V",
 											  QtAndroid::androidActivity().object());
 #endif
