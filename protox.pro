@@ -1,5 +1,4 @@
-QT += quick sql
-
+QT += quick sql androidextras
 CONFIG += c++14
 
 # The following define makes your compiler emit warnings if you use
@@ -46,7 +45,6 @@ DISTFILES += \
 	android/gradlew.bat \
 	android/res/values/libs.xml \
 	android/src/notifications/QtAndroidNotifications.java \
-	android/src/services/QtAndroidServices.java \
 
 contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
 	ANDROID_PACKAGE_SOURCE_DIR = \

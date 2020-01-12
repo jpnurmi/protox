@@ -31,7 +31,7 @@ static void toxcore_cb_self_connection_change(Tox *m, TOX_CONNECTION connection_
 	}
 }
 
-static void toxcore_cb_friend_request(Tox *m, const uint8_t *public_key, const uint8_t *data, size_t length, void *userdata)
+static void toxcore_cb_friend_request(Tox *m, const quint8 *public_key, const quint8 *data, size_t length, void *userdata)
 {
 	Q_UNUSED(data);
 	Q_UNUSED(length);
@@ -48,18 +48,19 @@ static void toxcore_cb_friend_request(Tox *m, const uint8_t *public_key, const u
 	qmlbridge->insertFriend(friend_number, toxcore_get_friend_name(m, friend_number));
 }
 
-void toxcore_cb_friend_read_receipt(Tox *m, uint32_t friend_number, uint32_t message_id, void *userdata)
+void toxcore_cb_friend_read_receipt(Tox *m, quint32 friend_number, quint32 message_id, void *userdata)
 {
 	Q_UNUSED(m);
 	Q_UNUSED(userdata);
 	// insert to db here
 	if (qmlbridge->getCurrentFriendNumber() != friend_number)
 		return;
+
 	chat_db->setMessageReceived(qmlbridge->messages_id_uid[message_id], toxcore_get_friend_public_key(m, friend_number));
 	qmlbridge->setMessageReceived(friend_number, message_id);
 }
 
-static void toxcore_cb_friend_message(Tox *m, quint32 friend_number, TOX_MESSAGE_TYPE type, const uint8_t *string, size_t length, void *userdata)
+static void toxcore_cb_friend_message(Tox *m, quint32 friend_number, TOX_MESSAGE_TYPE type, const quint8 *string, size_t length, void *userdata)
 {
 	Q_UNUSED(userdata);
 	if (type != TOX_MESSAGE_TYPE_NORMAL) {
@@ -68,7 +69,7 @@ static void toxcore_cb_friend_message(Tox *m, quint32 friend_number, TOX_MESSAGE
 
 	char public_key[TOX_PUBLIC_KEY_SIZE];
 
-	if (!tox_friend_get_public_key(m, friend_number, (uint8_t *)public_key, NULL)) {
+	if (!tox_friend_get_public_key(m, friend_number, (quint8 *)public_key, NULL)) {
 		return;
 	}
 
@@ -79,7 +80,7 @@ static void toxcore_cb_friend_message(Tox *m, quint32 friend_number, TOX_MESSAGE
 	qmlbridge->insertMessage(message, friend_number);
 }
 
-static void toxcore_cb_friend_name(Tox *m, uint32_t friend_number, const uint8_t *name, size_t length, void *user_data)
+static void toxcore_cb_friend_name(Tox *m, quint32 friend_number, const quint8 *name, size_t length, void *user_data)
 {
 	Q_UNUSED(user_data)
 	QString nickName = QString::fromUtf8((char*)name, length);;
@@ -89,7 +90,7 @@ static void toxcore_cb_friend_name(Tox *m, uint32_t friend_number, const uint8_t
 	qmlbridge->updateFriendNickName(friend_number, nickName);
 }
 
-static void toxcore_cb_friend_connection_change(Tox *m, uint32_t friend_number, TOX_CONNECTION connection_status, void *userdata)
+static void toxcore_cb_friend_connection_change(Tox *m, quint32 friend_number, TOX_CONNECTION connection_status, void *userdata)
 {
 	Q_UNUSED(userdata)
 	size_t size = tox_self_get_friend_list_size(m);
@@ -100,6 +101,22 @@ static void toxcore_cb_friend_connection_change(Tox *m, uint32_t friend_number, 
 
 	qmlbridge->setCurrentFriendConnStatus(friend_number, connection_status);
 	qmlbridge->friends_conn_status[friend_number] = connection_status;
+}
+
+static void toxcore_cb_friend_typing(Tox *m, quint32 friend_number, bool is_typing, void *user_data)
+{
+	Q_UNUSED(m)
+	Q_UNUSED(user_data)
+
+	qmlbridge->setFriendTyping(friend_number, is_typing);
+}
+
+static void toxcore_cb_friend_status_message(Tox *tox, quint32 friend_number, const quint8 *message, size_t length, void *user_data)
+{
+	Q_UNUSED(tox)
+	Q_UNUSED(user_data)
+
+	qmlbridge->setFriendStatusMessage(friend_number, QString::fromUtf8((char*)message, length));
 }
 
 /*
@@ -127,19 +144,29 @@ ToxFriends toxcore_get_friends(Tox *m)
 ToxPk toxcore_get_friend_public_key(Tox *m, quint32 friend_number)
 {
 	char public_key[TOX_PUBLIC_KEY_SIZE];
-	if(tox_friend_get_public_key(m, friend_number, (uint8_t*)public_key, nullptr))
+	if(tox_friend_get_public_key(m, friend_number, (quint8*)public_key, nullptr))
 		return ToxPk(public_key, TOX_PUBLIC_KEY_SIZE);
 
 	return ToxPk();
+}
+
+const QString toxcore_get_friend_status_message(Tox *m, quint32 friend_number)
+{
+	size_t length = tox_friend_get_status_message_size(m, friend_number, nullptr);
+	if (!length)
+		return QString();
+	char message[length];
+	tox_friend_get_status_message(m, friend_number, (quint8*)message, nullptr);
+	return QString::fromUtf8(message, length);
 }
 
 const QString toxcore_get_friend_name(Tox *m, quint32 friend_number)
 {
 	size_t length = tox_friend_get_name_size(m, friend_number, nullptr);
 	if (!length)
-		return QString();
+		return ToxId_To_QString(toxcore_get_friend_public_key(m, friend_number));
 	char name[length];
-	if (tox_friend_get_name(m, friend_number, (uint8_t*)name, nullptr)) {
+	if (tox_friend_get_name(m, friend_number, (quint8*)name, nullptr)) {
 		return QString::fromUtf8(name, length);
 	} else {
 		return QString();
@@ -150,7 +177,7 @@ quint32 toxcore_send_message(Tox *m, quint32 friend_number, const QString messag
 {
 	TOX_ERR_FRIEND_SEND_MESSAGE error;
 	QByteArray encodedMessage = message.toUtf8();
-	quint32 message_id = tox_friend_send_message(m, friend_number, TOX_MESSAGE_TYPE_NORMAL, (uint8_t*)encodedMessage.data(), encodedMessage.size(), &error);
+	quint32 message_id = tox_friend_send_message(m, friend_number, TOX_MESSAGE_TYPE_NORMAL, (quint8*)encodedMessage.data(), encodedMessage.size(), &error);
 	switch (error) {
 	case TOX_ERR_FRIEND_SEND_MESSAGE_OK:
 		failed = false;
@@ -168,7 +195,7 @@ int toxcore_make_friend_request(Tox *m, ToxId id, const QString friendMessage)
 {
 	TOX_ERR_FRIEND_ADD error;
 	QByteArray msgData(friendMessage.toUtf8());
-	quint32 friend_number = tox_friend_add(m, (uint8_t*)id.data(), (uint8_t*)msgData.data(), msgData.length(), &error);
+	quint32 friend_number = tox_friend_add(m, (quint8*)id.data(), (quint8*)msgData.data(), msgData.length(), &error);
 	if (!error) {
 		qmlbridge->insertFriend(friend_number, ToxId_To_QString(toxcore_get_friend_public_key(m, friend_number)));
 	}
@@ -179,6 +206,15 @@ void toxcore_delete_friend(Tox *m, quint32 friend_number)
 {
 	tox_friend_delete(m, friend_number, nullptr);
 }
+
+void toxcore_set_typing_friend(Tox *m, quint32 friend_number, bool typing)
+{
+	tox_self_set_typing(m, friend_number, typing, nullptr);
+}
+
+/*
+ * Basic Functions 
+*/
 
 bool toxcore_save_data(Tox *m, const QString path)
 {
@@ -193,7 +229,7 @@ bool toxcore_save_data(Tox *m, const QString path)
 
 	size_t data_len = tox_get_savedata_size(m);
 	char *data = (char*)malloc(data_len);
-	tox_get_savedata(m, (uint8_t*)data);
+	tox_get_savedata(m, (quint8*)data);
 
 	if (file.write(data, data_len) == -1) {
 		free(data);
@@ -242,7 +278,7 @@ static Tox *toxcore_load_tox(struct Tox_Options *options, QString path)
 
 	TOX_ERR_NEW err;
 	options->savedata_type = TOX_SAVEDATA_TYPE_TOX_SAVE;
-	options->savedata_data = (uint8_t*)data;
+	options->savedata_data = (quint8*)data;
 	options->savedata_length = data_len;
 
 	m = tox_new(options, &err);
@@ -282,7 +318,7 @@ void toxcore_bootstrap_DHT(Tox *m)
 		char *key = String_To_ToxPk(nodes[i].key);
 
 		TOX_ERR_BOOTSTRAP err;
-		tox_bootstrap(m, nodes[i].ip, nodes[i].port, (uint8_t*)key, &err);
+		tox_bootstrap(m, nodes[i].ip, nodes[i].port, (quint8*)key, &err);
 		free(key);
 
 		if (err != TOX_ERR_BOOTSTRAP_OK) {
@@ -291,7 +327,7 @@ void toxcore_bootstrap_DHT(Tox *m)
 	}
 }
 
-Tox *toxcore_create(void)
+Tox *toxcore_create()
 {
 	struct Tox_Options tox_opts;
 	memset(&tox_opts, 0, sizeof(struct Tox_Options));
@@ -311,19 +347,21 @@ Tox *toxcore_create(void)
 	//tox_callback_conference_invite(m, cb_group_invite);
 	//tox_callback_conference_title(m, cb_group_titlechange);
 	tox_callback_friend_read_receipt(m, toxcore_cb_friend_read_receipt);
+	tox_callback_friend_typing(m, toxcore_cb_friend_typing);
+	tox_callback_friend_status_message(m, toxcore_cb_friend_status_message);
 
 	size_t s_len = tox_self_get_status_message_size(m);
 
 	if (!s_len) {
 		const char *statusmsg = "Protox is here!";
-		tox_self_set_status_message(m, (uint8_t *)statusmsg, strlen(statusmsg), NULL);
+		tox_self_set_status_message(m, (quint8 *)statusmsg, strlen(statusmsg), NULL);
 	}
 
 	size_t n_len = tox_self_get_name_size(m);
 
 	const char *username = "Protox";
 	if (!n_len) {
-		tox_self_set_name(m, (uint8_t *)username, strlen(username), NULL);
+		tox_self_set_name(m, (quint8 *)username, strlen(username), NULL);
 	}
 
 	return m;
@@ -346,7 +384,7 @@ QTimer *toxcore_create_qtimer(Tox *m)
 ToxId toxcore_get_self_address(Tox *m)
 {
 	char address[TOX_ADDRESS_SIZE];
-	tox_self_get_address(m, (uint8_t*)address);
+	tox_self_get_address(m, (quint8*)address);
 	return ToxId(address, TOX_ADDRESS_SIZE);
 }
 

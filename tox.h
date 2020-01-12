@@ -28,7 +28,7 @@ struct ToxMessage {
 };
 typedef QList <ToxMessage> ToxMessages;
 
-Tox *toxcore_create(void);
+Tox *toxcore_create();
 void toxcore_destroy(Tox *m);
 QTimer *toxcore_create_qtimer(Tox *m);
 void toxcore_bootstrap_DHT(Tox *m);
@@ -39,6 +39,8 @@ const QString toxcore_get_friend_name(Tox *m, quint32 friend_number);
 ToxFriends toxcore_get_friends(Tox *m);
 int toxcore_make_friend_request(Tox *m, ToxId id, const QString friendMessage);
 void toxcore_delete_friend(Tox *m, quint32 friend_number);
+void toxcore_set_typing_friend(Tox *m, quint32 friend_number, bool typing);
+const QString toxcore_get_friend_status_message(Tox *m, quint32 friend_number);
 
 bool toxcore_save_data(Tox *m, const QString path);
 

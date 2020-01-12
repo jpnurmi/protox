@@ -95,6 +95,11 @@ void QmlCBridge::setCurrentFriend(quint32 newFriend)
 	current_friend_number = newFriend;
 }
 
+const QString QmlCBridge::getFriendStatusMessage(quint32 friend_number)
+{
+	return toxcore_get_friend_status_message(tox, friend_number);
+}
+
 void QmlCBridge::retrieveChatLog()
 {
 	ToxMessages messages = chat_db->getFriendMessagesFromDateTime(toxcore_get_friend_public_key(tox, current_friend_number), 
@@ -143,6 +148,25 @@ void QmlCBridge::updateFriendNickName(quint32 friend_number, const QString nickn
 		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, friend_number), Q_ARG(QVariant, nickname));
 }
 
+void QmlCBridge::setFriendTyping(quint32 friend_number, bool typing)
+{
+	QVariant returnedValue;
+	QMetaObject::invokeMethod(component, "setFriendTyping",
+		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, friend_number), Q_ARG(QVariant, typing));
+}
+
+void QmlCBridge::setTypingFriend(quint32 friend_number, bool typing)
+{
+	toxcore_set_typing_friend(tox, friend_number, typing);
+}
+
+void QmlCBridge::setFriendStatusMessage(quint32 friend_number, const QString message)
+{
+	QVariant returnedValue;
+	QMetaObject::invokeMethod(component, "setFriendStatusMessage",
+		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, friend_number), Q_ARG(QVariant, message));
+}
+
 static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler(0);
 
 void customMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString & msg)
@@ -160,33 +184,8 @@ void customMessageHandler(QtMsgType type, const QMessageLogContext &context, con
 	}
 }
 
-//QAndroidJniEnvironment env;
-//jclass _class = env.findClass("services/QtAndroidServices");
-
-//JNINativeMethod methods[] = {
-//		{"ToxIterate", "(I)V", reinterpret_cast<void*>(toxcore_tick)}
-//};
-//env->RegisterNatives(_class, methods, sizeof(methods) / sizeof(methods[0]));
-
-int service_main(int &argc, char *argv[])
-{
-	QAndroidService service(argc, argv);
-	QDir dir;
-	return service.exec();
-}
-
 int main(int argc, char *argv[])
 {
-	if (QString(argv[1]).contains("service"))
-		return service_main(argc, argv);
-
-#if defined (Q_OS_ANDROID)
-	QAndroidJniObject::callStaticMethod<void>("org/protox/services/QtAndroidServices",
-											  "_startService",
-											  "(Landroid/content/Context;)V",
-											  QtAndroid::androidActivity().object());
-#endif
-
 	Tox *tox = toxcore_create();
 	toxcore_bootstrap_DHT(tox);
 	Debug("My address: " + ToxId_To_QString(toxcore_get_self_address(tox)));

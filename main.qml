@@ -5,15 +5,42 @@ import QtQuick.Layouts 1.3
 
 import QtNotification 1.0
 
-
-
-
 ApplicationWindow {
     id: window
     width: 360
     height: 520
     visible: true
     title: qsTr("Side Panel")
+
+    Timer {
+        id: initTimer
+        repeat: false
+        interval: 1
+        onTriggered: {
+            bridge.retrieveChatLog()
+            splashImageDestroyAnimation.start()
+            chatFlickable.scrollToEnd()
+        }
+    }
+    
+    Image {
+        id: splashImage
+        source: "splash.png"
+        anchors.fill: parent
+        cache: true
+        z: z_splash
+        NumberAnimation on opacity {
+            id: splashImageDestroyAnimation
+            to: 0
+            duration: 200
+            running: false
+            onRunningChanged: {
+                 if (!running) {
+                     splashImage.destroy();
+                 }
+            }
+        }
+    }
 
     Notification {
         id: notification
@@ -32,8 +59,38 @@ ApplicationWindow {
     readonly property int z_menu: 3
     readonly property int z_splash: Number.MAX_VALUE
 
+    function limitString(str, limit) {
+        if (str.length > limit) {
+            return str.slice(0, limit) + "..."
+        }
+        return str
+    }
+
     // function callbacks
-    //function isAppActive
+    function setFriendStatusMessage(friend_number, message) {
+        if (friend_number !== bridge.getCurrentFriendNumber())
+            return
+        friendStatus.text = limitString(message, friendStatus.charsLimit)
+    }
+
+    function setFriendTyping(friend_number, typing) {
+        if (friend_number !== bridge.getCurrentFriendNumber())
+            return
+        if (typing) {
+            var nick = bridge.getFriendNickname(friend_number)
+            // don't print long nicks
+            if (nick.length > friendNickname.charsLimit) {
+                nick = qsTr("A friend")
+            }
+            typingText.text = nick + qsTr(" is typing...")
+            typingText.visible = true
+        } else {
+            typingText.text = ""
+            typingText.visible = false
+        }
+        chatFlickable.scrollToEnd()
+    }
+
     function updateFriendNickName(friend_number, nickname) {
         for (var i = 0; i < friendsModel.count; i++) {
             var friend = friendsModel.get(i)
@@ -43,7 +100,7 @@ ApplicationWindow {
             }
         }
         if (friend_number === bridge.getCurrentFriendNumber()) {
-            friendNickname.text = nickname
+            friendNickname.text = limitString(nickname, friendNickname.charsLimit)
         }
     }
     function sendFriendRequestStatus(status) {
@@ -71,8 +128,11 @@ ApplicationWindow {
         if (bridge.getCurrentFriendNumber() === friend_number) {
             return
         }
+        dropTypingTimer.stop()
+        bridge.setTypingFriend(bridge.getCurrentFriendNumber(), false)
         bridge.setCurrentFriend(friend_number)
-        friendNickname.text = bridge.getFriendNickname(friend_number)
+        friendNickname.text = limitString(bridge.getFriendNickname(bridge.getCurrentFriendNumber()), friendNickname.charsLimit)
+        friendStatus.text = limitString(bridge.getFriendStatusMessage(bridge.getCurrentFriendNumber()), friendStatus.charsLimit)
         setCurrentFriendConnStatus(friend_number, bridge.getFriendConnStatus(friend_number))
         messagesModel.clear()
         bridge.retrieveChatLog()
@@ -340,7 +400,17 @@ ApplicationWindow {
         Label {
             id: friendNickname
             anchors.centerIn: parent
-            text: bridge.getFriendNickname(bridge.getCurrentFriendNumber())
+            property int charsLimit: 16
+            text: limitString(bridge.getFriendNickname(bridge.getCurrentFriendNumber()), charsLimit)
+        }
+        Label {
+            id: friendStatus
+            anchors.top: friendNickname.bottom
+            anchors.horizontalCenter: friendNickname.horizontalCenter
+            font.pixelSize: 10
+            font.italic: true
+            property int charsLimit: 48
+            text: limitString(bridge.getFriendStatusMessage(bridge.getCurrentFriendNumber()), charsLimit)
         }
     }
 
@@ -551,10 +621,15 @@ ApplicationWindow {
                             anchors.fill: parent
                             onClicked: {
                                 bridge.copyTextToClipboard(cloudText.text)
-                                a
                             }
                         }
                     }
+                }
+                Text {
+                    id: typingText
+                    font.italic: true
+                    visible: false
+                    Layout.alignment: Qt.AlignBottom | Qt.AlignLeft
                 }
             }
             ScrollIndicator.vertical: ScrollIndicator { }
@@ -585,6 +660,23 @@ ApplicationWindow {
                 verticalAlignment: TextInput.AlignVCenter
                 placeholderText: qsTr("Type something")
                 onAccepted: send.sendMessage()
+                Timer {
+                    id: dropTypingTimer
+                    interval: 2000
+                    repeat: false
+                    onTriggered: {
+                        bridge.setTypingFriend(bridge.getCurrentFriendNumber(), false)
+                    }
+                }
+                onDisplayTextChanged: {
+                    dropTypingTimer.stop()
+                    if (displayText.length > 0) {
+                        dropTypingTimer.start()
+                        bridge.setTypingFriend(bridge.getCurrentFriendNumber(), true)
+                    } else {
+                        bridge.setTypingFriend(bridge.getCurrentFriendNumber(), false)
+                    }
+                }
             }
             Button {
                 id: send
@@ -618,36 +710,6 @@ ApplicationWindow {
 
     Component.onCompleted: {
         initTimer.start()
-    }
-
-    Timer {
-        id: initTimer
-        repeat: false
-        interval: 1
-        onTriggered: {
-            bridge.retrieveChatLog()
-            splashImageDestroyAnimation.start()
-            chatFlickable.scrollToEnd()
-        }
-    }
-    
-    Image {
-        id: splashImage
-        source: "splash.png"
-        anchors.fill: parent
-        asynchronous: true
-        z: z_splash
-        NumberAnimation on opacity {
-            id: splashImageDestroyAnimation
-            to: 0
-            duration: 200
-            running: false
-            onRunningChanged: {
-                 if (!running) {
-                     splashImage.destroy();
-                 }
-            }
-        }
     }
 
 }
