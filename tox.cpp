@@ -119,6 +119,14 @@ static void toxcore_cb_friend_status_message(Tox *tox, quint32 friend_number, co
 	qmlbridge->setFriendStatusMessage(friend_number, QString::fromUtf8((char*)message, length));
 }
 
+static void toxcore_cb_friend_status(Tox *m, uint32_t friend_number, TOX_USER_STATUS status, void *user_data)
+{
+	Q_UNUSED(m)
+	Q_UNUSED(user_data)
+
+	qmlbridge->setFriendStatus(friend_number, status);
+}
+
 /*
  * Toxcore functions
  * 
@@ -349,6 +357,7 @@ Tox *toxcore_create()
 	tox_callback_friend_read_receipt(m, toxcore_cb_friend_read_receipt);
 	tox_callback_friend_typing(m, toxcore_cb_friend_typing);
 	tox_callback_friend_status_message(m, toxcore_cb_friend_status_message);
+	tox_callback_friend_status(m, toxcore_cb_friend_status);
 
 	size_t s_len = tox_self_get_status_message_size(m);
 

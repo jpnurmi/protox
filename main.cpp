@@ -166,6 +166,13 @@ void QmlCBridge::setFriendStatusMessage(quint32 friend_number, const QString mes
 		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, friend_number), Q_ARG(QVariant, message));
 }
 
+void QmlCBridge::setFriendStatus(quint32 friend_number, quint32 status)
+{
+	QVariant returnedValue;
+	QMetaObject::invokeMethod(component, "setFriendStatus",
+		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, friend_number), Q_ARG(QVariant, status));
+}
+
 static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler(0);
 
 void customMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString & msg)

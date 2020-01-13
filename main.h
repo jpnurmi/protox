@@ -24,6 +24,7 @@ public:
 	void updateFriendNickName(quint32 friend_number, const QString nickname);
 	void setFriendTyping(quint32 friend_number, bool typing);
 	void setFriendStatusMessage(quint32 friend_number, const QString message);
+	void setFriendStatus(quint32 friend_number, quint32 status);
 public slots:
 	Q_INVOKABLE void sendMessage(const QString message);
 	Q_INVOKABLE quint32 getCurrentFriendNumber();

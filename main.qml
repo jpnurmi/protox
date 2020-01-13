@@ -21,37 +21,41 @@ ApplicationWindow {
 
     Connections {
         target: Qt.application
-        onStateChanged:
+        onStateChanged: {
+            if (splashImageDestroyAnimation !== null) {
+                splashImageDestroyAnimation.start()
+            }
             // select friend when you click on notification
             if(Qt.application.state === Qt.ApplicationActive && notification.getNotificationId() !== -1) {
                 selectFriend(notification.getNotificationId())
             }
+        }
     }
 
     Component.onCompleted: {
         initTimer.start()
     }
 
-    /*
-      Splash image
-    */
     Timer {
         id: initTimer
         repeat: false
         interval: 1
         onTriggered: {
             bridge.retrieveChatLog()
-            splashImageDestroyAnimation.start()
             chatFlickable.scrollToEnd()
         }
     }
-    
+
+    /*
+      Splash image
+    */
+
     Image {
         id: splashImage
         source: "splash.png"
         anchors.fill: parent
-        cache: true
         z: z_splash
+        cache: true
         NumberAnimation on opacity {
             id: splashImageDestroyAnimation
             to: 0
@@ -98,6 +102,25 @@ ApplicationWindow {
     }
 
     // function callbacks
+    function setFriendStatus(friend_number, status) {
+        var color;
+        switch (status) {
+        case 0: color = "lightgreen"; break;
+        case 1: color = "yellow"; break;
+        case 2: color = "red"; break;
+        }
+        if (bridge.getCurrentFriendNumber() === friend_number) {
+            friendStatusIndicator.color = color;
+        }
+
+        for (var i = 0; i < friendsModel.count; i++) {
+            var friend = friendsModel.get(i)
+            if (friend.friendNumber === friend_number) {
+                friends.itemAt(i).setFriendStatusIndicatorColor(color)
+            }
+        }
+    }
+
     function setFriendStatusMessage(friend_number, message) {
         if (friend_number !== bridge.getCurrentFriendNumber())
             return
