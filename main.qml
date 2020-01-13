@@ -10,7 +10,6 @@ ApplicationWindow {
     width: 360
     height: 520
     visible: true
-    title: qsTr("Side Panel")
 
     /*
       Window events
@@ -85,7 +84,7 @@ ApplicationWindow {
     readonly property int z_drawer: 2
     readonly property int z_overlay_header: 1
     readonly property int z_menu: 3
-    readonly property int z_splash: Number.MAX_VALUE
+    readonly property int z_splash: 9999
 
     /*
       Functions
@@ -229,6 +228,10 @@ ApplicationWindow {
         }
     }
 
+    /*
+        Image buffers
+    */
+
     Repeater {
         id: canvasBuffer
         model: ["lightgray", "orange", "lightblue"]
@@ -256,9 +259,7 @@ ApplicationWindow {
     }
 
     /*
-      
         Add friend menu
-      
     */
     Menu {
         id: addFriendMenu
@@ -341,12 +342,17 @@ ApplicationWindow {
         }
     }
 
+    /*
+        Toolbar (header)
+    */
+
     ToolBar {
         id: overlayHeader
 
         z: z_overlay_header
         width: parent.width
-        parent: window.overlay
+        // bug: ignores z
+        //parent: window.overlay
         ToolButton {
             id: leftOverlayButton
             text: "\u2630"
@@ -446,6 +452,10 @@ ApplicationWindow {
             text: limitString(bridge.getFriendStatusMessage(bridge.getCurrentFriendNumber()), charsLimit)
         }
     }
+
+    /*
+      Left menu (drawer)
+     */
 
     Drawer {
         id: drawer
