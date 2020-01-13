@@ -18,6 +18,7 @@
 #include <QClipboard>
 #include <QFuture>
 #include <QtConcurrent/QtConcurrent>
+#include <QSettings>
 
 #if defined (Q_OS_ANDROID)
 #include <QAndroidService>

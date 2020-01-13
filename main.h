@@ -15,7 +15,7 @@ class QmlCBridge : public QObject
 {
 	Q_OBJECT
 public:
-	QmlCBridge(Tox *_tox);
+	QmlCBridge(Tox *_tox, quint32 last_friend_number);
 	void setComponent(QObject *_component);
 	void insertMessage(const QString &message, quint32 friend_number, bool self = false, quint32 message_id = 0, quint64 unique_id = 0, QDateTime dt = QDateTime::currentDateTime(), bool history = false, bool failed = false);
 	void insertFriend(qint32 friend_number, const QString nickName);

@@ -7,13 +7,12 @@
 
 QPointer <QmlCBridge> qmlbridge;
 QPointer <ChatDataBase> chat_db;
+QPointer <QSettings> settings;
 
-QmlCBridge::QmlCBridge(Tox *_tox)
+QmlCBridge::QmlCBridge(Tox *_tox, quint32 last_friend_number)
 {
 	tox = _tox;
-
-	//fixme
-	current_friend_number = 0;
+	current_friend_number = last_friend_number;
 }
 
 void QmlCBridge::setComponent(QObject *_component)
@@ -186,6 +185,7 @@ void customMessageHandler(QtMsgType type, const QMessageLogContext &context, con
 
 int main(int argc, char *argv[])
 {
+	settings = new QSettings(GetProgDir() + "settings.ini", QSettings::IniFormat);
 	Tox *tox = toxcore_create();
 	toxcore_bootstrap_DHT(tox);
 	Debug("My address: " + ToxId_To_QString(toxcore_get_self_address(tox)));
@@ -206,7 +206,22 @@ int main(int argc, char *argv[])
 			QCoreApplication::exit(-1);
 	}, Qt::QueuedConnection);
 
-	qmlbridge = new QmlCBridge(tox);
+	settings->beginGroup("Global");
+	ToxPk friendPk = settings->value("last_friend", toxcore_get_friend_public_key(tox, 0)).toByteArray();
+	settings->endGroup();
+	ToxFriends friends = toxcore_get_friends(tox);
+
+	quint32 last_friend_number = 0;
+	if (!friendPk.isEmpty()) {
+		for (auto _friend : friends) {
+			if (toxcore_get_friend_public_key(tox, _friend) == friendPk) {
+				last_friend_number = _friend;
+				break;
+			}
+		}
+	}
+
+	qmlbridge = new QmlCBridge(tox, last_friend_number);
 	QQmlContext *root = engine.rootContext();
 	root->setContextProperty("bridge", qmlbridge);
 	QtNotification::declareQML();
@@ -214,15 +229,18 @@ int main(int argc, char *argv[])
 	QObject *component = engine.rootObjects().first();
 	qmlbridge->setComponent(component);
 
-	ToxFriends friends = toxcore_get_friends(tox);
-	for (int i = 0; i < friends.count(); i++) {
-		qmlbridge->insertFriend(friends[i], toxcore_get_friend_name(tox, friends[i]));
+	for (auto _friend : friends) {
+		qmlbridge->insertFriend(_friend, toxcore_get_friend_name(tox, _friend));
 	}
 
 	QTimer *toxcore_timer = toxcore_create_qtimer(tox);
 	toxcore_timer->start();
 
 	int result = app.exec();
+	settings->beginGroup("Global");
+	settings->setValue("last_friend", toxcore_get_friend_public_key(tox, qmlbridge->getCurrentFriendNumber()));
+	settings->endGroup();
+	settings->sync();
 	toxcore_timer->stop();
 	toxcore_destroy(tox);
 	delete qmlbridge;
