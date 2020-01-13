@@ -22,6 +22,15 @@ bool QtNotification::show(const QVariant &notificationParameters)
 			: _Notifier->show(notificationParameters);
 }
 
+
+int QtNotification::getNotificationId()
+{
+	return _Notifier == nullptr
+			? -1
+			: _Notifier->getNotificationId();
+}
+
+
 void QtNotification::declareQML()
 {
 	qmlRegisterType<QtNotification>("QtNotification", 1, 0, "Notification");

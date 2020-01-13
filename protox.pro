@@ -45,6 +45,7 @@ DISTFILES += \
 	android/gradlew.bat \
 	android/res/values/libs.xml \
 	android/src/notifications/QtAndroidNotifications.java \
+	android/src/activity/QtActivityEx.java
 
 contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
 	ANDROID_PACKAGE_SOURCE_DIR = \

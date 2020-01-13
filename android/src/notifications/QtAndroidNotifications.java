@@ -9,6 +9,7 @@ import android.content.Context;
 import android.app.PendingIntent;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.os.Bundle;
 
 // java
 import java.lang.String;
@@ -30,6 +31,9 @@ class QtAndroidNotifications {
         String packageName = context.getApplicationContext().getPackageName();
         Intent resultIntent = context.getPackageManager().getLaunchIntentForPackage(packageName);
         resultIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        Bundle bundle = new Bundle();
+        bundle.putInt("notificationId", id);
+        resultIntent.putExtras(bundle);
 
         PendingIntent resultPendingIntent = PendingIntent.getActivity(context, 0,
             resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);

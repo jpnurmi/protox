@@ -17,6 +17,7 @@ class QtNotification : public QObject
 
 	/// @see QtAbstractNotifier
 	Q_INVOKABLE bool show(const QVariant &notificationParameters);
+	Q_INVOKABLE int getNotificationId();
 
 	///! @brief The registry for QML object notification
 	static void declareQML() ;

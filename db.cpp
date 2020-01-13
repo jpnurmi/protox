@@ -94,7 +94,6 @@ quint64 ChatDataBase::getMessagesCountFriend(ToxPk public_key)
 
 void ChatDataBase::insertMessage(const QString message, QDateTime dt, ToxPk public_key, bool self, quint64 unique_id, bool failed)
 {
-	Debug("message: " + message + " uid:" + QString::number(unique_id));
 	QSqlQuery query(db);
 	query.prepare("INSERT INTO Messages (public_key, message, self, received, datetime, unique_id) "
 				  "VALUES (:public_key, :message, :self, :received, :datetime, :unique_id)");
@@ -106,7 +105,6 @@ void ChatDataBase::insertMessage(const QString message, QDateTime dt, ToxPk publ
 	query.bindValue(":unique_id", unique_id);
 	query.bindValue(":failed", failed);
 	query.exec();
-	Debug("error: " + query.lastError().text());
 
 	query.prepare("INSERT OR REPLACE INTO LastMessage (public_key, datetime) "
 				  "VALUES (:public_key, :datetime)");

@@ -12,6 +12,30 @@ ApplicationWindow {
     visible: true
     title: qsTr("Side Panel")
 
+    /*
+      Window events
+    */
+
+    onClosing: {
+        close.accepted = false
+    }
+
+    Connections {
+        target: Qt.application
+        onStateChanged:
+            // select friend when you click on notification
+            if(Qt.application.state === Qt.ApplicationActive && notification.getNotificationId() !== -1) {
+                selectFriend(notification.getNotificationId())
+            }
+    }
+
+    Component.onCompleted: {
+        initTimer.start()
+    }
+
+    /*
+      Splash image
+    */
     Timer {
         id: initTimer
         repeat: false
@@ -42,6 +66,10 @@ ApplicationWindow {
         }
     }
 
+    /*
+      Basic elements
+    */
+
     Notification {
         id: notification
     }
@@ -50,14 +78,18 @@ ApplicationWindow {
         id: dejavuSans; 
         source: "DejaVuSans.ttf"
     }
-    readonly property bool inPortrait: window.width < window.height
 
-    // global properties
+    // global properties (static)
+    readonly property bool inPortrait: window.width < window.height
     readonly property int z_cloud: -1
     readonly property int z_drawer: 2
     readonly property int z_overlay_header: 1
     readonly property int z_menu: 3
     readonly property int z_splash: Number.MAX_VALUE
+
+    /*
+      Functions
+    */
 
     function limitString(str, limit) {
         if (str.length > limit) {
@@ -140,7 +172,8 @@ ApplicationWindow {
     }
 
     function insertMessage(text, friend_number, self, message_id, time, unique_id, failed, history) {
-        if (!self && !history && (!window.visibility || (window.visibility && bridge.getCurrentFriendNumber() !== friend_number))) {
+        if (!self && !history && (Application.state === Qt.ApplicationHidden || (Application.state !== Qt.ApplicationHidden 
+                                                      && bridge.getCurrentFriendNumber() !== friend_number))) {
             notification.show({
                               caption : text,
                               title : qsTr("New message from ") + bridge.getFriendNickname(friend_number),
@@ -703,13 +736,4 @@ ApplicationWindow {
             }
         }
     }
-
-    onClosing: {
-        close.accepted = false
-    }
-
-    Component.onCompleted: {
-        initTimer.start()
-    }
-
 }

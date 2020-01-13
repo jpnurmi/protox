@@ -1,7 +1,8 @@
 #include "QtAndroidNotifier.h"
 
 #include <QVariant>
-#include <QtAndroid>
+#include <QtAndroidExtras/QAndroidJniEnvironment>
+#include <QDebug>
 
 bool QtAndroidNotifier::show(const QVariant &notificationParameters)
 {
@@ -20,4 +21,9 @@ bool QtAndroidNotifier::show(const QVariant &notificationParameters)
 											  jni_caption.object<jstring>(),
 											  static_cast<jint>(id));
 	return true;
+}
+
+int QtAndroidNotifier::getNotificationId()
+{
+	return QtAndroid::androidActivity().callMethod<int>("getNotificationId");
 }
