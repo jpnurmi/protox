@@ -220,6 +220,44 @@ void toxcore_set_typing_friend(Tox *m, quint32 friend_number, bool typing)
 	tox_self_set_typing(m, friend_number, typing, nullptr);
 }
 
+const QString toxcore_get_nickname(Tox *m, bool toxId)
+{
+	size_t length = tox_self_get_name_size(m);
+	if (!length) {
+		return toxId ? ToxId_To_QString(toxcore_get_self_address(m)) : QString();
+	}
+	char name[length];
+	tox_self_get_name(m, (quint8*)name);
+	QString nickname = QString::fromUtf8(name, length);
+
+	return nickname;
+}
+
+void toxcore_set_nickname(Tox *m, const QString nickname)
+{
+	QByteArray encodedNickname = nickname.toUtf8();
+	tox_self_set_name(m, (quint8*)encodedNickname.data(), encodedNickname.length(), nullptr);
+	toxcore_save_data(m, GetProgDir() + DEFAULT_PROFILE);
+}
+
+const QString toxcore_get_status_message(Tox *m)
+{
+	size_t length = tox_self_get_status_message_size(m);
+	if (!length)
+		return QString();
+	char name[length];
+	tox_self_get_status_message(m, (quint8*)name);
+	return QString::fromUtf8(name, length);
+}
+
+void toxcore_set_status_message(Tox *m, const QString statusMessage)
+{
+	QByteArray encodedMessage = statusMessage.toUtf8();
+	tox_self_set_status_message(m, (quint8*)encodedMessage.data(), encodedMessage.length(), nullptr);
+	toxcore_save_data(m, GetProgDir() + DEFAULT_PROFILE);
+}
+
+
 /*
  * Basic Functions 
 */
@@ -341,6 +379,8 @@ Tox *toxcore_create()
 	memset(&tox_opts, 0, sizeof(struct Tox_Options));
 	tox_options_default(&tox_opts);
 
+	QFile f(GetProgDir() + DEFAULT_PROFILE);
+	bool clean = !f.exists();
 	Tox *m = toxcore_load_tox(&tox_opts, GetProgDir() + DEFAULT_PROFILE);
 
 	if (!m) {
@@ -361,16 +401,16 @@ Tox *toxcore_create()
 
 	size_t s_len = tox_self_get_status_message_size(m);
 
-	if (!s_len) {
+	if (!s_len && clean) {
 		const char *statusmsg = "Protox is here!";
-		tox_self_set_status_message(m, (quint8 *)statusmsg, strlen(statusmsg), NULL);
+		tox_self_set_status_message(m, (quint8*)statusmsg, strlen(statusmsg), NULL);
 	}
 
 	size_t n_len = tox_self_get_name_size(m);
 
 	const char *username = "Protox";
-	if (!n_len) {
-		tox_self_set_name(m, (quint8 *)username, strlen(username), NULL);
+	if (!n_len && clean) {
+		tox_self_set_name(m, (quint8*)username, strlen(username), NULL);
 	}
 
 	return m;

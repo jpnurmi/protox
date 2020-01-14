@@ -88,7 +88,7 @@ ApplicationWindow {
     readonly property int z_drawer: 2
     readonly property int z_overlay_header: 1
     readonly property int z_menu: 3
-    readonly property int z_splash: 9999
+    readonly property int z_splash: Number.MAX_VALUE
 
     /*
       Functions
@@ -178,12 +178,14 @@ ApplicationWindow {
         chatFlickable.scrollToEnd()
     }
 
+    property variant each_friend_text: []
     function selectFriend(friend_number) {
         if (bridge.getCurrentFriendNumber() === friend_number) {
             return
         }
         dropTypingTimer.stop()
         bridge.setTypingFriend(bridge.getCurrentFriendNumber(), false)
+        each_friend_text[bridge.getCurrentFriendNumber()] = chatMessage.text
         bridge.setCurrentFriend(friend_number)
         friendNickname.text = limitString(bridge.getFriendNickname(bridge.getCurrentFriendNumber()), friendNickname.charsLimit)
         friendStatus.text = limitString(bridge.getFriendStatusMessage(bridge.getCurrentFriendNumber()), friendStatus.charsLimit)
@@ -191,6 +193,10 @@ ApplicationWindow {
         messagesModel.clear()
         bridge.retrieveChatLog()
         chatScrollToEnd()
+        chatMessage.text = ""
+        if (each_friend_text[friend_number] !== undefined) {
+            chatMessage.text = each_friend_text[friend_number]
+        } 
     }
 
     function insertMessage(text, friend_number, self, message_id, time, unique_id, failed, history) {
@@ -330,7 +336,7 @@ ApplicationWindow {
             rightPadding: leftPadding
             verticalAlignment: TextInput.AlignVCenter
             width: parent.width
-            text: "Add me to your friends. Maybe?"
+            placeholderText: "Add me to your friends. Maybe?"
             maximumLength: 1016 // fixme
         }
         Text {
@@ -346,7 +352,7 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 Text {
                     anchors.centerIn: parent
-                    text: "Cancel"
+                    text: qsTr("Cancel")
                 }
                 onTriggered: {
                     addFriendMenu.close()
@@ -356,10 +362,95 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 Text {
                     anchors.centerIn: parent
-                    text: "Send"
+                    text: qsTr("Send")
                 }
                 onTriggered: {
-                    bridge.makeFriendRequest(toxId.text, addFriendMessage.text)
+                    var toxId_text = toxId.text
+                    if(toxId_text.substring(0, 4) === "tox:") {
+                        toxId_text = toxId_text.slice(4, toxId_text.length())
+                    }
+                    bridge.makeFriendRequest(toxId_text.toUpperCase(), 
+                                             addFriendMessage.text.length > 0 ? addFriendMessage.text : addFriendMessage.placeholderText)
+                }
+            }
+        }
+    }
+
+    /*
+        Profile menu
+    */
+    Menu {
+        id: profileMenu
+        width: 300
+        title: "My profile"
+        x: window.width / 2 - width / 2
+        y: window.height / 2 - height / 2
+        z: z_menu
+        modal: true
+        onClosed: {
+            currentIndex = -1
+            myNickname.focus = false
+            myStatus.focus = false
+            myNickname.text = bridge.getNickname(false)
+            myStatus.text = bridge.getStatusMessage()
+        }
+
+        Text {
+            padding: 10
+            font.bold: true
+            width: parent.width
+            horizontalAlignment: Qt.AlignHCenter
+            text: qsTr("Nickname")
+        }
+        TextField {
+            id: myNickname
+            selectByMouse: true
+            font.pixelSize: 20
+            leftPadding: 10
+            rightPadding: leftPadding
+            verticalAlignment: TextInput.AlignVCenter
+            width: parent.width
+            text: bridge.getNickname(false)
+        }
+        Text {
+            padding: 10
+            font.bold: true
+            width: parent.width
+            horizontalAlignment: Qt.AlignHCenter
+            text: qsTr("Status")
+        }
+        TextField {
+            id: myStatus
+            selectByMouse: true
+            font.pixelSize: 20
+            leftPadding: 10
+            rightPadding: leftPadding
+            verticalAlignment: TextInput.AlignVCenter
+            width: parent.width
+            text: bridge.getStatusMessage()
+        }
+        RowLayout {
+            MenuItem {
+                Layout.fillWidth: true
+                Text {
+                    anchors.centerIn: parent
+                    text: qsTr("Cancel")
+                }
+                onTriggered: {
+                    profileMenu.close()
+                }
+            }
+            MenuItem {
+                Layout.fillWidth: true
+                Text {
+                    anchors.centerIn: parent
+                    text: qsTr("Apply")
+                }
+                onTriggered: {
+                    bridge.setNickname(myNickname.text)
+                    accountName.text = bridge.getNickname(true)
+                    bridge.setStatusMessage(myStatus.text)
+                    profileMenu.close()
                 }
             }
         }
@@ -509,41 +600,55 @@ ApplicationWindow {
             id: friendsFlickable
             ColumnLayout {
                 id: leftBarLayout
-                    Repeater {
-                        id: friends
-                        model: friendsModel
-
-                        delegate: RowLayout {
-                            id: friendLayout
-                            Rectangle {
-                                id: friendItemStatusIndicator
-                                color: "gray"
-                                width: 15
-                                height: width
-                                border.color: "black"
-                                border.width: 1
-                                radius: width * 0.5
-                                Layout.alignment: Qt.AlignLeft | Qt.AlignCenter
-                                property int indicator_margin: 10
-                                Layout.leftMargin: indicator_margin
-                            }
-                            function setFriendStatusIndicatorColor(color) {
-                                friendItemStatusIndicator.color = color
-                            }
-                            ItemDelegate {
-                                id: friendItem
-                                text: nickName
-                                property int friend_number: friendNumber
-                                Layout.alignment: Qt.AlignCenter
-                                implicitWidth: drawer.width - friendItemStatusIndicator.width - friendItemStatusIndicator.indicator_margin * 1.5
-                                onClicked: {
-                                    drawer.close()
-                                    selectFriend(friend_number)
-                                }
+                RowLayout {
+                    Layout.alignment: Qt.AlignTop
+                    ItemDelegate {
+                        id: accountName
+                        text: bridge.getNickname(true)
+                        font.bold: true
+                        Layout.alignment: Qt.AlignCenter
+                        implicitWidth: drawer.width
+                        //implicitWidth: drawer.width - friendItemStatusIndicator.width - friendItemStatusIndicator.indicator_margin * 1.5
+                        onClicked: {
+                            profileMenu.open()
+                        }
+                    }
+                }
+                MenuSeparator { implicitWidth: drawer.width }
+                Repeater {
+                    id: friends
+                    model: friendsModel
+                    delegate: RowLayout {
+                        id: friendLayout
+                        Rectangle {
+                            id: friendItemStatusIndicator
+                            color: "gray"
+                            width: 15
+                            height: width
+                            border.color: "black"
+                            border.width: 1
+                            radius: width * 0.5
+                            Layout.alignment: Qt.AlignLeft | Qt.AlignCenter
+                            property int indicator_margin: 10
+                            Layout.leftMargin: indicator_margin
+                        }
+                        function setFriendStatusIndicatorColor(color) {
+                            friendItemStatusIndicator.color = color
+                        }
+                        ItemDelegate {
+                            id: friendItem
+                            text: nickName
+                            property int friend_number: friendNumber
+                            Layout.alignment: Qt.AlignCenter
+                            implicitWidth: drawer.width - friendItemStatusIndicator.width - friendItemStatusIndicator.indicator_margin * 1.5
+                            onClicked: {
+                                drawer.close()
+                                selectFriend(friend_number)
                             }
                         }
                     }
                 }
+            }
             ScrollIndicator.vertical: ScrollIndicator { }
         }
         RowLayout {

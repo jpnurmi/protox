@@ -173,6 +173,26 @@ void QmlCBridge::setFriendStatus(quint32 friend_number, quint32 status)
 		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, friend_number), Q_ARG(QVariant, status));
 }
 
+const QString QmlCBridge::getNickname(bool toxId)
+{
+	return toxcore_get_nickname(tox, toxId);
+}
+
+void QmlCBridge::setNickname(const QString nickname)
+{
+	toxcore_set_nickname(tox, nickname);
+}
+
+const QString QmlCBridge::getStatusMessage()
+{
+	return toxcore_get_status_message(tox);
+}
+
+void QmlCBridge::setStatusMessage(const QString statusMessage)
+{
+	toxcore_set_status_message(tox, statusMessage);
+}
+
 static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler(0);
 
 void customMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString & msg)

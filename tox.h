@@ -41,6 +41,10 @@ int toxcore_make_friend_request(Tox *m, ToxId id, const QString friendMessage);
 void toxcore_delete_friend(Tox *m, quint32 friend_number);
 void toxcore_set_typing_friend(Tox *m, quint32 friend_number, bool typing);
 const QString toxcore_get_friend_status_message(Tox *m, quint32 friend_number);
+const QString toxcore_get_nickname(Tox* m, bool toxId = false);
+void toxcore_set_nickname(Tox *m, const QString nickname);
+const QString toxcore_get_status_message(Tox *m);
+void toxcore_set_status_message(Tox *m, const QString statusMessage);
 
 bool toxcore_save_data(Tox *m, const QString path);
 

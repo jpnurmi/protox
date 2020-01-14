@@ -39,6 +39,10 @@ public slots:
 	Q_INVOKABLE void clearFriendChatHistory(quint32 friend_number);
 	Q_INVOKABLE void setTypingFriend(quint32 friend_number, bool typing);
 	Q_INVOKABLE const QString getFriendStatusMessage(quint32 friend_number);
+	Q_INVOKABLE const QString getNickname(bool toxId = false);
+	Q_INVOKABLE void setNickname(const QString nickname);
+	Q_INVOKABLE const QString getStatusMessage();
+	Q_INVOKABLE void setStatusMessage(const QString statusMessage);
 
 public:
 	ToxFriendsConnStatus friends_conn_status;
