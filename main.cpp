@@ -4,10 +4,11 @@
 #include "db.h"
 
 #include "QtNotification.h"
+#include "toasts.h"
 
-QPointer <QmlCBridge> qmlbridge;
-QPointer <ChatDataBase> chat_db;
-QPointer <QSettings> settings;
+QmlCBridge *qmlbridge;
+ChatDataBase *chat_db;
+QSettings *settings;
 
 QmlCBridge::QmlCBridge(Tox *_tox, quint32 last_friend_number)
 {
@@ -101,8 +102,10 @@ const QString QmlCBridge::getFriendStatusMessage(quint32 friend_number)
 
 void QmlCBridge::retrieveChatLog()
 {
-	ToxMessages messages = chat_db->getFriendMessagesFromDateTime(toxcore_get_friend_public_key(tox, current_friend_number), 
-											QDateTime::fromSecsSinceEpoch(0));
+	settings->beginGroup("Global");
+	quint32 limit = settings->value("last_messages_limit", 128).toUInt();
+	settings->endGroup();
+	ToxMessages messages = chat_db->getFriendMessages(toxcore_get_friend_public_key(tox, current_friend_number), limit);
 	for (auto msg : messages) {
 		insertMessage(msg.message, current_friend_number, msg.self, 0, msg.unique_id, msg.dt, true);
 		if (!msg.self || msg.received)
@@ -252,6 +255,7 @@ int main(int argc, char *argv[])
 	QQmlContext *root = engine.rootContext();
 	root->setContextProperty("bridge", qmlbridge);
 	QtNotification::declareQML();
+	QtToast::declareQML();
 	engine.load(url);
 	QObject *component = engine.rootObjects().first();
 	qmlbridge->setComponent(component);

@@ -29,28 +29,6 @@ ChatDataBase::ChatDataBase(const QString fileName)
 			");\n"
 			"";
 	query = db.exec(create_command_messages);
-
-	const QString create_command_last_msg =
-			"CREATE TABLE IF NOT EXISTS LastMessage\n"
-			"(\n"
-			"	public_key BLOB,\n"
-			"	datetime INTEGER,\n"
-			"	PRIMARY KEY(public_key)\n"
-			");\n"
-			"";
-	query = db.exec(create_command_last_msg);
-
-	/*
-	const QString create_command_friends =
-			"CREATE TABLE IF NOT EXISTS Friends\n"
-			"(\n"
-			"	public_key BLOB,\n"
-			"	name TEXT,\n"
-			"	PRIMARY KEY(public_key)\n"
-			");\n"
-			"";
-	query = db.exec(create_command_friends);
-	*/
 	db.commit();
 }
 
@@ -124,13 +102,13 @@ void ChatDataBase::setMessageReceived(quint64 unique_id, ToxPk public_key)
 	db.commit();
 }
 
-ToxMessages ChatDataBase::getFriendMessagesFromDateTime(ToxPk public_key, QDateTime dt)
+ToxMessages ChatDataBase::getFriendMessages(ToxPk public_key, quint32 limit)
 {
 	ToxMessages messages;
 	QSqlQuery query(db);
-	query.prepare("SELECT message,datetime,self,received,unique_id,failed FROM Messages WHERE (public_key = :public_key) AND (datetime >= :datetime)");
+	query.prepare("SELECT message,datetime,self,received,unique_id,failed FROM Messages WHERE public_key = :public_key ORDER BY unique_id LIMIT :limit");
 	query.bindValue(":public_key", public_key);
-	query.bindValue(":datetime", dt.toSecsSinceEpoch());
+	query.bindValue(":limit", limit);
 	query.exec();
 	while (query.next()) {
 		messages.push_back(ToxMessage(query.value(0).toString(),
@@ -139,7 +117,6 @@ ToxMessages ChatDataBase::getFriendMessagesFromDateTime(ToxPk public_key, QDateT
 									  query.value(3).toBool(),
 									  query.value(4).toULongLong()));
 	}
-	std::sort(messages.begin(), messages.end(), [](const auto &a, const auto &b) { return a.unique_id < b.unique_id; });
 	return messages;
 }
 

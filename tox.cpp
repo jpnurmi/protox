@@ -5,8 +5,8 @@
 
 #define DEFAULT_PROFILE "profile.tox"
 
-extern QPointer <QmlCBridge> qmlbridge;
-extern QPointer <ChatDataBase> chat_db;
+extern QmlCBridge *qmlbridge;
+extern ChatDataBase *chat_db;
 
 /*
  * Toxcore callbacks
@@ -206,6 +206,7 @@ int toxcore_make_friend_request(Tox *m, ToxId id, const QString friendMessage)
 	quint32 friend_number = tox_friend_add(m, (quint8*)id.data(), (quint8*)msgData.data(), msgData.length(), &error);
 	if (!error) {
 		qmlbridge->insertFriend(friend_number, ToxId_To_QString(toxcore_get_friend_public_key(m, friend_number)));
+		toxcore_save_data(m, GetProgDir() + DEFAULT_PROFILE);
 	}
 	return error;
 }

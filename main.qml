@@ -4,6 +4,7 @@ import QtQuick.Controls.Material 2.2
 import QtQuick.Layouts 1.3
 
 import QtNotification 1.0
+import QtToast 1.0
 
 ApplicationWindow {
     id: window
@@ -75,6 +76,10 @@ ApplicationWindow {
 
     Notification {
         id: notification
+    }
+
+    Toast {
+        id: toast
     }
 
     FontLoader { 
@@ -162,7 +167,7 @@ ApplicationWindow {
         var color = "red";
         if (addFriendMenu.opened) {
             switch (status) {
-            case 0: msg = qsTr("Request sent!"); color = "green"; break;
+            case 0: toast.show({ message : qsTr("Request sent!"), duration : 0 }); addFriendMenu.close(); break;
             case 4: msg = qsTr("You cannot send friend request to yourself."); break;
             case 5: msg = qsTr("The friend is already on the friend list."); break;
             case 6: msg = qsTr("The friend address is invalid."); break;
@@ -193,7 +198,7 @@ ApplicationWindow {
         messagesModel.clear()
         bridge.retrieveChatLog()
         chatScrollToEnd()
-        chatMessage.text = ""
+        chatMessage.clear()
         if (each_friend_text[friend_number] !== undefined) {
             chatMessage.text = each_friend_text[friend_number]
         } 
@@ -337,12 +342,12 @@ ApplicationWindow {
             verticalAlignment: TextInput.AlignVCenter
             width: parent.width
             placeholderText: "Add me to your friends. Maybe?"
-            maximumLength: 1016 // fixme
         }
         Text {
             id: friendRequestStatusText
             padding: 5
             font.bold: true
+            font.pointSize: 15
             width: parent.width
             horizontalAlignment: Qt.AlignHCenter
             text: ""
@@ -371,6 +376,8 @@ ApplicationWindow {
                     }
                     bridge.makeFriendRequest(toxId_text.toUpperCase(), 
                                              addFriendMessage.text.length > 0 ? addFriendMessage.text : addFriendMessage.placeholderText)
+                    toxId.clear()
+                    addFriendMessage.clear()
                 }
             }
         }
@@ -494,9 +501,10 @@ ApplicationWindow {
             }
 
             MenuItem {
-                text: qsTr("Copy My ToxID")
+                text: qsTr("Copy my ToxID")
                 onClicked: {
                     bridge.copyToxIdToClipboard()
+                    toast.show({ message : qsTr("ToxID copied!"), duration : 0 })
                 }
             }
             MenuItem {
@@ -510,6 +518,7 @@ ApplicationWindow {
                             friendsModel.remove(i)
                         }
                     }
+                    toast.show({ message : qsTr("Friend removed!"), duration : 0 });
                     selectFriend(friendsModel.get(0).friendNumber)
                 }
             }
@@ -792,6 +801,7 @@ ApplicationWindow {
                             anchors.fill: parent
                             onClicked: {
                                 bridge.copyTextToClipboard(cloudText.text)
+                                toast.show({ message : "Text copied!", duration : 0 });
                             }
                         }
                     }
@@ -860,7 +870,7 @@ ApplicationWindow {
                 function sendMessage() {
                     if (chatMessage.text.length > 0) {
                         bridge.sendMessage(chatMessage.text)
-                        chatMessage.text = ""
+                        chatMessage.clear()
                     }
                 }
                 Image {

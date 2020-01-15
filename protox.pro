@@ -15,6 +15,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         db.cpp \
         main.cpp \
+        toasts.cpp \
         tools.cpp \
         tox.cpp
 
@@ -61,6 +62,7 @@ HEADERS += \
 	common.h \
 	db.h \
 	main.h \
+	toasts.h \
 	tools.h \
 	tox.h
 
