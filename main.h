@@ -15,12 +15,7 @@ class QmlCBridge : public QObject
 {
 	Q_OBJECT
 public:
-	enum ToastDuration {
-		SHORT = 0,
-		LONG = 1
-	};
-public:
-	QmlCBridge(Tox *_tox, quint32 last_friend_number);
+	QmlCBridge(Tox *_tox, QTimer *_toxcore_timer, quint32 last_friend_number);
 	void setComponent(QObject *_component);
 	void insertMessage(const QString &message, quint32 friend_number, bool self = false, quint32 message_id = 0, quint64 unique_id = 0, QDateTime dt = QDateTime::currentDateTime(), bool history = false, bool failed = false);
 	void insertFriend(qint32 friend_number, const QString nickName);
@@ -48,6 +43,9 @@ public slots:
 	Q_INVOKABLE void setNickname(const QString nickname);
 	Q_INVOKABLE const QString getStatusMessage();
 	Q_INVOKABLE void setStatusMessage(const QString statusMessage);
+	Q_INVOKABLE int getStatus();
+	Q_INVOKABLE void setStatus(quint32 status);
+	Q_INVOKABLE void changeConnection(bool online);
 
 public:
 	ToxFriendsConnStatus friends_conn_status;
@@ -59,6 +57,7 @@ private:
 private:
 	QObject *component;
 	Tox *tox;
+	QTimer *toxcore_timer;
 };
 
 #endif // MAIN_H

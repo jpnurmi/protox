@@ -10,9 +10,10 @@ QmlCBridge *qmlbridge;
 ChatDataBase *chat_db;
 QSettings *settings;
 
-QmlCBridge::QmlCBridge(Tox *_tox, quint32 last_friend_number)
+QmlCBridge::QmlCBridge(Tox *_tox, QTimer *_toxcore_timer, quint32 last_friend_number)
 {
 	tox = _tox;
+	toxcore_timer = _toxcore_timer;
 	current_friend_number = last_friend_number;
 }
 
@@ -116,7 +117,7 @@ void QmlCBridge::retrieveChatLog()
 void QmlCBridge::copyToxIdToClipboard()
 {
 	QClipboard *clipboard = QGuiApplication::clipboard(); 
-	clipboard->setText(ToxId_To_QString(toxcore_get_self_address(tox)));
+	clipboard->setText(ToxId_To_QString(toxcore_get_address(tox)));
 }
 
 void QmlCBridge::copyTextToClipboard(const QString text)
@@ -196,6 +197,25 @@ void QmlCBridge::setStatusMessage(const QString statusMessage)
 	toxcore_set_status_message(tox, statusMessage);
 }
 
+int QmlCBridge::getStatus()
+{
+	return toxcore_get_status(tox);
+}
+
+void QmlCBridge::setStatus(quint32 status)
+{
+	toxcore_set_status(tox, status);
+}
+
+void QmlCBridge::changeConnection(bool online)
+{
+	if (online) {
+		toxcore_timer->start();
+	} else {
+		toxcore_timer->stop();
+	}
+}
+
 static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler(0);
 
 void customMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString & msg)
@@ -218,7 +238,7 @@ int main(int argc, char *argv[])
 	settings = new QSettings(GetProgDir() + "settings.ini", QSettings::IniFormat);
 	Tox *tox = toxcore_create();
 	toxcore_bootstrap_DHT(tox);
-	Debug("My address: " + ToxId_To_QString(toxcore_get_self_address(tox)));
+	Debug("My address: " + ToxId_To_QString(toxcore_get_address(tox)));
 
 	chat_db = new ChatDataBase("chat.db");
 
@@ -251,7 +271,8 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	qmlbridge = new QmlCBridge(tox, last_friend_number);
+	QTimer *toxcore_timer = toxcore_create_qtimer(tox);
+	qmlbridge = new QmlCBridge(tox, toxcore_timer, last_friend_number);
 	QQmlContext *root = engine.rootContext();
 	root->setContextProperty("bridge", qmlbridge);
 	QtNotification::declareQML();
@@ -264,12 +285,14 @@ int main(int argc, char *argv[])
 		qmlbridge->insertFriend(_friend, toxcore_get_friend_name(tox, _friend));
 	}
 
-	QTimer *toxcore_timer = toxcore_create_qtimer(tox);
+	
 	toxcore_timer->start();
 
 	int result = app.exec();
 	settings->beginGroup("Global");
 	settings->setValue("last_friend", toxcore_get_friend_public_key(tox, qmlbridge->getCurrentFriendNumber()));
+	// fixme
+	//settings->setValue("last_messages_limit", )
 	settings->endGroup();
 	settings->sync();
 	toxcore_timer->stop();

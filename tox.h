@@ -32,7 +32,7 @@ Tox *toxcore_create();
 void toxcore_destroy(Tox *m);
 QTimer *toxcore_create_qtimer(Tox *m);
 void toxcore_bootstrap_DHT(Tox *m);
-ToxId toxcore_get_self_address(Tox *m);
+ToxId toxcore_get_address(Tox *m);
 quint32 toxcore_send_message(Tox *m, quint32 friend_number, const QString message, bool &failed);
 ToxPk toxcore_get_friend_public_key(Tox *m, quint32 friend_number);
 const QString toxcore_get_friend_name(Tox *m, quint32 friend_number);
@@ -45,6 +45,10 @@ const QString toxcore_get_nickname(Tox* m, bool toxId = false);
 void toxcore_set_nickname(Tox *m, const QString nickname);
 const QString toxcore_get_status_message(Tox *m);
 void toxcore_set_status_message(Tox *m, const QString statusMessage);
+quint32 toxcore_get_status(Tox *m);
+void toxcore_set_status(Tox *m, quint32 status);
+int toxcore_get_connection_status();
+
 
 bool toxcore_save_data(Tox *m, const QString path);
 

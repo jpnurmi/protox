@@ -93,6 +93,7 @@ ApplicationWindow {
     readonly property int z_drawer: 2
     readonly property int z_overlay_header: 1
     readonly property int z_menu: 3
+    readonly property int z_menu_elements: 4
     readonly property int z_splash: Number.MAX_VALUE
 
     /*
@@ -123,6 +124,13 @@ ApplicationWindow {
             if (friend.friendNumber === friend_number) {
                 friends.itemAt(i).setFriendStatusIndicatorColor(color)
             }
+        }
+    }
+
+    function makeEverythingOffline() {
+        friendStatusIndicator.color = "gray";
+        for (var i = 0; i < friendsModel.count; i++) {
+            friends.itemAt(i).setFriendStatusIndicatorColor("gray")
         }
     }
 
@@ -167,7 +175,13 @@ ApplicationWindow {
         var color = "red";
         if (addFriendMenu.opened) {
             switch (status) {
-            case 0: toast.show({ message : qsTr("Request sent!"), duration : 0 }); addFriendMenu.close(); break;
+            case 0: {
+                toast.show({ message : qsTr("Request sent!"), duration : 0 }); 
+                addFriendMenu.close();
+                toxId.clear()
+                addFriendMessage.clear()
+                break;
+            }
             case 4: msg = qsTr("You cannot send friend request to yourself."); break;
             case 5: msg = qsTr("The friend is already on the friend list."); break;
             case 6: msg = qsTr("The friend address is invalid."); break;
@@ -307,6 +321,7 @@ ApplicationWindow {
             currentIndex = -1
             toxId.focus = false
             addFriendMessage.focus = false
+            friendRequestStatusText.text = ""
         }
 
         Text {
@@ -376,8 +391,6 @@ ApplicationWindow {
                     }
                     bridge.makeFriendRequest(toxId_text.toUpperCase(), 
                                              addFriendMessage.text.length > 0 ? addFriendMessage.text : addFriendMessage.placeholderText)
-                    toxId.clear()
-                    addFriendMessage.clear()
                 }
             }
         }
@@ -614,12 +627,85 @@ ApplicationWindow {
                     ItemDelegate {
                         id: accountName
                         text: bridge.getNickname(true)
+                        font.pointSize: 12
                         font.bold: true
-                        Layout.alignment: Qt.AlignCenter
-                        implicitWidth: drawer.width
-                        //implicitWidth: drawer.width - friendItemStatusIndicator.width - friendItemStatusIndicator.indicator_margin * 1.5
+                        Layout.alignment: Qt.AlignLeft
+                        implicitWidth: drawer.width * 0.6
                         onClicked: {
                             profileMenu.open()
+                        }
+                    }
+                    Menu {
+                        id: accountStatusMenu
+                        z: z_menu_elements
+                        implicitWidth: 100
+                        Repeater {
+                            model: [[qsTr("Online"), "lightgreen"],[qsTr("Away"), "yellow"],[qsTr("Busy"), "red"],[qsTr("Offline"), "gray"]]
+                            delegate: MenuItem {
+                                text: modelData[0]
+                                Rectangle {
+                                    anchors.right: parent.right
+                                    anchors.rightMargin: 10
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    color: modelData[1]
+                                    width: 15
+                                    height: width
+                                    border.color: "black"
+                                    border.width: 1
+                                    radius: width * 0.5
+                                }
+                                onClicked: {
+                                    if (index < 3) {
+                                        bridge.setStatus(index)
+                                    } else {
+                                        makeEverythingOffline()
+                                    }
+                                    statusIndicator.setStatus(index)
+                                    bridge.changeConnection(index != 3)
+                                }
+                            }
+                        }
+                        onClosed: {
+                            currentIndex = -1
+                        }
+                    }
+                    Button {
+                        id: accountStatus
+                        Layout.alignment: Qt.AlignRight
+                        Rectangle {
+                            id: statusIndicator
+                            anchors.left: parent.left
+                            anchors.leftMargin: 10
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 15
+                            height: width
+                            border.color: "black"
+                            border.width: 1
+                            radius: width * 0.5
+                            property int index: -1
+                            function setStatus(status) {
+                                switch (status) {
+                                case 0: color = "lightgreen"; break;
+                                case 1: color = "yellow"; break;
+                                case 2: color = "red"; break;
+                                case 3: color = "gray"; break;
+                                }
+                                index = status
+                            }
+                            Component.onCompleted: {
+                                setStatus(bridge.getStatus())
+                            }
+                        }
+                        Text {
+                            text: "\u25BC"
+                            font.pointSize: 10
+                            anchors.left: statusIndicator.right
+                            anchors.leftMargin: 20
+                            anchors.verticalCenter: statusIndicator.verticalCenter
+                        }
+                        onPressed: {
+                            accountStatusMenu.currentIndex = statusIndicator.index
+                            accountStatusMenu.popup(accountStatus.x, accountStatus.y + accountStatus.height)
                         }
                     }
                 }

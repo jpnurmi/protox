@@ -12,20 +12,24 @@ extern ChatDataBase *chat_db;
  * Toxcore callbacks
 */
 
+int toxcore_connection_status = -1;
 static void toxcore_cb_self_connection_change(Tox *m, TOX_CONNECTION connection_status, void *userdata)
 {
 	Q_UNUSED(m);
 	Q_UNUSED(userdata);
 	switch (connection_status) {
 		case TOX_CONNECTION_NONE:
+			toxcore_connection_status = 0;
 			Debug("Connection to Tox network has been lost.");
 			break;
 
 		case TOX_CONNECTION_TCP:
+			toxcore_connection_status = 1;
 			Debug("Connection to Tox network is weak (using TCP).");
 			break;
 
 		case TOX_CONNECTION_UDP:
+			toxcore_connection_status = 2;
 			Debug("Connection to Tox network is strong (using UDP).");
 			break;
 	}
@@ -181,6 +185,16 @@ const QString toxcore_get_friend_name(Tox *m, quint32 friend_number)
 	}
 }
 
+quint32 toxcore_get_status(Tox *m)
+{
+	return tox_self_get_status(m);
+}
+
+void toxcore_set_status(Tox *m, quint32 status)
+{
+	tox_self_set_status(m, (TOX_USER_STATUS)status);
+}
+
 quint32 toxcore_send_message(Tox *m, quint32 friend_number, const QString message, bool &failed)
 {
 	TOX_ERR_FRIEND_SEND_MESSAGE error;
@@ -225,7 +239,7 @@ const QString toxcore_get_nickname(Tox *m, bool toxId)
 {
 	size_t length = tox_self_get_name_size(m);
 	if (!length) {
-		return toxId ? ToxId_To_QString(toxcore_get_self_address(m)) : QString();
+		return toxId ? ToxId_To_QString(toxcore_get_address(m)) : QString();
 	}
 	char name[length];
 	tox_self_get_name(m, (quint8*)name);
@@ -258,10 +272,14 @@ void toxcore_set_status_message(Tox *m, const QString statusMessage)
 	toxcore_save_data(m, GetProgDir() + DEFAULT_PROFILE);
 }
 
-
 /*
  * Basic Functions 
 */
+
+int toxcore_get_connection_status()
+{
+	return toxcore_connection_status;
+}
 
 bool toxcore_save_data(Tox *m, const QString path)
 {
@@ -431,7 +449,7 @@ QTimer *toxcore_create_qtimer(Tox *m)
 	return timer;
 }
 
-ToxId toxcore_get_self_address(Tox *m)
+ToxId toxcore_get_address(Tox *m)
 {
 	char address[TOX_ADDRESS_SIZE];
 	tox_self_get_address(m, (quint8*)address);
