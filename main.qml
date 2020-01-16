@@ -5,6 +5,7 @@ import QtQuick.Layouts 1.3
 
 import QtNotification 1.0
 import QtToast 1.0
+import QZXing 2.3
 
 ApplicationWindow {
     id: window
@@ -477,6 +478,44 @@ ApplicationWindow {
     }
 
     /*
+      Profile info menu
+    */
+
+    Menu {
+        id: profileInfoMenu
+        width: 300
+        title: "My profile info"
+        x: window.width / 2 - width / 2
+        y: window.height / 2 - height / 2
+        z: z_menu
+        modal: true
+        Image {
+            id: toxIDQRCodeImage
+            anchors.centerIn: parent
+            source: "image://QZXing/encode/" + bridge.getToxId() +
+                    "?correctionLevel=M" +
+                    "&format=qrcode"
+            sourceSize.width: 196
+            sourceSize.height: sourceSize.width
+            cache: false
+            width: sourceSize.width
+            height: sourceSize.width
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    bridge.copyTextToClipboard(bridge.getToxId())
+                    toast.show({ message : qsTr("ToxID copied!"), duration : 0 });
+                }
+            }
+        }
+        Text {
+            id: toxIDHelperText
+            horizontalAlignment: Qt.AlignHCenter
+            text: qsTr("Click on image to copy your ToxID.")
+        }
+}
+
+    /*
         Toolbar (header)
     */
 
@@ -513,13 +552,6 @@ ApplicationWindow {
                 rightOverlayHeaderButton.highlighted = false
             }
 
-            MenuItem {
-                text: qsTr("Copy my ToxID")
-                onClicked: {
-                    bridge.copyToxIdToClipboard()
-                    toast.show({ message : qsTr("ToxID copied!"), duration : 0 })
-                }
-            }
             MenuItem {
                 text: qsTr("Delete this friend")
                 onClicked: {
@@ -757,6 +789,17 @@ ApplicationWindow {
                 antialiasing: true
                 onClicked: {
                     addFriendMenu.popup()
+                }
+            }
+            ToolButton {
+                id: showMyInfoButton
+                text: "\u2302"
+                font.family: dejavuSans.name
+                font.pointSize: 30
+                font.bold: true
+                antialiasing: true
+                onClicked: {
+                    profileInfoMenu.popup()
                 }
             }
         }

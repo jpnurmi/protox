@@ -4,6 +4,7 @@
 #include "db.h"
 
 #include "QtNotification.h"
+#include "QZXing.h"
 #include "toasts.h"
 
 QmlCBridge *qmlbridge;
@@ -114,12 +115,6 @@ void QmlCBridge::retrieveChatLog()
 	}
 }
 
-void QmlCBridge::copyToxIdToClipboard()
-{
-	QClipboard *clipboard = QGuiApplication::clipboard(); 
-	clipboard->setText(ToxId_To_QString(toxcore_get_address(tox)));
-}
-
 void QmlCBridge::copyTextToClipboard(const QString text)
 {
 	QClipboard *clipboard = QGuiApplication::clipboard(); 
@@ -207,6 +202,11 @@ void QmlCBridge::setStatus(quint32 status)
 	toxcore_set_status(tox, status);
 }
 
+QString QmlCBridge::getToxId()
+{
+	return ToxId_To_QString(toxcore_get_address(tox));
+}
+
 void QmlCBridge::changeConnection(bool online)
 {
 	if (online) {
@@ -277,6 +277,8 @@ int main(int argc, char *argv[])
 	root->setContextProperty("bridge", qmlbridge);
 	QtNotification::declareQML();
 	QtToast::declareQML();
+	QZXing::registerQMLTypes();
+	QZXing::registerQMLImageProvider(engine);
 	engine.load(url);
 	QObject *component = engine.rootObjects().first();
 	qmlbridge->setComponent(component);

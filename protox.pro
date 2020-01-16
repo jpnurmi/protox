@@ -1,5 +1,5 @@
-QT += quick sql androidextras
-CONFIG += c++14
+QT += quick sql androidextras 
+CONFIG += c++14 qzxing_qml
 
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
@@ -24,6 +24,7 @@ LIBS += -L$$PWD/libs/ -ltoxcore
 RESOURCES += qml.qrc
 
 include(QtMobileNotification/QtMobileNotification.pri)
+include(QZXing/QZXing.pri)
 
 
 # Additional import path used to resolve QML modules in Qt Creator's code model

@@ -126,9 +126,6 @@ void ChatDataBase::clearFriendChatHistory(ToxPk public_key)
 	query.prepare("DELETE FROM Messages WHERE public_key = :public_key");
 	query.bindValue(":public_key", public_key);
 	query.exec();
-	query.prepare("DELETE FROM LastMessage WHERE public_key = :public_key");
-	query.bindValue(":public_key", public_key);
-	query.exec();
 	db.commit();
 }
 

@@ -32,7 +32,7 @@ public slots:
 	Q_INVOKABLE const QString getFriendNickname(quint32 friend_number);
 	Q_INVOKABLE void setCurrentFriend(quint32 newFriend);
 	Q_INVOKABLE void retrieveChatLog();
-	Q_INVOKABLE void copyToxIdToClipboard();
+	Q_INVOKABLE QString getToxId();
 	Q_INVOKABLE void copyTextToClipboard(const QString text);
 	Q_INVOKABLE void makeFriendRequest(const QString toxId, const QString friendMessage);
 	Q_INVOKABLE void deleteFriend(quint32 friend_number);
