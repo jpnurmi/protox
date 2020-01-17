@@ -72,6 +72,28 @@ ApplicationWindow {
         }
     }
 
+    Text {
+        id: welcomeTextTitle
+        x: (window.width - width) / 2
+        text: qsTr("Welcome to Protox!")
+        font.bold: true
+        font.pointSize: 32
+        anchors.top: overlayHeader.bottom
+        anchors.topMargin: 40
+        visible: clean_profile
+    }
+
+    Text {
+        id: welcomeText
+        text: qsTr("This is alpha version of a tox client.\nClick on «\u2630» to open contact menu and on «\uFF0B» to add a new friend.\n\n Good luck!")
+        wrapMode: Text.Wrap
+        anchors.top: welcomeTextTitle.bottom
+        anchors.topMargin: 20
+        visible: clean_profile
+        width: window.width
+        horizontalAlignment: Text.AlignHCenter
+    }
+
     /*
       Basic elements
     */
@@ -88,6 +110,9 @@ ApplicationWindow {
         id: dejavuSans; 
         source: "DejaVuSans.ttf"
     }
+
+    // global properties
+    property bool clean_profile: bridge.getFriendsCount() === 0
 
     // global properties (static)
     readonly property bool inPortrait: window.width < window.height
@@ -236,6 +261,8 @@ ApplicationWindow {
     }
     function insertFriend(friend_number, nickName) {
         friendsModel.append({"friendNumber" : friend_number, "nickName" : nickName})
+        friendNickname.text = limitString(bridge.getFriendNickname(friend_number), friendNickname.charsLimit)
+        clean_profile = bridge.getFriendsCount() === 0
     }
 
     function setMessageReceived(friend_number, message_id, use_uid, unique_id) {
@@ -269,6 +296,17 @@ ApplicationWindow {
                 }
             }
         }
+    }
+
+    function setConnStatus(conn_status) {
+        var text, color;
+        switch (conn_status) {
+        case 0: text = qsTr("Connection lost"); color = "red"; break;
+        case 1: text = qsTr("Connected (TCP)"); color = "green"; break;
+        case 2: text = qsTr("Connected (UDP)"); color = "green"; break;
+        }
+        connectionStatus.text = text;
+        connectionStatus.color = color;
     }
 
     /*
@@ -423,6 +461,10 @@ ApplicationWindow {
                     text: qsTr("Send")
                 }
                 onTriggered: {
+                    if (bridge.getConnStatus() < 1) {
+                        toast.show({ message : qsTr("You are not connected to the tox network."), duration : 0 });
+                        return
+                    }
                     var toxId_text = toxId.text
                     if(toxId_text.substring(0, 4) === "tox:") {
                         toxId_text = toxId_text.slice(4, toxId_text.length())
@@ -533,7 +575,7 @@ ApplicationWindow {
                     "?correctionLevel=M" +
                     "&format=qrcode"
             sourceSize.width: 196
-            sourceSize.height: sourceSize.width
+            sourceSize.height: 196
             cache: false
             width: 196
             height: width
@@ -601,7 +643,13 @@ ApplicationWindow {
                         }
                     }
                     toast.show({ message : qsTr("Friend removed!"), duration : 0 });
-                    selectFriend(friendsModel.get(0).friendNumber)
+                    clean_profile = bridge.getFriendsCount() === 0
+                    if (friendsModel.count > 0) {
+                        selectFriend(friendsModel.get(0).friendNumber)
+                    } else {
+                        friendNickname.text = ""
+                        friendStatus.text = ""
+                    }
                 }
             }
             MenuSeparator {}
@@ -639,6 +687,7 @@ ApplicationWindow {
             anchors.right: friendNickname.left
             anchors.rightMargin: 10
             anchors.verticalCenter: friendNickname.verticalCenter
+            visible: !clean_profile
         }
 
         Label {
@@ -775,6 +824,14 @@ ApplicationWindow {
                             accountStatusMenu.popup(accountStatus.x, accountStatus.y + accountStatus.height)
                         }
                     }
+                }
+                Text {
+                    id: connectionStatus
+                    text: qsTr("Bootstrapping...")
+                    color: "orange"
+                    font.italic: true
+                    font.pointSize: 12
+                    Layout.alignment: Qt.AlignHCenter
                 }
                 MenuSeparator { implicitWidth: drawer.width }
                 Repeater {
@@ -990,6 +1047,7 @@ ApplicationWindow {
             anchors.bottom: chatLayout.top
             property int separator_margin: 5
             anchors.bottomMargin: separator_margin
+            visible: !clean_profile
         }
 
         RowLayout {
@@ -1006,6 +1064,7 @@ ApplicationWindow {
                 verticalAlignment: TextInput.AlignVCenter
                 placeholderText: qsTr("Type something")
                 onAccepted: send.sendMessage()
+                visible: !clean_profile
                 Timer {
                     id: dropTypingTimer
                     interval: 2000
@@ -1027,6 +1086,7 @@ ApplicationWindow {
             Button {
                 id: send
                 Layout.rightMargin: 5
+                visible: !clean_profile
                 background: Rectangle {
                     implicitWidth: chatMessage.height * 0.75
                     implicitHeight: implicitWidth

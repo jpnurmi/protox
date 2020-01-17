@@ -36,6 +36,7 @@ ToxId toxcore_get_address(Tox *m);
 quint32 toxcore_send_message(Tox *m, quint32 friend_number, const QString message, bool &failed);
 ToxPk toxcore_get_friend_public_key(Tox *m, quint32 friend_number);
 const QString toxcore_get_friend_name(Tox *m, quint32 friend_number);
+size_t toxcore_get_friends_count(Tox *m);
 ToxFriends toxcore_get_friends(Tox *m);
 int toxcore_make_friend_request(Tox *m, ToxId id, const QString friendMessage);
 void toxcore_delete_friend(Tox *m, quint32 friend_number);

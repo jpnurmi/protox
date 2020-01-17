@@ -33,6 +33,7 @@ static void toxcore_cb_self_connection_change(Tox *m, TOX_CONNECTION connection_
 			Debug("Connection to Tox network is strong (using UDP).");
 			break;
 	}
+	qmlbridge->setConnStatus(toxcore_connection_status);
 }
 
 static void toxcore_cb_friend_request(Tox *m, const quint8 *public_key, const quint8 *data, size_t length, void *userdata)

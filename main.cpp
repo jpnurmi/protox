@@ -216,6 +216,23 @@ void QmlCBridge::changeConnection(bool online)
 	}
 }
 
+int QmlCBridge::getFriendsCount()
+{
+	return toxcore_get_friends_count(tox);
+}
+
+void QmlCBridge::setConnStatus(int conn_status)
+{
+	QVariant returnedValue;
+	QMetaObject::invokeMethod(component, "setConnStatus",
+		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, conn_status));
+}
+
+int QmlCBridge::getConnStatus()
+{
+	return toxcore_get_connection_status();
+}
+
 static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler(0);
 
 void customMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString & msg)

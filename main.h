@@ -25,6 +25,7 @@ public:
 	void setFriendTyping(quint32 friend_number, bool typing);
 	void setFriendStatusMessage(quint32 friend_number, const QString message);
 	void setFriendStatus(quint32 friend_number, quint32 status);
+	void setConnStatus(int conn_status);
 public slots:
 	Q_INVOKABLE void sendMessage(const QString message);
 	Q_INVOKABLE quint32 getCurrentFriendNumber();
@@ -46,6 +47,8 @@ public slots:
 	Q_INVOKABLE int getStatus();
 	Q_INVOKABLE void setStatus(quint32 status);
 	Q_INVOKABLE void changeConnection(bool online);
+	Q_INVOKABLE int getFriendsCount();
+	Q_INVOKABLE int getConnStatus();
 
 public:
 	ToxFriendsConnStatus friends_conn_status;
