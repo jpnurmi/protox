@@ -129,22 +129,6 @@ void ChatDataBase::clearFriendChatHistory(ToxPk public_key)
 	db.commit();
 }
 
-/*
-void ChatDataBase::insertFriend(ToxPk public_key, const QString name)
-{
-	QSqlQuery query;
-	query.prepare("INSERT INTO Friends (public_key, name)"
-				  "VALUES (:public_key, :name)"
-				  "ON DUPLICATE KEY UPDATE name = :name;");
-	query.bindValue(":public_key", public_key);
-	query.bindValue(":name", name);
-	query.exec();
-	Debug("test: " + query.lastError().text());
-
-	db.commit();
-}
-*/
-
 ChatDataBase::~ChatDataBase()
 {
 	db.close();

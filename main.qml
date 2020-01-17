@@ -2,6 +2,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.2
 import QtQuick.Controls.Material 2.2
 import QtQuick.Layouts 1.3
+import QtMultimedia 5.12
 
 import QtNotification 1.0
 import QtToast 1.0
@@ -128,13 +129,6 @@ ApplicationWindow {
         }
     }
 
-    function makeEverythingOffline() {
-        friendStatusIndicator.color = "gray";
-        for (var i = 0; i < friendsModel.count; i++) {
-            friends.itemAt(i).setFriendStatusIndicatorColor("gray")
-        }
-    }
-
     function setFriendStatusMessage(friend_number, message) {
         if (friend_number !== bridge.getCurrentFriendNumber())
             return
@@ -183,10 +177,10 @@ ApplicationWindow {
                 addFriendMessage.clear()
                 break;
             }
-            case 4: msg = qsTr("You cannot send friend request to yourself."); break;
+            case 4: msg = qsTr("You cannot send a friend request to yourself."); break;
             case 5: msg = qsTr("The friend is already on the friend list."); break;
             case 6: msg = qsTr("The friend address is invalid."); break;
-            case 7: msg = qsTr("The friend has different nospam value."); break;
+            case 7: msg = qsTr("The friend has a different nospam value."); break;
             default: msg = qsTr("Failed! error code: ") + status.toString(); break;
             }
             friendRequestStatusText.color = color
@@ -308,6 +302,41 @@ ApplicationWindow {
     }
 
     /*
+        QRCode capture & decoding
+    */
+
+    /*
+    Menu {
+        id: qrScannerMenu
+        z: z_splash
+        width: window.width
+        height: window.height
+        Camera{
+            id: camera
+        }
+        Rectangle {
+            anchors.fill: parent
+            VideoOutput {
+                source: camera
+                anchors.fill: parent
+                focus : visible
+            }
+        }
+
+
+    }
+
+
+    QZXing {
+        id: qrDecoder
+        enabledDecoders: QZXing.DecoderFormat_QR_COD
+        onDecodingStarted: console.log("Decoding of image started...")
+        onTagFound: console.log("Barcode data: " + tag)
+        onDecodingFinished: console.log("Decoding finished " + (succeeded==true ? "successfully" :    "unsuccessfully") )
+    }
+        */
+
+    /*
         Add friend menu
     */
     Menu {
@@ -342,6 +371,14 @@ ApplicationWindow {
             width: parent.width
             text: ""
         }
+        /*
+        Button {
+            text: qsTr("Scan QRCode")
+            onClicked: {
+                qrScannerMenu.popup()
+            }
+        }
+        */
         Text {
             padding: 10
             font.bold: true
@@ -492,14 +529,14 @@ ApplicationWindow {
         Image {
             id: toxIDQRCodeImage
             anchors.centerIn: parent
-            source: "image://QZXing/encode/" + bridge.getToxId() +
+            source: "image://QZXing/encode/" + "tox:" + bridge.getToxId() +
                     "?correctionLevel=M" +
                     "&format=qrcode"
             sourceSize.width: 196
             sourceSize.height: sourceSize.width
             cache: false
-            width: sourceSize.width
-            height: sourceSize.width
+            width: 196
+            height: width
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
@@ -689,8 +726,6 @@ ApplicationWindow {
                                 onClicked: {
                                     if (index < 3) {
                                         bridge.setStatus(index)
-                                    } else {
-                                        makeEverythingOffline()
                                     }
                                     statusIndicator.setStatus(index)
                                     bridge.changeConnection(index != 3)
@@ -806,6 +841,7 @@ ApplicationWindow {
     }
     ColumnLayout {
         anchors.fill: parent
+        
         Flickable {
             id: chatFlickable
 

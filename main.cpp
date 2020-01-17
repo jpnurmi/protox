@@ -235,6 +235,16 @@ void customMessageHandler(QtMsgType type, const QMessageLogContext &context, con
 
 int main(int argc, char *argv[])
 {
+#if defined (Q_OS_ANDROID)
+	const QString permission_write = "android.permission.WRITE_EXTERNAL_STORAGE";
+	auto permission_result = QtAndroid::checkPermission(permission_write);
+	if(permission_result == QtAndroid::PermissionResult::Denied){
+		QtAndroid::PermissionResultMap resultHash = QtAndroid::requestPermissionsSync(QStringList({permission_write}));
+		if(resultHash[permission_write] == QtAndroid::PermissionResult::Denied) {
+			return 1;
+		}
+	}
+#endif
 	settings = new QSettings(GetProgDir() + "settings.ini", QSettings::IniFormat);
 	Tox *tox = toxcore_create();
 	toxcore_bootstrap_DHT(tox);
@@ -301,6 +311,7 @@ int main(int argc, char *argv[])
 	toxcore_destroy(tox);
 	delete qmlbridge;
 	delete chat_db;
+	delete settings;
 	Debug("Program exited successfully.");
 
 	return result;

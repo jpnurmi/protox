@@ -1,4 +1,4 @@
-QT += quick sql androidextras 
+QT += quick sql androidextras multimedia
 CONFIG += c++14 qzxing_qml
 
 # The following define makes your compiler emit warnings if you use
