@@ -38,19 +38,12 @@ static void toxcore_cb_self_connection_change(Tox *m, TOX_CONNECTION connection_
 
 static void toxcore_cb_friend_request(Tox *m, const quint8 *public_key, const quint8 *data, size_t length, void *userdata)
 {
-	Q_UNUSED(data);
-	Q_UNUSED(length);
+	Q_UNUSED(m)
 	Q_UNUSED(userdata);
-	TOX_ERR_FRIEND_ADD err;
-	quint32 friend_number = tox_friend_add_norequest(m, public_key, &err);
 
-	if (err != TOX_ERR_FRIEND_ADD_OK) {
-		Debug("tox_friend_add_norequest failed (error " + QString::number(err) + ")");
-		return;
-	}
-
-	toxcore_save_data(m, GetProgDir() + DEFAULT_PROFILE);
-	qmlbridge->insertFriend(friend_number, toxcore_get_friend_name(m, friend_number));
+	ToxPk pk((char*)public_key, TOX_PUBLIC_KEY_SIZE);
+	qmlbridge->insertFriend(0, ToxId_To_QString(pk), 
+							true, QString::fromUtf8((char*)data, length), pk);
 }
 
 void toxcore_cb_friend_read_receipt(Tox *m, quint32 friend_number, quint32 message_id, void *userdata)
@@ -224,6 +217,13 @@ int toxcore_make_friend_request(Tox *m, ToxId id, const QString friendMessage)
 		toxcore_save_data(m, GetProgDir() + DEFAULT_PROFILE);
 	}
 	return error;
+}
+
+quint32 toxcore_add_friend(Tox *m, const ToxPk friendPk)
+{
+	quint32 friend_number = tox_friend_add_norequest(m, (quint8*)friendPk.data(), nullptr);
+	toxcore_save_data(m, GetProgDir() + DEFAULT_PROFILE);
+	return friend_number;
 }
 
 void toxcore_delete_friend(Tox *m, quint32 friend_number)

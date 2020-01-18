@@ -40,12 +40,15 @@ void QmlCBridge::insertMessage(const QString &message, quint32 friend_number, bo
 							  Q_ARG(QVariant, history));
 }
 
-void QmlCBridge::insertFriend(qint32 friend_number, const QString nickName)
+void QmlCBridge::insertFriend(qint32 friend_number, const QString nickName, bool request, const QString request_message, const ToxPk friendPk)
 {
 	QVariant returnedValue;
 	QMetaObject::invokeMethod(component, "insertFriend",
 		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, friend_number), 
-							  Q_ARG(QVariant, nickName));
+							  Q_ARG(QVariant, nickName), 
+							  Q_ARG(QVariant, request),
+							  Q_ARG(QVariant, request_message),
+							  Q_ARG(QVariant, QString::fromLatin1(friendPk)));
 }
 
 void QmlCBridge::setMessageReceived(quint32 friend_number, quint32 message_id, bool use_uid, quint64 unique_id)
@@ -231,6 +234,12 @@ void QmlCBridge::setConnStatus(int conn_status)
 int QmlCBridge::getConnStatus()
 {
 	return toxcore_get_connection_status();
+}
+
+void QmlCBridge::addFriend(const QString friendPk)
+{
+	quint32 friend_number = toxcore_add_friend(tox, friendPk.toLatin1());
+	insertFriend(friend_number, toxcore_get_friend_name(tox, friend_number));
 }
 
 static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler(0);

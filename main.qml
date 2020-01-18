@@ -2,6 +2,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.2
 import QtQuick.Controls.Material 2.2
 import QtQuick.Layouts 1.3
+import QtQuick.Dialogs 1.2
 import QtMultimedia 5.12
 
 import QtNotification 1.0
@@ -259,10 +260,19 @@ ApplicationWindow {
         if (!history)
             chatFlickable.scrollToEnd()
     }
-    function insertFriend(friend_number, nickName) {
-        friendsModel.append({"friendNumber" : friend_number, "nickName" : nickName})
-        friendNickname.text = limitString(bridge.getFriendNickname(friend_number), friendNickname.charsLimit)
-        clean_profile = bridge.getFriendsCount() === 0
+    function insertFriend(friend_number, nickName, request, request_message, friendPk) {
+        friendsModel.append({"friendNumber" : friend_number, "nickName" : nickName, "request" : request, "request_message" : request_message, "friendPk" : friendPk})
+        if (!request) {
+            friendNickname.text = limitString(bridge.getFriendNickname(friend_number), friendNickname.charsLimit)
+            clean_profile = bridge.getFriendsCount() === 0
+        } 
+        if (request && (Application.state === Qt.ApplicationHidden || !drawer.opened)) {
+            notification.show({
+                              caption : request_message,
+                              title : qsTr("A new friend request from ") + nickName,
+                              id : -1
+                            });
+        }
     }
 
     function setMessageReceived(friend_number, message_id, use_uid, unique_id) {
@@ -707,6 +717,23 @@ ApplicationWindow {
         }
     }
 
+    MessageDialog {
+        id: addFriendDialog
+        title: qsTr("A new friend request")
+        icon: StandardIcon.Question
+        standardButtons: StandardButton.Yes | StandardButton.No | StandardButton.Close
+        visible: false
+        property int item_index: -1
+        property variant friendPk: ""
+        onYes: {
+            friendsModel.remove(item_index)
+            bridge.addFriend(friendPk)
+        }
+        onNo: {
+            friendsModel.remove(item_index)
+        }
+    }
+
     /*
       Left menu (drawer)
      */
@@ -839,6 +866,7 @@ ApplicationWindow {
                     model: friendsModel
                     delegate: RowLayout {
                         id: friendLayout
+
                         Rectangle {
                             id: friendItemStatusIndicator
                             color: "gray"
@@ -850,19 +878,44 @@ ApplicationWindow {
                             Layout.alignment: Qt.AlignLeft | Qt.AlignCenter
                             property int indicator_margin: 10
                             Layout.leftMargin: indicator_margin
+                            visible: !request
                         }
                         function setFriendStatusIndicatorColor(color) {
                             friendItemStatusIndicator.color = color
                         }
                         ItemDelegate {
                             id: friendItem
+                            background.z: 1
+                            z: 1
                             text: nickName
                             property int friend_number: friendNumber
                             Layout.alignment: Qt.AlignCenter
-                            implicitWidth: drawer.width - friendItemStatusIndicator.width - friendItemStatusIndicator.indicator_margin * 1.5
                             onClicked: {
+                                if (request) {
+                                    if (request_message.length > 0) {
+                                        addFriendDialog.text = request_message
+                                    } else {
+                                        addFriendMessage.text = qsTr("(no request message specified)")
+                                    }
+                                    addFriendDialog.friendPk = friendPk
+                                    addFriendDialog.item_index = index
+                                    addFriendDialog.open()
+                                    return
+                                }
                                 drawer.close()
                                 selectFriend(friend_number)
+                            }
+                            Rectangle {
+                                anchors.fill: parent
+                                color: request ? "lightgreen" : ""
+                                visible: request
+                                z: 0
+                            }
+                            Component.onCompleted: {
+                                implicitWidth = drawer.width
+                                if (!request) {
+                                    implicitWidth -= friendItemStatusIndicator.width + friendItemStatusIndicator.indicator_margin * 1.5
+                                }
                             }
                         }
                     }
