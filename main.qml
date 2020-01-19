@@ -5,6 +5,7 @@ import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.2
 import QtQuick.Window 2.12
 import QtMultimedia 5.12
+import QtGraphicalEffects 1.0
 
 import QtNotification 1.0
 import QtToast 1.0
@@ -68,7 +69,7 @@ ApplicationWindow {
             running: false
             onRunningChanged: {
                  if (!running) {
-                     splashImage.destroy();
+                     splashImage.destroy()
                  }
             }
         }
@@ -284,6 +285,7 @@ ApplicationWindow {
                               title : qsTr("A new friend request from ") + nickName,
                               id : -1
                             });
+            leftOverlayButtonTextAnimation.start()
         }
     }
 
@@ -628,11 +630,33 @@ ApplicationWindow {
         width: parent.width
         ToolButton {
             id: leftOverlayButton
-            text: "\u2630"
-            font.family: dejavuSans.name
-            font.pointSize: 30
-            font.bold: true
+            Text {
+                id: leftOverlayButtonText
+                text: "\u2630"
+                font.family: dejavuSans.name
+                font.pointSize: 30
+                font.bold: true
+                anchors.centerIn: parent
+                color: parent.highlighted ? Material.highlightedButtonColor : "white"
+                SequentialAnimation {
+                    id: leftOverlayButtonTextAnimation
+                    loops: Animation.Infinite
+                    PropertyAnimation {
+                        target: leftOverlayButtonText
+                        property: "color"
+                        to: "lightgreen"
+                        duration: 1000
+                    }
+                    PropertyAnimation {
+                        target: leftOverlayButtonText
+                        property: "color"
+                        to: "white"
+                        duration: 1000
+                    }
+                }
+            }
             onClicked: {
+                leftOverlayButtonTextAnimation.stop()
                 highlighted = true
                 drawer.open()
             }
@@ -1065,7 +1089,7 @@ ApplicationWindow {
                 if (virtualKeyboard.keyboardActive && contentHeight <= height) {
                     scrollToEnd()
                     boundsMovement = Flickable.DragOverBounds
-                    contentY -= virtualKeyboard.keyboardHeight - chatLayout.height - chatSeparator.height - 5 /* messageCloud.margin = 5 */
+                    contentY -= virtualKeyboard.keyboardHeight - chatLayout.height - chatSeparator.height - chatContent.cloud_margin
                     if (contentHeight > virtualKeyboard.keyboardHeight + chatLayout.height + chatSeparator.height - (flickable_margin + chatSeparator.separator_margin)) {
                         contentY += contentHeight - (virtualKeyboard.keyboardHeight + chatLayout.height + chatSeparator.height) + flickable_margin + chatSeparator.separator_margin
                     }
@@ -1079,6 +1103,7 @@ ApplicationWindow {
                 id: chatContent
                 spacing: 20
                 property int chat_margin: 15
+                property int cloud_margin: 5
                 // fixme: convert to Layout.
                 anchors.margins: chat_margin
                 anchors.left: parent.left
@@ -1091,7 +1116,6 @@ ApplicationWindow {
                     model: messagesModel
                     delegate: Rectangle {
                         id: messageCloud
-                        property int cloud_margin: 5
                         color: !msgSelf ? "lightblue" : "lightgray"
                         radius: 10
                         function setCloudColor(newColor) {
@@ -1131,8 +1155,8 @@ ApplicationWindow {
 
 
                         Component.onCompleted: {
-                            if (cloudText.width > window.width - cloud_margin -  chatContent.chat_margin)
-                                Layout.maximumWidth = window.width - cloud_margin - chatContent.chat_margin
+                            if (cloudText.width > window.width - chatContent.cloud_margin -  chatContent.chat_margin)
+                                Layout.maximumWidth = window.width - chatContent.cloud_margin - chatContent.chat_margin
                             if (msgSelf)
                                 anchors.right = parent.right
                         }
@@ -1141,12 +1165,12 @@ ApplicationWindow {
                             id: cloudText
                             text: msgText
                             anchors.fill: parent
-                            anchors.margins: parent.cloud_margin
+                            anchors.margins: chatContent.cloud_margin
                             font.family: "Helvetica"
                             font.pointSize: 20
                             onContentHeightChanged: {
-                                parent.implicitHeight = contentHeight + parent.cloud_margin * 2
-                                parent.implicitWidth = contentWidth + parent.cloud_margin * 2
+                                parent.implicitHeight = contentHeight + chatContent.cloud_margin * 2
+                                parent.implicitWidth = contentWidth + chatContent.cloud_margin * 2
                             }
                             wrapMode: Text.Wrap
                         }
