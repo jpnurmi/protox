@@ -43,19 +43,3 @@ const QString GetProgDir(bool create)
 		dir.mkdir(path);
 	return path;
 }
-
-quint64 pack_quint64(quint32 low, quint32 high)
-{
-	return (((quint64)high) << 32) | ((quint64)low);
-}
-
-quint32 quint64_low(quint64 combined)
-{
-	quint64 mask = std::numeric_limits<uint32_t>::max();
-	return mask & combined; // fixme: or just return combined?
-}
-
-quint32 quint64_high(uint64_t combined)
-{
-	return combined >> 32;
-}

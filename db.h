@@ -7,13 +7,13 @@
 class ChatDataBase : public QObject
 {
 public:
-	ChatDataBase(const QString fileName);
+	ChatDataBase(const QString &fileName);
 	void asyncCommit();
-	void insertMessage(const QString message, QDateTime dt, ToxPk public_key, bool self = false, quint64 unique_id = 0, bool failed = false);
-	void setMessageReceived(quint64 unique_id, ToxPk public_key);
-	ToxMessages getFriendMessages(ToxPk public_key, quint32 limit);
-	quint64 getMessagesCountFriend(ToxPk public_key);
-	void clearFriendChatHistory(ToxPk public_key);
+	void insertMessage(const QString &message, QDateTime dt, const ToxPk &public_key, bool self = false, quint64 unique_id = 0, bool failed = false);
+	void setMessageReceived(quint64 unique_id, const ToxPk &public_key);
+	ToxMessages getFriendMessages(const ToxPk &public_key, quint32 limit);
+	quint64 getMessagesCountFriend(ToxPk &public_key);
+	void clearFriendChatHistory(const ToxPk &public_key);
 	//void insertFriend(ToxPk public_key, const QString name);
 	~ChatDataBase();
 private:

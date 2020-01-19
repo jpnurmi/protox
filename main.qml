@@ -118,6 +118,8 @@ ApplicationWindow {
     // global properties (static)
     readonly property bool inPortrait: window.width < window.height
     readonly property int z_cloud: -1
+    readonly property int z_friend_item_background: 0
+    readonly property int z_friend_item: 1
     readonly property int z_drawer: 2
     readonly property int z_overlay_header: 1
     readonly property int z_menu: 3
@@ -133,6 +135,17 @@ ApplicationWindow {
             return str.slice(0, limit) + "..."
         }
         return str
+    }
+
+    function getFriendsModelOrder() {
+        var order = [];
+        for (var i = 0; i < friendsModel.count; i++) {
+            if (friendsModel.get(i).request) {
+                continue
+            }
+            order[i] = friendsModel.get(i).friendNumber;
+        }
+        return order
     }
 
     // function callbacks
@@ -196,13 +209,12 @@ ApplicationWindow {
         var color = "red";
         if (addFriendMenu.opened) {
             switch (status) {
-            case 0: {
+            case 0:
                 toast.show({ message : qsTr("Request sent!"), duration : 0 }); 
                 addFriendMenu.close();
                 toxId.clear()
                 addFriendMessage.clear()
                 break;
-            }
             case 4: msg = qsTr("You cannot send a friend request to yourself."); break;
             case 5: msg = qsTr("The friend is already on the friend list."); break;
             case 6: msg = qsTr("The friend address is invalid."); break;
@@ -329,6 +341,7 @@ ApplicationWindow {
         delegate: Image { 
             id: cloudTailImageFrameBuffer 
             visible: false
+            cache: true
             Canvas {
                 id: cloudTailCanvas
                 width: 256
@@ -390,9 +403,9 @@ ApplicationWindow {
     Menu {
         id: addFriendMenu
         width: 300
-        title: "Add new friend"
-        x: window.width / 2 - width / 2
-        y: window.height / 2 - height / 2
+        title: qsTr("Add a new friend")
+        x: (window.width - width) * 0.5
+        y: (window.height - height) * 0.5
         z: z_menu
         modal: true
         onClosed: {
@@ -432,7 +445,7 @@ ApplicationWindow {
             font.bold: true
             width: parent.width
             horizontalAlignment: Qt.AlignHCenter
-            text: "Messsage"
+            text: qsTr("Messsage")
         }
         TextField {
             id: addFriendMessage
@@ -442,7 +455,7 @@ ApplicationWindow {
             rightPadding: leftPadding
             verticalAlignment: TextInput.AlignVCenter
             width: parent.width
-            placeholderText: "Add me to your friends. Maybe?"
+            placeholderText: qsTr("Add me to your friends. Maybe?")
         }
         Text {
             id: friendRequestStatusText
@@ -493,8 +506,8 @@ ApplicationWindow {
         id: profileMenu
         width: 300
         title: "My profile"
-        x: window.width / 2 - width / 2
-        y: window.height / 2 - height / 2
+        x: (window.width - width) * 0.5
+        y: (window.height - height) * 0.5
         z: z_menu
         modal: true
         onClosed: {
@@ -573,9 +586,9 @@ ApplicationWindow {
     Menu {
         id: profileInfoMenu
         width: 300
-        title: "My profile info"
-        x: window.width / 2 - width / 2
-        y: window.height / 2 - height / 2
+        title: qsTr("My profile info")
+        x: (window.width - width) * 0.5
+        y: (window.height - height) * 0.5
         z: z_menu
         modal: true
         Image {
@@ -613,8 +626,6 @@ ApplicationWindow {
 
         z: z_overlay_header
         width: parent.width
-        // bug: ignores z
-        //parent: window.overlay
         ToolButton {
             id: leftOverlayButton
             text: "\u2630"
@@ -743,7 +754,7 @@ ApplicationWindow {
 
         // fixme: button overlaps with drawer. Qt bug?
         y: 0//overlayHeader.height
-        width: window.width / 2
+        width: window.width * 0.5
         height: window.height //- overlayHeader.height
 
         modal: inPortrait
@@ -762,6 +773,12 @@ ApplicationWindow {
 
         ListModel {
             id: friendsModel
+            function swap(slot1, slot2) {
+                var min = Math.min(slot1, slot2);
+                var max = Math.max(slot1, slot2);
+                move(min, max, 1);
+                move(max - 1, min, 1);
+            }
         }
         Flickable {
             id: friendsFlickable
@@ -861,35 +878,86 @@ ApplicationWindow {
                     Layout.alignment: Qt.AlignHCenter
                 }
                 MenuSeparator { implicitWidth: drawer.width }
+                property int draggedItem: -1
                 Repeater {
                     id: friends
                     model: friendsModel
                     delegate: RowLayout {
                         id: friendLayout
+                        property bool dragEntered: false
+                        property bool dragStarted: false
+                        property int default_x
+                        property int default_y
+                        function savePosition() {
+                            default_x = x
+                            default_y = y
+                        }
+                        Component.onCompleted: {
+                            savePosition()
+                        }
+                        function resetPosition() {
+                            x = default_x
+                            y = default_y
+                        }
+                        Drag.dragType: Drag.Automatic
+                        property bool dragActive: friendDragArea.drag.active
+                        onDragActiveChanged: {
+                            if (dragActive) {
+                                savePosition()
+                                leftBarLayout.draggedItem = index
+                                dragStarted = true
+                                Drag.start()
+                            } else {
+                                Drag.drop()
+                                if (dragStarted) {
+                                    resetPosition()
+                                    dragStarted = false
+                                }
+                            }
+                        }
 
                         Rectangle {
-                            id: friendItemStatusIndicator
-                            color: "gray"
-                            width: 15
-                            height: width
-                            border.color: "black"
-                            border.width: 1
-                            radius: width * 0.5
-                            Layout.alignment: Qt.AlignLeft | Qt.AlignCenter
-                            property int indicator_margin: 10
-                            Layout.leftMargin: indicator_margin
+                            id: friendItemStatusIndicatorBody
+                            z: -1
+                            width: parent.height
+                            height: parent.height
+                            Layout.alignment: Qt.AlignLeft
+                            color: parent.dragEntered ? "lightgray" : "#00000000"
                             visible: !request
+                            Component.onCompleted: {
+                                if (request) {
+                                    width = height = 0
+                                }
+                            }
+                            MouseArea {
+                                id: friendDragArea
+                                anchors.fill: parent
+                                drag.target: friendLayout
+                            }
+                            Rectangle {
+                                id: friendItemStatusIndicator
+                                color: "gray"
+                                width: 15
+                                height: width
+                                border.color: "black"
+                                border.width: 1
+                                radius: width * 0.5
+                                anchors.centerIn: parent
+                                visible: parent.visible
+                            }
                         }
+
                         function setFriendStatusIndicatorColor(color) {
                             friendItemStatusIndicator.color = color
                         }
                         ItemDelegate {
                             id: friendItem
-                            background.z: 1
-                            z: 1
+                            background.z: z_friend_item
+                            z: z_friend_item
                             text: nickName
                             property int friend_number: friendNumber
                             Layout.alignment: Qt.AlignCenter
+                            Layout.leftMargin: friendItemStatusIndicatorBody.width
                             onClicked: {
                                 if (request) {
                                     if (request_message.length > 0) {
@@ -907,14 +975,34 @@ ApplicationWindow {
                             }
                             Rectangle {
                                 anchors.fill: parent
-                                color: request ? "lightgreen" : ""
-                                visible: request
-                                z: 0
+                                color: request ? "lightgreen" : "lightgray"
+                                visible: request || parent.parent.dragEntered
+                                z: z_friend_item_background
                             }
                             Component.onCompleted: {
                                 implicitWidth = drawer.width
                                 if (!request) {
-                                    implicitWidth -= friendItemStatusIndicator.width + friendItemStatusIndicator.indicator_margin * 1.5
+                                    implicitWidth -= friendItemStatusIndicatorBody.width
+                                }
+                            }
+                            DropArea {
+                                anchors.fill: parent
+                                onEntered: {
+                                    if (!request) {
+                                        parent.parent.dragEntered = true
+                                    }
+                                }
+                                onExited: {
+                                    if (!request) {
+                                        parent.parent.dragEntered = false
+                                    }
+                                }
+                                onDropped: {
+                                    if (!request) {
+                                        parent.parent.dragEntered = false
+                                        friendsModel.get(leftBarLayout.draggedItem).dragStarted = false
+                                        friendsModel.swap(index, leftBarLayout.draggedItem)
+                                    }
                                 }
                             }
                         }
@@ -1155,7 +1243,6 @@ ApplicationWindow {
                     id: send_arrow
                     anchors.fill: parent
                     source: "send-button.png"
-                    smooth: true
                     antialiasing: true
                 }
                 onPressed: sendMessage()

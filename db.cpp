@@ -4,7 +4,7 @@
 #define DATABASE_VERSION 1
 #define APPLICATION_ID ('P' << 24) + ('T' << 16) + ('O' << 8) + 'X'
 
-ChatDataBase::ChatDataBase(const QString fileName)
+ChatDataBase::ChatDataBase(const QString &fileName)
 {
 	commitRequests = 0;
 	commitAnotherRequests = 0;
@@ -60,7 +60,7 @@ void ChatDataBase::asyncCommit()
 	});
 }
 
-quint64 ChatDataBase::getMessagesCountFriend(ToxPk public_key)
+quint64 ChatDataBase::getMessagesCountFriend(const ToxPk &public_key)
 {
 	QSqlQuery query(db);
 	query.prepare("SELECT COUNT(*) FROM Messages WHERE (public_key = :public_key)");
@@ -70,7 +70,7 @@ quint64 ChatDataBase::getMessagesCountFriend(ToxPk public_key)
 	return query.value(0).toULongLong();
 }
 
-void ChatDataBase::insertMessage(const QString message, QDateTime dt, ToxPk public_key, bool self, quint64 unique_id, bool failed)
+void ChatDataBase::insertMessage(const QString &message, QDateTime dt, const ToxPk &public_key, bool self, quint64 unique_id, bool failed)
 {
 	QSqlQuery query(db);
 	query.prepare("INSERT INTO Messages (public_key, message, self, received, datetime, unique_id) "
@@ -92,7 +92,7 @@ void ChatDataBase::insertMessage(const QString message, QDateTime dt, ToxPk publ
 	db.commit();
 }
 
-void ChatDataBase::setMessageReceived(quint64 unique_id, ToxPk public_key)
+void ChatDataBase::setMessageReceived(quint64 unique_id, const ToxPk &public_key)
 {
 	QSqlQuery query(db);
 	query.prepare("UPDATE Messages SET received = 1 WHERE unique_id = :unique_id AND public_key = :public_key");
@@ -102,7 +102,7 @@ void ChatDataBase::setMessageReceived(quint64 unique_id, ToxPk public_key)
 	db.commit();
 }
 
-ToxMessages ChatDataBase::getFriendMessages(ToxPk public_key, quint32 limit)
+ToxMessages ChatDataBase::getFriendMessages(const ToxPk &public_key, quint32 limit)
 {
 	ToxMessages messages;
 	QSqlQuery query(db);
@@ -120,7 +120,7 @@ ToxMessages ChatDataBase::getFriendMessages(ToxPk public_key, quint32 limit)
 	return messages;
 }
 
-void ChatDataBase::clearFriendChatHistory(ToxPk public_key)
+void ChatDataBase::clearFriendChatHistory(const ToxPk &public_key)
 {
 	QSqlQuery query(db);
 	query.prepare("DELETE FROM Messages WHERE public_key = :public_key");

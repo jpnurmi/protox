@@ -189,7 +189,7 @@ void toxcore_set_status(Tox *m, quint32 status)
 	tox_self_set_status(m, (TOX_USER_STATUS)status);
 }
 
-quint32 toxcore_send_message(Tox *m, quint32 friend_number, const QString message, bool &failed)
+quint32 toxcore_send_message(Tox *m, quint32 friend_number, const QString &message, bool &failed)
 {
 	TOX_ERR_FRIEND_SEND_MESSAGE error;
 	QByteArray encodedMessage = message.toUtf8();
@@ -207,7 +207,7 @@ quint32 toxcore_send_message(Tox *m, quint32 friend_number, const QString messag
 	return message_id;
 }
 
-int toxcore_make_friend_request(Tox *m, ToxId id, const QString friendMessage)
+int toxcore_make_friend_request(Tox *m, ToxId id, const QString &friendMessage)
 {
 	TOX_ERR_FRIEND_ADD error;
 	QByteArray msgData(friendMessage.toUtf8());
@@ -219,7 +219,7 @@ int toxcore_make_friend_request(Tox *m, ToxId id, const QString friendMessage)
 	return error;
 }
 
-quint32 toxcore_add_friend(Tox *m, const ToxPk friendPk)
+quint32 toxcore_add_friend(Tox *m, const ToxPk &friendPk)
 {
 	quint32 friend_number = tox_friend_add_norequest(m, (quint8*)friendPk.data(), nullptr);
 	toxcore_save_data(m, GetProgDir() + DEFAULT_PROFILE);
@@ -249,7 +249,7 @@ const QString toxcore_get_nickname(Tox *m, bool toxId)
 	return nickname;
 }
 
-void toxcore_set_nickname(Tox *m, const QString nickname)
+void toxcore_set_nickname(Tox *m, const QString &nickname)
 {
 	QByteArray encodedNickname = nickname.toUtf8();
 	tox_self_set_name(m, (quint8*)encodedNickname.data(), encodedNickname.length(), nullptr);
@@ -266,7 +266,7 @@ const QString toxcore_get_status_message(Tox *m)
 	return QString::fromUtf8(name, length);
 }
 
-void toxcore_set_status_message(Tox *m, const QString statusMessage)
+void toxcore_set_status_message(Tox *m, const QString &statusMessage)
 {
 	QByteArray encodedMessage = statusMessage.toUtf8();
 	tox_self_set_status_message(m, (quint8*)encodedMessage.data(), encodedMessage.length(), nullptr);
@@ -282,7 +282,7 @@ int toxcore_get_connection_status()
 	return toxcore_connection_status;
 }
 
-bool toxcore_save_data(Tox *m, const QString path)
+bool toxcore_save_data(Tox *m, const QString &path)
 {
 	if (path.isEmpty()) {
 		Debug("Warning: save_data failed: path is empty.");

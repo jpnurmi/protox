@@ -40,7 +40,7 @@ void QmlCBridge::insertMessage(const QString &message, quint32 friend_number, bo
 							  Q_ARG(QVariant, history));
 }
 
-void QmlCBridge::insertFriend(qint32 friend_number, const QString nickName, bool request, const QString request_message, const ToxPk friendPk)
+void QmlCBridge::insertFriend(qint32 friend_number, const QString &nickName, bool request, const QString &request_message, const ToxPk &friendPk)
 {
 	QVariant returnedValue;
 	QMetaObject::invokeMethod(component, "insertFriend",
@@ -68,7 +68,7 @@ void QmlCBridge::setCurrentFriendConnStatus(quint32 friend_number, int conn_stat
 		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, friend_number), Q_ARG(QVariant, conn_status));
 }
 
-void QmlCBridge::sendMessage(const QString message)
+void QmlCBridge::sendMessage(const QString &message)
 {
 	ToxPk friend_pk = toxcore_get_friend_public_key(tox, current_friend_number);
 	bool failed;
@@ -118,13 +118,13 @@ void QmlCBridge::retrieveChatLog()
 	}
 }
 
-void QmlCBridge::copyTextToClipboard(const QString text)
+void QmlCBridge::copyTextToClipboard(const QString &text)
 {
 	QClipboard *clipboard = QGuiApplication::clipboard(); 
 	clipboard->setText(text);
 }
 
-void QmlCBridge::makeFriendRequest(const QString toxId, const QString friendMessage)
+void QmlCBridge::makeFriendRequest(const QString &toxId, const QString &friendMessage)
 {
 	int error = toxcore_make_friend_request(tox, QString_To_ToxId(toxId), friendMessage);
 	QVariant returnedValue;
@@ -142,7 +142,7 @@ void QmlCBridge::clearFriendChatHistory(quint32 friend_number)
 	chat_db->clearFriendChatHistory(toxcore_get_friend_public_key(tox, friend_number));
 }
 
-void QmlCBridge::updateFriendNickName(quint32 friend_number, const QString nickname)
+void QmlCBridge::updateFriendNickName(quint32 friend_number, const QString &nickname)
 {
 	QVariant returnedValue;
 	QMetaObject::invokeMethod(component, "updateFriendNickName",
@@ -161,7 +161,7 @@ void QmlCBridge::setTypingFriend(quint32 friend_number, bool typing)
 	toxcore_set_typing_friend(tox, friend_number, typing);
 }
 
-void QmlCBridge::setFriendStatusMessage(quint32 friend_number, const QString message)
+void QmlCBridge::setFriendStatusMessage(quint32 friend_number, const QString &message)
 {
 	QVariant returnedValue;
 	QMetaObject::invokeMethod(component, "setFriendStatusMessage",
@@ -180,7 +180,7 @@ const QString QmlCBridge::getNickname(bool toxId)
 	return toxcore_get_nickname(tox, toxId);
 }
 
-void QmlCBridge::setNickname(const QString nickname)
+void QmlCBridge::setNickname(const QString &nickname)
 {
 	toxcore_set_nickname(tox, nickname);
 }
@@ -190,7 +190,7 @@ const QString QmlCBridge::getStatusMessage()
 	return toxcore_get_status_message(tox);
 }
 
-void QmlCBridge::setStatusMessage(const QString statusMessage)
+void QmlCBridge::setStatusMessage(const QString &statusMessage)
 {
 	toxcore_set_status_message(tox, statusMessage);
 }
@@ -236,10 +236,18 @@ int QmlCBridge::getConnStatus()
 	return toxcore_get_connection_status();
 }
 
-void QmlCBridge::addFriend(const QString friendPk)
+void QmlCBridge::addFriend(const QString &friendPk)
 {
 	quint32 friend_number = toxcore_add_friend(tox, friendPk.toLatin1());
 	insertFriend(friend_number, toxcore_get_friend_name(tox, friend_number));
+}
+
+QList<QVariant> QmlCBridge::getFriendsModelOrder()
+{
+	QVariant returnedValue;
+	QMetaObject::invokeMethod(component, "getFriendsModelOrder",
+		Q_RETURN_ARG(QVariant, returnedValue));
+	return returnedValue.toList();
 }
 
 static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler(0);
@@ -294,6 +302,7 @@ int main(int argc, char *argv[])
 
 	settings->beginGroup("Global");
 	ToxPk friendPk = settings->value("last_friend", toxcore_get_friend_public_key(tox, 0)).toByteArray();
+	QList <QVariant> friend_list = settings->value("friend_list", QList <QVariant>()).toList();
 	settings->endGroup();
 	ToxFriends friends = toxcore_get_friends(tox);
 
@@ -319,16 +328,21 @@ int main(int argc, char *argv[])
 	QObject *component = engine.rootObjects().first();
 	qmlbridge->setComponent(component);
 
+	for (auto _friend : friend_list) {
+		qmlbridge->insertFriend(_friend.toUInt(), toxcore_get_friend_name(tox, _friend.toUInt()));
+	}
 	for (auto _friend : friends) {
-		qmlbridge->insertFriend(_friend, toxcore_get_friend_name(tox, _friend));
+		if (friend_list.lastIndexOf(QVariant(_friend)) < 0) {
+			qmlbridge->insertFriend(_friend, toxcore_get_friend_name(tox, _friend));
+		}
 	}
 
-	
 	toxcore_timer->start();
 
 	int result = app.exec();
 	settings->beginGroup("Global");
 	settings->setValue("last_friend", toxcore_get_friend_public_key(tox, qmlbridge->getCurrentFriendNumber()));
+	settings->setValue("friend_list", qmlbridge->getFriendsModelOrder());
 	// fixme
 	//settings->setValue("last_messages_limit", )
 	settings->endGroup();
