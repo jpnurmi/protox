@@ -3,6 +3,7 @@ import QtQuick.Controls 2.2
 import QtQuick.Controls.Material 2.2
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.2
+import QtQuick.Window 2.12
 import QtMultimedia 5.12
 
 import QtNotification 1.0
@@ -189,7 +190,7 @@ ApplicationWindow {
             typingText.text = ""
             typingText.visible = false
         }
-        chatFlickable.scrollToEnd()
+        chatFlickable.scrollToEndVK()
     }
 
     function updateFriendNickName(friend_number, nickname) {
@@ -270,7 +271,7 @@ ApplicationWindow {
                                  "msgUniqueId" : unique_id,
                                  "msgFailed" : failed})
         if (!history)
-            chatFlickable.scrollToEnd()
+            chatFlickable.scrollToEndVK()
     }
     function insertFriend(friend_number, nickName, request, request_message, friendPk) {
         friendsModel.append({"friendNumber" : friend_number, "nickName" : nickName, "request" : request, "request_message" : request_message, "friendPk" : friendPk})
@@ -1060,6 +1061,20 @@ ApplicationWindow {
                     contentY = contentHeight
                 returnToBounds()
             }
+            function scrollToEndVK() {
+                if (virtualKeyboard.keyboardActive && contentHeight <= height) {
+                    scrollToEnd()
+                    boundsMovement = Flickable.DragOverBounds
+                    contentY -= virtualKeyboard.keyboardHeight - chatLayout.height - chatSeparator.height
+                    // fixme: there is a problem with multi-line messages and I don't know how to fix it
+                    if (contentHeight > virtualKeyboard.keyboardHeight + chatLayout.height + chatSeparator.height) {
+                        contentY += contentHeight - (virtualKeyboard.keyboardHeight + chatLayout.height + chatSeparator.height) + flickable_margin + chatSeparator.separator_margin
+                    }
+                } else {
+                    boundsMovement = Flickable.StopAtBounds
+                    scrollToEnd()
+                }
+            }
 
             ColumnLayout {
                 id: chatContent
@@ -1205,6 +1220,24 @@ ApplicationWindow {
                 placeholderText: qsTr("Type something")
                 onAccepted: send.sendMessage()
                 visible: !clean_profile
+                Item {
+                    id: virtualKeyboard
+                    property int keyboardHeight: 0
+                    property bool keyboardActive: false
+                    onKeyboardActiveChanged: {
+                        chatFlickable.scrollToEndVK()
+                    }
+
+                    Connections {
+                        target: Qt.inputMethod
+                        onKeyboardRectangleChanged: {
+                            virtualKeyboard.keyboardHeight = Qt.inputMethod.keyboardRectangle.height / Screen.devicePixelRatio
+                            virtualKeyboard.keyboardActive = virtualKeyboard.keyboardHeight > 0
+                        }
+                    }
+                }
+
+
                 Timer {
                     id: dropTypingTimer
                     interval: 2000
