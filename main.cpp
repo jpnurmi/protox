@@ -306,11 +306,17 @@ int main(int argc, char *argv[])
 	settings->endGroup();
 	ToxFriends friends = toxcore_get_friends(tox);
 
+	for (auto _friend : friends) {
+		if (friend_list.lastIndexOf(QVariant(_friend)) < 0) {
+			friend_list.append(QVariant(_friend));
+		}
+	}
+
 	quint32 last_friend_number = 0;
 	if (!friendPk.isEmpty()) {
-		for (auto _friend : friends) {
-			if (toxcore_get_friend_public_key(tox, _friend) == friendPk) {
-				last_friend_number = _friend;
+		for (auto _friend : friend_list) {
+			if (toxcore_get_friend_public_key(tox, _friend.toUInt()) == friendPk) {
+				last_friend_number = _friend.toUInt();
 				break;
 			}
 		}
@@ -330,11 +336,6 @@ int main(int argc, char *argv[])
 
 	for (auto _friend : friend_list) {
 		qmlbridge->insertFriend(_friend.toUInt(), toxcore_get_friend_name(tox, _friend.toUInt()));
-	}
-	for (auto _friend : friends) {
-		if (friend_list.lastIndexOf(QVariant(_friend)) < 0) {
-			qmlbridge->insertFriend(_friend, toxcore_get_friend_name(tox, _friend));
-		}
 	}
 
 	toxcore_timer->start();

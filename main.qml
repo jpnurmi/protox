@@ -275,7 +275,6 @@ ApplicationWindow {
     function insertFriend(friend_number, nickName, request, request_message, friendPk) {
         friendsModel.append({"friendNumber" : friend_number, "nickName" : nickName, "request" : request, "request_message" : request_message, "friendPk" : friendPk})
         if (!request) {
-            friendNickname.text = limitString(bridge.getFriendNickname(friend_number), friendNickname.charsLimit)
             clean_profile = bridge.getFriendsCount() === 0
         } 
         if (request && (Application.state === Qt.ApplicationHidden || !drawer.opened)) {
