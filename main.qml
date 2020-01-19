@@ -1065,9 +1065,8 @@ ApplicationWindow {
                 if (virtualKeyboard.keyboardActive && contentHeight <= height) {
                     scrollToEnd()
                     boundsMovement = Flickable.DragOverBounds
-                    contentY -= virtualKeyboard.keyboardHeight - chatLayout.height - chatSeparator.height
-                    // fixme: there is a problem with multi-line messages and I don't know how to fix it
-                    if (contentHeight > virtualKeyboard.keyboardHeight + chatLayout.height + chatSeparator.height) {
+                    contentY -= virtualKeyboard.keyboardHeight - chatLayout.height - chatSeparator.height - 5 /* messageCloud.margin = 5 */
+                    if (contentHeight > virtualKeyboard.keyboardHeight + chatLayout.height + chatSeparator.height - (flickable_margin + chatSeparator.separator_margin)) {
                         contentY += contentHeight - (virtualKeyboard.keyboardHeight + chatLayout.height + chatSeparator.height) + flickable_margin + chatSeparator.separator_margin
                     }
                 } else {
@@ -1225,6 +1224,7 @@ ApplicationWindow {
                     property int keyboardHeight: 0
                     property bool keyboardActive: false
                     onKeyboardActiveChanged: {
+                        chatFlickable.interactive = !keyboardActive
                         chatFlickable.scrollToEndVK()
                     }
 
