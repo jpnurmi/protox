@@ -33,6 +33,12 @@ public class QtActivityEx extends QtActivity
         }
     }
 
-    public int getNotificationId() { return notificationId; }
+    public int getNotificationId(boolean cancel) {
+        int result = notificationId;
+        if (cancel) {
+            notificationId = -1;
+        }
+        return result; 
+    }
     private int notificationId = -1;
 }

@@ -23,7 +23,7 @@ bool QtAndroidNotifier::show(const QVariant &notificationParameters)
 	return true;
 }
 
-int QtAndroidNotifier::getNotificationId()
+int QtAndroidNotifier::getNotificationId(bool cancel)
 {
-	return QtAndroid::androidActivity().callMethod<int>("getNotificationId");
+	return QtAndroid::androidActivity().callMethod<int>("getNotificationId", "(Z)I", cancel);
 }

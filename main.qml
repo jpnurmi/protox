@@ -33,7 +33,7 @@ ApplicationWindow {
             }
             // select friend when you click on notification
             if(Qt.application.state === Qt.ApplicationActive && notification.getNotificationId() !== -1) {
-                selectFriend(notification.getNotificationId())
+                selectFriend(notification.getNotificationId(true))
             }
         }
     }
@@ -49,6 +49,7 @@ ApplicationWindow {
         onTriggered: {
             bridge.retrieveChatLog()
             chatFlickable.scrollToEnd()
+            destroy()
         }
     }
 
@@ -636,7 +637,9 @@ ApplicationWindow {
                 font.family: dejavuSans.name
                 font.pointSize: 30
                 font.bold: true
-                anchors.centerIn: parent
+                x: contentWidth * 0.35
+                y: contentHeight * 0.2
+                
                 color: parent.highlighted ? Material.highlightedButtonColor : "white"
                 SequentialAnimation {
                     id: leftOverlayButtonTextAnimation

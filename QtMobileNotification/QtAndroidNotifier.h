@@ -12,7 +12,7 @@ public:
 
 public:
 	bool show(const QVariant &notificationParameters);
-	int getNotificationId();
+	int getNotificationId(bool cancel = false);
 };
 
 #endif // QTANDROIDNotifier_H
