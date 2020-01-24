@@ -19,6 +19,7 @@ class QtAbstractNotifier : public QObject
 
 public:
 	virtual bool show(const QVariant &notificationParameters) = 0;
+	virtual bool cancel(int id) = 0;
 	virtual int getNotificationId(bool cancel = false) = 0;
 };
 

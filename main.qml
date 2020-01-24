@@ -252,6 +252,7 @@ ApplicationWindow {
         if (bridge.getCurrentFriendNumber() === friend_number) {
             return
         }
+        notification.cancel(friend_number)
         dropTypingTimer.stop()
         bridge.setTypingFriend(bridge.getCurrentFriendNumber(), false)
         each_friend_text[bridge.getCurrentFriendNumber()] = chatMessage.text
