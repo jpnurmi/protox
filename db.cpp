@@ -84,11 +84,6 @@ void ChatDataBase::insertMessage(const QString &message, QDateTime dt, const Tox
 	query.bindValue(":failed", failed);
 	query.exec();
 
-	query.prepare("INSERT OR REPLACE INTO LastMessage (public_key, datetime) "
-				  "VALUES (:public_key, :datetime)");
-	query.bindValue(":public_key", public_key);
-	query.bindValue(":datetime", dt.toSecsSinceEpoch());
-	query.exec();
 	db.commit();
 }
 
@@ -106,7 +101,9 @@ ToxMessages ChatDataBase::getFriendMessages(const ToxPk &public_key, quint32 lim
 {
 	ToxMessages messages;
 	QSqlQuery query(db);
-	query.prepare("SELECT message,datetime,self,received,unique_id,failed FROM Messages WHERE public_key = :public_key ORDER BY unique_id LIMIT :limit");
+	query.prepare("SELECT * FROM ("
+				  "SELECT message,datetime,self,received,unique_id,failed FROM Messages WHERE public_key = :public_key ORDER BY unique_id DESC LIMIT :limit"
+				  ") ORDER BY unique_id ASC");
 	query.bindValue(":public_key", public_key);
 	query.bindValue(":limit", limit);
 	query.exec();

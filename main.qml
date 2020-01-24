@@ -8,6 +8,7 @@ import QtMultimedia 5.12
 import QtGraphicalEffects 1.0
 
 import QtNotification 1.0
+import QtStatusBar 1.0
 import QtToast 1.0
 import QZXing 2.3
 
@@ -111,6 +112,12 @@ ApplicationWindow {
 
     Notification {
         id: notification
+    }
+
+    StatusBar {
+        id: statusBar
+        theme: Material.Dark
+        color: Material.toolBarColor
     }
 
     Toast {
@@ -220,7 +227,7 @@ ApplicationWindow {
         if (addFriendMenu.opened) {
             switch (status) {
             case 0:
-                toast.show({ message : qsTr("Request sent!"), duration : 0 }); 
+                toast.show({ message : qsTr("Request sent!"), duration : Toast.Short }); 
                 addFriendMenu.close();
                 toxId.clear()
                 addFriendMessage.clear()
@@ -495,7 +502,7 @@ ApplicationWindow {
                 }
                 onTriggered: {
                     if (bridge.getConnStatus() < 1) {
-                        toast.show({ message : qsTr("You are not connected to the tox network."), duration : 0 });
+                        toast.show({ message : qsTr("You are not connected to the tox network."), duration : Toast.Short });
                         return
                     }
                     var toxId_text = toxId.text
@@ -616,7 +623,7 @@ ApplicationWindow {
                 anchors.fill: parent
                 onClicked: {
                     bridge.copyTextToClipboard(bridge.getToxId())
-                    toast.show({ message : qsTr("ToxID copied!"), duration : 0 });
+                    toast.show({ message : qsTr("ToxID copied!"), duration : Toast.Short });
                 }
             }
         }
@@ -698,7 +705,7 @@ ApplicationWindow {
                             friendsModel.remove(i)
                         }
                     }
-                    toast.show({ message : qsTr("Friend removed!"), duration : 0 });
+                    toast.show({ message : qsTr("Friend removed!"), duration : Toast.Short });
                     clean_profile = bridge.getFriendsCount() === 0
                     if (friendsModel.count > 0) {
                         selectFriend(friendsModel.get(0).friendNumber)
@@ -921,10 +928,10 @@ ApplicationWindow {
                     id: friendsFlickable
                     anchors.top: drawerSeparator.bottom
                     ScrollIndicator.vertical: ScrollIndicator { }
-                    //contentHeight: 
+                    contentHeight: 100
                     ColumnLayout  {
-
                         anchors.top: parent.top
+                        spacing: 1
                         Repeater {
                             id: friends
                             model: friendsModel
@@ -1253,7 +1260,7 @@ ApplicationWindow {
                             anchors.fill: parent
                             onClicked: {
                                 bridge.copyTextToClipboard(cloudText.text)
-                                toast.show({ message : "Text copied!", duration : 0 });
+                                toast.show({ message : "Text copied!", duration : Toast.Short });
                             }
                         }
                     }
@@ -1263,6 +1270,7 @@ ApplicationWindow {
                     font.italic: true
                     visible: false
                     Layout.alignment: Qt.AlignBottom | Qt.AlignLeft
+                    Layout.fillHeight: true
                 }
             }
             ScrollIndicator.vertical: ScrollIndicator { }

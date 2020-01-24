@@ -10,6 +10,12 @@ public:
 	QtToast() {}
 	Q_INVOKABLE bool show(const QVariant &toastParameters);
 
+	enum Duration {
+		Short = 0,
+		Long = 1
+	};
+	Q_ENUM(Duration)
+
 	static void declareQML();
 };
 

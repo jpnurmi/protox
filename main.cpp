@@ -4,6 +4,7 @@
 #include "db.h"
 
 #include "QtNotification.h"
+#include "QtStatusBar.h"
 #include "QZXing.h"
 #include "toasts.h"
 
@@ -327,6 +328,7 @@ int main(int argc, char *argv[])
 	QQmlContext *root = engine.rootContext();
 	root->setContextProperty("bridge", qmlbridge);
 	QtNotification::declareQML();
+	QtStatusBar::declareQML();
 	QtToast::declareQML();
 	QZXing::registerQMLTypes();
 	QZXing::registerQMLImageProvider(engine);

@@ -9,7 +9,9 @@ import android.content.Context;
 import android.app.PendingIntent;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.NotificationChannel;
 import android.os.Bundle;
+import android.os.Build;
 
 // java
 import java.lang.String;
@@ -26,6 +28,8 @@ class QtAndroidNotifications {
                 .setSmallIcon(org.protox.R.drawable.icon)
                 .setContentTitle(title)
                 .setContentText(caption)
+                .setDefaults(Notification.DEFAULT_ALL)
+                .setPriority(Notification.PRIORITY_HIGH)
                 .setAutoCancel(true);
 
         String packageName = context.getApplicationContext().getPackageName();

@@ -24,6 +24,7 @@ LIBS += -L$$PWD/libs/ -ltoxcore
 RESOURCES += qml.qrc
 
 include(QtMobileNotification/QtMobileNotification.pri)
+include(QtStatusBar/QtStatusBar.pri)
 include(QZXing/QZXing.pri)
 
 
