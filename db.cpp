@@ -97,14 +97,15 @@ void ChatDataBase::setMessageReceived(quint64 unique_id, const ToxPk &public_key
 	db.commit();
 }
 
-ToxMessages ChatDataBase::getFriendMessages(const ToxPk &public_key, quint32 limit)
+ToxMessages ChatDataBase::getFriendMessages(const ToxPk &public_key, quint32 limit, quint32 start, bool from, bool reverse)
 {
 	ToxMessages messages;
 	QSqlQuery query(db);
-	query.prepare("SELECT * FROM ("
-				  "SELECT message,datetime,self,received,unique_id,failed FROM Messages WHERE public_key = :public_key ORDER BY unique_id DESC LIMIT :limit"
-				  ") ORDER BY unique_id ASC");
+	query.prepare(QString("SELECT * FROM ("
+				  "SELECT message,datetime,self,received,unique_id,failed FROM Messages WHERE public_key = :public_key AND unique_id %1 :start ORDER BY unique_id %2 LIMIT :limit"
+				  ") ORDER BY unique_id ASC").arg(reverse ? "<" : ">", from ? "DESC" : "ASC"));
 	query.bindValue(":public_key", public_key);
+	query.bindValue(":start", start);
 	query.bindValue(":limit", limit);
 	query.exec();
 	while (query.next()) {

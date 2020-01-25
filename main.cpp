@@ -106,14 +106,18 @@ const QString QmlCBridge::getFriendStatusMessage(quint32 friend_number)
 	return toxcore_get_friend_status_message(tox, friend_number);
 }
 
-void QmlCBridge::retrieveChatLog()
+void QmlCBridge::retrieveChatLog(quint32 start, bool from, bool reverse)
 {
 	settings->beginGroup("Global");
-	quint32 limit = settings->value("last_messages_limit", 128).toUInt();
+	quint32 limit = settings->value("last_messages_limit", 64).toUInt();
 	settings->endGroup();
-	ToxMessages messages = chat_db->getFriendMessages(toxcore_get_friend_public_key(tox, current_friend_number), limit);
+	ToxMessages messages = chat_db->getFriendMessages(toxcore_get_friend_public_key(tox, current_friend_number), limit, start, from, reverse);
+	if (messages.isEmpty()) {
+		return;
+	}
+	QMetaObject::invokeMethod(component, "clearChatContent");
 	for (auto msg : messages) {
-		insertMessage(msg.message, current_friend_number, msg.self, 0, msg.unique_id, msg.dt, true);
+		insertMessage(msg.message, current_friend_number, msg.self, 0, msg.unique_id, msg.dt, true, false);
 		if (!msg.self || msg.received)
 			setMessageReceived(current_friend_number, 0, true, msg.unique_id);
 	}
@@ -220,9 +224,14 @@ void QmlCBridge::changeConnection(bool online)
 	}
 }
 
-int QmlCBridge::getFriendsCount()
+long QmlCBridge::getFriendsCount()
 {
 	return toxcore_get_friends_count(tox);
+}
+
+quint32 QmlCBridge::getMessagesCount(quint32 friend_number)
+{
+	return chat_db->getMessagesCountFriend(toxcore_get_friend_public_key(tox, friend_number));
 }
 
 void QmlCBridge::setConnStatus(int conn_status)

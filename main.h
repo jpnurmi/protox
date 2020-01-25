@@ -33,7 +33,7 @@ public slots:
 	Q_INVOKABLE int getFriendConnStatus(quint32 friend_number);
 	Q_INVOKABLE const QString getFriendNickname(quint32 friend_number);
 	Q_INVOKABLE void setCurrentFriend(quint32 newFriend);
-	Q_INVOKABLE void retrieveChatLog();
+	Q_INVOKABLE void retrieveChatLog(quint32 start = 0, bool from = true, bool reverse = false);
 	Q_INVOKABLE QString getToxId();
 	Q_INVOKABLE void copyTextToClipboard(const QString &text);
 	Q_INVOKABLE void makeFriendRequest(const QString &toxId, const QString &friendMessage);
@@ -48,7 +48,8 @@ public slots:
 	Q_INVOKABLE int getStatus();
 	Q_INVOKABLE void setStatus(quint32 status);
 	Q_INVOKABLE void changeConnection(bool online);
-	Q_INVOKABLE int getFriendsCount();
+	Q_INVOKABLE long getFriendsCount();
+	Q_INVOKABLE quint32 getMessagesCount(quint32 friend_number);
 	Q_INVOKABLE int getConnStatus();
 	Q_INVOKABLE void addFriend(const QString &friendPk);
 

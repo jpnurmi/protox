@@ -147,11 +147,19 @@ ApplicationWindow {
       Functions
     */
 
+    function checkLastMessage(friend_number) {
+        return bridge.getMessagesCount(friend_number) === messagesModel.get(messagesModel.count - 1).msgUniqueId
+    }
+
     function limitString(str, limit) {
         if (str.length > limit) {
             return str.slice(0, limit) + "..."
         }
         return str
+    }
+
+    function clearChatContent() {
+        messagesModel.clear()
     }
 
     function getFriendsModelOrder() {
@@ -249,7 +257,7 @@ ApplicationWindow {
 
     property variant each_friend_text: []
     function selectFriend(friend_number) {
-        if (bridge.getCurrentFriendNumber() === friend_number) {
+        if (bridge.getCurrentFriendNumber() === friend_number && checkLastMessage(friend_number)) {
             return
         }
         notification.cancel(friend_number)
@@ -260,7 +268,6 @@ ApplicationWindow {
         friendNickname.text = limitString(bridge.getFriendNickname(bridge.getCurrentFriendNumber()), friendNickname.charsLimit)
         friendStatus.text = limitString(bridge.getFriendStatusMessage(bridge.getCurrentFriendNumber()), friendStatus.charsLimit)
         setCurrentFriendConnStatus(friend_number, bridge.getFriendConnStatus(friend_number))
-        messagesModel.clear()
         bridge.retrieveChatLog()
         chatScrollToEnd()
         chatMessage.clear()
@@ -270,6 +277,7 @@ ApplicationWindow {
     }
 
     function insertMessage(text, friend_number, self, message_id, time, unique_id, failed, history) {
+
         if (!self && !history && (Application.state === Qt.ApplicationHidden || (Application.state !== Qt.ApplicationHidden 
                                                       && bridge.getCurrentFriendNumber() !== friend_number))) {
             notification.show({
@@ -278,8 +286,12 @@ ApplicationWindow {
                               id : friend_number
                             });
         }
-        if (bridge.getCurrentFriendNumber() !== friend_number)
+        if (bridge.getCurrentFriendNumber() !== friend_number) {
             return
+        }
+        if (!history && messagesModel.count > 0 && !checkLastMessage(friend_number)) {
+            return
+        }
         messagesModel.append({"msgText": text, 
                                  "msgSelf" : self, 
                                  "msgReceived" : false, 
@@ -1119,6 +1131,143 @@ ApplicationWindow {
             }
         }
     }
+    Rectangle {
+        id: prevPageButton
+        z: 9999
+        width: 50
+        height: width
+        radius: width * 0.5
+        color: "white"
+        property real alpha: 0.9
+        opacity: alpha
+        anchors.top: overlayHeader.bottom
+        anchors.topMargin: 15
+        anchors.horizontalCenter: overlayHeader.horizontalCenter
+        visible: messagesModel.count > 0 && messagesModel.count < bridge.getMessagesCount(bridge.getCurrentFriendNumber()) && (checkLastMessage(bridge.getCurrentFriendNumber()) || messagesModel.get(0).msgUniqueId > 1) && chatFlickable.contentY === -chatFlickable.flickable_margin
+        Timer {
+            id: prevPageButtonFadeOutAnimationTimer
+            repeat: false
+            interval: 2000
+            onTriggered: {
+                prevPageButtonFadeOutAnimation.start()
+            }
+        }
+        NumberAnimation on opacity {
+            id: prevPageButtonFadeOutAnimation
+            to: 0
+            duration: 500
+            running: false
+        }
+        onVisibleChanged: {
+            if (visible) {
+                prevPageButtonFadeOutAnimation.stop()
+                prevPageButtonFadeOutAnimationTimer.stop()
+                opacity = alpha
+                prevPageButtonFadeOutAnimationTimer.start()
+            }
+        }
+        Text {
+            id: prevPageButtonText
+            text: "\u2191"
+            font.bold: true
+            font.pointSize: 30
+            opacity: parent.opacity
+            anchors.centerIn: parent
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            enabled: parent.opacity > 0
+            onPressed: {
+                prevPageButtonFadeOutAnimationTimer.stop()
+                prevPageButtonFadeOutAnimation.stop()
+                parent.opacity = parent.alpha
+                var from = messagesModel.get(0).msgUniqueId
+                bridge.retrieveChatLog(from, true, true)
+                chatScrollToEnd()
+                prevPageButtonFadeOutAnimationTimer.start()
+            }
+        }
+    }
+    DropShadow {
+        anchors.fill: prevPageButton
+        visible: prevPageButton.visible
+        opacity: prevPageButton.opacity
+        radius: 8.0
+        samples: 16
+        color: "#80000000"
+        source: prevPageButton
+    }
+    Rectangle {
+        id: nextPageButton
+        z: 9999
+        width: 50
+        height: width
+        radius: width * 0.5
+        color: "white"
+        property real alpha: 0.9
+        property int bottomMargin: 15
+        opacity: alpha
+        x: prevPageButton.x
+        y: chatSeparator.y - height - bottomMargin
+        visible: messagesModel.count > 0 && (chatFlickable.checkAtEnd() || (messagesModel.get(0).msgUniqueId === 1 && !chatFlickable.checkExceedsHeight())) && !checkLastMessage(bridge.getCurrentFriendNumber())
+        Timer {
+            id: nextPageButtonFadeOutAnimationTimer
+            repeat: false
+            interval: 2000
+            onTriggered: {
+                nextPageButtonFadeOutAnimation.start()
+            }
+        }
+        NumberAnimation on opacity {
+            id: nextPageButtonFadeOutAnimation
+            to: 0
+            duration: 500
+            running: false
+        }
+        onVisibleChanged: {
+            if (visible) {
+                nextPageButtonFadeOutAnimation.stop()
+                nextPageButtonFadeOutAnimationTimer.stop()
+                opacity = alpha
+                if (chatFlickable.checkExceedsHeight()) {
+                    nextPageButtonFadeOutAnimationTimer.start()
+                }
+            }
+        }
+        Text {
+            id: nextPageButtonText
+            text: "\u2193"
+            font.bold: true
+            font.pointSize: 30
+            opacity: parent.opacity
+            anchors.centerIn: parent
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            enabled: parent.opacity > 0
+            onPressed: {
+                nextPageButtonFadeOutAnimationTimer.stop()
+                nextPageButtonFadeOutAnimation.stop()
+                parent.opacity = parent.alpha
+                var from = messagesModel.get(messagesModel.count - 1).msgUniqueId
+                bridge.retrieveChatLog(from, false)
+                chatFlickable.scrollToStart()
+                nextPageButtonFadeOutAnimationTimer.start()
+            }
+        }
+    }
+    DropShadow {
+        anchors.fill: nextPageButton
+        visible: nextPageButton.visible
+        opacity: nextPageButton.opacity
+        radius: 8.0
+        samples: 16
+        color: "#80000000"
+        source: nextPageButton
+    }
+
     ColumnLayout {
         anchors.fill: parent
         anchors.leftMargin: !inPortrait ? drawer.width : undefined
@@ -1137,13 +1286,23 @@ ApplicationWindow {
             clip: true
             boundsMovement: Flickable.StopAtBounds
 
+            function checkAtEnd() {
+                return contentHeight - height - contentY === -flickable_margin
+            }
+            function checkExceedsHeight() {
+                return contentHeight > height
+            }
+            function scrollToStart() {
+                contentY = -flickable_margin
+            }
+
             function scrollToEnd() {
-                if (contentHeight > height)
+                if (checkExceedsHeight())
                     contentY = contentHeight
                 returnToBounds()
             }
             function scrollToEndVK() {
-                if (virtualKeyboard.keyboardActive && contentHeight <= height) {
+                if (virtualKeyboard.keyboardActive && !checkExceedsHeight()) {
                     scrollToEnd()
                     boundsMovement = Flickable.DragOverBounds
                     contentY -= virtualKeyboard.keyboardHeight - chatLayout.height - chatSeparator.height - chatContent.cloud_margin
@@ -1219,6 +1378,15 @@ ApplicationWindow {
                             calculateMaximumWidth()
                             if (msgSelf)
                                 anchors.right = parent.right
+                            if (msgFailed) {
+                                Qt.createQmlObject("import QtQuick 2.12; Text {
+                                                        text: \"!\"
+                                                        color: \"red\"
+                                                        font.pointSize: 20
+                                                        font.bold: true
+                                                        anchors.right: parent.left
+                                                    }", this, "failedText")
+                            }
                         }
 
                         Text {
@@ -1246,15 +1414,6 @@ ApplicationWindow {
                                     anchors.right = parent.right
                                 }
                             }
-                        }
-                        Text {
-                            id: failedText
-                            text: "!"
-                            color: "red"
-                            font.pointSize: 20
-                            font.bold: true
-                            visible: msgFailed
-                            anchors.right: parent.left
                         }
                         MouseArea {
                             id: cloudMouseArea
@@ -1352,6 +1511,9 @@ ApplicationWindow {
                 }
                 function sendMessage() {
                     if (chatMessage.text.length > 0) {
+                        if (!checkLastMessage(bridge.getCurrentFriendNumber())) {
+                            bridge.retrieveChatLog()
+                        }
                         bridge.sendMessage(chatMessage.text)
                         chatMessage.clear()
                     }
