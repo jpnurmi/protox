@@ -24,9 +24,6 @@ ApplicationWindow {
     property bool _inPortrait: inPortrait
     on_InPortraitChanged: {
         drawer.width = width * 0.5 * (!inPortrait ? (Screen.height / Screen.width) : 1.0)
-        for (var i = 0; i < messagesModel.count; i++) {
-            messages.itemAt(i).calculateMaximumWidth()
-        }
     }
 
     onClosing: {
@@ -56,7 +53,7 @@ ApplicationWindow {
         interval: 1
         onTriggered: {
             bridge.retrieveChatLog()
-            chatFlickable.scrollToEnd()
+            messages.scrollToEnd()
             destroy()
         }
     }
@@ -158,6 +155,10 @@ ApplicationWindow {
         return str
     }
 
+    ListModel {
+        id: temp
+    }
+
     function clearChatContent() {
         messagesModel.clear()
     }
@@ -214,7 +215,7 @@ ApplicationWindow {
             typingText.text = ""
             typingText.visible = false
         }
-        chatFlickable.scrollToEndVK()
+        messages.scrollToEndVK()
     }
 
     function updateFriendNickName(friend_number, nickname) {
@@ -252,7 +253,7 @@ ApplicationWindow {
     }
 
     function chatScrollToEnd() {
-        chatFlickable.scrollToEnd()
+        messages.scrollToEnd()
     }
 
     property variant each_friend_text: []
@@ -289,9 +290,7 @@ ApplicationWindow {
         if (bridge.getCurrentFriendNumber() !== friend_number) {
             return
         }
-        if (!history && messagesModel.count > 0 && !checkLastMessage(friend_number)) {
-            return
-        }
+
         messagesModel.append({"msgText": text, 
                                  "msgSelf" : self, 
                                  "msgReceived" : false, 
@@ -299,8 +298,9 @@ ApplicationWindow {
                                  "msgTime" : time, 
                                  "msgUniqueId" : unique_id,
                                  "msgFailed" : failed})
+
         if (!history)
-            chatFlickable.scrollToEndVK()
+            messages.scrollToEndVK()
     }
     function insertFriend(friend_number, nickName, request, request_message, friendPk) {
         friendsModel.append({"friendNumber" : friend_number, "nickName" : nickName, "request" : request, "request_message" : request_message, "friendPk" : friendPk})
@@ -325,7 +325,6 @@ ApplicationWindow {
             if ((!use_uid && message.msgId === message_id) || (use_uid && message.msgUniqueId === unique_id)) {
                 message.msgReceived = true
                 messagesModel.set(i, message)
-                messages.itemAt(i).setCloudColor("orange")
             }
         }
     }
@@ -1143,7 +1142,7 @@ ApplicationWindow {
         anchors.top: overlayHeader.bottom
         anchors.topMargin: 15
         anchors.horizontalCenter: overlayHeader.horizontalCenter
-        visible: messagesModel.count > 0 && messagesModel.count < bridge.getMessagesCount(bridge.getCurrentFriendNumber()) && (checkLastMessage(bridge.getCurrentFriendNumber()) || messagesModel.get(0).msgUniqueId > 1) && chatFlickable.contentY === -chatFlickable.flickable_margin
+        visible: messagesModel.count > 0 && messagesModel.count < bridge.getMessagesCount(bridge.getCurrentFriendNumber()) && (checkLastMessage(bridge.getCurrentFriendNumber()) || messagesModel.get(0).msgUniqueId > 1) && messages.atYBeginning
         Timer {
             id: prevPageButtonFadeOutAnimationTimer
             repeat: false
@@ -1210,7 +1209,7 @@ ApplicationWindow {
         opacity: alpha
         x: prevPageButton.x
         y: chatSeparator.y - height - bottomMargin
-        visible: messagesModel.count > 0 && (chatFlickable.checkAtEnd() || (messagesModel.get(0).msgUniqueId === 1 && !chatFlickable.checkExceedsHeight())) && !checkLastMessage(bridge.getCurrentFriendNumber())
+        visible: messagesModel.count > 0 && (messages.atYEnd || (messagesModel.get(0).msgUniqueId === 1 && !messages.checkExceedsHeight())) && !checkLastMessage(bridge.getCurrentFriendNumber())
         Timer {
             id: nextPageButtonFadeOutAnimationTimer
             repeat: false
@@ -1230,7 +1229,7 @@ ApplicationWindow {
                 nextPageButtonFadeOutAnimation.stop()
                 nextPageButtonFadeOutAnimationTimer.stop()
                 opacity = alpha
-                if (chatFlickable.checkExceedsHeight()) {
+                if (messages.checkExceedsHeight()) {
                     nextPageButtonFadeOutAnimationTimer.start()
                 }
             }
@@ -1253,7 +1252,7 @@ ApplicationWindow {
                 parent.opacity = parent.alpha
                 var from = messagesModel.get(messagesModel.count - 1).msgUniqueId
                 bridge.retrieveChatLog(from, false)
-                chatFlickable.scrollToStart()
+                messages.scrollToStart()
                 nextPageButtonFadeOutAnimationTimer.start()
             }
         }
@@ -1271,169 +1270,171 @@ ApplicationWindow {
     ColumnLayout {
         anchors.fill: parent
         anchors.leftMargin: !inPortrait ? drawer.width : undefined
-        Flickable {
-            id: chatFlickable
-
+        Item {
+            id: chatContent
+            property int chat_margin: 15
+            property int cloud_margin: 5
             // fixme: convert to Layout.
             anchors.fill: parent
-            anchors.topMargin: overlayHeader.height
-            anchors.bottomMargin: chatLayout.height + chatSeparator.separator_margin * 2 + chatSeparator.height
-
-            property int flickable_margin: 20
-            topMargin: flickable_margin
-            bottomMargin: flickable_margin
-            contentHeight: chatContent.height
-            clip: true
-            boundsMovement: Flickable.StopAtBounds
-
-            function checkAtEnd() {
-                return contentHeight - height - contentY === -flickable_margin
+            
+            ListModel {
+                id: messagesModel
             }
-            function checkExceedsHeight() {
-                return contentHeight > height
-            }
-            function scrollToStart() {
-                contentY = -flickable_margin
-            }
-
-            function scrollToEnd() {
-                if (checkExceedsHeight())
-                    contentY = contentHeight
-                returnToBounds()
-            }
-            function scrollToEndVK() {
-                if (virtualKeyboard.keyboardActive && !checkExceedsHeight()) {
-                    scrollToEnd()
-                    boundsMovement = Flickable.DragOverBounds
-                    contentY -= virtualKeyboard.keyboardHeight - chatLayout.height - chatSeparator.height - chatContent.cloud_margin
-                    if (contentHeight > virtualKeyboard.keyboardHeight + chatLayout.height + chatSeparator.height - (flickable_margin + chatSeparator.separator_margin)) {
-                        contentY += contentHeight - (virtualKeyboard.keyboardHeight + chatLayout.height + chatSeparator.height) + flickable_margin + chatSeparator.separator_margin
-                    }
-                } else {
-                    boundsMovement = Flickable.StopAtBounds
-                    scrollToEnd()
-                }
-            }
-
-            ColumnLayout {
-                id: chatContent
+            ListView {
+                id: messages
+                anchors.fill: parent
+                
+                property int flickable_margin: 20
+                anchors.topMargin: overlayHeader.height
+                anchors.bottomMargin: chatLayout.height + chatSeparator.separator_margin * 2 + chatSeparator.height
+                topMargin: flickable_margin
+                bottomMargin: flickable_margin
                 spacing: 20
-                property int chat_margin: 15
-                property int cloud_margin: 5
-                // fixme: convert to Layout.
-                anchors.margins: chat_margin
-                anchors.left: parent.left
-                anchors.right: parent.right
-                ListModel {
-                    id: messagesModel
+                clip: true
+                boundsMovement: Flickable.StopAtBounds
+                ScrollIndicator.vertical: ScrollIndicator {}
+
+                function checkExceedsHeight() {
+                    return contentHeight > height
                 }
-                Repeater {
-                    id: messages
-                    model: messagesModel
-                    delegate: Rectangle {
-                        id: messageCloud
-                        color: !msgSelf ? "lightblue" : "lightgray"
-                        radius: 10
-                        function setCloudColor(newColor) {
-                            color = newColor
+                function scrollToStart() {
+                    contentY = 0
+                    positionViewAtBeginning()
+                    contentY -= chatLayout.height + chatSeparator.separator_margin * 2 + chatSeparator.height
+                }
+                
+                function scrollToEnd() {
+                    contentY = 0
+                    positionViewAtEnd()
+                    contentY += chatLayout.height + chatSeparator.separator_margin * 2 + chatSeparator.height
+                }
+                function scrollToEndVK() {
+                    if (virtualKeyboard.keyboardActive && !checkExceedsHeight()) {
+                        scrollToEnd()
+                        boundsMovement = Flickable.DragOverBounds
+                        contentY -= virtualKeyboard.keyboardHeight - chatLayout.height - chatSeparator.height - chatContent.cloud_margin
+                        if (contentHeight > virtualKeyboard.keyboardHeight + chatLayout.height + chatSeparator.height - (flickable_margin + chatSeparator.separator_margin)) {
+                            contentY += contentHeight - (virtualKeyboard.keyboardHeight + chatLayout.height + chatSeparator.height) + flickable_margin + chatSeparator.separator_margin
                         }
-                        Rectangle {
-                            id: cloudCornerRemover
-                            z: z_cloud
-                            width: parent.radius
-                            height: width
-                            color: parent.color
-                            anchors.top: parent.top
-                            Component.onCompleted: {
-                                if (msgSelf) {
-                                    anchors.right = parent.right
-                                } else {
-                                    anchors.left = parent.left
-                                }
-                            }
-                        }
-
-                        Image {
-                            id: cloudTailImage
-                            width: 10
-                            height: width
-                            source: msgSelf ? (msgReceived ? canvasBuffer.itemAt(1).source : canvasBuffer.itemAt(0).source) : canvasBuffer.itemAt(2).source
-                            mirror: !msgSelf
-                            smooth: true
-                            Component.onCompleted: {
-                                if (msgSelf) {
-                                    anchors.left = parent.right
-                                } else {
-                                    anchors.right = parent.left
-                                }
-                            }
-                        }
-
-                        function calculateMaximumWidth() {
-                            if (cloudText.width > window.width - chatContent.cloud_margin -  chatContent.chat_margin - (!inPortrait ? drawer.width : 0))
-                                Layout.maximumWidth = window.width - chatContent.cloud_margin - chatContent.chat_margin - (!inPortrait ? drawer.width : 0)
-                        }
-
+                    } else {
+                        boundsMovement = Flickable.StopAtBounds
+                        scrollToEnd()
+                    }
+                }
+                model: messagesModel
+                delegate: Rectangle {
+                    id: messageCloud
+                    color: !msgSelf ? "lightblue" : (msgReceived ? "orange" : "lightgray")
+                    radius: 10
+                    Rectangle {
+                        id: cloudCornerRemover
+                        z: z_cloud
+                        width: parent.radius
+                        height: width
+                        color: parent.color
+                        anchors.top: parent.top
                         Component.onCompleted: {
-                            calculateMaximumWidth()
-                            if (msgSelf)
+                            if (msgSelf) {
                                 anchors.right = parent.right
-                            if (msgFailed) {
-                                Qt.createQmlObject("import QtQuick 2.12; Text {
+                            } else {
+                                anchors.left = parent.left
+                            }
+                        }
+                    }
+                    
+                    Image {
+                        id: cloudTailImage
+                        width: 10
+                        height: width
+                        source: msgSelf ? (msgReceived ? canvasBuffer.itemAt(1).source : canvasBuffer.itemAt(0).source) : canvasBuffer.itemAt(2).source
+                        mirror: !msgSelf
+                        smooth: true
+                        Component.onCompleted: {
+                            if (msgSelf) {
+                                anchors.left = parent.right
+                            } else {
+                                anchors.right = parent.left
+                            }
+                        }
+                    }
+                    
+                    function calculateMaximumWidth() {
+                        if (cloudText.width > window.width - chatContent.cloud_margin -  chatContent.chat_margin - (!inPortrait ? drawer.width : 0))
+                            implicitWidth = window.width - chatContent.cloud_margin - chatContent.chat_margin - (!inPortrait ? drawer.width : 0)
+                    }
+                    
+                    Component.onCompleted: {
+                        calculateMaximumWidth()
+                        if (msgSelf) {
+                            anchors.right = parent.right
+                            anchors.rightMargin = chatContent.chat_margin
+                        } else {
+                            anchors.left = parent.left
+                            anchors.leftMargin = chatContent.chat_margin
+                        }
+                        if (msgFailed) {
+                            Qt.createQmlObject("import QtQuick 2.12; Text {
                                                         text: \"!\"
                                                         color: \"red\"
                                                         font.pointSize: 20
                                                         font.bold: true
                                                         anchors.right: parent.left
                                                     }", this, "failedText")
-                            }
                         }
-
-                        Text {
-                            id: cloudText
-                            text: msgText
-                            anchors.fill: parent
-                            anchors.margins: chatContent.cloud_margin
-                            font.family: "Helvetica"
-                            font.pointSize: 20
-                            onContentHeightChanged: {
-                                parent.implicitHeight = contentHeight + chatContent.cloud_margin * 2
-                                parent.implicitWidth = contentWidth + chatContent.cloud_margin * 2
-                            }
-                            wrapMode: Text.Wrap
+                    }
+                    
+                    Text {
+                        id: cloudText
+                        text: msgText
+                        anchors.fill: parent
+                        anchors.margins: chatContent.cloud_margin
+                        font.family: "Helvetica"
+                        font.pointSize: 20
+                        onContentHeightChanged: {
+                            parent.implicitHeight = contentHeight + chatContent.cloud_margin * 2
+                            parent.implicitWidth = contentWidth + chatContent.cloud_margin * 2
                         }
-                        Text {
-                            id: timeText
-                            anchors.top: messageCloud.bottom
-                            text: msgTime
-                            font.pointSize: 10
-                            Component.onCompleted: {
-                                if (!msgSelf) {
-                                    anchors.left = parent.left
-                                } else {
-                                    anchors.right = parent.right
-                                }
-                            }
-                        }
-                        MouseArea {
-                            id: cloudMouseArea
-                            anchors.fill: parent
-                            onClicked: {
-                                bridge.copyTextToClipboard(cloudText.text)
-                                toast.show({ message : "Text copied!", duration : Toast.Short });
+                        wrapMode: Text.Wrap
+                    }
+                    Text {
+                        id: timeText
+                        anchors.top: messageCloud.bottom
+                        text: msgTime
+                        font.pointSize: 10
+                        Component.onCompleted: {
+                            if (!msgSelf) {
+                                anchors.left = parent.left
+                            } else {
+                                anchors.right = parent.right
                             }
                         }
                     }
-                }
-                Text {
-                    id: typingText
-                    font.italic: true
-                    visible: false
-                    Layout.alignment: Qt.AlignBottom | Qt.AlignLeft
-                    Layout.fillHeight: true
+                    MouseArea {
+                        id: cloudMouseArea
+                        anchors.fill: parent
+                        onClicked: {
+                            bridge.copyTextToClipboard(cloudText.text)
+                            toast.show({ message : "Text copied!", duration : Toast.Short });
+                        }
+                    }
                 }
             }
-            ScrollIndicator.vertical: ScrollIndicator { }
+        }
+        Text {
+            id: typingText
+            font.italic: true
+            visible: false
+            anchors.left: chatContent.left
+            anchors.leftMargin: chatContent.chat_margin
+            anchors.bottom: chatSeparator.top
+            anchors.bottomMargin: chatContent.chat_margin
+            onVisibleChanged: {
+                if (visible) {
+                    messages.bottomMargin += contentHeight + chatContent.chat_margin
+                } else {
+                    messages.bottomMargin -= contentHeight + chatContent.chat_margin
+                }
+            }
         }
 
         Rectangle {
@@ -1468,8 +1469,8 @@ ApplicationWindow {
                     property int keyboardHeight: 0
                     property bool keyboardActive: false
                     onKeyboardActiveChanged: {
-                        chatFlickable.interactive = !keyboardActive
-                        chatFlickable.scrollToEndVK()
+                        messages.interactive = !keyboardActive
+                        messages.scrollToEndVK()
                     }
 
                     Connections {
