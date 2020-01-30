@@ -158,9 +158,11 @@ ToxPk toxcore_get_friend_public_key(Tox *m, quint32 friend_number)
 
 const QString toxcore_get_friend_status_message(Tox *m, quint32 friend_number)
 {
-	size_t length = tox_friend_get_status_message_size(m, friend_number, nullptr);
-	if (!length)
+	TOX_ERR_FRIEND_QUERY query_error;
+	size_t length = tox_friend_get_status_message_size(m, friend_number, &query_error);
+	if (!length || query_error > 0)
 		return QString();
+
 	char message[length];
 	tox_friend_get_status_message(m, friend_number, (quint8*)message, nullptr);
 	return QString::fromUtf8(message, length);
@@ -254,6 +256,16 @@ void toxcore_set_nickname(Tox *m, const QString &nickname)
 	QByteArray encodedNickname = nickname.toUtf8();
 	tox_self_set_name(m, (quint8*)encodedNickname.data(), encodedNickname.length(), nullptr);
 	toxcore_save_data(m, GetProgDir() + DEFAULT_PROFILE);
+}
+
+int toxcore_get_friend_status(Tox *m, quint32 friend_number)
+{
+	TOX_ERR_FRIEND_QUERY error;
+	int result = tox_friend_get_status(m, friend_number, &error);
+	if (!error) {
+		return result;
+	}
+	return -1;
 }
 
 const QString toxcore_get_status_message(Tox *m)

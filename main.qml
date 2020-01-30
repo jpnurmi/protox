@@ -33,6 +33,10 @@ ApplicationWindow {
     Connections {
         target: Qt.application
         onStateChanged: {
+            if (bridge.getConnStatus() < 1) {
+                bridge.bootstrapDHT()
+                connectionStatus.text = qsTr("Bootstrapping...")
+            }
             if (splashImageDestroyAnimation !== null) {
                 splashImageDestroyAnimation.start()
             }
@@ -138,13 +142,18 @@ ApplicationWindow {
     readonly property int z_overlay_header: 1
     readonly property int z_menu: 3
     readonly property int z_menu_elements: 4
+    readonly property int z_top: Number.MAX_VALUE-1
     readonly property int z_splash: Number.MAX_VALUE
+    
 
     /*
       Functions
     */
 
     function checkLastMessage(friend_number) {
+        if (!messagesModel.count) {
+            return true
+        }
         return bridge.getMessagesCount(friend_number) === messagesModel.get(messagesModel.count - 1).msgUniqueId
     }
 
@@ -153,10 +162,6 @@ ApplicationWindow {
             return str.slice(0, limit) + "..."
         }
         return str
-    }
-
-    ListModel {
-        id: temp
     }
 
     function clearChatContent() {
@@ -215,7 +220,6 @@ ApplicationWindow {
             typingText.text = ""
             typingText.visible = false
         }
-        messages.scrollToEndVK()
     }
 
     function updateFriendNickName(friend_number, nickname) {
@@ -268,7 +272,12 @@ ApplicationWindow {
         bridge.setCurrentFriend(friend_number)
         friendNickname.text = limitString(bridge.getFriendNickname(bridge.getCurrentFriendNumber()), friendNickname.charsLimit)
         friendStatus.text = limitString(bridge.getFriendStatusMessage(bridge.getCurrentFriendNumber()), friendStatus.charsLimit)
-        setCurrentFriendConnStatus(friend_number, bridge.getFriendConnStatus(friend_number))
+        for (var i = 0; i < friendsModel.count; i++) {
+            if (friendsModel.get(i).friendNumber === friend_number) {
+                friendStatusIndicator.color = friends.itemAt(i).getFriendStatusIndicatorColor()
+                break
+            }
+        }
         bridge.retrieveChatLog()
         chatScrollToEnd()
         chatMessage.clear()
@@ -329,10 +338,9 @@ ApplicationWindow {
         }
     }
     function setCurrentFriendConnStatus(friend_number, conn_status) {
+        setFriendStatus(friend_number, bridge.getFriendStatus(friend_number))
         if (bridge.getCurrentFriendNumber() === friend_number) {
-            if (conn_status > 0) {
-                friendStatusIndicator.color = "lightgreen"
-            } else {
+            if (!conn_status) {
                 friendStatusIndicator.color = "gray"
             }
         }
@@ -340,9 +348,7 @@ ApplicationWindow {
         for (var i = 0; i < friendsModel.count; i++) {
             var friend = friendsModel.get(i)
             if (friend.friendNumber === friend_number) {
-                if (conn_status > 0) {
-                    friends.itemAt(i).setFriendStatusIndicatorColor("lightgreen")
-                } else {
+                if (!conn_status) {
                     friends.itemAt(i).setFriendStatusIndicatorColor("gray")
                 }
             }
@@ -527,6 +533,68 @@ ApplicationWindow {
             }
         }
     }
+    /*
+        Friend info menu
+    */
+    Menu {
+        id: friendInfoMenu
+        width: 300
+        title: "My profile"
+        x: (window.width - width) * 0.5
+        y: (window.height - height) * 0.5
+        z: z_menu
+        modal: true
+        Text {
+            padding: 10
+            font.bold: true
+            width: parent.width
+            horizontalAlignment: Qt.AlignHCenter
+            text: qsTr("Nickname")
+        }
+        Text {
+            id: infoNickname
+            padding: 10
+            width: parent.width
+            horizontalAlignment: Qt.AlignHCenter
+            wrapMode: Text.Wrap
+        }
+        Text {
+            padding: 10
+            font.bold: true
+            width: parent.width
+            horizontalAlignment: Qt.AlignHCenter
+            text: qsTr("Status")
+        }
+        Text {
+            id: infoStatus
+            padding: 10
+            width: parent.width
+            horizontalAlignment: Qt.AlignHCenter
+            wrapMode: Text.Wrap
+        }
+        Button {
+            text: qsTr("Delete this friend")
+            onClicked: {
+                bridge.clearFriendChatHistory(bridge.getCurrentFriendNumber())
+                bridge.deleteFriend(bridge.getCurrentFriendNumber())
+                for (var i = 0; i < friendsModel.count; i++) {
+                    var friend = friendsModel.get(i)
+                    if (friend.friendNumber === bridge.getCurrentFriendNumber()) {
+                        friendsModel.remove(i)
+                    }
+                }
+                toast.show({ message : qsTr("Friend removed!"), duration : Toast.Short });
+                clean_profile = bridge.getFriendsCount() === 0
+                if (friendsModel.count > 0) {
+                    selectFriend(friendsModel.get(0).friendNumber)
+                } else {
+                    friendNickname.text = ""
+                    friendStatus.text = ""
+                }
+                friendInfoMenu.close()
+            }
+        }
+    }
 
     /*
         Profile menu
@@ -707,28 +775,6 @@ ApplicationWindow {
             }
 
             MenuItem {
-                text: qsTr("Delete this friend")
-                onClicked: {
-                    bridge.clearFriendChatHistory(bridge.getCurrentFriendNumber())
-                    bridge.deleteFriend(bridge.getCurrentFriendNumber())
-                    for (var i = 0; i < friendsModel.count; i++) {
-                        var friend = friendsModel.get(i)
-                        if (friend.friendNumber === bridge.getCurrentFriendNumber()) {
-                            friendsModel.remove(i)
-                        }
-                    }
-                    toast.show({ message : qsTr("Friend removed!"), duration : Toast.Short });
-                    clean_profile = bridge.getFriendsCount() === 0
-                    if (friendsModel.count > 0) {
-                        selectFriend(friendsModel.get(0).friendNumber)
-                    } else {
-                        friendNickname.text = ""
-                        friendStatus.text = ""
-                    }
-                }
-            }
-            MenuSeparator {}
-            MenuItem {
                 text: qsTr("Quit")
                 onClicked: {
                     window.visible = false
@@ -770,6 +816,16 @@ ApplicationWindow {
             anchors.centerIn: parent
             property int charsLimit: 16
             text: limitString(bridge.getFriendNickname(bridge.getCurrentFriendNumber()), charsLimit)
+            MouseArea {
+                anchors.fill: parent
+                onPressed: {
+                    if (!clean_profile) {
+                        infoNickname.text = bridge.getFriendNickname(bridge.getCurrentFriendNumber())
+                        infoStatus.text = bridge.getFriendStatusMessage(bridge.getCurrentFriendNumber())
+                        friendInfoMenu.popup()
+                    }
+                }
+            }
         }
         Label {
             id: friendStatus
@@ -803,6 +859,8 @@ ApplicationWindow {
       Left menu (drawer)
      */
 
+    property variant friendListModel: [[qsTr("Online"), "lightgreen"],[qsTr("Away"), "yellow"],[qsTr("Busy"), "red"],[qsTr("Offline"), "gray"]]
+
     Drawer {
         id: drawer
 
@@ -819,6 +877,7 @@ ApplicationWindow {
 
         onOpened: {
             chatMessage.focus = false
+            notification.cancel(-1)
         }
         onClosed: {
             leftOverlayButton.highlighted = false
@@ -856,7 +915,7 @@ ApplicationWindow {
                         z: z_menu_elements
                         implicitWidth: 100
                         Repeater {
-                            model: [[qsTr("Online"), "lightgreen"],[qsTr("Away"), "yellow"],[qsTr("Busy"), "red"],[qsTr("Offline"), "gray"]]
+                            model: friendListModel
                             delegate: MenuItem {
                                 text: modelData[0]
                                 Rectangle {
@@ -918,6 +977,10 @@ ApplicationWindow {
                             anchors.verticalCenter: statusIndicator.verticalCenter
                         }
                         onPressed: {
+                            if (accountStatusMenu.visible) {
+                                accountStatusMenu.close()
+                                return
+                            }
                             accountStatusMenu.currentIndex = statusIndicator.index
                             accountStatusMenu.popup(accountStatus.x, accountStatus.y + accountStatus.height)
                         }
@@ -941,7 +1004,7 @@ ApplicationWindow {
                     anchors.top: drawerSeparator.bottom
                     ScrollIndicator.vertical: ScrollIndicator { }
                     contentHeight: 100
-                    ColumnLayout  {
+                    ColumnLayout {
                         anchors.top: parent.top
                         spacing: 1
                         Repeater {
@@ -1011,7 +1074,7 @@ ApplicationWindow {
                                     width: parent.height
                                     height: parent.height
                                     Layout.alignment: Qt.AlignLeft
-                                    color: parent.dragEntered ? "lightgray" : "#00000000"
+                                    color: (parent.dragEntered && !parent.dragActive) ? "lightgray" : "#00000000"
                                     visible: !request
                                     Component.onCompleted: {
                                         if (request) {
@@ -1034,10 +1097,34 @@ ApplicationWindow {
                                         anchors.centerIn: parent
                                         visible: parent.visible
                                     }
+                                    DropArea {
+                                        anchors.fill: parent
+                                        enabled: !parent.parent.dragActive
+                                        onEntered: {
+                                            if (!request) {
+                                                parent.parent.dragEntered = true
+                                            }
+                                        }
+                                        onExited: {
+                                            if (!request) {
+                                                parent.parent.dragEntered = false
+                                            }
+                                        }
+                                        onDropped: {
+                                            if (!request) {
+                                                parent.parent.dragEntered = false
+                                                friendsModel.get(leftBarLayout.draggedItem).dragStarted = false
+                                                friendsModel.swap(index, leftBarLayout.draggedItem)
+                                            }
+                                        }
+                                    }
                                 }
-                                
+
                                 function setFriendStatusIndicatorColor(color) {
                                     friendItemStatusIndicator.color = color
+                                }
+                                function getFriendStatusIndicatorColor() {
+                                    return friendItemStatusIndicator.color
                                 }
                                 ItemDelegate {
                                     id: friendItem
@@ -1067,7 +1154,7 @@ ApplicationWindow {
                                     Rectangle {
                                         anchors.fill: parent
                                         color: request ? "lightgreen" : "lightgray"
-                                        visible: request || parent.parent.dragEntered
+                                        visible: request || (parent.parent.dragEntered && !parent.parent.dragActive)
                                         z: z_friend_item_background
                                     }
                                     Component.onCompleted: {
@@ -1128,143 +1215,18 @@ ApplicationWindow {
                     profileInfoMenu.popup()
                 }
             }
-        }
-    }
-    Rectangle {
-        id: prevPageButton
-        z: 9999
-        width: 50
-        height: width
-        radius: width * 0.5
-        color: "white"
-        property real alpha: 0.9
-        opacity: alpha
-        anchors.top: overlayHeader.bottom
-        anchors.topMargin: 15
-        anchors.horizontalCenter: overlayHeader.horizontalCenter
-        visible: messagesModel.count > 0 && messagesModel.count < bridge.getMessagesCount(bridge.getCurrentFriendNumber()) && (checkLastMessage(bridge.getCurrentFriendNumber()) || messagesModel.get(0).msgUniqueId > 1) && messages.atYBeginning
-        Timer {
-            id: prevPageButtonFadeOutAnimationTimer
-            repeat: false
-            interval: 2000
-            onTriggered: {
-                prevPageButtonFadeOutAnimation.start()
-            }
-        }
-        NumberAnimation on opacity {
-            id: prevPageButtonFadeOutAnimation
-            to: 0
-            duration: 500
-            running: false
-        }
-        onVisibleChanged: {
-            if (visible) {
-                prevPageButtonFadeOutAnimation.stop()
-                prevPageButtonFadeOutAnimationTimer.stop()
-                opacity = alpha
-                prevPageButtonFadeOutAnimationTimer.start()
-            }
-        }
-        Text {
-            id: prevPageButtonText
-            text: "\u2191"
-            font.bold: true
-            font.pointSize: 30
-            opacity: parent.opacity
-            anchors.centerIn: parent
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            enabled: parent.opacity > 0
-            onPressed: {
-                prevPageButtonFadeOutAnimationTimer.stop()
-                prevPageButtonFadeOutAnimation.stop()
-                parent.opacity = parent.alpha
-                var from = messagesModel.get(0).msgUniqueId
-                bridge.retrieveChatLog(from, true, true)
-                chatScrollToEnd()
-                prevPageButtonFadeOutAnimationTimer.start()
-            }
-        }
-    }
-    DropShadow {
-        anchors.fill: prevPageButton
-        visible: prevPageButton.visible
-        opacity: prevPageButton.opacity
-        radius: 8.0
-        samples: 16
-        color: "#80000000"
-        source: prevPageButton
-    }
-    Rectangle {
-        id: nextPageButton
-        z: 9999
-        width: 50
-        height: width
-        radius: width * 0.5
-        color: "white"
-        property real alpha: 0.9
-        property int bottomMargin: 15
-        opacity: alpha
-        x: prevPageButton.x
-        y: chatSeparator.y - height - bottomMargin
-        visible: messagesModel.count > 0 && (messages.atYEnd || (messagesModel.get(0).msgUniqueId === 1 && !messages.checkExceedsHeight())) && !checkLastMessage(bridge.getCurrentFriendNumber())
-        Timer {
-            id: nextPageButtonFadeOutAnimationTimer
-            repeat: false
-            interval: 2000
-            onTriggered: {
-                nextPageButtonFadeOutAnimation.start()
-            }
-        }
-        NumberAnimation on opacity {
-            id: nextPageButtonFadeOutAnimation
-            to: 0
-            duration: 500
-            running: false
-        }
-        onVisibleChanged: {
-            if (visible) {
-                nextPageButtonFadeOutAnimation.stop()
-                nextPageButtonFadeOutAnimationTimer.stop()
-                opacity = alpha
-                if (messages.checkExceedsHeight()) {
-                    nextPageButtonFadeOutAnimationTimer.start()
+            ToolButton {
+                id: showSettingsButton
+                text: "\u2699"
+                font.family: dejavuSans.name
+                font.pointSize: 30
+                font.bold: true
+                antialiasing: true
+                onClicked: {
+                    toast.show({ message: "Not implemented.", duration: Toast.Short })
                 }
             }
         }
-        Text {
-            id: nextPageButtonText
-            text: "\u2193"
-            font.bold: true
-            font.pointSize: 30
-            opacity: parent.opacity
-            anchors.centerIn: parent
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            enabled: parent.opacity > 0
-            onPressed: {
-                nextPageButtonFadeOutAnimationTimer.stop()
-                nextPageButtonFadeOutAnimation.stop()
-                parent.opacity = parent.alpha
-                var from = messagesModel.get(messagesModel.count - 1).msgUniqueId
-                bridge.retrieveChatLog(from, false)
-                messages.scrollToStart()
-                nextPageButtonFadeOutAnimationTimer.start()
-            }
-        }
-    }
-    DropShadow {
-        anchors.fill: nextPageButton
-        visible: nextPageButton.visible
-        opacity: nextPageButton.opacity
-        radius: 8.0
-        samples: 16
-        color: "#80000000"
-        source: nextPageButton
     }
 
     ColumnLayout {
@@ -1310,11 +1272,10 @@ ApplicationWindow {
                 }
                 function scrollToEndVK() {
                     if (virtualKeyboard.keyboardActive && !checkExceedsHeight()) {
-                        scrollToEnd()
                         boundsMovement = Flickable.DragOverBounds
                         contentY -= virtualKeyboard.keyboardHeight - chatLayout.height - chatSeparator.height - chatContent.cloud_margin
                         if (contentHeight > virtualKeyboard.keyboardHeight + chatLayout.height + chatSeparator.height - (flickable_margin + chatSeparator.separator_margin)) {
-                            contentY += contentHeight - (virtualKeyboard.keyboardHeight + chatLayout.height + chatSeparator.height) + flickable_margin + chatSeparator.separator_margin
+                            contentY += contentHeight - (virtualKeyboard.keyboardHeight + chatLayout.height + chatSeparator.height) + flickable_margin + chatSeparator.separator_margin + (typingText.visible ? messages.bottomMargin - typingText.height : 0)
                         }
                     } else {
                         boundsMovement = Flickable.StopAtBounds
@@ -1395,6 +1356,7 @@ ApplicationWindow {
                             parent.implicitWidth = contentWidth + chatContent.cloud_margin * 2
                         }
                         wrapMode: Text.Wrap
+                        textFormat: Text.StyledText
                     }
                     Text {
                         id: timeText
@@ -1434,6 +1396,7 @@ ApplicationWindow {
                 } else {
                     messages.bottomMargin -= contentHeight + chatContent.chat_margin
                 }
+                messages.scrollToEndVK()
             }
         }
 
@@ -1512,8 +1475,9 @@ ApplicationWindow {
                 }
                 function sendMessage() {
                     if (chatMessage.text.length > 0) {
-                        if (!checkLastMessage(bridge.getCurrentFriendNumber())) {
-                            bridge.retrieveChatLog()
+                        if (bridge.getConnStatus() < 1) {
+                            toast.show({ message : qsTr("You are not connected to tox network!"), duration: Toast.Short })
+                            return
                         }
                         bridge.sendMessage(chatMessage.text)
                         chatMessage.clear()

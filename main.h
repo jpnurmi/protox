@@ -52,6 +52,8 @@ public slots:
 	Q_INVOKABLE quint32 getMessagesCount(quint32 friend_number);
 	Q_INVOKABLE int getConnStatus();
 	Q_INVOKABLE void addFriend(const QString &friendPk);
+	Q_INVOKABLE int getFriendStatus(quint32 friend_number);
+	Q_INVOKABLE void bootstrapDHT();
 
 public:
 	ToxFriendsConnStatus friends_conn_status;

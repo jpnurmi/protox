@@ -106,16 +106,21 @@ const QString QmlCBridge::getFriendStatusMessage(quint32 friend_number)
 	return toxcore_get_friend_status_message(tox, friend_number);
 }
 
+int QmlCBridge::getFriendStatus(quint32 friend_number)
+{
+	return toxcore_get_friend_status(tox, friend_number);
+}
+
 void QmlCBridge::retrieveChatLog(quint32 start, bool from, bool reverse)
 {
 	settings->beginGroup("Global");
 	quint32 limit = settings->value("last_messages_limit", 512).toUInt();
 	settings->endGroup();
 	ToxMessages messages = chat_db->getFriendMessages(toxcore_get_friend_public_key(tox, current_friend_number), limit, start, from, reverse);
+	QMetaObject::invokeMethod(component, "clearChatContent");
 	if (messages.isEmpty()) {
 		return;
 	}
-	QMetaObject::invokeMethod(component, "clearChatContent");
 	for (auto msg : messages) {
 		insertMessage(msg.message, current_friend_number, msg.self, 0, msg.unique_id, msg.dt, true, false);
 		if (!msg.self || msg.received)
@@ -260,6 +265,11 @@ QList<QVariant> QmlCBridge::getFriendsModelOrder()
 	return returnedValue.toList();
 }
 
+void QmlCBridge::bootstrapDHT()
+{
+	toxcore_bootstrap_DHT(tox);
+}
+
 static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler(0);
 
 void customMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString & msg)
@@ -310,6 +320,7 @@ int main(int argc, char *argv[])
 			QCoreApplication::exit(-1);
 	}, Qt::QueuedConnection);
 
+	// load config
 	settings->beginGroup("Global");
 	ToxPk friendPk = settings->value("last_friend", toxcore_get_friend_public_key(tox, 0)).toByteArray();
 	QList <QVariant> friend_list = settings->value("friend_list", QList <QVariant>()).toList();
@@ -319,6 +330,11 @@ int main(int argc, char *argv[])
 	for (auto _friend : friends) {
 		if (friend_list.lastIndexOf(QVariant(_friend)) < 0) {
 			friend_list.append(QVariant(_friend));
+		}
+	}
+	for (auto _friend : friend_list) {
+		if (friends.lastIndexOf(_friend.toUInt()) < 0) {
+			friend_list.removeOne(_friend);
 		}
 	}
 
