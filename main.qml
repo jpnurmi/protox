@@ -814,7 +814,7 @@ ApplicationWindow {
         Label {
             id: friendNickname
             anchors.centerIn: parent
-            property int charsLimit: 16
+            property int charsLimit: 20
             text: limitString(bridge.getFriendNickname(bridge.getCurrentFriendNumber()), charsLimit)
             MouseArea {
                 anchors.fill: parent
@@ -833,7 +833,7 @@ ApplicationWindow {
             anchors.horizontalCenter: friendNickname.horizontalCenter
             font.pixelSize: 10
             font.italic: true
-            property int charsLimit: 48
+            property int charsLimit: 52
             text: limitString(bridge.getFriendStatusMessage(bridge.getCurrentFriendNumber()), charsLimit)
         }
     }
@@ -898,6 +898,7 @@ ApplicationWindow {
                 id: leftBarLayout
                 RowLayout {
                     id: accountLayout
+                    spacing: 0
                     Layout.alignment: Qt.AlignTop
                     ItemDelegate {
                         id: accountName
@@ -1002,8 +1003,8 @@ ApplicationWindow {
                 Flickable {
                     id: friendsFlickable
                     anchors.top: drawerSeparator.bottom
+                    implicitHeight: 200
                     ScrollIndicator.vertical: ScrollIndicator { }
-                    contentHeight: 100
                     ColumnLayout {
                         anchors.top: parent.top
                         spacing: 1
@@ -1012,6 +1013,8 @@ ApplicationWindow {
                             model: friendsModel
                             delegate: RowLayout {
                                 id: friendLayout
+                                spacing: 0
+                                property int itemHeight: 40
                                 property bool dragEntered: false
                                 property bool dragStarted: false
                                 property int default_x
@@ -1046,7 +1049,7 @@ ApplicationWindow {
                                     }
                                 }
                                 Drag.dragType: Drag.Automatic
-                                property bool dragActive: friendDragArea.drag.active
+                                property bool dragActive: friendDragAreaIndicator.drag.active
                                 onDragActiveChanged: {
                                     if (dragActive) {
                                         friendItemAnimationXBehavior.enabled = true
@@ -1071,8 +1074,8 @@ ApplicationWindow {
                                 Rectangle {
                                     id: friendItemStatusIndicatorBody
                                     z: -1
-                                    width: parent.height
-                                    height: parent.height
+                                    width: parent.itemHeight
+                                    height: parent.itemHeight
                                     Layout.alignment: Qt.AlignLeft
                                     color: (parent.dragEntered && !parent.dragActive) ? "lightgray" : "#00000000"
                                     visible: !request
@@ -1082,7 +1085,7 @@ ApplicationWindow {
                                         }
                                     }
                                     MouseArea {
-                                        id: friendDragArea
+                                        id: friendDragAreaIndicator
                                         anchors.fill: parent
                                         drag.target: friendLayout
                                     }
@@ -1132,8 +1135,8 @@ ApplicationWindow {
                                     z: z_friend_item
                                     text: nickName
                                     property int friend_number: friendNumber
-                                    Layout.alignment: Qt.AlignCenter
-                                    Layout.leftMargin: friendItemStatusIndicatorBody.width
+                                    Layout.alignment: Qt.AlignRight
+                                    implicitHeight: parent.itemHeight
                                     onClicked: {
                                         if (request) {
                                             if (request_message.length > 0) {
@@ -1219,7 +1222,7 @@ ApplicationWindow {
                 id: showSettingsButton
                 text: "\u2699"
                 font.family: dejavuSans.name
-                font.pointSize: 30
+                font.pointSize: 24
                 font.bold: true
                 antialiasing: true
                 onClicked: {
@@ -1320,8 +1323,8 @@ ApplicationWindow {
                     }
                     
                     function calculateMaximumWidth() {
-                        if (cloudText.width > window.width - chatContent.cloud_margin -  chatContent.chat_margin - (!inPortrait ? drawer.width : 0))
-                            implicitWidth = window.width - chatContent.cloud_margin - chatContent.chat_margin - (!inPortrait ? drawer.width : 0)
+                        if (cloudText.width > window.width - chatContent.cloud_margin * 2 -  chatContent.chat_margin - (!inPortrait ? drawer.width : 0))
+                            implicitWidth = window.width - chatContent.cloud_margin * 2 - chatContent.chat_margin - (!inPortrait ? drawer.width : 0)
                     }
                     
                     Component.onCompleted: {
