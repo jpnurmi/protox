@@ -214,11 +214,11 @@ ApplicationWindow {
             if (nick.length > friendNickname.charsLimit) {
                 nick = qsTr("A friend")
             }
-            typingText.text = nick + qsTr(" is typing...")
-            typingText.visible = true
+            messages.footerItem.text = nick + qsTr(" is typing...")
+            messages.footerItem.visible = true
         } else {
-            typingText.text = ""
-            typingText.visible = false
+            messages.footerItem.text = ""
+            messages.footerItem.visible = false
         }
     }
 
@@ -1235,6 +1235,7 @@ ApplicationWindow {
     ColumnLayout {
         anchors.fill: parent
         anchors.leftMargin: !inPortrait ? drawer.width : undefined
+        spacing: 0
         Item {
             id: chatContent
             property int chat_margin: 15
@@ -1248,7 +1249,6 @@ ApplicationWindow {
             ListView {
                 id: messages
                 anchors.fill: parent
-                
                 property int flickable_margin: 20
                 anchors.topMargin: overlayHeader.height
                 anchors.bottomMargin: chatLayout.height + chatSeparator.separator_margin * 2 + chatSeparator.height
@@ -1278,7 +1278,7 @@ ApplicationWindow {
                         boundsMovement = Flickable.DragOverBounds
                         contentY -= virtualKeyboard.keyboardHeight - chatLayout.height - chatSeparator.height - chatContent.cloud_margin
                         if (contentHeight > virtualKeyboard.keyboardHeight + chatLayout.height + chatSeparator.height - (flickable_margin + chatSeparator.separator_margin)) {
-                            contentY += contentHeight - (virtualKeyboard.keyboardHeight + chatLayout.height + chatSeparator.height) + flickable_margin + chatSeparator.separator_margin + (typingText.visible ? messages.bottomMargin - typingText.height : 0)
+                            contentY += contentHeight - (virtualKeyboard.keyboardHeight + chatLayout.height + chatSeparator.height) + flickable_margin + chatSeparator.separator_margin
                         }
                     } else {
                         boundsMovement = Flickable.StopAtBounds
@@ -1286,6 +1286,18 @@ ApplicationWindow {
                     }
                 }
                 model: messagesModel
+                footer: Text {
+                    id: typingText
+                    width: parent.width
+                    height: visible ? 20 : 0
+                    topPadding: height * 0.5
+                    leftPadding: chatContent.chat_margin
+                    font.italic: true
+                    visible: false
+                    onVisibleChanged: {
+                        messages.scrollToEndVK()
+                    }
+                }
                 delegate: Rectangle {
                     id: messageCloud
                     color: !msgSelf ? "lightblue" : (msgReceived ? "orange" : "lightgray")
@@ -1305,7 +1317,6 @@ ApplicationWindow {
                             }
                         }
                     }
-                    
                     Image {
                         id: cloudTailImage
                         width: 10
@@ -1353,7 +1364,7 @@ ApplicationWindow {
                         anchors.fill: parent
                         anchors.margins: chatContent.cloud_margin
                         font.family: "Helvetica"
-                        font.pointSize: 20
+                        font.pointSize: 17.5
                         onContentHeightChanged: {
                             parent.implicitHeight = contentHeight + chatContent.cloud_margin * 2
                             parent.implicitWidth = contentWidth + chatContent.cloud_margin * 2
@@ -1385,23 +1396,6 @@ ApplicationWindow {
                 }
             }
         }
-        Text {
-            id: typingText
-            font.italic: true
-            visible: false
-            anchors.left: chatContent.left
-            anchors.leftMargin: chatContent.chat_margin
-            anchors.bottom: chatSeparator.top
-            anchors.bottomMargin: chatContent.chat_margin
-            onVisibleChanged: {
-                if (visible) {
-                    messages.bottomMargin += contentHeight + chatContent.chat_margin
-                } else {
-                    messages.bottomMargin -= contentHeight + chatContent.chat_margin
-                }
-                messages.scrollToEndVK()
-            }
-        }
 
         Rectangle {
             id: chatSeparator
@@ -1428,7 +1422,7 @@ ApplicationWindow {
                 leftPadding: 10
                 verticalAlignment: TextInput.AlignVCenter
                 placeholderText: qsTr("Type something")
-                onAccepted: send.sendMessage()
+                onAccepted: { send.sendMessage(); focus = false }
                 visible: !clean_profile
                 Item {
                     id: virtualKeyboard
