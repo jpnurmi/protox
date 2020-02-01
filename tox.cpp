@@ -445,6 +445,7 @@ Tox *toxcore_create()
 		tox_self_set_name(m, (quint8*)username, strlen(username), NULL);
 	}
 
+	toxcore_save_data(m, GetProgDir() + DEFAULT_PROFILE);
 	return m;
 }
 

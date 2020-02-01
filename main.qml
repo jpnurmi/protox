@@ -55,6 +55,7 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
+        cleanProfile = bridge.getFriendsCount() < 1
         initTimer.start()
     }
 
@@ -100,7 +101,7 @@ ApplicationWindow {
         font.pointSize: 32
         anchors.top: overlayHeader.bottom
         anchors.topMargin: 40
-        visible: clean_profile
+        visible: cleanProfile
     }
 
     Text {
@@ -109,7 +110,7 @@ ApplicationWindow {
         wrapMode: Text.Wrap
         anchors.top: welcomeTextTitle.bottom
         anchors.topMargin: 20
-        visible: clean_profile
+        visible: cleanProfile
         width: window.width
         horizontalAlignment: Text.AlignHCenter
     }
@@ -136,7 +137,7 @@ ApplicationWindow {
     }
 
     // global properties
-    property bool clean_profile: bridge.getFriendsCount() === 0
+    property bool cleanProfile
 
     // global properties (static)
     readonly property bool inPortrait: window.width < window.height
@@ -325,7 +326,7 @@ ApplicationWindow {
     function insertFriend(friend_number, nickName, request, request_message, friendPk) {
         friendsModel.append({"friendNumber" : friend_number, "nickName" : nickName, "request" : request, "request_message" : request_message, "friendPk" : friendPk})
         if (!request) {
-            clean_profile = bridge.getFriendsCount() === 0
+            cleanProfile = bridge.getFriendsCount() === 0
         } 
         if (request && (appInactive || !drawer.opened)) {
             notification.show({
@@ -334,6 +335,10 @@ ApplicationWindow {
                               id : -1
                             });
             leftOverlayButtonTextAnimation.start()
+        }
+        if (bridge.getFriendsCount() === 1) {
+            selectFriend(0)
+            friendNickname.setText(friendsModel.get(0).nickName)
         }
     }
 
@@ -536,7 +541,7 @@ ApplicationWindow {
                     }
                     var toxId_text = toxId.text
                     if(toxId_text.substring(0, 4) === "tox:") {
-                        toxId_text = toxId_text.slice(4, toxId_text.length())
+                        toxId_text = toxId_text.slice(4, toxId.text.length)
                     }
                     bridge.makeFriendRequest(toxId_text.toUpperCase(), 
                                              addFriendMessage.text.length > 0 ? addFriendMessage.text : addFriendMessage.placeholderText)
@@ -595,7 +600,7 @@ ApplicationWindow {
                     }
                 }
                 toast.show({ message : qsTr("Friend removed!"), duration : Toast.Short });
-                clean_profile = bridge.getFriendsCount() === 0
+                cleanProfile = bridge.getFriendsCount() < 1
                 if (friendsModel.count > 0) {
                     selectFriend(friendsModel.get(0).friendNumber)
                 } else {
@@ -819,7 +824,7 @@ ApplicationWindow {
             anchors.right: friendNickname.left
             anchors.rightMargin: 10
             anchors.verticalCenter: friendNickname.verticalCenter
-            visible: !clean_profile
+            visible: !cleanProfile
         }
 
         Label {
@@ -833,7 +838,7 @@ ApplicationWindow {
             MouseArea {
                 anchors.fill: parent
                 onPressed: {
-                    if (!clean_profile) {
+                    if (!cleanProfile) {
                         infoNickname.text = bridge.getFriendNickname(bridge.getCurrentFriendNumber())
                         infoStatus.text = bridge.getFriendStatusMessage(bridge.getCurrentFriendNumber())
                         friendInfoMenu.popup()
@@ -1517,7 +1522,7 @@ ApplicationWindow {
             anchors.bottom: chatLayout.top
             property int separator_margin: 5
             anchors.bottomMargin: separator_margin
-            visible: !clean_profile
+            visible: !cleanProfile
         }
 
         RowLayout {
@@ -1534,7 +1539,7 @@ ApplicationWindow {
                 verticalAlignment: TextInput.AlignVCenter
                 placeholderText: qsTr("Type something")
                 onAccepted: { send.sendMessage(); focus = false }
-                visible: !clean_profile
+                visible: !cleanProfile
                 Item {
                     id: virtualKeyboard
                     property int keyboardHeight: 0
@@ -1575,7 +1580,7 @@ ApplicationWindow {
             Button {
                 id: send
                 Layout.rightMargin: 5
-                visible: !clean_profile
+                visible: !cleanProfile
                 background: Rectangle {
                     implicitWidth: chatMessage.height * 0.75
                     implicitHeight: implicitWidth
