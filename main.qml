@@ -336,9 +336,9 @@ ApplicationWindow {
                             });
             leftOverlayButtonTextAnimation.start()
         }
-        if (bridge.getFriendsCount() === 1) {
+        if (bridge.getFriendsCount() < 2) {
             selectFriend(0)
-            friendNickname.setText(friendsModel.get(0).nickName)
+            friendNickname.setText(nickName)
         }
     }
 
@@ -482,6 +482,10 @@ ApplicationWindow {
             verticalAlignment: TextInput.AlignVCenter
             width: parent.width
             text: ""
+            onAccepted: {
+                focus = false
+                addFriendMessage.focus = true
+            }
         }
         /*
         Button {
@@ -507,6 +511,10 @@ ApplicationWindow {
             verticalAlignment: TextInput.AlignVCenter
             width: parent.width
             placeholderText: qsTr("Add me to your friends. Maybe?")
+            onAccepted: {
+                focus = false
+                sendItem.send()
+            }
         }
         Text {
             id: friendRequestStatusText
@@ -529,12 +537,13 @@ ApplicationWindow {
                 }
             }
             MenuItem {
+                id: sendItem
                 Layout.fillWidth: true
                 Text {
                     anchors.centerIn: parent
                     text: qsTr("Send")
                 }
-                onTriggered: {
+                function send() {
                     if (bridge.getConnStatus() < 1) {
                         toast.show({ message : qsTr("You are not connected to the tox network."), duration : Toast.Short });
                         return
@@ -545,6 +554,9 @@ ApplicationWindow {
                     }
                     bridge.makeFriendRequest(toxId_text.toUpperCase(), 
                                              addFriendMessage.text.length > 0 ? addFriendMessage.text : addFriendMessage.placeholderText)
+                }
+                onTriggered: {
+                    sendItem.send()
                 }
             }
         }
