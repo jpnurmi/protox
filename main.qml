@@ -33,6 +33,7 @@ ApplicationWindow {
         close.accepted = false
     }
 
+    property bool appInactive
     Connections {
         target: Qt.application
         onStateChanged: {
@@ -49,6 +50,7 @@ ApplicationWindow {
             if(Qt.application.state === Qt.ApplicationActive && notification.getNotificationId() !== -1) {
                 selectFriend(notification.getNotificationId(true))
             }
+            appInactive = Qt.application.state === Qt.ApplicationSuspended
         }
     }
 
@@ -292,8 +294,7 @@ ApplicationWindow {
     property int new_messages: 0
     function insertMessage(text, friend_number, self, message_id, time, unique_id, failed, history) {
 
-        if (!self && !history && (Application.state === Qt.ApplicationHidden || (Application.state !== Qt.ApplicationHidden 
-                                                      && bridge.getCurrentFriendNumber() !== friend_number))) {
+        if (!self && !history && (appInactive || bridge.getCurrentFriendNumber() !== friend_number)) {
             notification.show({
                               caption : text,
                               title : qsTr("New message from ") + bridge.getFriendNickname(friend_number),
@@ -326,7 +327,7 @@ ApplicationWindow {
         if (!request) {
             clean_profile = bridge.getFriendsCount() === 0
         } 
-        if (request && (Application.state === Qt.ApplicationHidden || !drawer.opened)) {
+        if (request && (appInactive || !drawer.opened)) {
             notification.show({
                               caption : request_message,
                               title : qsTr("A new friend request from ") + nickName,
@@ -1025,7 +1026,7 @@ ApplicationWindow {
                     ScrollIndicator.vertical: ScrollIndicator { }
                     ColumnLayout {
                         anchors.top: parent.top
-                        spacing: 1
+                        spacing: 0
                         Repeater {
                             id: friends
                             model: friendsModel
@@ -1153,7 +1154,7 @@ ApplicationWindow {
                                     z: z_friend_item
                                     text: nickName
                                     leftPadding: 4
-                                    rightPadding: 4
+                                    rightPadding: 6
                                     property int friend_number: friendNumber
                                     Layout.alignment: Qt.AlignRight
                                     implicitHeight: parent.itemHeight
@@ -1262,7 +1263,7 @@ ApplicationWindow {
         property real alpha: 0.9
         property int bottomMargin: 30
         opacity: alpha
-        x: (parent.width - width) * 0.5
+        x: (parent.width - width) * (inPortrait ? 0.5 : 0.7)
         y: chatSeparator.y - height - bottomMargin
         visible: false
         Text {
@@ -1511,6 +1512,7 @@ ApplicationWindow {
             width: window.width
             height: 1
             color: "gray"
+            opacity: 0.5
             anchors.left: parent.left
             anchors.bottom: chatLayout.top
             property int separator_margin: 5
