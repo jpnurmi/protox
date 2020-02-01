@@ -289,6 +289,7 @@ void customMessageHandler(QtMsgType type, const QMessageLogContext &context, con
 
 int main(int argc, char *argv[])
 {
+	QtStatusBar::setColor(QColor("#3F51B5"));
 #if defined (Q_OS_ANDROID)
 	const QString permission_write = "android.permission.WRITE_EXTERNAL_STORAGE";
 	auto permission_result = QtAndroid::checkPermission(permission_write);
@@ -358,6 +359,9 @@ int main(int argc, char *argv[])
 	QZXing::registerQMLTypes();
 	QZXing::registerQMLImageProvider(engine);
 	engine.load(url);
+#ifdef Q_OS_ANDROID
+	QtAndroid::hideSplashScreen();
+#endif
 	QObject *component = engine.rootObjects().first();
 	qmlbridge->setComponent(component);
 

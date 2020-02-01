@@ -23,7 +23,10 @@ ApplicationWindow {
     */
     property bool _inPortrait: inPortrait
     on_InPortraitChanged: {
+        var friend_number = bridge.getCurrentFriendNumber()
         drawer.width = width * 0.5 * (!inPortrait ? (Screen.height / Screen.width) : 1.0)
+        friendNickname.setText(bridge.getFriendNickname(friend_number))
+        friendStatus.setText(bridge.getFriendStatusMessage(friend_number))
     }
 
     onClosing: {
@@ -38,6 +41,8 @@ ApplicationWindow {
                 connectionStatus.text = qsTr("Bootstrapping...")
             }
             if (splashImageDestroyAnimation !== null) {
+                statusBar.theme = Material.Dark
+                statusBar.color = Material.toolBarColor
                 splashImageDestroyAnimation.start()
             }
             // select friend when you click on notification
@@ -117,8 +122,6 @@ ApplicationWindow {
 
     StatusBar {
         id: statusBar
-        theme: Material.Dark
-        color: Material.toolBarColor
     }
 
     Toast {
@@ -202,7 +205,7 @@ ApplicationWindow {
     function setFriendStatusMessage(friend_number, message) {
         if (friend_number !== bridge.getCurrentFriendNumber())
             return
-        friendStatus.text = limitString(message, friendStatus.charsLimit)
+        friendStatus.setText(message)
     }
 
     function setFriendTyping(friend_number, typing) {
@@ -214,11 +217,11 @@ ApplicationWindow {
             if (nick.length > friendNickname.charsLimit) {
                 nick = qsTr("A friend")
             }
-            messages.footerItem.text = nick + qsTr(" is typing...")
-            messages.footerItem.visible = true
+            typingText.text = nick + qsTr(" is typing...")
+            typingText.visible = true
         } else {
-            messages.footerItem.text = ""
-            messages.footerItem.visible = false
+            typingText.text = ""
+            typingText.visible = false
         }
     }
 
@@ -267,11 +270,11 @@ ApplicationWindow {
         }
         notification.cancel(friend_number)
         dropTypingTimer.stop()
-        bridge.setTypingFriend(bridge.getCurrentFriendNumber(), false)
+        typingText.visible = false
         each_friend_text[bridge.getCurrentFriendNumber()] = chatMessage.text
         bridge.setCurrentFriend(friend_number)
-        friendNickname.text = limitString(bridge.getFriendNickname(bridge.getCurrentFriendNumber()), friendNickname.charsLimit)
-        friendStatus.text = limitString(bridge.getFriendStatusMessage(bridge.getCurrentFriendNumber()), friendStatus.charsLimit)
+        friendNickname.setText(bridge.getFriendNickname(friend_number))
+        friendStatus.setText(bridge.getFriendStatusMessage(friend_number))
         for (var i = 0; i < friendsModel.count; i++) {
             if (friendsModel.get(i).friendNumber === friend_number) {
                 friendStatusIndicator.color = friends.itemAt(i).getFriendStatusIndicatorColor()
@@ -286,6 +289,7 @@ ApplicationWindow {
         } 
     }
 
+    property int new_messages: 0
     function insertMessage(text, friend_number, self, message_id, time, unique_id, failed, history) {
 
         if (!self && !history && (Application.state === Qt.ApplicationHidden || (Application.state !== Qt.ApplicationHidden 
@@ -308,8 +312,14 @@ ApplicationWindow {
                                  "msgUniqueId" : unique_id,
                                  "msgFailed" : failed})
 
-        if (!history)
-            messages.scrollToEndVK()
+        if (!history) {
+            if (messages.lastItemVisible) {
+                messages.scrollToEndVK()
+            } else {
+                new_messages += 1
+                scrollToEndButton.visible = true
+            }
+        }
     }
     function insertFriend(friend_number, nickName, request, request_message, friendPk) {
         friendsModel.append({"friendNumber" : friend_number, "nickName" : nickName, "request" : request, "request_message" : request_message, "friendPk" : friendPk})
@@ -815,7 +825,10 @@ ApplicationWindow {
             id: friendNickname
             anchors.centerIn: parent
             property int charsLimit: 20
-            text: limitString(bridge.getFriendNickname(bridge.getCurrentFriendNumber()), charsLimit)
+            function setText(t) {
+                var mult = !inPortrait ? 1.5 : 1.0
+                text = limitString(t, Math.round(charsLimit * mult))
+            }
             MouseArea {
                 anchors.fill: parent
                 onPressed: {
@@ -834,7 +847,10 @@ ApplicationWindow {
             font.pixelSize: 10
             font.italic: true
             property int charsLimit: 52
-            text: limitString(bridge.getFriendStatusMessage(bridge.getCurrentFriendNumber()), charsLimit)
+            function setText(t) {
+                var mult = !inPortrait ? 1.5 : 1.0
+                text = limitString(t, Math.round(charsLimit * mult))
+            }
         }
     }
 
@@ -902,6 +918,8 @@ ApplicationWindow {
                     Layout.alignment: Qt.AlignTop
                     ItemDelegate {
                         id: accountName
+                        leftPadding: 4
+                        rightPadding: 4
                         text: bridge.getNickname(true)
                         font.pointSize: 12
                         font.bold: true
@@ -1134,6 +1152,8 @@ ApplicationWindow {
                                     background.z: z_friend_item
                                     z: z_friend_item
                                     text: nickName
+                                    leftPadding: 4
+                                    rightPadding: 4
                                     property int friend_number: friendNumber
                                     Layout.alignment: Qt.AlignRight
                                     implicitHeight: parent.itemHeight
@@ -1232,6 +1252,50 @@ ApplicationWindow {
         }
     }
 
+    Rectangle {
+        id: scrollToEndButton
+        z: z_top
+        width: 200
+        height: 40
+        radius: height * 0.5
+        color: "white"
+        property real alpha: 0.9
+        property int bottomMargin: 30
+        opacity: alpha
+        x: (parent.width - width) * 0.5
+        y: chatSeparator.y - height - bottomMargin
+        visible: false
+        Text {
+            id: nextPageButtonText
+            text: "\u2193 " + qsTr("You have ") + new_messages + qsTr(" new messages") + " \u2193"
+            font.bold: true
+            font.pointSize: 12.5
+            opacity: parent.opacity
+            anchors.centerIn: parent
+        }
+        onVisibleChanged: {
+            if (!visible) {
+                new_messages = 0
+            }
+        }
+        MouseArea {
+            anchors.fill: parent
+            enabled: parent.visible
+            onPressed: {
+                messages.scrollToEndVK()
+            }
+        }
+    }
+    DropShadow {
+        anchors.fill: scrollToEndButton
+        visible: scrollToEndButton.visible
+        opacity: scrollToEndButton.opacity
+        radius: 8.0
+        samples: 16
+        color: "#80000000"
+        source: scrollToEndButton
+    }
+
     ColumnLayout {
         anchors.fill: parent
         anchors.leftMargin: !inPortrait ? drawer.width : undefined
@@ -1242,7 +1306,51 @@ ApplicationWindow {
             property int cloud_margin: 5
             // fixme: convert to Layout.
             anchors.fill: parent
-            
+            Rectangle {
+                id: typingText
+                property int margin: 5
+                property real alpha: 0.9
+                height: 20
+                opacity: alpha
+                z: z_top
+                radius: height * 0.5
+                anchors.left: parent.left
+                anchors.leftMargin: parent.chat_margin
+                anchors.right: parent.right
+                anchors.rightMargin: parent.chat_margin
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: chatLayout.height + chatSeparator.separator_margin * 2 + chatSeparator.height + margin
+                color: "white"
+                property string text
+                Text {
+                    anchors.left: parent.left
+                    anchors.leftMargin: 5
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: parent.text
+                    font.italic: true
+                    visible: parent.visible
+                }
+                visible: false
+                onVisibleChanged: {
+                    if (messages.lastItemVisible) {
+                        messages.scrollToEndVK()
+                    }
+                    if (visible) {
+                        messages.bottomMargin += height + margin
+                    } else {
+                        messages.bottomMargin -= height + margin
+                    }
+                }
+            }
+            DropShadow {
+                anchors.fill: typingText
+                visible: typingText.visible
+                opacity: typingText.opacity
+                radius: 8.0
+                samples: 16
+                color: "#80000000"
+                source: typingText
+            }
             ListModel {
                 id: messagesModel
             }
@@ -1250,6 +1358,7 @@ ApplicationWindow {
                 id: messages
                 anchors.fill: parent
                 property int flickable_margin: 20
+                property bool lastItemVisible: false
                 anchors.topMargin: overlayHeader.height
                 anchors.bottomMargin: chatLayout.height + chatSeparator.separator_margin * 2 + chatSeparator.height
                 topMargin: flickable_margin
@@ -1258,7 +1367,11 @@ ApplicationWindow {
                 clip: true
                 boundsMovement: Flickable.StopAtBounds
                 ScrollIndicator.vertical: ScrollIndicator {}
-
+                onContentYChanged: {
+                    if (lastItemVisible) {
+                        scrollToEndButton.visible = false
+                    }
+                }
                 function checkExceedsHeight() {
                     return contentHeight > height
                 }
@@ -1267,7 +1380,6 @@ ApplicationWindow {
                     positionViewAtBeginning()
                     contentY -= chatLayout.height + chatSeparator.separator_margin * 2 + chatSeparator.height
                 }
-                
                 function scrollToEnd() {
                     contentY = 0
                     positionViewAtEnd()
@@ -1286,22 +1398,19 @@ ApplicationWindow {
                     }
                 }
                 model: messagesModel
-                footer: Text {
-                    id: typingText
-                    width: parent.width
-                    height: visible ? 20 : 0
-                    topPadding: height * 0.5
-                    leftPadding: chatContent.chat_margin
-                    font.italic: true
-                    visible: false
-                    onVisibleChanged: {
-                        messages.scrollToEndVK()
-                    }
-                }
+                property real span : contentY + height
                 delegate: Rectangle {
                     id: messageCloud
                     color: !msgSelf ? "lightblue" : (msgReceived ? "orange" : "lightgray")
                     radius: 10
+                    property bool fullyVisible: y > messages.contentY && y < messages.span
+                    onFullyVisibleChanged: {
+                        if (bridge.getMessagesCount(bridge.getCurrentFriendNumber()) !== index+1) {
+                            return
+                        }
+                        messages.lastItemVisible = fullyVisible
+                    }
+
                     Rectangle {
                         id: cloudCornerRemover
                         z: z_cloud
