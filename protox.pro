@@ -23,6 +23,16 @@ LIBS += -L$$PWD/libs/ -ltoxcore
 
 RESOURCES += qml.qrc
 
+extralib.target = extra
+extralib.commands = echo "Running qmlcombiner.py"; \
+                        cd $$PWD; \
+                        python3 $$PWD/qmlcombiner.py $$PWD/main.qml $$PWD/app.qml
+
+extralib.depends =
+
+QMAKE_EXTRA_TARGETS += extralib
+PRE_TARGETDEPS = extra
+
 include(QtMobileNotification/QtMobileNotification.pri)
 include(QtStatusBar/QtStatusBar.pri)
 include(QZXing/QZXing.pri)
@@ -48,7 +58,8 @@ DISTFILES += \
 	android/gradlew.bat \
 	android/res/values/libs.xml \
 	android/src/notifications/QtAndroidNotifications.java \
-	android/src/activity/QtActivityEx.java
+	android/src/activity/QtActivityEx.java \
+	combiner.py
 
 contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
 	ANDROID_PACKAGE_SOURCE_DIR = \

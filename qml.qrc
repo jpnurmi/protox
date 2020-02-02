@@ -5,5 +5,8 @@
         <file>send-button.png</file>
         <file>DejaVuSans.ttf</file>
         <file>splash.png</file>
+        <file>chatarea.qml</file>
+        <file>app.qml</file>
+        <file>functions.qml</file>
     </qresource>
 </RCC>
