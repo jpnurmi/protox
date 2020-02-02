@@ -100,19 +100,6 @@ ColumnLayout {
                 positionViewAtEnd()
                 contentY += chatLayout.height + chatSeparator.separator_margin * 2 + chatSeparator.height
             }
-            /*
-            function scrollToEndVK() {
-                
-                if (virtualKeyboard.keyboardActive && !checkExceedsHeight()) {
-                    boundsMovement = Flickable.DragOverBounds
-                } else {
-                    console.log("closed")
-                    //anchors.topMargin = overlayHeader.height
-                    boundsMovement = Flickable.StopAtBounds
-                    scrollToEnd()
-                }
-            }
-            */
             model: messagesModel
             property real span : contentY + height
             delegate: Rectangle {
@@ -190,12 +177,97 @@ ColumnLayout {
                     anchors.margins: chatContent.cloud_margin
                     font.family: "Helvetica"
                     font.pointSize: 17.5
+                    Component.onCompleted: {
+                        text = processText(text)
+                    }
+                    onTextChanged: {
+                        if (!contentWidth) {
+                            return
+                        }
+                        parent.implicitWidth = contentWidth + chatContent.cloud_margin * 2
+                    }
                     onContentHeightChanged: {
                         parent.implicitHeight = contentHeight + chatContent.cloud_margin * 2
                         parent.implicitWidth = contentWidth + chatContent.cloud_margin * 2
                     }
                     wrapMode: Text.Wrap
-                    textFormat: Text.StyledText
+                    textFormat: Text.AutoText
+                    
+                    function processText(t) {
+                        String.prototype.splice = function(idx, rem, str) {
+                            return this.slice(0, idx) + str + this.slice(idx + Math.abs(rem));
+                        };
+                        String.prototype.removeCharAt = function (i) {
+                            var tmp = this.split('');
+                            tmp.splice(i - 1 , 1);
+                            return tmp.join('');
+                        }
+                        var result = ""
+                        var quote = false
+                        var lines = String(t).split("<br>")
+                        var tags = [0, 0, 0, -1]
+                        for (var j = 0; j < lines.length; j++) {
+                            var line = lines[j].toString()
+                            for (var i = 0; i < line.length; i++) {
+                                var ch = line.charAt(i)
+                                if (ch === '>') {
+                                    result += "<font color=\"darkgreen\">"
+                                    quote = true
+                                    result += "&gt;"
+                                    continue
+                                }
+                                if (ch === '<') { result += "&lt;"; continue }
+                                if (ch === '"') { result += "&quot;"; continue }
+                                if (ch === '&') { result += "&amp;"; continue }
+                                if (ch === '*') {
+                                    result += "*"; tags[0]++
+                                    if (tags[0] === 2 && line.charAt(i - 1) === "*") { result = result.replace("**", "<b>"); continue }
+                                    if (tags[0] === 4 && line.charAt(i - 1) === "*") { tags[0] = 0; result = result.replace("**", "</b>"); continue }
+                                    continue
+                                }
+                                if (ch === '_') {
+                                    result += "_"; tags[1]++
+                                    if (tags[1] === 2 && line.charAt(i - 1) === "_") { result = result.replace("__", "<u>"); continue }
+                                    if (tags[1] === 4 && line.charAt(i - 1) === "_") { tags[1] = 0; result = result.replace("__", "</u>"); continue }
+                                    continue
+                                }
+                                if (ch === '~') {
+                                    result += "~"; tags[2]++
+                                    if (tags[2] === 2 && line.charAt(i - 1) === "~") { result = result.replace("~~", "<s>"); continue }
+                                    if (tags[2] === 4 && line.charAt(i - 1) === "~") { tags[2] = 0; result = result.replace("~~", "</s>"); continue }
+                                    continue
+                                }
+                                /*
+                                if (ch === '/') {
+                                    if (i < line.length && line.charAt(i + 1) !== '/') {
+                                        tags[3] = i
+                                    } else {
+                                        result += "/"
+                                    }
+                                    if (tags[3] >= 0) { result = result.splice(tags[3], 0, "<i>"); tags[3] = -1; result = result.splice(i, 0, "</i>"); continue }
+                                    continue
+                                }
+                                */
+
+                                result += ch
+                            }
+                            // cancel formatting
+                            if (tags[0] > 1 && tags[0] < 4) { result = result.replace("<b>", "**") }
+                            if (tags[1] > 1 && tags[1] < 4) { result = result.replace("<u>", "__") }
+                            if (tags[2] > 1 && tags[2] < 4) { result = result.replace("<s>", "~~") }
+                            tags[0] = 0; tags[1] = 0; tags[2] = 0
+
+                            if (quote) {
+                                result += "</font>"
+                                quote = false
+                            }
+                            if (j !== lines.length - 1) {
+                                result += "<br>"
+                            }
+                        }
+                        //console.log(result)
+                        return result
+                    }
                 }
                 Text {
                     id: timeText
@@ -252,22 +324,12 @@ ColumnLayout {
             visible: !cleanProfile
             Item {
                 id: virtualKeyboard
-                property int keyboardHeight: 0
+                property real keyboardHeight: 0
                 property bool keyboardActive: false
                 onKeyboardActiveChanged: {
-                    //messages.interactive = !keyboardActive
-                    messages.scrollToEnd()
-                    var hmove = keyboardHeight - chatLayout.height - chatSeparator.height - chatContent.cloud_margin
-                    if (keyboardActive) {
-                        overlayHeader.y = hmove + overlayHeader.height
-                        messages.anchors.topMargin += 0//overlayHeader.height
-                        if (!messages.checkExceedsHeight()) {
-                            messages.anchors.topMargin += hmove
-                        }
-                    } else {
-                        messages.anchors.topMargin = overlayHeader.height
-                        overlayHeader.y = 0
-                    }
+                    if (chatMessage.focus) {
+                        messages.scrollToEnd()
+                    }s
                 }
 
                 Connections {
@@ -275,6 +337,7 @@ ColumnLayout {
                     onKeyboardRectangleChanged: {
                         virtualKeyboard.keyboardHeight = Qt.inputMethod.keyboardRectangle.height / Screen.devicePixelRatio
                         virtualKeyboard.keyboardActive = virtualKeyboard.keyboardHeight > 0
+                        
                     }
                 }
             }

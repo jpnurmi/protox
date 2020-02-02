@@ -144,7 +144,6 @@ function selectFriend(friend_number) {
 
 property int new_messages: 0
 function insertMessage(text, friend_number, self, message_id, time, unique_id, failed, history) {
-
     if (!self && !history && (appInactive || bridge.getCurrentFriendNumber() !== friend_number)) {
         notification.show({
                           caption : text,

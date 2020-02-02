@@ -522,6 +522,7 @@ ApplicationWindow {
         leftPadding: !inPortrait ? drawer.width : undefined
         z: z_overlay_header
         width: parent.width
+
         ToolButton {
             id: leftOverlayButton
             visible: inPortrait
