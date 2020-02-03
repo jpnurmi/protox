@@ -227,7 +227,7 @@ ApplicationWindow {
         width: 300
         title: qsTr("Add a new friend")
         x: (window.width - width) * 0.5
-        y: (window.height - height) * 0.5
+        y: (window.height - height - keyboardHeight) * 0.5
         z: z_menu
         modal: true
         onClosed: {
@@ -403,7 +403,7 @@ ApplicationWindow {
         width: 300
         title: "My profile"
         x: (window.width - width) * 0.5
-        y: (window.height - height) * 0.5
+        y: (window.height - height - keyboardHeight) * 0.5
         z: z_menu
         modal: true
         onClosed: {
@@ -522,6 +522,10 @@ ApplicationWindow {
         leftPadding: !inPortrait ? drawer.width : undefined
         z: z_overlay_header
         width: parent.width
+        NumberAnimation on y {
+            id: overlayHeaderSmoothMover
+            running: false
+        }
 
         ToolButton {
             id: leftOverlayButton
@@ -719,6 +723,7 @@ ApplicationWindow {
                         font.pointSize: 12
                         font.bold: true
                         Layout.alignment: Qt.AlignLeft
+                        Layout.leftMargin: 4
                         implicitWidth: drawer.width * 0.6
                         onClicked: {
                             profileMenu.open()
@@ -746,7 +751,7 @@ ApplicationWindow {
                                 onClicked: {
                                     if (index < 3) {
                                         bridge.setStatus(index)
-                                    }
+                                    } 
                                     statusIndicator.setStatus(index)
                                     bridge.changeConnection(index != 3)
                                 }

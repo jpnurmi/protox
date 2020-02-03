@@ -59,6 +59,7 @@ DISTFILES += \
 	android/res/values/libs.xml \
 	android/src/notifications/QtAndroidNotifications.java \
 	android/src/activity/QtActivityEx.java \
+	android/src/activity/KeyboardProvider.java \
 	combiner.py
 
 contains(ANDROID_TARGET_ARCH,armeabi-v7a) {

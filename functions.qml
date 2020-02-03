@@ -230,4 +230,28 @@ function setConnStatus(conn_status) {
     connectionStatus.text = text;
     connectionStatus.color = color;
 }
+
+Text {
+    x: 0
+    y: 0
+    color: "red"
+    text: "Height:" + keyboardHeight
+}
+
+property real keyboardHeight: 0
+property bool keyboardActive: false
+/*
+NumberAnimation on keyboardHeight {
+    id: keyboardHeightSmoothMover
+    running: false
+}
+*/
+function setKeyboardHeight(height) {
+    keyboardActive = height > 0
+    keyboardHeight = height / Screen.devicePixelRatio
+    if (keyboardActive && chatMessage.focus) {
+        messages.scrollToEnd()
+    }
+}
+
 /*[remove]*/ }

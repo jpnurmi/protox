@@ -6,10 +6,7 @@ import QtQuick.Dialogs 1.2
 import QtQuick.Window 2.12
 import QtMultimedia 5.12
 import QtGraphicalEffects 1.0
-import QtNotification 1.0
-import QtStatusBar 1.0
-import QtToast 1.0
-import QZXing 2.3
+
 
 ColumnLayout {
     anchors.fill: parent
@@ -75,7 +72,7 @@ ColumnLayout {
             property int flickable_margin: 20
             property bool lastItemVisible: false
             anchors.topMargin: overlayHeader.height
-            anchors.bottomMargin: chatLayout.height + chatSeparator.separator_margin * 2 + chatSeparator.height
+            anchors.bottomMargin: keyboardHeight + chatLayout.height + chatSeparator.separator_margin * 2 + chatSeparator.height
             topMargin: flickable_margin
             bottomMargin: flickable_margin
             spacing: 20
@@ -310,7 +307,11 @@ ColumnLayout {
     RowLayout {
         id: chatLayout
         Layout.alignment: Qt.AlignBottom | Qt.AlignLeft
-        Layout.margins: 5
+        property int margin: 5
+        Layout.leftMargin: margin
+        Layout.rightMargin: margin
+        Layout.topMargin: margin
+        Layout.bottomMargin: keyboardHeight + margin
 
         TextField {
             Layout.fillWidth: true
@@ -322,27 +323,6 @@ ColumnLayout {
             placeholderText: qsTr("Type something")
             onAccepted: { send.sendMessage(); focus = false }
             visible: !cleanProfile
-            Item {
-                id: virtualKeyboard
-                property real keyboardHeight: 0
-                property bool keyboardActive: false
-                onKeyboardActiveChanged: {
-                    if (chatMessage.focus) {
-                        messages.scrollToEnd()
-                    }s
-                }
-
-                Connections {
-                    target: Qt.inputMethod
-                    onKeyboardRectangleChanged: {
-                        virtualKeyboard.keyboardHeight = Qt.inputMethod.keyboardRectangle.height / Screen.devicePixelRatio
-                        virtualKeyboard.keyboardActive = virtualKeyboard.keyboardHeight > 0
-                        
-                    }
-                }
-            }
-
-
             Timer {
                 id: dropTypingTimer
                 interval: 2000

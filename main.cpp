@@ -272,6 +272,13 @@ void QmlCBridge::bootstrapDHT()
 	toxcore_bootstrap_DHT(tox);
 }
 
+void QmlCBridge::setKeyboardHeight(int height)
+{
+	QVariant returnedValue;
+	QMetaObject::invokeMethod(component, "setKeyboardHeight", Qt::BlockingQueuedConnection,
+		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, height));
+}
+
 static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler(0);
 
 void customMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString & msg)
@@ -286,6 +293,16 @@ void customMessageHandler(QtMsgType type, const QMessageLogContext &context, con
 	default:
 		(*QT_DEFAULT_MESSAGE_HANDLER)(type, context, msg);
 		break;
+	}
+}
+
+extern "C" 
+{
+	JNIEXPORT void JNICALL Java_org_protox_activity_QtActivityEx_keyboardHeightChanged(JNIEnv *, jobject, jint height)
+	{
+		if (qmlbridge) {
+			qmlbridge->setKeyboardHeight(height);
+		}
 	}
 }
 

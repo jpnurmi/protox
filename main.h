@@ -27,6 +27,7 @@ public:
 	void setFriendStatus(quint32 friend_number, quint32 status);
 	void setConnStatus(int conn_status);
 	QList<QVariant> getFriendsModelOrder();
+	void setKeyboardHeight(int height);
 public slots:
 	Q_INVOKABLE void sendMessage(const QString &message);
 	Q_INVOKABLE quint32 getCurrentFriendNumber();
