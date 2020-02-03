@@ -208,7 +208,7 @@ ColumnLayout {
                             for (var i = 0; i < line.length; i++) {
                                 var ch = line.charAt(i)
                                 if (ch === '>') {
-                                    result += "<font color=\"darkgreen\">"
+                                    result += "<font color=\"#0b6623\">"
                                     quote = true
                                     result += "&gt;"
                                     continue
