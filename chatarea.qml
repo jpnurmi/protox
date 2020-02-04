@@ -4,8 +4,6 @@ import QtQuick.Controls.Material 2.2
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.2
 import QtQuick.Window 2.12
-import QtMultimedia 5.12
-import QtGraphicalEffects 1.0
 
 
 ColumnLayout {
@@ -298,6 +296,7 @@ ColumnLayout {
         color: "gray"
         opacity: 0.5
         anchors.left: parent.left
+        anchors.right: parent.right
         anchors.bottom: chatLayout.top
         property int separator_margin: 5
         anchors.bottomMargin: separator_margin

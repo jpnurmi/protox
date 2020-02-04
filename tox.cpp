@@ -324,7 +324,7 @@ bool toxcore_save_data(Tox *m, const QString &path)
 static Tox *toxcore_load_tox(struct Tox_Options *options, QString path)
 {
 	QFile file(path);
-	Tox *m = NULL;
+	Tox *m = nullptr;
 
 	if (!file.open(QFile::OpenModeFlag::ReadOnly)) {
 		TOX_ERR_NEW err;

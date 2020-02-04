@@ -9,16 +9,20 @@ import android.view.WindowManager;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.widget.PopupWindow;
+import android.content.res.Configuration;
+import android.util.Log;
 
 public class KeyboardProvider extends PopupWindow implements OnGlobalLayoutListener {
     private Activity mActivity;
     private View rootView;
     private KeyboardListener listener;
     private int heightMax; // Record the maximum height of the pop content area
+    private int lastOrientation;
 
     public KeyboardProvider(Activity activity) {
         super(activity);
         this.mActivity = activity;
+        lastOrientation = mActivity.getResources().getConfiguration().orientation;
 
         // Basic configuration
         rootView = new View(activity);
@@ -60,12 +64,17 @@ public class KeyboardProvider extends PopupWindow implements OnGlobalLayoutListe
     public void onGlobalLayout() {
         Rect rect = new Rect();
         rootView.getWindowVisibleDisplayFrame(rect);
-        if (rect.bottom > heightMax) {
-            heightMax = rect.bottom;
+        int height = rect.bottom;
+        int orientation = mActivity.getResources().getConfiguration().orientation;
+        if (orientation != lastOrientation) {
+            heightMax = height;
         }
-
+        lastOrientation = orientation;
+        if (height > heightMax) {
+            heightMax = height;
+        }
         // The difference between the two is the height of the keyboard
-        int keyboardHeight = heightMax - rect.bottom;
+        int keyboardHeight = heightMax - height;
         if (listener != null) {
             listener.onHeightChanged(keyboardHeight);
         }

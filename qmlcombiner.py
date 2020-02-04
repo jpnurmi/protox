@@ -1,9 +1,6 @@
 #!/usr/bin/python3
 # This Python file uses the following encoding: utf-8
 
-# if__name__ == "__main__":
-#     pass
-
 import sys
 
 if (len(sys.argv) < 2):
@@ -21,7 +18,11 @@ for line in data:
     if operator in line:
         split = line.split(" ")
         incf = split[len(split)-1].replace('\n', '')
-        spaces = '    ' # fixme: generate number of spaces
+        _spaces = 0
+        for symbol in line:
+            if symbol == ' ':
+                _spaces += 1
+        spaces = ' ' * (_spaces - 1)
         print('Found include file: ' + incf)
         include = open(incf, "r")
         proceed = []

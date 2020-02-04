@@ -6,7 +6,8 @@
         <file>DejaVuSans.ttf</file>
         <file>splash.png</file>
         <file>chatarea.qml</file>
-        <file>app.qml</file>
         <file>functions.qml</file>
+        <file>app.qml</file>
+        <file>leftpanel.qml</file>
     </qresource>
 </RCC>

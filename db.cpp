@@ -97,7 +97,7 @@ void ChatDataBase::setMessageReceived(quint64 unique_id, const ToxPk &public_key
 	db.commit();
 }
 
-ToxMessages ChatDataBase::getFriendMessages(const ToxPk &public_key, quint32 limit, quint32 start, bool from, bool reverse)
+ToxMessages ChatDataBase::getFriendMessages(const ToxPk &public_key, quint32 limit, quint32 start, bool from, bool reverse, QDate fromDate)
 {
 	ToxMessages messages;
 	QSqlQuery query(db);

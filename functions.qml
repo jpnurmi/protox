@@ -231,13 +231,6 @@ function setConnStatus(conn_status) {
     connectionStatus.color = color;
 }
 
-Text {
-    x: 0
-    y: 0
-    color: "red"
-    text: "Height:" + keyboardHeight
-}
-
 property real keyboardHeight: 0
 property bool keyboardActive: false
 /*
@@ -249,6 +242,7 @@ NumberAnimation on keyboardHeight {
 function setKeyboardHeight(height) {
     keyboardActive = height > 0
     keyboardHeight = height / Screen.devicePixelRatio
+    console.log(keyboardHeight)
     if (keyboardActive && chatMessage.focus) {
         messages.scrollToEnd()
     }
