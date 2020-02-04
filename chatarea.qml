@@ -4,6 +4,7 @@ import QtQuick.Controls.Material 2.2
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.2
 import QtQuick.Window 2.12
+import QtGraphicalEffects 1.0
 
 
 ColumnLayout {
@@ -172,6 +173,20 @@ ColumnLayout {
                     anchors.margins: chatContent.cloud_margin
                     font.family: "Helvetica"
                     font.pointSize: 17.5
+                    MouseArea {
+                        anchors.fill: parent
+                        preventStealing: true
+                        onClicked: {
+                            var link = parent.linkAt(mouseX, mouseY)
+                            if (link.length > 0) {
+                                Qt.openUrlExternally(link)
+                                return
+                            }
+                            bridge.copyTextToClipboard(cloudText.text)
+                            toast.show({ message : "Text copied!", duration : Toast.Short });
+                        }
+                    }
+
                     Component.onCompleted: {
                         text = processText(text)
                     }
@@ -201,6 +216,7 @@ ColumnLayout {
                         var quote = false
                         var lines = String(t).split("<br>")
                         var tags = [0, 0, 0, -1]
+                        var link_prefixes = ["http://","https://", "ftp://", "sftp://"]
                         for (var j = 0; j < lines.length; j++) {
                             var line = lines[j].toString()
                             for (var i = 0; i < line.length; i++) {
@@ -232,6 +248,7 @@ ColumnLayout {
                                     if (tags[2] === 4 && line.charAt(i - 1) === "~") { tags[2] = 0; result = result.replace("~~", "</s>"); continue }
                                     continue
                                 }
+
                                 /*
                                 if (ch === '/') {
                                     if (i < line.length && line.charAt(i + 1) !== '/') {
@@ -246,6 +263,28 @@ ColumnLayout {
 
                                 result += ch
                             }
+                            for (var k = 0; k < link_prefixes.length; k++) {
+                                var search_from = 0;
+                                while (result.indexOf(link_prefixes[k], search_from) !== -1) {
+                                    var start = result.indexOf(link_prefixes[k], search_from)
+                                    var end = -1;
+                                    for (i = start; i < result.length; i++) {
+                                        if (result.charAt(i) === ' ') {
+                                            end = i
+                                            break
+                                        }
+                                    }
+                                    if (end < 0) {
+                                        end = result.length
+                                    }
+                                    var link = result.substring(start, end)
+                                    var rep = '<a href=\"' + link +'\">' + link + '</a>'
+                                    result = result.replace(link, rep)
+                                    search_from = start + rep.length
+                                }
+                            }
+
+                            
                             // cancel formatting
                             if (tags[0] > 1 && tags[0] < 4) { result = result.replace("<b>", "**") }
                             if (tags[1] > 1 && tags[1] < 4) { result = result.replace("<u>", "__") }
@@ -277,14 +316,15 @@ ColumnLayout {
                         }
                     }
                 }
+                /*
                 MouseArea {
                     id: cloudMouseArea
                     anchors.fill: parent
                     onClicked: {
-                        bridge.copyTextToClipboard(cloudText.text)
-                        toast.show({ message : "Text copied!", duration : Toast.Short });
+
                     }
                 }
+                */
             }
         }
     }
