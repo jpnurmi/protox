@@ -96,7 +96,6 @@ ColumnLayout {
             property bool addTransitionEnabled: true
             add: Transition {
                 enabled: messages.addTransitionEnabled
-                NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: 300 }
                 NumberAnimation { property: "scale"; from: 0; to: 1.0; duration: 300 }
             }
             model: messagesModel
@@ -118,7 +117,6 @@ ColumnLayout {
                     width: parent.radius
                     height: width
                     color: parent.color
-                    opacity: parent.opacity
                     anchors.top: parent.top
                     Component.onCompleted: {
                         if (msgSelf) {
@@ -135,7 +133,6 @@ ColumnLayout {
                     source: msgSelf ? (msgReceived ? canvasBuffer.itemAt(1).source : canvasBuffer.itemAt(0).source) : canvasBuffer.itemAt(2).source
                     mirror: !msgSelf
                     smooth: true
-                    opacity: parent.opacity
                     Component.onCompleted: {
                         if (msgSelf) {
                             anchors.left = parent.right
