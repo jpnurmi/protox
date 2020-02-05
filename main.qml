@@ -64,8 +64,10 @@ ApplicationWindow {
         repeat: false
         interval: 1
         onTriggered: {
+            messages.addTransitionEnabled = false
             bridge.retrieveChatLog()
             messages.scrollToEnd()
+            messages.addTransitionEnabled = true
             destroy()
         }
     }
@@ -150,6 +152,7 @@ ApplicationWindow {
     readonly property int z_menu_elements: 4
     readonly property int z_top: Number.MAX_VALUE-1
     readonly property int z_splash: Number.MAX_VALUE
+    readonly property real standardFontPointSize: 17.5
 
     //include: functions.qml
 
@@ -157,6 +160,8 @@ ApplicationWindow {
         Image buffers
     */
 
+    // I don't need multiple images but this bug appears
+    //https://forum.qt.io/topic/109114/qml-artifacts-android/9
     Repeater {
         id: canvasBuffer
         model: ["lightgray", "orange", "lightblue"]
@@ -247,7 +252,7 @@ ApplicationWindow {
         TextField {
             id: toxId
             selectByMouse: true
-            font.pixelSize: 20
+            font.pointSize: standardFontPointSize
             leftPadding: 10
             rightPadding: leftPadding
             verticalAlignment: TextInput.AlignVCenter
@@ -276,7 +281,7 @@ ApplicationWindow {
         TextField {
             id: addFriendMessage
             selectByMouse: true
-            font.pixelSize: 20
+            font.pointSize: standardFontPointSize
             leftPadding: 10
             rightPadding: leftPadding
             verticalAlignment: TextInput.AlignVCenter
@@ -424,7 +429,7 @@ ApplicationWindow {
         TextField {
             id: myNickname
             selectByMouse: true
-            font.pixelSize: 20
+            font.pointSize: standardFontPointSize
             leftPadding: 10
             rightPadding: leftPadding
             verticalAlignment: TextInput.AlignVCenter
@@ -441,7 +446,7 @@ ApplicationWindow {
         TextField {
             id: myStatus
             selectByMouse: true
-            font.pixelSize: 20
+            font.pointSize: standardFontPointSize
             leftPadding: 10
             rightPadding: leftPadding
             verticalAlignment: TextInput.AlignVCenter
@@ -653,7 +658,7 @@ ApplicationWindow {
             id: friendStatus
             anchors.top: friendNickname.bottom
             anchors.horizontalCenter: friendNickname.horizontalCenter
-            font.pixelSize: 10
+            font.pointSize: 10
             font.italic: true
             property int charsLimit: 52
             function setText(t) {

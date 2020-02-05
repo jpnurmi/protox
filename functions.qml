@@ -134,8 +134,10 @@ function selectFriend(friend_number) {
             break
         }
     }
+    messages.addTransitionEnabled = false
     bridge.retrieveChatLog()
     chatScrollToEnd()
+    messages.addTransitionEnabled = true
     chatMessage.clear()
     if (each_friend_text[friend_number] !== undefined) {
         chatMessage.text = each_friend_text[friend_number]

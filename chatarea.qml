@@ -6,7 +6,6 @@ import QtQuick.Dialogs 1.2
 import QtQuick.Window 2.12
 import QtGraphicalEffects 1.0
 
-
 ColumnLayout {
     anchors.fill: parent
     anchors.leftMargin: !inPortrait ? drawer.width : undefined
@@ -68,7 +67,7 @@ ColumnLayout {
         ListView {
             id: messages
             anchors.fill: parent
-            property int flickable_margin: 20
+            property int flickable_margin: 25
             property bool lastItemVisible: false
             anchors.topMargin: overlayHeader.height
             anchors.bottomMargin: (chatMessage.focus ? keyboardHeight : 0) + chatLayout.height + chatSeparator.separator_margin * 2 + chatSeparator.height
@@ -87,34 +86,28 @@ ColumnLayout {
                 return contentHeight > height
             }
             function scrollToStart() {
-                contentY = 0
                 positionViewAtBeginning()
                 contentY -= chatLayout.height + chatSeparator.separator_margin * 2 + chatSeparator.height
             }
             function scrollToEnd() {
-                //contentY = 0
                 positionViewAtEnd()
                 contentY += chatLayout.height + chatSeparator.separator_margin * 2 + chatSeparator.height
             }
+            property bool addTransitionEnabled: true
             add: Transition {
-                NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: 400 }
-                NumberAnimation { property: "scale"; from: 0; to: 1.0; duration: 400 }
-            }
-            displaced: Transition {
-                NumberAnimation { properties: "x,y"; duration: 400; easing.type: Easing.OutBounce }
-                NumberAnimation { property: "opacity"; to: 1.0 }
-                NumberAnimation { property: "scale"; to: 1.0 }
+                enabled: messages.addTransitionEnabled
+                NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: 300 }
+                NumberAnimation { property: "scale"; from: 0; to: 1.0; duration: 300 }
             }
             model: messagesModel
             property real span : contentY + height
-
             delegate: Rectangle {
                 id: messageCloud
                 color: !msgSelf ? "lightblue" : (msgReceived ? "orange" : "lightgray")
                 radius: 10
                 property bool fullyVisible: y > messages.contentY && y < messages.span
                 onFullyVisibleChanged: {
-                    if (bridge.getMessagesCount(bridge.getCurrentFriendNumber()) !== index+1) {
+                    if (bridge.getMessagesCount(bridge.getCurrentFriendNumber()) - 1 !== msgUniqueId) {
                         return
                     }
                     messages.lastItemVisible = fullyVisible
@@ -125,6 +118,7 @@ ColumnLayout {
                     width: parent.radius
                     height: width
                     color: parent.color
+                    opacity: parent.opacity
                     anchors.top: parent.top
                     Component.onCompleted: {
                         if (msgSelf) {
@@ -141,6 +135,7 @@ ColumnLayout {
                     source: msgSelf ? (msgReceived ? canvasBuffer.itemAt(1).source : canvasBuffer.itemAt(0).source) : canvasBuffer.itemAt(2).source
                     mirror: !msgSelf
                     smooth: true
+                    opacity: parent.opacity
                     Component.onCompleted: {
                         if (msgSelf) {
                             anchors.left = parent.right
@@ -182,7 +177,7 @@ ColumnLayout {
                     anchors.fill: parent
                     anchors.margins: chatContent.cloud_margin
                     font.family: "Helvetica"
-                    font.pointSize: 17.5
+                    font.pointSize: standardFontPointSize
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
@@ -196,11 +191,12 @@ ColumnLayout {
                         }
                         onPressAndHold: {
                             chatMessage.forceActiveFocus()
-                            var add = cloudText.plainText.replace("\n", "\n>")
+                            var add = cloudText.plainText.replace("\n", "\n> ")
+                            Qt.inputMethod.reset()
                             if (chatMessage.text.length > 0) {
-                                chatMessage.text += "\n>" + add + "\n"
+                                chatMessage.text += "\n> " + add + "\n"
                             } else {
-                                chatMessage.text += ">" + add + "\n"
+                                chatMessage.text += "> " + add + "\n"
                             }
                         }
                     }
@@ -218,7 +214,7 @@ ColumnLayout {
                         parent.implicitWidth = contentWidth + chatContent.cloud_margin * 2
                     }
                     wrapMode: Text.Wrap
-                    textFormat: Text.AutoText
+                    textFormat: Text.StyledText
                     function processText(t) {
                         var result = ""
                         var quote = false
@@ -355,19 +351,24 @@ ColumnLayout {
             Layout.fillWidth: true
             id: chatMessage
             selectByMouse: true
-            font.pixelSize: 20
+            font.pointSize: standardFontPointSize
             leftPadding: 10
             verticalAlignment: TextInput.AlignVCenter
             placeholderText: qsTr("Type something")
             visible: !cleanProfile
             property real defaultHeight
+            property real defaultContentHeight
             wrapMode: Text.Wrap
-            inputMethodHints: Qt.ImhSensitiveData
             Component.onCompleted: {
                 defaultHeight = height
+                defaultContentHeight = contentHeight
+            }
+            onContentWidthChanged: {
+                updateTyping()
             }
             onContentHeightChanged: {
                 messages.scrollToEnd()
+                updateTyping()
             }
             Keys.onBackPressed: {
                 focus = false
@@ -382,12 +383,12 @@ ColumnLayout {
                 }
             }
 
-            property string lastText
-            onTextChanged: {
-                if (text === lastText) { return }
-                lastText = text
+            function updateTyping() {
+                if (bridge.getConnStatus() < 1) {
+                    return
+                }
                 dropTypingTimer.stop()
-                if (text.length > 0) {
+                if (contentWidth > 0 || contentHeight > defaultContentHeight) {
                     dropTypingTimer.start()
                     bridge.setTypingFriend(bridge.getCurrentFriendNumber(), true)
                 } else {
@@ -408,7 +409,12 @@ ColumnLayout {
             }
             focusPolicy: Qt.NoFocus
             function sendMessage() {
+                Qt.inputMethod.reset()
                 if (chatMessage.text.length > 0) {
+                    if (bridge.getFriendConnStatus(bridge.getCurrentFriendNumber()) < 1) {
+                        toast.show({ message : qsTr("The friend is not online."), duration: Toast.Short })
+                        return
+                    }
                     if (bridge.getConnStatus() < 1) {
                         toast.show({ message : qsTr("You are not connected to tox network!"), duration: Toast.Short })
                         return

@@ -114,7 +114,7 @@ int QmlCBridge::getFriendStatus(quint32 friend_number)
 void QmlCBridge::retrieveChatLog(quint32 start, bool from, bool reverse)
 {
 	settings->beginGroup("Global");
-	quint32 limit = settings->value("last_messages_limit", 512).toUInt();
+	quint32 limit = settings->value("last_messages_limit", 64).toUInt();
 	settings->endGroup();
 	ToxMessages messages = chat_db->getFriendMessages(toxcore_get_friend_public_key(tox, current_friend_number), limit, start, from, reverse);
 	QMetaObject::invokeMethod(component, "clearChatContent");

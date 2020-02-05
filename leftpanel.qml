@@ -67,7 +67,7 @@ Drawer {
                     z: z_menu_elements
                     implicitWidth: 100
                     Repeater {
-                        model: [[qsTr("Online"), "lightgreen"],[qsTr("Away"), "yellow"],[qsTr("Busy"), "red"],[qsTr("Offline"), "gray"]]
+                        model: [[qsTr("Online"), "lightgreen"],[qsTr("Away"), "yellow"],[qsTr("Busy"), "red"]/*,[qsTr("Offline"), "gray"]*/]
                         delegate: MenuItem {
                             text: modelData[0]
                             Rectangle {
