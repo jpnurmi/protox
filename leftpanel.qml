@@ -154,9 +154,10 @@ Drawer {
             ListView {
                 id: friends
                 model: friendsModel
-                boundsMovement: Flickable.StopAtBounds
+                interactive: true
+                //boundsMovement: Flickable.StopAtBounds
                 ScrollIndicator.vertical: ScrollIndicator { id: friendsScrollIndicator }
-                //Layout.rightMargin: friendsScrollIndicator.width
+                contentHeight: Layout.preferredHeight
                 Layout.alignment: Qt.AlignBottom
                 Layout.preferredHeight: window.height - 
                                         controlsLayout.height - 
@@ -275,10 +276,6 @@ Drawer {
                             }
                         }
                     }
-
-                    function getFriendStatusIndicatorColor() {
-                        return friendItemStatusIndicator.color
-                    }
                     ItemDelegate {
                         id: friendItem
                         background.z: z_friend_item
@@ -343,9 +340,9 @@ Drawer {
             }
             RowLayout {
                 id: controlsLayout
-                //y: window.height - height
                 Layout.bottomMargin: 10
                 Layout.alignment: Qt.AlignBottom | Qt.AlignHCenter
+                Layout.rightMargin: 8
                 ToolButton {
                     id: addFriendButton
                     Layout.alignment: Qt.AlignLeft

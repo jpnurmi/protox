@@ -30,7 +30,7 @@ ColumnLayout {
             anchors.right: parent.right
             anchors.rightMargin: parent.chat_margin
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: keyboardHeight + chatLayout.height + chatSeparator.separator_margin * 2 + chatSeparator.height + margin
+            anchors.bottomMargin: (chatMessage.focus ? keyboardHeight : 0) + chatLayout.height + chatSeparator.separator_margin * 2 + chatSeparator.height + margin
             color: "white"
             property string text
             Text {
@@ -71,7 +71,7 @@ ColumnLayout {
             property int flickable_margin: 20
             property bool lastItemVisible: false
             anchors.topMargin: overlayHeader.height
-            anchors.bottomMargin: keyboardHeight + chatLayout.height + chatSeparator.separator_margin * 2 + chatSeparator.height
+            anchors.bottomMargin: (chatMessage.focus ? keyboardHeight : 0) + chatLayout.height + chatSeparator.separator_margin * 2 + chatSeparator.height
             topMargin: flickable_margin
             bottomMargin: flickable_margin
             spacing: 20
@@ -349,7 +349,7 @@ ColumnLayout {
         Layout.leftMargin: margin
         Layout.rightMargin: margin
         Layout.topMargin: margin
-        Layout.bottomMargin: keyboardHeight + margin
+        Layout.bottomMargin: (chatMessage.focus ? keyboardHeight : 0) + margin
 
         TextArea {
             Layout.fillWidth: true

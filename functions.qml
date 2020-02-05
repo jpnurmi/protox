@@ -219,7 +219,7 @@ function setCurrentFriendConnStatus(friend_number, conn_status) {
     for (var i = 0; i < friendsModel.count; i++) {
         if (friendsModel.get(i).friendNumber === friend_number) {
             if (!conn_status) {
-                friends.itemAt(i).setFriendStatusIndicatorColor("gray")
+                friendsModel.get(i).statusColor = "gray"
             }
         }
     }

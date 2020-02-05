@@ -636,12 +636,16 @@ ApplicationWindow {
             }
             MouseArea {
                 anchors.fill: parent
-                onPressed: {
+                onClicked: {
                     if (!cleanProfile) {
                         infoNickname.text = bridge.getFriendNickname(bridge.getCurrentFriendNumber())
                         infoStatus.text = bridge.getFriendStatusMessage(bridge.getCurrentFriendNumber())
                         friendInfoMenu.popup()
                     }
+                }
+                onPressAndHold: {
+                    chatMessage.forceActiveFocus()
+                    chatMessage.text += friendNickname.text
                 }
             }
         }
