@@ -537,8 +537,8 @@ ApplicationWindow {
                 font.pointSize: 30
                 font.bold: true
                 x: contentWidth * 0.35
-                y: contentHeight * 0.2
-                
+                y: contentHeight * 0.22
+
                 color: parent.highlighted ? Material.highlightedButtonColor : "white"
                 SequentialAnimation {
                     id: leftOverlayButtonTextAnimation
@@ -599,7 +599,11 @@ ApplicationWindow {
             font.family: dejavuSans.name
             font.pointSize: 30
             font.bold: true
-            onClicked: {
+            onPressed: {
+                if (contextMenuRight.visible) {
+                    contextMenuRight.close()
+                    return
+                }
                 highlighted = true
                 contextMenuRight.popup(window.width - contextMenuRight.implicitWidth, overlayHeader.height)
             }

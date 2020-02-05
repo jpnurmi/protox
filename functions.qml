@@ -161,7 +161,8 @@ function insertMessage(text, friend_number, self, message_id, time, unique_id, f
                              "msgId" : message_id, 
                              "msgTime" : time, 
                              "msgUniqueId" : unique_id,
-                             "msgFailed" : failed})
+                             "msgFailed" : failed,
+                             "msgHistory" : history})
 
     if (!history) {
         if (messages.lastItemVisible) {
@@ -242,7 +243,6 @@ NumberAnimation on keyboardHeight {
 function setKeyboardHeight(height) {
     keyboardActive = height > 0
     keyboardHeight = height / Screen.devicePixelRatio
-    console.log(keyboardHeight)
     if (keyboardActive && chatMessage.focus) {
         messages.scrollToEnd()
     }

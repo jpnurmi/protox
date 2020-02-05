@@ -31,7 +31,7 @@ void QmlCBridge::insertMessage(const QString &message, quint32 friend_number, bo
 		friends_once[friend_number] = true;
 	}
 	QMetaObject::invokeMethod(component, "insertMessage", 
-		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, QString(message).replace("\n", "<br>")), 
+		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, message), 
 							  Q_ARG(QVariant, friend_number), 
 							  Q_ARG(QVariant, self),
 							  Q_ARG(QVariant, message_id),
@@ -130,8 +130,6 @@ void QmlCBridge::retrieveChatLog(quint32 start, bool from, bool reverse)
 
 void QmlCBridge::copyTextToClipboard(QString text)
 {
-	text.replace("<br>", "\n");
-	text.remove(QRegExp("<[^>]*>"));
 	QClipboard *clipboard = QGuiApplication::clipboard(); 
 	clipboard->setText(text);
 }

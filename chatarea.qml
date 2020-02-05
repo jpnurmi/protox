@@ -30,7 +30,7 @@ ColumnLayout {
             anchors.right: parent.right
             anchors.rightMargin: parent.chat_margin
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: chatLayout.height + chatSeparator.separator_margin * 2 + chatSeparator.height + margin
+            anchors.bottomMargin: keyboardHeight + chatLayout.height + chatSeparator.separator_margin * 2 + chatSeparator.height + margin
             color: "white"
             property string text
             Text {
@@ -92,12 +92,22 @@ ColumnLayout {
                 contentY -= chatLayout.height + chatSeparator.separator_margin * 2 + chatSeparator.height
             }
             function scrollToEnd() {
-                contentY = 0
+                //contentY = 0
                 positionViewAtEnd()
                 contentY += chatLayout.height + chatSeparator.separator_margin * 2 + chatSeparator.height
             }
+            add: Transition {
+                NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: 400 }
+                NumberAnimation { property: "scale"; from: 0; to: 1.0; duration: 400 }
+            }
+            displaced: Transition {
+                NumberAnimation { properties: "x,y"; duration: 400; easing.type: Easing.OutBounce }
+                NumberAnimation { property: "opacity"; to: 1.0 }
+                NumberAnimation { property: "scale"; to: 1.0 }
+            }
             model: messagesModel
             property real span : contentY + height
+
             delegate: Rectangle {
                 id: messageCloud
                 color: !msgSelf ? "lightblue" : (msgReceived ? "orange" : "lightgray")
@@ -109,7 +119,6 @@ ColumnLayout {
                     }
                     messages.lastItemVisible = fullyVisible
                 }
-
                 Rectangle {
                     id: cloudCornerRemover
                     z: z_cloud
@@ -145,7 +154,7 @@ ColumnLayout {
                     if (cloudText.width > window.width - chatContent.cloud_margin * 2 -  chatContent.chat_margin - (!inPortrait ? drawer.width : 0))
                         implicitWidth = window.width - chatContent.cloud_margin * 2 - chatContent.chat_margin - (!inPortrait ? drawer.width : 0)
                 }
-                
+
                 Component.onCompleted: {
                     calculateMaximumWidth()
                     if (msgSelf) {
@@ -168,27 +177,35 @@ ColumnLayout {
                 
                 Text {
                     id: cloudText
-                    text: msgText
+                    property string plainText: msgText
+                    text: plainText
                     anchors.fill: parent
                     anchors.margins: chatContent.cloud_margin
                     font.family: "Helvetica"
                     font.pointSize: 17.5
                     MouseArea {
                         anchors.fill: parent
-                        preventStealing: true
                         onClicked: {
                             var link = parent.linkAt(mouseX, mouseY)
                             if (link.length > 0) {
                                 Qt.openUrlExternally(link)
                                 return
                             }
-                            bridge.copyTextToClipboard(cloudText.text)
+                            bridge.copyTextToClipboard(cloudText.plainText)
                             toast.show({ message : "Text copied!", duration : Toast.Short });
                         }
+                        onPressAndHold: {
+                            chatMessage.forceActiveFocus()
+                            var add = cloudText.plainText.replace("\n", "\n>")
+                            if (chatMessage.text.length > 0) {
+                                chatMessage.text += "\n>" + add + "\n"
+                            } else {
+                                chatMessage.text += ">" + add + "\n"
+                            }
+                        }
                     }
-
                     Component.onCompleted: {
-                        text = processText(text)
+                        text = processText(plainText.replace("\n", "<br>"))
                     }
                     onTextChanged: {
                         if (!contentWidth) {
@@ -202,21 +219,12 @@ ColumnLayout {
                     }
                     wrapMode: Text.Wrap
                     textFormat: Text.AutoText
-                    
                     function processText(t) {
-                        String.prototype.splice = function(idx, rem, str) {
-                            return this.slice(0, idx) + str + this.slice(idx + Math.abs(rem));
-                        };
-                        String.prototype.removeCharAt = function (i) {
-                            var tmp = this.split('');
-                            tmp.splice(i - 1 , 1);
-                            return tmp.join('');
-                        }
                         var result = ""
                         var quote = false
                         var lines = String(t).split("<br>")
                         var tags = [0, 0, 0, -1]
-                        var link_prefixes = ["http://","https://", "ftp://", "sftp://"]
+                        var link_prefixes = ["http","https", "ftp", "sftp"]
                         for (var j = 0; j < lines.length; j++) {
                             var line = lines[j].toString()
                             for (var i = 0; i < line.length; i++) {
@@ -265,8 +273,8 @@ ColumnLayout {
                             }
                             for (var k = 0; k < link_prefixes.length; k++) {
                                 var search_from = 0;
-                                while (result.indexOf(link_prefixes[k], search_from) !== -1) {
-                                    var start = result.indexOf(link_prefixes[k], search_from)
+                                while (result.indexOf(link_prefixes[k] + "://", search_from) !== -1) {
+                                    var start = result.indexOf(link_prefixes[k] + "://", search_from)
                                     var end = -1;
                                     for (i = start; i < result.length; i++) {
                                         if (result.charAt(i) === ' ') {
@@ -316,15 +324,6 @@ ColumnLayout {
                         }
                     }
                 }
-                /*
-                MouseArea {
-                    id: cloudMouseArea
-                    anchors.fill: parent
-                    onClicked: {
-
-                    }
-                }
-                */
             }
         }
     }
@@ -352,7 +351,7 @@ ColumnLayout {
         Layout.topMargin: margin
         Layout.bottomMargin: keyboardHeight + margin
 
-        TextField {
+        TextArea {
             Layout.fillWidth: true
             id: chatMessage
             selectByMouse: true
@@ -360,8 +359,20 @@ ColumnLayout {
             leftPadding: 10
             verticalAlignment: TextInput.AlignVCenter
             placeholderText: qsTr("Type something")
-            onAccepted: { send.sendMessage(); focus = false }
             visible: !cleanProfile
+            property real defaultHeight
+            wrapMode: Text.Wrap
+            inputMethodHints: Qt.ImhSensitiveData
+            Component.onCompleted: {
+                defaultHeight = height
+            }
+            onContentHeightChanged: {
+                messages.scrollToEnd()
+            }
+            Keys.onBackPressed: {
+                focus = false
+            }
+
             Timer {
                 id: dropTypingTimer
                 interval: 2000
@@ -370,25 +381,32 @@ ColumnLayout {
                     bridge.setTypingFriend(bridge.getCurrentFriendNumber(), false)
                 }
             }
-            onDisplayTextChanged: {
+
+            property string lastText
+            onTextChanged: {
+                if (text === lastText) { return }
+                lastText = text
                 dropTypingTimer.stop()
-                if (displayText.length > 0) {
+                if (text.length > 0) {
                     dropTypingTimer.start()
                     bridge.setTypingFriend(bridge.getCurrentFriendNumber(), true)
                 } else {
                     bridge.setTypingFriend(bridge.getCurrentFriendNumber(), false)
                 }
+                chatMessage.cursorPosition = chatMessage.text.length
             }
         }
         Button {
             id: send
             Layout.rightMargin: 5
+            Layout.alignment: Qt.AlignVCenter
             visible: !cleanProfile
             background: Rectangle {
-                implicitWidth: chatMessage.height * 0.75
+                implicitWidth: chatMessage.defaultHeight * 0.75
                 implicitHeight: implicitWidth
                 visible: false
             }
+            focusPolicy: Qt.NoFocus
             function sendMessage() {
                 if (chatMessage.text.length > 0) {
                     if (bridge.getConnStatus() < 1) {
@@ -397,6 +415,8 @@ ColumnLayout {
                     }
                     bridge.sendMessage(chatMessage.text)
                     chatMessage.clear()
+                } else {
+                    chatMessage.focus = false
                 }
             }
             Image {
@@ -405,7 +425,11 @@ ColumnLayout {
                 source: "send-button.png"
                 antialiasing: true
             }
-            onPressed: sendMessage()
+            TapHandler {
+                acceptedButtons: Qt.LeftButton
+                onTapped: { send.sendMessage() }
+                grabPermissions: PointerHandler.CanTakeOverFromHandlersOfDifferentType | PointerHandler.ApprovesTakeOverByHandlersOfDifferentType
+            }
         }
     }
 }

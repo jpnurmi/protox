@@ -349,35 +349,57 @@ Drawer {
     RowLayout {
         id: controlsLayout
         y: window.height - height
+        Layout.fillWidth: true
         ToolButton {
             id: addFriendButton
-            text: "\uFF0B"
-            font.family: dejavuSans.name
-            font.pointSize: 30
-            font.bold: true
-            antialiasing: true
+            Layout.alignment: Qt.AlignLeft
+            Text {
+                text: "\uFF0B"
+                anchors.fill: parent
+                font.family: dejavuSans.name
+                font.pointSize: 32
+                font.bold: true
+                fontSizeMode: Text.Fit
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+            }
             onClicked: {
                 addFriendMenu.popup()
             }
         }
         ToolButton {
             id: showMyInfoButton
-            text: "\u2302"
-            font.family: dejavuSans.name
-            font.pointSize: 30
-            font.bold: true
-            antialiasing: true
+            Layout.alignment: Qt.AlignCenter
+            Text {
+                text: "\u2302"
+                anchors.fill: parent
+                font.family: dejavuSans.name
+                font.pointSize: 32
+                font.bold: true
+                fontSizeMode: Text.Fit
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                bottomPadding: 1
+            }
             onClicked: {
                 profileInfoMenu.popup()
             }
         }
         ToolButton {
             id: showSettingsButton
-            text: "\u2699"
-            font.family: dejavuSans.name
-            font.pointSize: 24
-            font.bold: true
-            antialiasing: true
+            Layout.alignment: Qt.AlignRight
+            Text {
+                text: "\u2699"
+                anchors.fill: parent
+                font.family: dejavuSans.name
+                font.pointSize: 29
+                font.bold: true
+                fontSizeMode: Text.Fit
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                topPadding: 3
+                rightPadding: 1
+            }
             onClicked: {
                 toast.show({ message: "Not implemented.", duration: Toast.Short })
             }
