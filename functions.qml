@@ -50,7 +50,7 @@ function setFriendStatus(friend_number, status) {
     for (var i = 0; i < friendsModel.count; i++) {
         var friend = friendsModel.get(i)
         if (friend.friendNumber === friend_number) {
-            friends.itemAt(i).setFriendStatusIndicatorColor(color)
+            friendsModel.get(i).statusColor = color;
         }
     }
 }
@@ -130,7 +130,7 @@ function selectFriend(friend_number) {
     friendStatus.setText(bridge.getFriendStatusMessage(friend_number))
     for (var i = 0; i < friendsModel.count; i++) {
         if (friendsModel.get(i).friendNumber === friend_number) {
-            friendStatusIndicator.color = friends.itemAt(i).getFriendStatusIndicatorColor()
+            friendStatusIndicator.color = friendsModel.get(i).statusColor
             break
         }
     }
@@ -174,7 +174,12 @@ function insertMessage(text, friend_number, self, message_id, time, unique_id, f
     }
 }
 function insertFriend(friend_number, nickName, request, request_message, friendPk) {
-    friendsModel.append({"friendNumber" : friend_number, "nickName" : nickName, "request" : request, "request_message" : request_message, "friendPk" : friendPk})
+    friendsModel.append({"friendNumber" : friend_number, 
+                            "nickName" : nickName, 
+                            "request" : request, 
+                            "request_message" : request_message, 
+                            "friendPk" : friendPk,
+                            "statusColor" : "gray"})
     if (!request) {
         cleanProfile = bridge.getFriendsCount() === 0
     } 
@@ -212,8 +217,7 @@ function setCurrentFriendConnStatus(friend_number, conn_status) {
     }
 
     for (var i = 0; i < friendsModel.count; i++) {
-        var friend = friendsModel.get(i)
-        if (friend.friendNumber === friend_number) {
+        if (friendsModel.get(i).friendNumber === friend_number) {
             if (!conn_status) {
                 friends.itemAt(i).setFriendStatusIndicatorColor("gray")
             }

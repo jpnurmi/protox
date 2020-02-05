@@ -151,257 +151,255 @@ Drawer {
                 implicitWidth: drawer.width 
             }
             property int draggedItem: -1
-            Flickable {
-                id: friendsFlickable
-                anchors.top: drawerSeparator.bottom
-                implicitHeight: 200
-                ScrollIndicator.vertical: ScrollIndicator { }
-                ColumnLayout {
-                    anchors.top: parent.top
+            ListView {
+                id: friends
+                model: friendsModel
+                boundsMovement: Flickable.StopAtBounds
+                ScrollIndicator.vertical: ScrollIndicator { id: friendsScrollIndicator }
+                //Layout.rightMargin: friendsScrollIndicator.width
+                Layout.alignment: Qt.AlignBottom
+                Layout.preferredHeight: window.height - 
+                                        controlsLayout.height - 
+                                        accountLayout.height - 
+                                        connectionStatus.height - 
+                                        drawerSeparator.height -
+                                        leftBarLayout.spacing * 4
+                delegate: RowLayout {
+                    id: friendLayout
                     spacing: 0
-                    Repeater {
-                        id: friends
-                        model: friendsModel
-                        delegate: RowLayout {
-                            id: friendLayout
-                            spacing: 0
-                            property int itemHeight: 40
-                            property bool dragEntered: false
-                            property bool dragStarted: false
-                            property int default_x
-                            property int default_y
-                            function savePosition() {
-                                default_x = x
-                                default_y = y
+                    property int itemHeight: 40
+                    property bool dragEntered: false
+                    property bool dragStarted: false
+                    property int default_x
+                    property int default_y
+                    function savePosition() {
+                        default_x = x
+                        default_y = y
+                    }
+                    Component.onCompleted: {
+                        savePosition()
+                    }
+                    function resetPosition() {
+                        x = default_x
+                        y = default_y
+                    }
+                    
+                    property int animation_duration: 200
+                    Behavior on x {
+                        id: friendItemAnimationXBehavior
+                        enabled: false
+                        NumberAnimation {
+                            duration: friendLayout.animation_duration
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                    Behavior on y {
+                        id: friendItemAnimationYBehavior
+                        enabled: false
+                        NumberAnimation {
+                            duration: friendLayout.animation_duration
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                    Drag.dragType: Drag.Automatic
+                    property bool dragActive: friendDragAreaIndicator.drag.active
+                    onDragActiveChanged: {
+                        if (dragActive) {
+                            friendItemAnimationXBehavior.enabled = true
+                            friendItemAnimationYBehavior.enabled = true
+                            savePosition()
+                            leftBarLayout.draggedItem = index
+                            dragStarted = true
+                            Drag.start()
+                        } else {
+                            if (Drag.target !== null) {
+                                friendItemAnimationXBehavior.enabled = false
+                                friendItemAnimationYBehavior.enabled = false
                             }
-                            Component.onCompleted: {
-                                savePosition()
+                            Drag.drop()
+                            if (dragStarted) {
+                                resetPosition()
+                                dragStarted = false
                             }
-                            function resetPosition() {
-                                x = default_x
-                                y = default_y
+                        }
+                    }
+                    
+                    Rectangle {
+                        id: friendItemStatusIndicatorBody
+                        z: -1
+                        width: parent.itemHeight
+                        height: parent.itemHeight
+                        Layout.alignment: Qt.AlignLeft
+                        color: (parent.dragEntered && !parent.dragActive) ? "lightgray" : "#00000000"
+                        visible: !request
+                        Component.onCompleted: {
+                            if (request) {
+                                width = height = 0
                             }
+                        }
+                        MouseArea {
+                            id: friendDragAreaIndicator
+                            anchors.fill: parent
+                            drag.target: friendLayout
+                        }
+                        Rectangle {
+                            id: friendItemStatusIndicator
+                            color: statusColor
+                            width: 15
+                            height: width
+                            border.color: "black"
+                            border.width: 1
+                            radius: width * 0.5
+                            anchors.centerIn: parent
+                            visible: parent.visible
+                        }
+                        DropArea {
+                            anchors.fill: parent
+                            enabled: !parent.parent.dragActive
+                            onEntered: {
+                                if (!request) {
+                                    parent.parent.dragEntered = true
+                                }
+                            }
+                            onExited: {
+                                if (!request) {
+                                    parent.parent.dragEntered = false
+                                }
+                            }
+                            onDropped: {
+                                if (!request) {
+                                    parent.parent.dragEntered = false
+                                    friendsModel.get(leftBarLayout.draggedItem).dragStarted = false
+                                    friendsModel.swap(index, leftBarLayout.draggedItem)
+                                }
+                            }
+                        }
+                    }
 
-                            property int animation_duration: 200
-                            Behavior on x {
-                                id: friendItemAnimationXBehavior
-                                enabled: false
-                                NumberAnimation {
-                                    duration: friendLayout.animation_duration
-                                    easing.type: Easing.OutCubic
-                                }
-                            }
-                            Behavior on y {
-                                id: friendItemAnimationYBehavior
-                                enabled: false
-                                NumberAnimation {
-                                    duration: friendLayout.animation_duration
-                                    easing.type: Easing.OutCubic
-                                }
-                            }
-                            Drag.dragType: Drag.Automatic
-                            property bool dragActive: friendDragAreaIndicator.drag.active
-                            onDragActiveChanged: {
-                                if (dragActive) {
-                                    friendItemAnimationXBehavior.enabled = true
-                                    friendItemAnimationYBehavior.enabled = true
-                                    savePosition()
-                                    leftBarLayout.draggedItem = index
-                                    dragStarted = true
-                                    Drag.start()
+                    function getFriendStatusIndicatorColor() {
+                        return friendItemStatusIndicator.color
+                    }
+                    ItemDelegate {
+                        id: friendItem
+                        background.z: z_friend_item
+                        z: z_friend_item
+                        text: nickName
+                        leftPadding: 4
+                        rightPadding: 6
+                        property int friend_number: friendNumber
+                        Layout.alignment: Qt.AlignRight
+                        implicitHeight: parent.itemHeight
+                        onClicked: {
+                            if (request) {
+                                if (request_message.length > 0) {
+                                    addFriendDialog.text = request_message
                                 } else {
-                                    if (Drag.target !== null) {
-                                        friendItemAnimationXBehavior.enabled = false
-                                        friendItemAnimationYBehavior.enabled = false
-                                    }
-                                    Drag.drop()
-                                    if (dragStarted) {
-                                        resetPosition()
-                                        dragStarted = false
-                                    }
+                                    addFriendMessage.text = qsTr("(no request message specified)")
+                                }
+                                addFriendDialog.friendPk = friendPk
+                                addFriendDialog.item_index = index
+                                addFriendDialog.open()
+                                return
+                            }
+                            if (inPortrait) {
+                                drawer.close()
+                            }
+                            selectFriend(friend_number)
+                        }
+                        Rectangle {
+                            anchors.fill: parent
+                            color: request ? "lightgreen" : "lightgray"
+                            visible: request || (parent.parent.dragEntered && !parent.parent.dragActive)
+                            z: z_friend_item_background
+                        }
+                        Component.onCompleted: {
+                            implicitWidth = drawer.width
+                            if (!request) {
+                                implicitWidth -= friendItemStatusIndicatorBody.width
+                            }
+                        }
+                        DropArea {
+                            anchors.fill: parent
+                            onEntered: {
+                                if (!request) {
+                                    parent.parent.dragEntered = true
                                 }
                             }
-                            
-                            Rectangle {
-                                id: friendItemStatusIndicatorBody
-                                z: -1
-                                width: parent.itemHeight
-                                height: parent.itemHeight
-                                Layout.alignment: Qt.AlignLeft
-                                color: (parent.dragEntered && !parent.dragActive) ? "lightgray" : "#00000000"
-                                visible: !request
-                                Component.onCompleted: {
-                                    if (request) {
-                                        width = height = 0
-                                    }
-                                }
-                                MouseArea {
-                                    id: friendDragAreaIndicator
-                                    anchors.fill: parent
-                                    drag.target: friendLayout
-                                }
-                                Rectangle {
-                                    id: friendItemStatusIndicator
-                                    color: "gray"
-                                    width: 15
-                                    height: width
-                                    border.color: "black"
-                                    border.width: 1
-                                    radius: width * 0.5
-                                    anchors.centerIn: parent
-                                    visible: parent.visible
-                                }
-                                DropArea {
-                                    anchors.fill: parent
-                                    enabled: !parent.parent.dragActive
-                                    onEntered: {
-                                        if (!request) {
-                                            parent.parent.dragEntered = true
-                                        }
-                                    }
-                                    onExited: {
-                                        if (!request) {
-                                            parent.parent.dragEntered = false
-                                        }
-                                    }
-                                    onDropped: {
-                                        if (!request) {
-                                            parent.parent.dragEntered = false
-                                            friendsModel.get(leftBarLayout.draggedItem).dragStarted = false
-                                            friendsModel.swap(index, leftBarLayout.draggedItem)
-                                        }
-                                    }
+                            onExited: {
+                                if (!request) {
+                                    parent.parent.dragEntered = false
                                 }
                             }
-
-                            function setFriendStatusIndicatorColor(color) {
-                                friendItemStatusIndicator.color = color
-                            }
-                            function getFriendStatusIndicatorColor() {
-                                return friendItemStatusIndicator.color
-                            }
-                            ItemDelegate {
-                                id: friendItem
-                                background.z: z_friend_item
-                                z: z_friend_item
-                                text: nickName
-                                leftPadding: 4
-                                rightPadding: 6
-                                property int friend_number: friendNumber
-                                Layout.alignment: Qt.AlignRight
-                                implicitHeight: parent.itemHeight
-                                onClicked: {
-                                    if (request) {
-                                        if (request_message.length > 0) {
-                                            addFriendDialog.text = request_message
-                                        } else {
-                                            addFriendMessage.text = qsTr("(no request message specified)")
-                                        }
-                                        addFriendDialog.friendPk = friendPk
-                                        addFriendDialog.item_index = index
-                                        addFriendDialog.open()
-                                        return
-                                    }
-                                    if (inPortrait) {
-                                        drawer.close()
-                                    }
-                                    selectFriend(friend_number)
-                                }
-                                Rectangle {
-                                    anchors.fill: parent
-                                    color: request ? "lightgreen" : "lightgray"
-                                    visible: request || (parent.parent.dragEntered && !parent.parent.dragActive)
-                                    z: z_friend_item_background
-                                }
-                                Component.onCompleted: {
-                                    implicitWidth = drawer.width
-                                    if (!request) {
-                                        implicitWidth -= friendItemStatusIndicatorBody.width
-                                    }
-                                }
-                                DropArea {
-                                    anchors.fill: parent
-                                    onEntered: {
-                                        if (!request) {
-                                            parent.parent.dragEntered = true
-                                        }
-                                    }
-                                    onExited: {
-                                        if (!request) {
-                                            parent.parent.dragEntered = false
-                                        }
-                                    }
-                                    onDropped: {
-                                        if (!request) {
-                                            parent.parent.dragEntered = false
-                                            friendsModel.get(leftBarLayout.draggedItem).dragStarted = false
-                                            friendsModel.swap(index, leftBarLayout.draggedItem)
-                                        }
-                                    }
+                            onDropped: {
+                                if (!request) {
+                                    parent.parent.dragEntered = false
+                                    friendsModel.get(leftBarLayout.draggedItem).dragStarted = false
+                                    friendsModel.swap(index, leftBarLayout.draggedItem)
                                 }
                             }
                         }
                     }
                 }
             }
-        }
-    }
-    RowLayout {
-        id: controlsLayout
-        y: window.height - height
-        Layout.fillWidth: true
-        ToolButton {
-            id: addFriendButton
-            Layout.alignment: Qt.AlignLeft
-            Text {
-                text: "\uFF0B"
-                anchors.fill: parent
-                font.family: dejavuSans.name
-                font.pointSize: 32
-                font.bold: true
-                fontSizeMode: Text.Fit
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-            }
-            onClicked: {
-                addFriendMenu.popup()
-            }
-        }
-        ToolButton {
-            id: showMyInfoButton
-            Layout.alignment: Qt.AlignCenter
-            Text {
-                text: "\u2302"
-                anchors.fill: parent
-                font.family: dejavuSans.name
-                font.pointSize: 32
-                font.bold: true
-                fontSizeMode: Text.Fit
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                bottomPadding: 1
-            }
-            onClicked: {
-                profileInfoMenu.popup()
-            }
-        }
-        ToolButton {
-            id: showSettingsButton
-            Layout.alignment: Qt.AlignRight
-            Text {
-                text: "\u2699"
-                anchors.fill: parent
-                font.family: dejavuSans.name
-                font.pointSize: 29
-                font.bold: true
-                fontSizeMode: Text.Fit
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                topPadding: 3
-                rightPadding: 1
-            }
-            onClicked: {
-                toast.show({ message: "Not implemented.", duration: Toast.Short })
+            RowLayout {
+                id: controlsLayout
+                //y: window.height - height
+                Layout.bottomMargin: 10
+                Layout.alignment: Qt.AlignBottom | Qt.AlignHCenter
+                ToolButton {
+                    id: addFriendButton
+                    Layout.alignment: Qt.AlignLeft
+                    Text {
+                        text: "\uFF0B"
+                        anchors.fill: parent
+                        font.family: dejavuSans.name
+                        font.pointSize: 32
+                        font.bold: true
+                        fontSizeMode: Text.Fit
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                    onClicked: {
+                        addFriendMenu.popup()
+                    }
+                }
+                ToolButton {
+                    id: showMyInfoButton
+                    Layout.alignment: Qt.AlignCenter
+                    Text {
+                        text: "\u2302"
+                        anchors.fill: parent
+                        font.family: dejavuSans.name
+                        font.pointSize: 32
+                        font.bold: true
+                        fontSizeMode: Text.Fit
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        bottomPadding: 1
+                    }
+                    onClicked: {
+                        profileInfoMenu.popup()
+                    }
+                }
+                ToolButton {
+                    id: showSettingsButton
+                    Layout.alignment: Qt.AlignRight
+                    Text {
+                        text: "\u2699"
+                        anchors.fill: parent
+                        font.family: dejavuSans.name
+                        font.pointSize: 29
+                        font.bold: true
+                        fontSizeMode: Text.Fit
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        topPadding: 3
+                        rightPadding: 1
+                    }
+                    onClicked: {
+                        toast.show({ message: "Not implemented.", duration: Toast.Short })
+                    }
+                }
             }
         }
     }
