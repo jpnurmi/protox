@@ -214,25 +214,50 @@ ColumnLayout {
                             return this.split(search).join(replace);
                         }
                         var str = String(t)
+                        // deHTML input
                         str = str.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll("\"", "&quot;")
 
-                        str = str.replace(/(>(.)+)/g, function(quote) {
+                        var result = "";
+                        var lines = str.split("\n")
+                        // parse each line separately
+                        for (var i = 0; i < lines.length; i++) {
+                            var line = lines[i]
+                            // skip formatting in quote lines
+                            if (line.charAt(0) === '>') {
+                                line = line.replaceAll(">", "&gt;")
+                                result += line
+                                // put back all next line operators
+                                if (i < lines.length - 1) { result += "\n" }
+                                continue
+                            }
+                            line = line.replaceAll(">", "&gt;")
+                            line = line.replace(/(\*{2,2})(.*?)\1/g, function(bold) {
+                                return '<b>' + bold.replace(/^.{2}/, '').replace(/.{2}$/, '') + '</b>'
+                            })
+                            /*
+                            line = line.replace(/\B\/(.+)\/\B/g, function(italic) {
+                                return '<i>' + italic.replace(/^.{2}/, '').replace(/.{2}$/, '') + '</i>'
+                            })
+                            */
+                            line = line.replace(/(\_{2,2})(.*?)\1/g, function(underline) {
+                                return '<u>' + underline.replace(/^.{2}/, '').replace(/.{2}$/, '') + '</u>'
+                            })
+                            result += line
+                            // put back all next line operators
+                            if (i < lines.length - 1) { result += "\n" }
+                        }
+                        //console.log(result)
+
+                        result = result.replace(/((http|https|ftp|sftp)?:\/\/[^\s]+)/g, function(url) {
+                            return '<font color="blue"><a href="' + url + '">' + url + '</a></font>'
+                        })
+                        result = result.replace(/(&gt;(.)*)/g, function(quote) {
                             return '<font color="#0b6623">' + quote + '</font>'
                         })
-                        str = str.replace(/(\*{2,2})(.*?)\1/g, function(bold) {
-                            return '<b>' + bold.replace(/^.{2}/, '').replace(/.{2}$/, '') + '</b>'
-                        })
-                        str = str.replace(/(\_{2,2})(.*?)\1/g, function(underline) {
-                            return '<u>' + underline.replace(/^.{2}/, '').replace(/.{2}$/, '') + '</u>'
-                        })
-                        str = str.replace(/((http|https|ftp|sftp)?:\/\/[^\s]+)/g, function(url) {
-                            return '<a href="' + url + '">' + url + '</a>'
-                        })
-                        
-                        str.replaceAll("\n", "<br>")
+                        result.replaceAll("\n", "<br>")
 
-                        console.log(str)
-                        return str
+                        console.log(result)
+                        return result
                     }
                 }
                 Text {
