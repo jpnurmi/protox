@@ -198,12 +198,9 @@ ColumnLayout {
                         }
                     }
                     Component.onCompleted: {
-                        text = processText(plainText.replace("\n", "<br>"))
-                    }
-                    onTextChanged: {
-                        if (!contentWidth) {
-                            return
-                        }
+                        textFormat = Text.StyledText
+                        wrapMode = Text.Wrap
+                        text = processText(plainText)
                         parent.implicitWidth = contentWidth + chatContent.cloud_margin * 2
                     }
                     onContentHeightChanged: {
@@ -211,97 +208,31 @@ ColumnLayout {
                         parent.implicitWidth = contentWidth + chatContent.cloud_margin * 2
                     }
                     wrapMode: Text.Wrap
-                    textFormat: Text.StyledText
+                    textFormat: Text.PlainText
                     function processText(t) {
-                        var result = ""
-                        var quote = false
-                        var lines = String(t).split("<br>")
-                        var tags = [0, 0, 0, -1]
-                        var link_prefixes = ["http","https", "ftp", "sftp"]
-                        for (var j = 0; j < lines.length; j++) {
-                            var line = lines[j].toString()
-                            for (var i = 0; i < line.length; i++) {
-                                var ch = line.charAt(i)
-                                if (ch === '>') {
-                                    result += "<font color=\"#0b6623\">"
-                                    quote = true
-                                    result += "&gt;"
-                                    continue
-                                }
-                                if (ch === '<') { result += "&lt;"; continue }
-                                if (ch === '"') { result += "&quot;"; continue }
-                                if (ch === '&') { result += "&amp;"; continue }
-                                if (ch === '*') {
-                                    result += "*"; tags[0]++
-                                    if (tags[0] === 2 && line.charAt(i - 1) === "*") { result = result.replace("**", "<b>"); continue }
-                                    if (tags[0] === 4 && line.charAt(i - 1) === "*") { tags[0] = 0; result = result.replace("**", "</b>"); continue }
-                                    continue
-                                }
-                                if (ch === '_') {
-                                    result += "_"; tags[1]++
-                                    if (tags[1] === 2 && line.charAt(i - 1) === "_") { result = result.replace("__", "<u>"); continue }
-                                    if (tags[1] === 4 && line.charAt(i - 1) === "_") { tags[1] = 0; result = result.replace("__", "</u>"); continue }
-                                    continue
-                                }
-                                if (ch === '~') {
-                                    result += "~"; tags[2]++
-                                    if (tags[2] === 2 && line.charAt(i - 1) === "~") { result = result.replace("~~", "<s>"); continue }
-                                    if (tags[2] === 4 && line.charAt(i - 1) === "~") { tags[2] = 0; result = result.replace("~~", "</s>"); continue }
-                                    continue
-                                }
-
-                                /*
-                                if (ch === '/') {
-                                    if (i < line.length && line.charAt(i + 1) !== '/') {
-                                        tags[3] = i
-                                    } else {
-                                        result += "/"
-                                    }
-                                    if (tags[3] >= 0) { result = result.splice(tags[3], 0, "<i>"); tags[3] = -1; result = result.splice(i, 0, "</i>"); continue }
-                                    continue
-                                }
-                                */
-
-                                result += ch
-                            }
-                            for (var k = 0; k < link_prefixes.length; k++) {
-                                var search_from = 0;
-                                while (result.indexOf(link_prefixes[k] + "://", search_from) !== -1) {
-                                    var start = result.indexOf(link_prefixes[k] + "://", search_from)
-                                    var end = -1;
-                                    for (i = start; i < result.length; i++) {
-                                        if (result.charAt(i) === ' ') {
-                                            end = i
-                                            break
-                                        }
-                                    }
-                                    if (end < 0) {
-                                        end = result.length
-                                    }
-                                    var link = result.substring(start, end)
-                                    var rep = '<a href=\"' + link +'\">' + link + '</a>'
-                                    result = result.replace(link, rep)
-                                    search_from = start + rep.length
-                                }
-                            }
-
-                            
-                            // cancel formatting
-                            if (tags[0] > 1 && tags[0] < 4) { result = result.replace("<b>", "**") }
-                            if (tags[1] > 1 && tags[1] < 4) { result = result.replace("<u>", "__") }
-                            if (tags[2] > 1 && tags[2] < 4) { result = result.replace("<s>", "~~") }
-                            tags[0] = 0; tags[1] = 0; tags[2] = 0
-
-                            if (quote) {
-                                result += "</font>"
-                                quote = false
-                            }
-                            if (j !== lines.length - 1) {
-                                result += "<br>"
-                            }
+                        String.prototype.replaceAll = function(search, replace){
+                            return this.split(search).join(replace);
                         }
-                        //console.log(result)
-                        return result
+                        var str = String(t)
+                        str = str.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll("\"", "&quot;")
+
+                        str = str.replace(/(>(.)+)/g, function(quote) {
+                            return '<font color="#0b6623">' + quote + '</font>'
+                        })
+                        str = str.replace(/(\*{2,2})(.*?)\1/g, function(bold) {
+                            return '<b>' + bold.replace(/^.{2}/, '').replace(/.{2}$/, '') + '</b>'
+                        })
+                        str = str.replace(/(\_{2,2})(.*?)\1/g, function(underline) {
+                            return '<u>' + underline.replace(/^.{2}/, '').replace(/.{2}$/, '') + '</u>'
+                        })
+                        str = str.replace(/((http|https|ftp|sftp)?:\/\/[^\s]+)/g, function(url) {
+                            return '<a href="' + url + '">' + url + '</a>'
+                        })
+                        
+                        str.replaceAll("\n", "<br>")
+
+                        console.log(str)
+                        return str
                     }
                 }
                 Text {

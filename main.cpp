@@ -30,6 +30,7 @@ void QmlCBridge::insertMessage(const QString &message, quint32 friend_number, bo
 	if (!friends_once[friend_number]) {
 		friends_once[friend_number] = true;
 	}
+
 	QMetaObject::invokeMethod(component, "insertMessage", 
 		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, message), 
 							  Q_ARG(QVariant, friend_number), 
@@ -276,6 +277,7 @@ void QmlCBridge::setKeyboardHeight(int height)
 	QMetaObject::invokeMethod(component, "setKeyboardHeight", Qt::BlockingQueuedConnection,
 		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, height));
 }
+
 
 static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler(0);
 
