@@ -9,6 +9,8 @@ import QtQuick.Window 2.12
   Left menu (drawer)
  */
 
+/*[remove]*/ Item {
+
 Drawer {
     id: drawer
 
@@ -20,8 +22,8 @@ Drawer {
     interactive: inPortrait
     position: inPortrait ? 0 : 1
     visible: !inPortrait
-    property bool disabled: false
-    dragMargin: disabled ? 0 : 20
+    property bool dragEnabled: true
+    dragMargin: dragEnabled ? 20 : 0
     z: z_drawer
 
     onOpened: {
@@ -220,22 +222,31 @@ Drawer {
                             leftBarLayout.draggedItem = index
                             dragStarted = true
                             Drag.start()
+                            z = z_top
                         } else {
+                            if (Drag.target === this) {
+                                return
+                            }
                             if (Drag.target !== null) {
                                 friendItemAnimationXBehavior.enabled = false
                                 friendItemAnimationYBehavior.enabled = false
-                            }
-                            Drag.drop()
-                            if (dragStarted) {
+                                Drag.drop()
+                                if (dragStarted) {
+                                    x = default_x
+                                    dragStarted = false
+                                }
+                            } else {
+                                Drag.cancel()
                                 resetPosition()
                                 dragStarted = false
                             }
+                            z = z_friend_item
                         }
                     }
                     
                     Rectangle {
                         id: friendItemStatusIndicatorBody
-                        z: -1
+                        z: z_friend_icon
                         width: parent.itemHeight
                         height: parent.itemHeight
                         Layout.alignment: Qt.AlignLeft
@@ -350,7 +361,7 @@ Drawer {
                 id: controlsLayout
                 Layout.alignment: Qt.AlignBottom | Qt.AlignHCenter
                 Layout.rightMargin: 8
-                Layout.topMargin: 12
+                Layout.topMargin: 10
                 ToolButton {
                     id: addFriendButton
                     Layout.alignment: Qt.AlignLeft
@@ -409,3 +420,22 @@ Drawer {
         }
     }
 }
+
+MessageDialog {
+    id: addFriendDialog
+    title: qsTr("A new friend request")
+    icon: StandardIcon.Question
+    standardButtons: StandardButton.Yes | StandardButton.No | StandardButton.Close
+    visible: false
+    property int item_index: -1
+    property variant friendPk: ""
+    onYes: {
+        friendsModel.remove(item_index)
+        bridge.addFriend(friendPk)
+    }
+    onNo: {
+        friendsModel.remove(item_index)
+    }
+}
+
+/*[remove]*/ }

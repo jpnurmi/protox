@@ -413,6 +413,8 @@ Tox *toxcore_create()
 	tox_options_default(&tox_opts);
 	settings->beginGroup("Toxcore");
 	tox_opts.udp_enabled = settings->value("udp_enabled", true).toBool();
+	tox_opts.ipv6_enabled = settings->value("ipv6_enabled", true).toBool();
+	tox_opts.local_discovery_enabled = settings->value("local_discovery_enabled", false).toBool();
 	settings->endGroup();
 
 	QFile f(GetProgDir() + DEFAULT_PROFILE);

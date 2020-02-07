@@ -5,41 +5,58 @@ import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.2
 import QtQuick.Window 2.12
 
-Drawer {
+Popup {
     id: settingsWindow
     width: window.width
     height: window.height
-    z: z_settings_menu
     leftPadding: 0
     rightPadding: 0
     topPadding: 0
     bottomPadding: 0
-    edge: Qt.RightEdge
-    dragMargin: 0
-    interactive: false
+    enter: Transition {
+        NumberAnimation { property: "x"; from: settingsWindow.width; to: 0; easing.type: Easing.OutCubic }
+    }
+    exit: Transition {
+        NumberAnimation { property: "x"; from: 0; to: settingsWindow.width; easing.type: Easing.OutCubic }
+    }
     readonly property int ptype_bool: 1
-    readonly property int ptype_int: 2
     readonly property int ptype_string: 10
     readonly property int sf_none: 0
     readonly property int sf_text: 1 // unused, text is always present
     readonly property int sf_title: 1 << 1
     readonly property int sf_checkbox: 1 << 2
+    readonly property int sf_help: 1 << 3
+    readonly property int sf_input: 1 << 4
+    readonly property int sf_numbers_only: 1 << 5
     Component.onCompleted: {
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Tox options") })
+        settingsModel.append({ flags: sf_text | sf_title | sf_help, name: qsTr("These settings require client restart!") })
         settingsModel.append({ flags: sf_text | sf_checkbox, name: qsTr("UDP mode"), prop: "udp_enabled", 
                     value: bridge.getSettingsValue("Toxcore", "udp_enabled", ptype_bool, Boolean(true)) })
+        settingsModel.append({ flags: sf_text | sf_checkbox, name: qsTr("IPV6 mode"), prop: "ipv6_enabled", 
+                    value: bridge.getSettingsValue("Toxcore", "ipv6_enabled", ptype_bool, Boolean(true)) })
+        settingsModel.append({ flags: sf_text | sf_checkbox, name: qsTr("Lan discovery"), prop: "local_discovery_enabled", 
+                    value: bridge.getSettingsValue("Toxcore", "local_discovery_enabled", ptype_bool, Boolean(false)) })
+        settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Client options") })
+        settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only, itemWidth: 96, name: qsTr("Last messages limit"), prop: "last_messages_limit", 
+                    svalue: bridge.getSettingsValue("Client", "last_messages_limit", ptype_string, 128) })
     }
 
     function open() {
         settingsWindow.visible = true
         drawer.close()
-        drawer.disabled = true 
+        drawer.dragEnabled = false
         leftOverlayButton.highlighted = false
+        closeSettingsButton.highlighted = false
     }
     function _close() {
-        drawer.disabled = false
+        drawer.dragEnabled = true
         bridge.setSettingsValue("Toxcore", "udp_enabled", Boolean(settingsModel.getValue("udp_enabled")))
+        bridge.setSettingsValue("Toxcore", "ipv6_enabled", Boolean(settingsModel.getValue("ipv6_enabled")))
+        bridge.setSettingsValue("Toxcore", "local_discovery_enabled", Boolean(settingsModel.getValue("local_discovery_enabled")))
+        bridge.setSettingsValue("Client", "last_messages_limit", settingsModel.getValueString("last_messages_limit"))
     }
+
     onClosed: {
         settingsWindow._close()
     }
@@ -55,7 +72,7 @@ Drawer {
                 font.family: dejavuSans.name
                 font.pointSize: 32
                 font.bold: true
-                color: "white"
+                color: parent.highlighted ? Material.highlightedButtonColor : "white"
                 fontSizeMode: Text.Fit
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
@@ -63,6 +80,7 @@ Drawer {
                 topPadding: 5
             }
             onClicked: {
+                closeSettingsButton.highlighted = true
                 settingsWindow.close()
             }
             anchors.left: parent.left
@@ -84,13 +102,10 @@ Drawer {
                 }
             }
         }
-        function setValue(p, v) {
+        function getValueString(p) {
             for (var i = 0; i < settingsModel.count; i++) {
                 if (settingsModel.get(i).prop === p) {
-                    var item = settingsModel.get(i)
-                    item.value = v
-                    settingsModel.set(i, item)
-                    return
+                    return settingsModel.get(i).svalue
                 }
             }
         }
@@ -100,24 +115,26 @@ Drawer {
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        bottomMargin: 20
-        topMargin: 20
         boundsMovement: Flickable.StopAtBounds
         clip: true
         ScrollIndicator.vertical: ScrollIndicator {}
         model: settingsModel
+
         delegate: ColumnLayout {
             width: parent.width
+            spacing: 0
             RowLayout {
                 width: parent.width
                 Text {
                     Layout.leftMargin: 10
                     Layout.alignment: Qt.AlignLeft
                     Layout.fillWidth: true
+                    Layout.topMargin: (flags & settingsWindow.sf_title) && !(flags & settingsWindow.sf_help) ? 10 : 0
                     text: name
-                    font.pointSize: (flags & settingsWindow.sf_title) ? 14 : 20
-                    font.bold: (flags & settingsWindow.sf_title) ? true : false
-                    color: (flags & settingsWindow.sf_title) ? "green" : "black"
+                    font.pointSize: (flags & settingsWindow.sf_title) ? ((flags & settingsWindow.sf_help) ? 12 : 14) : 20
+                    font.bold: (flags & settingsWindow.sf_title) && !(flags & settingsWindow.sf_help)
+                    font.italic: flags & settingsWindow.sf_help
+                    color: (flags & settingsWindow.sf_title) ? ((flags & settingsWindow.sf_help) ? "red" : "green") : "black"
                 }
                 Loader {
                     Component { 
@@ -133,11 +150,31 @@ Drawer {
                     }
                     sourceComponent: (flags & settingsWindow.sf_checkbox) ? settingsCheckBox : undefined
                 }
+                Loader {
+                    Component {
+                        id: settingsTextInput
+                        TextField {
+                            width: itemWidth
+                            Layout.alignment: Qt.AlignRight
+                            horizontalAlignment: TextInput.AlignHCenter
+                            rightInset: 15
+                            rightPadding: rightInset
+                            text: svalue
+                            inputMethodHints: (flags & settingsWindow.sf_numbers_only) ? Qt.ImhDigitsOnly : Qt.ImhNoPredictiveText
+                            onAccepted: {
+                                svalue = text
+                                text = svalue
+                                focus = false
+                            }
+                        }
+                    }
+                    sourceComponent: (flags & settingsWindow.sf_input) ? settingsTextInput : undefined
+                }
             }
             MenuSeparator { 
                 implicitWidth: parent.width
-                topPadding: 4
-                bottomPadding: 4
+                topPadding: 0
+                bottomPadding: 0
                 visible: !(flags & settingsWindow.sf_title) && index != settingsModel.count - 1
             }
         }

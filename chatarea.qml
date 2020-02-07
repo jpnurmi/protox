@@ -6,6 +6,8 @@ import QtQuick.Dialogs 1.2
 import QtQuick.Window 2.12
 import QtGraphicalEffects 1.0
 
+/*[remove]*/ Item {
+
 ColumnLayout {
     anchors.fill: parent
     anchors.leftMargin: !inPortrait ? drawer.width : undefined
@@ -210,13 +212,12 @@ ColumnLayout {
                     wrapMode: Text.Wrap
                     textFormat: Text.PlainText
                     function processText(t) {
-                        String.prototype.replaceAll = function(search, replace){
+                        String.prototype.replaceAll = function(search, replace) {
                             return this.split(search).join(replace);
                         }
                         var str = String(t)
                         // deHTML input
                         str = str.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll("\"", "&quot;")
-
                         var result = "";
                         var lines = str.split("\n")
                         // parse each line separately
@@ -249,8 +250,6 @@ ColumnLayout {
                             // put back all next line operators
                             if (i < lines.length - 1) { result += "\n" }
                         }
-                        //console.log(result)
-
                         result = result.replace(/((http|https|ftp|sftp)?:\/\/[^\s]+)/g, function(url) {
                             return '<font color="blue"><a href="' + url + '">' + url + '</a></font>'
                         })
@@ -259,7 +258,7 @@ ColumnLayout {
                         })
                         result.replaceAll("\n", "<br>")
 
-                        console.log(result)
+                        //console.log(result)
                         return result
                     }
                 }
@@ -304,8 +303,8 @@ ColumnLayout {
         Layout.bottomMargin: (chatMessage.focus ? keyboardHeight : 0) + margin
 
         TextArea {
-            Layout.fillWidth: true
             id: chatMessage
+            Layout.fillWidth: true
             selectByMouse: true
             font.pointSize: standardFontPointSize
             leftPadding: 10
@@ -395,3 +394,49 @@ ColumnLayout {
         }
     }
 }
+
+Rectangle {
+    id: scrollToEndButton
+    z: z_top
+    width: 200
+    height: 40
+    radius: height * 0.5
+    color: "white"
+    property real alpha: 0.9
+    property int bottomMargin: 30
+    opacity: alpha
+    x: (parent.width - width) * (inPortrait ? 0.5 : 0.7)
+    y: chatSeparator.y - height - bottomMargin
+    visible: false
+    Text {
+        id: nextPageButtonText
+        text: "\u2193 " + qsTr("You have ") + new_messages + qsTr(" new messages") + " \u2193"
+        font.bold: true
+        font.pointSize: 12.5
+        opacity: parent.opacity
+        anchors.centerIn: parent
+    }
+    onVisibleChanged: {
+        if (!visible) {
+            new_messages = 0
+        }
+    }
+    MouseArea {
+        anchors.fill: parent
+        enabled: parent.visible
+        onPressed: {
+            messages.scrollToEnd()
+        }
+    }
+}
+DropShadow {
+    anchors.fill: scrollToEndButton
+    visible: scrollToEndButton.visible
+    opacity: scrollToEndButton.opacity
+    radius: 8.0
+    samples: 16
+    color: "#80000000"
+    source: scrollToEndButton
+}
+
+/*[remove]*/ }

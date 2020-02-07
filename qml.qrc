@@ -10,5 +10,8 @@
         <file>app.qml</file>
         <file>leftpanel.qml</file>
         <file>settings.qml</file>
+        <file>menus.qml</file>
+        <file>header.qml</file>
+        <file>logo_big.png</file>
     </qresource>
 </RCC>

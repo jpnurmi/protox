@@ -114,8 +114,8 @@ int QmlCBridge::getFriendStatus(quint32 friend_number)
 
 void QmlCBridge::retrieveChatLog(quint32 start, bool from, bool reverse)
 {
-	settings->beginGroup("Global");
-	quint32 limit = settings->value("last_messages_limit", 64).toUInt();
+	settings->beginGroup("Client");
+	quint32 limit = settings->value("last_messages_limit", 128).toUInt();
 	settings->endGroup();
 	ToxMessages messages = chat_db->getFriendMessages(toxcore_get_friend_public_key(tox, current_friend_number), limit, start, from, reverse);
 	QMetaObject::invokeMethod(component, "clearChatContent");
@@ -284,14 +284,11 @@ QVariant QmlCBridge::getSettingsValue(const QString &group, const QString &key, 
 	settings->beginGroup(group);
 	result = settings->value(key, default_value);
 	settings->endGroup();
-	qDebug() << result;
 	switch (type) {
-	case 1: return result.toBool(); break;
-	case 2: return result.toInt(); break;
-	case 10: return result.toString(); break;
+	case QVariant::Bool: return result.toBool(); break;
+	case QVariant::String: return result.toString(); break;
 	default: return result; break;
 	}
-	return result;
 }
 
 void QmlCBridge::setSettingsValue(const QString &group, const QString &key, const QVariant &value)
@@ -318,6 +315,7 @@ void customMessageHandler(QtMsgType type, const QMessageLogContext &context, con
 	}
 }
 
+#ifdef Q_OS_ANDROID
 extern "C" 
 {
 	JNIEXPORT void JNICALL Java_org_protox_activity_QtActivityEx_keyboardHeightChanged(JNIEnv *, jobject, jint height)
@@ -327,6 +325,7 @@ extern "C"
 		}
 	}
 }
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -363,7 +362,7 @@ int main(int argc, char *argv[])
 	}, Qt::QueuedConnection);
 
 	// load config
-	settings->beginGroup("Global");
+	settings->beginGroup("Client");
 	ToxPk friendPk = settings->value("last_friend", toxcore_get_friend_public_key(tox, 0)).toByteArray();
 	QList <QVariant> friend_list = settings->value("friend_list", QList <QVariant>()).toList();
 	settings->endGroup();
@@ -413,7 +412,7 @@ int main(int argc, char *argv[])
 	toxcore_timer->start();
 
 	int result = app.exec();
-	settings->beginGroup("Global");
+	settings->beginGroup("Client");
 	settings->setValue("last_friend", toxcore_get_friend_public_key(tox, qmlbridge->getCurrentFriendNumber()));
 	settings->setValue("friend_list", qmlbridge->getFriendsModelOrder());
 	// fixme
