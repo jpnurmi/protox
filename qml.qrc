@@ -9,5 +9,6 @@
         <file>functions.qml</file>
         <file>app.qml</file>
         <file>leftpanel.qml</file>
+        <file>settings.qml</file>
     </qresource>
 </RCC>

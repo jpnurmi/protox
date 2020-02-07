@@ -20,7 +20,8 @@ Drawer {
     interactive: inPortrait
     position: inPortrait ? 0 : 1
     visible: !inPortrait
-    dragMargin: 20
+    property bool disabled: false
+    dragMargin: disabled ? 0 : 20
     z: z_drawer
 
     onOpened: {
@@ -44,6 +45,7 @@ Drawer {
         anchors.fill: parent
         ColumnLayout {
             id: leftBarLayout
+            spacing: 0
             RowLayout {
                 id: accountLayout
                 spacing: 0
@@ -82,11 +84,11 @@ Drawer {
                                 radius: width * 0.5
                             }
                             onClicked: {
-                                if (index < 3) {
+                                //if (index < 3) {
                                     bridge.setStatus(index)
-                                } 
+                                //} 
                                 statusIndicator.setStatus(index)
-                                bridge.changeConnection(index != 3)
+                                //bridge.changeConnection(index != 3)
                             }
                         }
                     }
@@ -149,22 +151,24 @@ Drawer {
             MenuSeparator { 
                 id: drawerSeparator
                 implicitWidth: drawer.width 
+                bottomPadding: 0
             }
             property int draggedItem: -1
             ListView {
                 id: friends
                 model: friendsModel
-                interactive: true
-                //boundsMovement: Flickable.StopAtBounds
-                ScrollIndicator.vertical: ScrollIndicator { id: friendsScrollIndicator }
-                contentHeight: Layout.preferredHeight
+                flickableDirection: Flickable.VerticalFlick
+                boundsMovement: Flickable.StopAtBounds
+                clip: true
+                ScrollIndicator.vertical: ScrollIndicator {}
+                Layout.fillWidth: true
+                Layout.fillHeight: true
                 Layout.alignment: Qt.AlignBottom
                 Layout.preferredHeight: window.height - 
-                                        controlsLayout.height - 
-                                        accountLayout.height - 
-                                        connectionStatus.height - 
-                                        drawerSeparator.height -
-                                        leftBarLayout.spacing * 4
+                                        controlsLayout.height -
+                                        accountLayout.height -
+                                        connectionStatus.height - connectionStatus.topPadding - connectionStatus.bottomPadding -
+                                        drawerSeparator.height - drawerSeparator.topPadding
                 delegate: RowLayout {
                     id: friendLayout
                     spacing: 0
@@ -178,6 +182,10 @@ Drawer {
                         default_y = y
                     }
                     Component.onCompleted: {
+                        if (friends.contentHeight > friends.Layout.preferredHeight) {
+                            var count = Math.floor(friends.Layout.preferredHeight / itemHeight)
+                            friends.Layout.preferredHeight = itemHeight * count
+                        }
                         savePosition()
                     }
                     function resetPosition() {
@@ -340,9 +348,9 @@ Drawer {
             }
             RowLayout {
                 id: controlsLayout
-                Layout.bottomMargin: 10
                 Layout.alignment: Qt.AlignBottom | Qt.AlignHCenter
                 Layout.rightMargin: 8
+                Layout.topMargin: 12
                 ToolButton {
                     id: addFriendButton
                     Layout.alignment: Qt.AlignLeft
@@ -394,7 +402,7 @@ Drawer {
                         rightPadding: 1
                     }
                     onClicked: {
-                        toast.show({ message: "Not implemented.", duration: Toast.Short })
+                        settingsWindow.open()
                     }
                 }
             }

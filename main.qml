@@ -117,6 +117,8 @@ ApplicationWindow {
         horizontalAlignment: Text.AlignHCenter
     }
 
+    //include: settings.qml
+
     /*
       Basic elements
     */
@@ -150,6 +152,7 @@ ApplicationWindow {
     readonly property int z_overlay_header: 1
     readonly property int z_menu: 3
     readonly property int z_menu_elements: 4
+    readonly property int z_settings_menu: 1000
     readonly property int z_top: Number.MAX_VALUE-1
     readonly property int z_splash: Number.MAX_VALUE
     readonly property real standardFontPointSize: 17.5
@@ -527,10 +530,6 @@ ApplicationWindow {
         leftPadding: !inPortrait ? drawer.width : undefined
         z: z_overlay_header
         width: parent.width
-        NumberAnimation on y {
-            id: overlayHeaderSmoothMover
-            running: false
-        }
 
         ToolButton {
             id: leftOverlayButton

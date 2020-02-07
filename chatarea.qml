@@ -239,6 +239,9 @@ ColumnLayout {
                                 return '<i>' + italic.replace(/^.{2}/, '').replace(/.{2}$/, '') + '</i>'
                             })
                             */
+                            line = line.replace(/(\~{2,2})(.*?)\1/g, function(strike) {
+                                return '<s>' + strike.replace(/^.{2}/, '').replace(/.{2}$/, '') + '</s>'
+                            })
                             line = line.replace(/(\_{2,2})(.*?)\1/g, function(underline) {
                                 return '<u>' + underline.replace(/^.{2}/, '').replace(/.{2}$/, '') + '</u>'
                             })

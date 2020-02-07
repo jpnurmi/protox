@@ -7,6 +7,7 @@
 
 extern QmlCBridge *qmlbridge;
 extern ChatDataBase *chat_db;
+extern QSettings *settings;
 
 /*
  * Toxcore callbacks
@@ -410,6 +411,9 @@ Tox *toxcore_create()
 	struct Tox_Options tox_opts;
 	memset(&tox_opts, 0, sizeof(struct Tox_Options));
 	tox_options_default(&tox_opts);
+	settings->beginGroup("Toxcore");
+	tox_opts.udp_enabled = settings->value("udp_enabled", true).toBool();
+	settings->endGroup();
 
 	QFile f(GetProgDir() + DEFAULT_PROFILE);
 	bool clean = !f.exists();

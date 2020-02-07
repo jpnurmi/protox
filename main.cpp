@@ -278,6 +278,28 @@ void QmlCBridge::setKeyboardHeight(int height)
 		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, height));
 }
 
+QVariant QmlCBridge::getSettingsValue(const QString &group, const QString &key, int type, const QVariant &default_value)
+{
+	QVariant result;
+	settings->beginGroup(group);
+	result = settings->value(key, default_value);
+	settings->endGroup();
+	qDebug() << result;
+	switch (type) {
+	case 1: return result.toBool(); break;
+	case 2: return result.toInt(); break;
+	case 10: return result.toString(); break;
+	default: return result; break;
+	}
+	return result;
+}
+
+void QmlCBridge::setSettingsValue(const QString &group, const QString &key, const QVariant &value)
+{
+	settings->beginGroup(group);
+	settings->setValue(key, value);
+	settings->endGroup();
+}
 
 static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler(0);
 
