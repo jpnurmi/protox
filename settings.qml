@@ -31,14 +31,15 @@ Popup {
     Component.onCompleted: {
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Tox options") })
         settingsModel.append({ flags: sf_text | sf_title | sf_help, name: qsTr("These settings require client restart!") })
-        settingsModel.append({ flags: sf_text | sf_checkbox, name: qsTr("UDP mode"), prop: "udp_enabled", 
+        settingsModel.append({ flags: sf_text | sf_checkbox, name: qsTr("Enable UDP"), prop: "udp_enabled", 
                     value: bridge.getSettingsValue("Toxcore", "udp_enabled", ptype_bool, Boolean(true)) })
-        settingsModel.append({ flags: sf_text | sf_checkbox, name: qsTr("IPV6 mode"), prop: "ipv6_enabled", 
+        settingsModel.append({ flags: sf_text | sf_checkbox, name: qsTr("Enable IPV6"), prop: "ipv6_enabled", 
                     value: bridge.getSettingsValue("Toxcore", "ipv6_enabled", ptype_bool, Boolean(true)) })
-        settingsModel.append({ flags: sf_text | sf_checkbox, name: qsTr("Lan discovery"), prop: "local_discovery_enabled", 
+        settingsModel.append({ flags: sf_text | sf_checkbox, name: qsTr("Enable LAN discovery"), prop: "local_discovery_enabled", 
                     value: bridge.getSettingsValue("Toxcore", "local_discovery_enabled", ptype_bool, Boolean(false)) })
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Client options") })
-        settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only, itemWidth: 96, name: qsTr("Last messages limit"), prop: "last_messages_limit", 
+        settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only, numberMinLimit: 5, numberMaxLimit: 10000, itemWidth: 96, 
+                    name: qsTr("Recent messages limit"), prop: "last_messages_limit", 
                     svalue: bridge.getSettingsValue("Client", "last_messages_limit", ptype_string, 128) })
     }
 
@@ -49,12 +50,20 @@ Popup {
         leftOverlayButton.highlighted = false
         closeSettingsButton.highlighted = false
     }
+    property bool reloadChatHistory: false
     function _close() {
         drawer.dragEnabled = true
         bridge.setSettingsValue("Toxcore", "udp_enabled", Boolean(settingsModel.getValue("udp_enabled")))
         bridge.setSettingsValue("Toxcore", "ipv6_enabled", Boolean(settingsModel.getValue("ipv6_enabled")))
         bridge.setSettingsValue("Toxcore", "local_discovery_enabled", Boolean(settingsModel.getValue("local_discovery_enabled")))
         bridge.setSettingsValue("Client", "last_messages_limit", settingsModel.getValueString("last_messages_limit"))
+        if (reloadChatHistory) {
+            messages.addTransitionEnabled = false
+            bridge.retrieveChatLog()
+            chatScrollToEnd()
+            messages.addTransitionEnabled = true
+            reloadChatHistory = false
+        }
     }
 
     onClosed: {
@@ -162,9 +171,17 @@ Popup {
                             text: svalue
                             inputMethodHints: (flags & settingsWindow.sf_numbers_only) ? Qt.ImhDigitsOnly : Qt.ImhNoPredictiveText
                             onAccepted: {
+                                if (flags & settingsWindow.sf_numbers_only) {
+                                    if (parseInt(text) > numberMaxLimit) {
+                                        text = numberMaxLimit
+                                    } else if (parseInt(text) < numberMinLimit) {
+                                        text = numberMinLimit
+                                    }
+                                }
                                 svalue = text
                                 text = svalue
                                 focus = false
+                                settingsWindow.reloadChatHistory = true
                             }
                         }
                     }

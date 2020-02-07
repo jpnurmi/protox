@@ -72,15 +72,6 @@ ToolBar {
                 messagesModel.clear()
             }
         }
-        MenuItem {
-            text: qsTr("Reload chat")
-            onClicked: {
-                messages.addTransitionEnabled = false
-                bridge.retrieveChatLog()
-                chatScrollToEnd()
-                messages.addTransitionEnabled = true
-            }
-        }
         MenuSeparator {}
         MenuItem {
             text: qsTr("Quit")

@@ -36,11 +36,14 @@ Drawer {
 
     ListModel {
         id: friendsModel
-        function swap(slot1, slot2) {
+        function smartMove(slot1, slot2) {
             var min = Math.min(slot1, slot2);
             var max = Math.max(slot1, slot2);
-            move(min, max, 1);
-            move(max - 1, min, 1);
+            if (slot1 > slot2) {
+                move(min, max, 1);
+            } else {
+                move(max, min, 1);
+            }
         }
     }
     Item {
@@ -290,7 +293,7 @@ Drawer {
                                 if (!request) {
                                     parent.parent.dragEntered = false
                                     friendsModel.get(leftBarLayout.draggedItem).dragStarted = false
-                                    friendsModel.swap(index, leftBarLayout.draggedItem)
+                                    friendsModel.smartMove(index, leftBarLayout.draggedItem)
                                 }
                             }
                         }
@@ -350,7 +353,7 @@ Drawer {
                                 if (!request) {
                                     parent.parent.dragEntered = false
                                     friendsModel.get(leftBarLayout.draggedItem).dragStarted = false
-                                    friendsModel.swap(index, leftBarLayout.draggedItem)
+                                    friendsModel.smartMove(index, leftBarLayout.draggedItem)
                                 }
                             }
                         }
