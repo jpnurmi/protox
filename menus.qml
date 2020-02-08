@@ -77,7 +77,6 @@ Menu {
         width: parent.width
         text: ""
         onAccepted: {
-            focus = false
             addFriendMessage.focus = true
         }
     }
@@ -255,6 +254,9 @@ Menu {
         verticalAlignment: TextInput.AlignVCenter
         width: parent.width
         text: bridge.getNickname(false)
+        onAccepted: {
+            myStatus.focus = true
+        }
     }
     Text {
         padding: 10
@@ -272,6 +274,7 @@ Menu {
         verticalAlignment: TextInput.AlignVCenter
         width: parent.width
         text: bridge.getStatusMessage()
+        onAccepted: profileMenuApplyItem.onTriggered()
     }
     RowLayout {
         MenuItem {
@@ -285,6 +288,7 @@ Menu {
             }
         }
         MenuItem {
+            id: profileMenuApplyItem
             Layout.fillWidth: true
             Text {
                 anchors.centerIn: parent
