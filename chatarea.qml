@@ -44,7 +44,7 @@ ColumnLayout {
             }
             visible: false
             onVisibleChanged: {
-                if (messages.lastItemVisible) {
+                if (messages.atYEnd) {
                     messages.scrollToEnd()
                 }
                 if (visible) {
@@ -80,7 +80,7 @@ ColumnLayout {
             boundsMovement: Flickable.StopAtBounds
             ScrollIndicator.vertical: ScrollIndicator {}
             onContentYChanged: {
-                if (lastItemVisible) {
+                if (atYEnd) {
                     scrollToEndButton.visible = false
                 }
             }
@@ -89,11 +89,11 @@ ColumnLayout {
             }
             function scrollToStart() {
                 positionViewAtBeginning()
-                contentY -= chatLayout.height + chatSeparator.separator_margin * 2 + chatSeparator.height
+                contentY -= flickable_margin
             }
             function scrollToEnd() {
                 positionViewAtEnd()
-                contentY += chatLayout.height + chatSeparator.separator_margin * 2 + chatSeparator.height
+                contentY += flickable_margin + (typingText.visible ? typingText.height + typingText.margin : 0)
             }
             property bool addTransitionEnabled: true
             add: Transition {
@@ -101,18 +101,10 @@ ColumnLayout {
                 NumberAnimation { property: "scale"; from: 0; to: 1.0; duration: 300 }
             }
             model: messagesModel
-            property real span : contentY + height
             delegate: Rectangle {
                 id: messageCloud
                 color: !msgSelf ? "lightblue" : (msgReceived ? "orange" : "lightgray")
                 radius: 10
-                property bool fullyVisible: y > messages.contentY && y < messages.span
-                onFullyVisibleChanged: {
-                    if (bridge.getMessagesCount(bridge.getCurrentFriendNumber()) - 1 !== msgUniqueId) {
-                        return
-                    }
-                    messages.lastItemVisible = fullyVisible
-                }
                 Rectangle {
                     id: cloudCornerRemover
                     z: z_cloud

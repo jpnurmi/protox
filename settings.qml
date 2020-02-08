@@ -33,7 +33,7 @@ Popup {
         settingsModel.append({ flags: sf_text | sf_title | sf_help, name: qsTr("These settings require client restart!") })
         settingsModel.append({ flags: sf_text | sf_checkbox, name: qsTr("Enable UDP"), prop: "udp_enabled", 
                     value: bridge.getSettingsValue("Toxcore", "udp_enabled", ptype_bool, Boolean(true)) })
-        settingsModel.append({ flags: sf_text | sf_checkbox, name: qsTr("Enable IPV6"), prop: "ipv6_enabled", 
+        settingsModel.append({ flags: sf_text | sf_checkbox, name: qsTr("Enable IPv6"), prop: "ipv6_enabled", 
                     value: bridge.getSettingsValue("Toxcore", "ipv6_enabled", ptype_bool, Boolean(true)) })
         settingsModel.append({ flags: sf_text | sf_checkbox, name: qsTr("Enable LAN discovery"), prop: "local_discovery_enabled", 
                     value: bridge.getSettingsValue("Toxcore", "local_discovery_enabled", ptype_bool, Boolean(false)) })

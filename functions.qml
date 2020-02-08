@@ -167,8 +167,12 @@ function insertMessage(text, friend_number, self, message_id, time, unique_id, f
                              "msgHistory" : history})
 
     if (!history) {
-        if (messages.lastItemVisible) {
+        if (messages.atYEnd) {
             messages.scrollToEnd()
+            // to make typingText disappear immediately
+            if (!self) {
+                typingText.visible = false
+            }
         } else {
             new_messages += 1
             scrollToEndButton.visible = true
