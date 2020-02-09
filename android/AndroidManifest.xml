@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <manifest package="org.protox" xmlns:android="http://schemas.android.com/apk/res/android" android:versionName="1.0alpha" android:versionCode="1" android:installLocation="auto">
-    <application android:hardwareAccelerated="true" android:excludeFromRecents="true" android:noHistory="true" android:name="org.qtproject.qt5.android.bindings.QtApplication" android:label="Protox" android:icon="@drawable/icon">
+    <application android:hardwareAccelerated="true" android:name="org.qtproject.qt5.android.bindings.QtApplication" android:label="Protox" android:icon="@drawable/icon">
         <activity android:theme="@style/ProtoxTheme" android:windowSoftInputMode="adjustNothing" android:isScrollContainer="false" android:configChanges="orientation|uiMode|screenLayout|screenSize|smallestScreenSize|layoutDirection|locale|fontScale|keyboard|keyboardHidden|navigation" android:name="org.protox.activity.QtActivityEx" android:label="Protox" android:screenOrientation="portrait" android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -44,7 +44,7 @@
                           application still try to draw after
                           "applicationStateChanged(Qt::ApplicationSuspended)"
                           signal is sent! -->
-            <meta-data android:name="android.app.background_running" android:value="true"/>
+            <meta-data android:name="android.app.background_running" android:value="false"/>
             <!-- Background running -->
 
             <!-- auto screen scale factor -->

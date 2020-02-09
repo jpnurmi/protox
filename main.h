@@ -28,6 +28,7 @@ public:
 	void setConnStatus(int conn_status);
 	QList<QVariant> getFriendsModelOrder();
 	void setKeyboardHeight(int height);
+	bool getAppInactive() { return app_inactive; }
 public slots:
 	Q_INVOKABLE void sendMessage(const QString &message);
 	Q_INVOKABLE quint32 getCurrentFriendNumber();
@@ -57,6 +58,7 @@ public slots:
 	Q_INVOKABLE void bootstrapDHT();
 	Q_INVOKABLE QVariant getSettingsValue(const QString &group, const QString &key, int type, const QVariant &default_value);
 	Q_INVOKABLE void setSettingsValue(const QString &group, const QString &key, const QVariant &value);
+	Q_INVOKABLE void setAppInactive(bool inactive) { app_inactive = inactive; }
 
 public:
 	ToxFriendsConnStatus friends_conn_status;
@@ -65,6 +67,7 @@ public:
 	ToxFriendsOnce friends_once;
 private:
 	quint32 current_friend_number;
+	bool app_inactive;
 private:
 	QObject *component;
 	Tox *tox;

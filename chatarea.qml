@@ -93,7 +93,8 @@ ColumnLayout {
             }
             function scrollToEnd() {
                 positionViewAtEnd()
-                contentY += flickable_margin + (typingText.visible ? typingText.height + typingText.margin : 0)
+                contentY += flickable_margin + (typingText.visible ? typingText.height + typingText.margin : 0) +
+                        chatLayout.height + chatSeparator.separator_margin * 2 + chatSeparator.height
             }
             property bool addTransitionEnabled: true
             add: Transition {

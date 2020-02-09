@@ -400,20 +400,24 @@ void toxcore_bootstrap_DHT(Tox *m)
 	QJsonDocument doc = QJsonDocument::fromJson(json_data.isEmpty() ? default_nodes_json.toUtf8() : json_data);
 	QJsonArray array = doc.object()["nodes"].toArray();
 
-	for (auto node : array) {
-		QJsonObject item = node.toObject();
-		QString ipv4 = item["ipv4"].toString();
-		QString ipv6 = item["ipv6"].toString();
-		QString ip = (use_ipv6 && ipv6 != "-") ? ipv6 : ipv4;
-		int port = item["port"].toInt();
-		QString public_key = item["public_key"].toString();
-		TOX_ERR_BOOTSTRAP err;
-		tox_bootstrap(m, ip.toStdString().c_str(), (quint16)port, (const quint8*)public_key.toStdString().c_str(), &err);
-
-		if (err != TOX_ERR_BOOTSTRAP_OK) {
-			Debug("Failed to bootstrap DHT via: " + ip + " " + QString::number(port) + " (error number: " + QString::number(err) + ")");
+	QtConcurrent::run([=]() {
+		for (auto node : array) {
+			QJsonObject item = node.toObject();
+			QString ipv4 = item["ipv4"].toString();
+			QString ipv6 = item["ipv6"].toString();
+			QString ip = (use_ipv6 && ipv6 != "-") ? ipv6 : ipv4;
+			int port = item["port"].toInt();
+			QString public_key = item["public_key"].toString();
+	
+				TOX_ERR_BOOTSTRAP err;
+				tox_bootstrap(m, ip.toStdString().c_str(), (quint16)port, (const quint8*)public_key.toStdString().c_str(), &err);
+		
+				if (err != TOX_ERR_BOOTSTRAP_OK) {
+					Debug("Failed to bootstrap DHT via: " + ip + " " + QString::number(port) + " (error number: " + QString::number(err) + ")");
+				}
+			}
 		}
-	}
+	);
 }
 
 Tox *toxcore_create()

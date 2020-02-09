@@ -17,6 +17,7 @@ QmlCBridge::QmlCBridge(Tox *_tox, QTimer *_toxcore_timer, quint32 last_friend_nu
 	tox = _tox;
 	toxcore_timer = _toxcore_timer;
 	current_friend_number = last_friend_number;
+	app_inactive = true;
 }
 
 void QmlCBridge::setComponent(QObject *_component)
@@ -274,7 +275,7 @@ void QmlCBridge::bootstrapDHT()
 void QmlCBridge::setKeyboardHeight(int height)
 {
 	QVariant returnedValue;
-	QMetaObject::invokeMethod(component, "setKeyboardHeight", Qt::BlockingQueuedConnection,
+	QMetaObject::invokeMethod(component, "setKeyboardHeight", Qt::UniqueConnection,
 		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, height));
 }
 
@@ -320,7 +321,7 @@ extern "C"
 {
 	JNIEXPORT void JNICALL Java_org_protox_activity_QtActivityEx_keyboardHeightChanged(JNIEnv *, jobject, jint height)
 	{
-		if (qmlbridge) {
+		if (qmlbridge && !qmlbridge->getAppInactive()) {
 			qmlbridge->setKeyboardHeight(height);
 		}
 	}
@@ -415,8 +416,6 @@ int main(int argc, char *argv[])
 	settings->beginGroup("Client");
 	settings->setValue("last_friend", toxcore_get_friend_public_key(tox, qmlbridge->getCurrentFriendNumber()));
 	settings->setValue("friend_list", qmlbridge->getFriendsModelOrder());
-	// fixme
-	//settings->setValue("last_messages_limit", )
 	settings->endGroup();
 	settings->sync();
 	toxcore_timer->stop();

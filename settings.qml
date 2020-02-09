@@ -38,11 +38,11 @@ Popup {
         settingsModel.append({ flags: sf_text | sf_checkbox, name: qsTr("Enable LAN discovery"), prop: "local_discovery_enabled", 
                     value: bridge.getSettingsValue("Toxcore", "local_discovery_enabled", ptype_bool, Boolean(false)) })
         settingsModel.append({ flags: sf_text | sf_input, itemWidth: 128, 
-                    name: qsTr("Custom nodes .json file"), prop: "nodes_json_file", 
+                    name: qsTr("Custom nodes .json file"), prop: "nodes_json_file", helperText: "nodes.json",
                     svalue: bridge.getSettingsValue("Client", "nodes_json_file", ptype_string, String("")) })
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Client options") })
         settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only, numberMinLimit: 5, numberMaxLimit: 10000, itemWidth: 96, 
-                    name: qsTr("Recent messages limit"), prop: "last_messages_limit", 
+                    name: qsTr("Recent messages limit"), prop: "last_messages_limit", helperText: "128",
                     svalue: bridge.getSettingsValue("Client", "last_messages_limit", ptype_string, 128) })
     }
 
@@ -135,6 +135,7 @@ Popup {
 
         delegate: ColumnLayout {
             width: parent.width
+            height: (flags & settingsWindow.sf_title) ? 24 : 56
             spacing: 0
             RowLayout {
                 width: parent.width
@@ -152,7 +153,7 @@ Popup {
                 Loader {
                     Component { 
                         id: settingsCheckBox
-                        CheckBox {
+                        Switch {
                             Layout.alignment: Qt.AlignRight
                             checked: value
                             onCheckedChanged: {
@@ -173,10 +174,13 @@ Popup {
                             rightInset: 15
                             rightPadding: rightInset
                             text: svalue
+                            placeholderText: helperText
                             inputMethodHints: (flags & settingsWindow.sf_numbers_only) ? Qt.ImhDigitsOnly : Qt.ImhNoPredictiveText
                             onAccepted: {
                                 if (flags & settingsWindow.sf_numbers_only) {
-                                    if (parseInt(text) > numberMaxLimit) {
+                                    if (text.length == 0) {
+                                        text = helperText
+                                    } else if (parseInt(text) > numberMaxLimit) {
                                         text = numberMaxLimit
                                     } else if (parseInt(text) < numberMinLimit) {
                                         text = numberMinLimit

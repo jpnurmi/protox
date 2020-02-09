@@ -14,8 +14,6 @@ import QZXing 2.3
 
 ApplicationWindow {
     id: window
-    width: 360
-    height: 520
     visible: true
 
     /*
@@ -37,10 +35,6 @@ ApplicationWindow {
     Connections {
         target: Qt.application
         onStateChanged: {
-            if (bridge.getConnStatus() < 1) {
-                bridge.bootstrapDHT()
-                connectionStatus.text = qsTr("Bootstrapping...")
-            }
             if (splashImageDestroyAnimation !== null) {
                 statusBar.theme = Material.Dark
                 statusBar.color = Material.toolBarColor
@@ -52,6 +46,7 @@ ApplicationWindow {
                 selectFriend(notification.getNotificationId(true))
             }
             appInactive = Qt.application.state === Qt.ApplicationSuspended
+            bridge.setAppInactive(appInactive)
         }
     }
 
