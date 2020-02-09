@@ -51,6 +51,8 @@ void toxcore_set_status_message(Tox *m, const QString &statusMessage);
 quint32 toxcore_get_status(Tox *m);
 void toxcore_set_status(Tox *m, quint32 status);
 int toxcore_get_connection_status();
+quint32 toxcore_get_nospam(Tox *m);
+void toxcore_set_nospam(Tox *m, quint32 nospam);
 
 
 bool toxcore_save_data(Tox *m, const QString &path);
