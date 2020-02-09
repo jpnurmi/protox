@@ -10,5 +10,6 @@ You can donate if you want to support this project:
 * ETH: 0x7575c05460b5c2c9fbd1fcc2dd4cc0a246f7f672
 
 [Download](https://gitlab.com/Monsterovich/protox/-/releases)
+[Download (nightly builds)](https://submarine.strangled.net/protox/builds/nightly/)
 
 P.S. To keep the application network activity in the background mode, under battery settings choose “Don't Optimise” option for Protox.
