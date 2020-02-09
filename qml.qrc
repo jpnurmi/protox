@@ -13,5 +13,6 @@
         <file>menus.qml</file>
         <file>header.qml</file>
         <file>logo_big.png</file>
+        <file>nodes.json</file>
     </qresource>
 </RCC>

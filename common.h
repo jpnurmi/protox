@@ -19,6 +19,8 @@
 #include <QFuture>
 #include <QtConcurrent/QtConcurrent>
 #include <QSettings>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 #if defined (Q_OS_ANDROID)
 #include <QAndroidService>
