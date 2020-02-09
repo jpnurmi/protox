@@ -388,6 +388,7 @@ void toxcore_bootstrap_DHT(Tox *m)
 	settings->beginGroup("Toxcore");
 	QString json_file = settings->value("nodes_json_file", "").toString();
 	bool use_ipv6 = settings->value("ipv6_enabled", true).toBool();
+	uint32_t max_bootstrap_nodes = settings->value("max_bootstrap_nodes", 6).toUInt();
 	settings->endGroup();
 	QByteArray json_data;
 	if (!json_file.isEmpty()) {
@@ -401,6 +402,7 @@ void toxcore_bootstrap_DHT(Tox *m)
 	QJsonArray array = doc.object()["nodes"].toArray();
 
 	QtConcurrent::run([=]() {
+		uint32_t succeed = 0;
 		for (auto node : array) {
 			QJsonObject item = node.toObject();
 			QString ipv4 = item["ipv4"].toString();
@@ -412,8 +414,11 @@ void toxcore_bootstrap_DHT(Tox *m)
 				TOX_ERR_BOOTSTRAP err;
 				tox_bootstrap(m, ip.toStdString().c_str(), (quint16)port, (const quint8*)public_key.toStdString().c_str(), &err);
 		
-				if (err != TOX_ERR_BOOTSTRAP_OK) {
-					Debug("Failed to bootstrap DHT via: " + ip + " " + QString::number(port) + " (error number: " + QString::number(err) + ")");
+				if (err == TOX_ERR_BOOTSTRAP_OK) {
+					succeed++;
+				}
+				if (succeed == max_bootstrap_nodes) {
+					return;
 				}
 			}
 		}

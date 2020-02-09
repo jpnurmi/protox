@@ -40,6 +40,9 @@ Popup {
         settingsModel.append({ flags: sf_text | sf_input, itemWidth: 128, 
                     name: qsTr("Custom nodes .json file"), prop: "nodes_json_file", helperText: "nodes.json",
                     svalue: bridge.getSettingsValue("Client", "nodes_json_file", ptype_string, String("")) })
+        settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only, numberMinLimit: 1, numberMaxLimit: 10000, itemWidth: 96, 
+                    name: qsTr("Maximum bootstrap nodes"), prop: "max_bootstrap_nodes", helperText: "6",
+                    svalue: bridge.getSettingsValue("Toxcore", "max_bootstrap_nodes", ptype_string, 6) })
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Client options") })
         settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only, numberMinLimit: 5, numberMaxLimit: 10000, itemWidth: 96, 
                     name: qsTr("Recent messages limit"), prop: "last_messages_limit", helperText: "128",
@@ -60,6 +63,7 @@ Popup {
         bridge.setSettingsValue("Toxcore", "ipv6_enabled", Boolean(settingsModel.getValue("ipv6_enabled")))
         bridge.setSettingsValue("Toxcore", "local_discovery_enabled", Boolean(settingsModel.getValue("local_discovery_enabled")))
         bridge.setSettingsValue("Toxcore", "nodes_json_file", String(settingsModel.getValueString("nodes_json_file")))
+        bridge.setSettingsValue("Toxcore", "max_bootstrap_nodes", String(settingsModel.getValueString("max_bootstrap_nodes")))
         bridge.setSettingsValue("Client", "last_messages_limit", settingsModel.getValueString("last_messages_limit"))
         if (reloadChatHistory) {
             messages.addTransitionEnabled = false
