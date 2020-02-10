@@ -190,6 +190,7 @@ ColumnLayout {
                             } else {
                                 chatMessage.text += "> " + add + "\n"
                             }
+                            chatMessage.cursorPosition = chatMessage.length
                         }
                     }
                     Component.onCompleted: {
@@ -249,7 +250,7 @@ ColumnLayout {
                         result = result.replace(/(&gt;(.)*)/g, function(quote) {
                             return '<font color="#0b6623">' + quote + '</font>'
                         })
-                        result.replaceAll("\n", "<br>")
+                        result = result.replace(/(\n)/gm, '<br>')
 
                         //console.log(result)
                         return result
@@ -342,7 +343,6 @@ ColumnLayout {
                 } else {
                     bridge.setTypingFriend(bridge.getCurrentFriendNumber(), false)
                 }
-                chatMessage.cursorPosition = chatMessage.text.length
             }
         }
         Button {
