@@ -170,6 +170,7 @@ MessageDialog {
         if (bridge.getCurrentFriendNumber() === currentFriendNumber) {
             messagesModel.clear()
         }
+        toast.show({ message : qsTr("Chat history removed!"), duration : Toast.Short });
     }
 }
 MessageDialog {
