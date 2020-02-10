@@ -190,7 +190,7 @@ ColumnLayout {
                             } else {
                                 chatMessage.text += "> " + add + "\n"
                             }
-                            chatMessage.cursorPosition = chatMessage.length
+                            chatMessage.cursorPosition = chatMessage.text.length
                         }
                     }
                     Component.onCompleted: {

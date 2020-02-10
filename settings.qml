@@ -18,12 +18,12 @@ Popup {
     Connections {
         target: window
         onKeyboardActiveChanged: {
-            if (visible) {
+            if (settingsWindow.visible) {
                 bridge.setKeyboardAdjustMode(!window.keyboardActive)
             }
         }
         onFocusObjectChanged: {
-            if (visible && window.keyboardActive) {
+            if (settingsWindow.visible && window.keyboardActive) {
                 bridge.setKeyboardAdjustMode(false)
             }
         }
