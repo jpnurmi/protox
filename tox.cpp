@@ -412,13 +412,15 @@ void toxcore_bootstrap_DHT(Tox *m)
 			QJsonObject item = node.toObject();
 			QString ipv4 = item["ipv4"].toString();
 			QString ipv6 = item["ipv6"].toString();
-			QString ip = (use_ipv6 && ipv6 != "-") ? ipv6 : ipv4;
 			int port = item["port"].toInt();
 			QString public_key = item["public_key"].toString();
 	
 				TOX_ERR_BOOTSTRAP err;
-				tox_bootstrap(m, ip.toStdString().c_str(), (quint16)port, (const quint8*)public_key.toStdString().c_str(), &err);
-		
+				tox_bootstrap(m, ipv4.toStdString().c_str(), (quint16)port, (const quint8*)public_key.toStdString().c_str(), &err);
+				if (use_ipv6 && ipv6 != "-") {
+					tox_bootstrap(m, ipv6.toStdString().c_str(), (quint16)port, (const quint8*)public_key.toStdString().c_str(), &err);
+				}
+
 				if (err == TOX_ERR_BOOTSTRAP_OK) {
 					succeed++;
 				}
