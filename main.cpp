@@ -304,6 +304,15 @@ void QmlCBridge::setSettingsValue(const QString &group, const QString &key, cons
 	settings->endGroup();
 }
 
+void QmlCBridge::setKeyboardAdjustMode(bool adjustNothing)
+{
+#if defined (Q_OS_ANDROID)
+	QtAndroid::runOnAndroidThread([=]() {
+		QtAndroid::androidActivity().callMethod<void>("setKeyboardAdjustMode", "(Z)V", adjustNothing);
+	});
+#endif
+}
+
 static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler(0);
 
 void customMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString & msg)

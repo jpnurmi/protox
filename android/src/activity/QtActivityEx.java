@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.View;
+import android.view.WindowManager;
 import android.graphics.Rect;
 
 import KeyboardProvider.KeyboardProvider;
@@ -56,6 +57,9 @@ public class QtActivityEx extends QtActivity
     }
     private int notificationId = -1;
 
-
-
+    public void setKeyboardAdjustMode(boolean adjustNothing) {
+        // for some reason it doesn't work without QtNative.activity(). Why?
+        QtNative.activity().getWindow().setSoftInputMode(adjustNothing ? WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING :
+                                                                         WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+    }
 }

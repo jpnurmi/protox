@@ -254,6 +254,7 @@ Menu {
             color: "red"
             font.pointSize: 14
             font.capitalization: Font.AllUppercase
+            font.bold: true
         }
         
         leftInset: 10

@@ -59,6 +59,7 @@ public slots:
 	Q_INVOKABLE QVariant getSettingsValue(const QString &group, const QString &key, int type, const QVariant &default_value);
 	Q_INVOKABLE void setSettingsValue(const QString &group, const QString &key, const QVariant &value);
 	Q_INVOKABLE void setAppInactive(bool inactive) { app_inactive = inactive; }
+	Q_INVOKABLE void setKeyboardAdjustMode(bool adjustNothing);
 
 public:
 	ToxFriendsConnStatus friends_conn_status;

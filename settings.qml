@@ -13,6 +13,15 @@ Popup {
     rightPadding: 0
     topPadding: 0
     bottomPadding: 0
+    visible: false
+    // enable adjustTop only for this window
+    property int _keyboardActive: keyboardActive
+    on_KeyboardActiveChanged: {
+        if (visible) {
+            bridge.setKeyboardAdjustMode(!_keyboardActive)
+        }
+    }
+
     enter: Transition {
         NumberAnimation { property: "x"; from: settingsWindow.width; to: 0; easing.type: Easing.OutCubic }
     }
@@ -140,7 +149,6 @@ Popup {
         clip: true
         ScrollIndicator.vertical: ScrollIndicator {}
         model: settingsModel
-
         delegate: ColumnLayout {
             width: parent.width
             height: (flags & settingsWindow.sf_title) ? 24 : 56
@@ -184,9 +192,10 @@ Popup {
                             text: svalue
                             placeholderText: helperText
                             inputMethodHints: (flags & settingsWindow.sf_numbers_only) ? Qt.ImhDigitsOnly : Qt.ImhNoPredictiveText
+
                             onAccepted: {
                                 if (flags & settingsWindow.sf_numbers_only) {
-                                    if (text.length == 0) {
+                                    if (text.length == 0 || isNaN(text)) {
                                         text = helperText
                                     } else if (parseInt(text) > numberMaxLimit) {
                                         text = numberMaxLimit
