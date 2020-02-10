@@ -116,7 +116,7 @@ function chatScrollToEnd() {
     messages.scrollToEnd()
 }
 
-property variant each_friend_text: []
+property string each_friend_text: []
 function selectFriend(friend_number) {
     if (bridge.getCurrentFriendNumber() === friend_number && checkLastMessage(friend_number)) {
         return

@@ -19,8 +19,7 @@ ApplicationWindow {
     /*
       Window events
     */
-    property bool _inPortrait: inPortrait
-    on_InPortraitChanged: {
+    onInPortraitChanged: {
         var friend_number = bridge.getCurrentFriendNumber()
         drawer.width = width * 0.5 * (!inPortrait ? (Screen.height / Screen.width) : 1.0)
         friendNickname.setText(bridge.getFriendNickname(friend_number))

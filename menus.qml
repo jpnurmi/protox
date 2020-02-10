@@ -69,7 +69,6 @@ Menu {
     }
     TextField {
         id: toxId
-        selectByMouse: true
         font.pointSize: standardFontPointSize
         leftPadding: 10
         rightPadding: leftPadding
@@ -97,7 +96,6 @@ Menu {
     }
     TextField {
         id: addFriendMessage
-        selectByMouse: true
         font.pointSize: standardFontPointSize
         leftPadding: 10
         rightPadding: leftPadding
@@ -294,7 +292,6 @@ Menu {
     }
     TextField {
         id: myNickname
-        selectByMouse: true
         font.pointSize: standardFontPointSize
         leftPadding: 10
         rightPadding: leftPadding
@@ -314,7 +311,6 @@ Menu {
     }
     TextField {
         id: myStatus
-        selectByMouse: true
         font.pointSize: standardFontPointSize
         leftPadding: 10
         rightPadding: leftPadding

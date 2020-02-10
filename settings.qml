@@ -15,10 +15,17 @@ Popup {
     bottomPadding: 0
     visible: false
     // enable adjustTop only for this window
-    property int _keyboardActive: keyboardActive
-    on_KeyboardActiveChanged: {
-        if (visible) {
-            bridge.setKeyboardAdjustMode(!_keyboardActive)
+    Connections {
+        target: window
+        onKeyboardActiveChanged: {
+            if (visible) {
+                bridge.setKeyboardAdjustMode(!window.keyboardActive)
+            }
+        }
+        onFocusObjectChanged: {
+            if (visible && window.keyboardActive) {
+                bridge.setKeyboardAdjustMode(false)
+            }
         }
     }
 
