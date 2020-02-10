@@ -157,6 +157,47 @@ Menu {
 /*
     Friend info menu
 */
+MessageDialog {
+    id: clearFriendHistoryDialog
+    title: qsTr("Clearing friend history")
+    text: qsTr("Do you want to remove all history for this contact?")
+    icon: StandardIcon.Question
+    standardButtons: StandardButton.Yes | StandardButton.No
+    visible: false
+    property int currentFriendNumber: -1
+    onYes: {
+        bridge.clearFriendChatHistory(currentFriendNumber)
+    }
+}
+MessageDialog {
+    id: removeFriendDialog
+    title: qsTr("Delete current friend")
+    property string nickName: ""
+    text: qsTr("Are you really want to delete ") + nickName + qsTr(" from your contact list?")
+    icon: StandardIcon.Question
+    standardButtons: StandardButton.Yes | StandardButton.No
+    visible: false
+    onYes: {
+        clearFriendHistoryDialog.currentFriendNumber = bridge.getCurrentFriendNumber()
+        clearFriendHistoryDialog.open()
+        bridge.deleteFriend(bridge.getCurrentFriendNumber())
+        for (var i = 0; i < friendsModel.count; i++) {
+            var friend = friendsModel.get(i)
+            if (friend.friendNumber === bridge.getCurrentFriendNumber()) {
+                friendsModel.remove(i)
+            }
+        }
+        toast.show({ message : qsTr("Friend removed!"), duration : Toast.Short });
+        cleanProfile = bridge.getFriendsCount() < 1
+        if (friendsModel.count > 0) {
+            selectFriend(friendsModel.get(0).friendNumber)
+        } else {
+            friendNickname.text = ""
+            friendStatus.text = ""
+        }
+        friendInfoMenu.close()
+    }
+}
 Menu {
     id: friendInfoMenu
     width: 300
@@ -194,27 +235,28 @@ Menu {
         wrapMode: Text.Wrap
     }
     Button {
-        text: qsTr("Delete this friend")
+        text: qsTr("Clear chat history")
         leftInset: 10
         rightInset: leftInset
         onClicked: {
-            bridge.clearFriendChatHistory(bridge.getCurrentFriendNumber())
-            bridge.deleteFriend(bridge.getCurrentFriendNumber())
-            for (var i = 0; i < friendsModel.count; i++) {
-                var friend = friendsModel.get(i)
-                if (friend.friendNumber === bridge.getCurrentFriendNumber()) {
-                    friendsModel.remove(i)
-                }
-            }
-            toast.show({ message : qsTr("Friend removed!"), duration : Toast.Short });
-            cleanProfile = bridge.getFriendsCount() < 1
-            if (friendsModel.count > 0) {
-                selectFriend(friendsModel.get(0).friendNumber)
-            } else {
-                friendNickname.text = ""
-                friendStatus.text = ""
-            }
-            friendInfoMenu.close()
+            clearFriendHistoryDialog.currentFriendNumber = bridge.getCurrentFriendNumber()
+            clearFriendHistoryDialog.open()
+        }
+    }
+    Button {
+        Text {
+            anchors.centerIn: parent
+            text: qsTr("Delete this friend")
+            color: "red"
+            font.pointSize: 14
+            font.capitalization: Font.AllUppercase
+        }
+        
+        leftInset: 10
+        rightInset: leftInset
+        onClicked: {
+            removeFriendDialog.nickName = bridge.getFriendNickname(bridge.getCurrentFriendNumber())
+            removeFriendDialog.open()
         }
     }
 }

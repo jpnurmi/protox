@@ -24,18 +24,18 @@ Popup {
     readonly property int sf_none: 0
     readonly property int sf_text: 1 // unused, text is always present
     readonly property int sf_title: 1 << 1
-    readonly property int sf_checkbox: 1 << 2
+    readonly property int sf_switch: 1 << 2
     readonly property int sf_help: 1 << 3
     readonly property int sf_input: 1 << 4
     readonly property int sf_numbers_only: 1 << 5
     Component.onCompleted: {
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Tox options") })
         settingsModel.append({ flags: sf_text | sf_title | sf_help, name: qsTr("These settings require client restart!") })
-        settingsModel.append({ flags: sf_text | sf_checkbox, name: qsTr("Enable UDP"), prop: "udp_enabled", 
+        settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Enable UDP"), prop: "udp_enabled", 
                     value: bridge.getSettingsValue("Toxcore", "udp_enabled", ptype_bool, Boolean(true)) })
-        settingsModel.append({ flags: sf_text | sf_checkbox, name: qsTr("Enable IPv6"), prop: "ipv6_enabled", 
+        settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Enable IPv6"), prop: "ipv6_enabled", 
                     value: bridge.getSettingsValue("Toxcore", "ipv6_enabled", ptype_bool, Boolean(true)) })
-        settingsModel.append({ flags: sf_text | sf_checkbox, name: qsTr("Enable LAN discovery"), prop: "local_discovery_enabled", 
+        settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Enable LAN discovery"), prop: "local_discovery_enabled", 
                     value: bridge.getSettingsValue("Toxcore", "local_discovery_enabled", ptype_bool, Boolean(false)) })
         settingsModel.append({ flags: sf_text | sf_input, itemWidth: 128, 
                     name: qsTr("Custom nodes .json file"), prop: "nodes_json_file", helperText: "nodes.json",
@@ -47,6 +47,9 @@ Popup {
         settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only, numberMinLimit: 5, numberMaxLimit: 10000, itemWidth: 96, 
                     name: qsTr("Recent messages limit"), prop: "last_messages_limit", helperText: "128",
                     svalue: bridge.getSettingsValue("Client", "last_messages_limit", ptype_string, 128) })
+        settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Privacy") })
+        settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Keep chat history"), prop: "keep_chat_history", 
+                    value: bridge.getSettingsValue("Privacy", "keep_chat_history", ptype_bool, Boolean(true)) })
     }
 
     function open() {
@@ -65,6 +68,7 @@ Popup {
         bridge.setSettingsValue("Toxcore", "nodes_json_file", String(settingsModel.getValueString("nodes_json_file")))
         bridge.setSettingsValue("Toxcore", "max_bootstrap_nodes", String(settingsModel.getValueString("max_bootstrap_nodes")))
         bridge.setSettingsValue("Client", "last_messages_limit", settingsModel.getValueString("last_messages_limit"))
+        bridge.setSettingsValue("Privacy", "keep_chat_history", Boolean(settingsModel.getValue("keep_chat_history")))
         if (reloadChatHistory) {
             messages.addTransitionEnabled = false
             bridge.retrieveChatLog()
@@ -166,7 +170,7 @@ Popup {
                             }
                         }
                     }
-                    sourceComponent: (flags & settingsWindow.sf_checkbox) ? settingsCheckBox : undefined
+                    sourceComponent: (flags & settingsWindow.sf_switch) ? settingsCheckBox : undefined
                 }
                 Loader {
                     Component {

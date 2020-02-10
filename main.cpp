@@ -80,7 +80,12 @@ void QmlCBridge::sendMessage(const QString &message)
 	QDateTime dt = QDateTime::currentDateTime();
 	insertMessage(message, current_friend_number, true, message_id, new_unique_id, dt, false, failed);
 	messages_id_uid[message_id] = new_unique_id;
-	chat_db->insertMessage(message, dt, friend_pk, true, new_unique_id, failed);
+	settings->beginGroup("Privacy");
+	bool keep_chat_history = settings->value("keep_chat_history", true).toBool();
+	settings->endGroup();
+	if (keep_chat_history) {
+		chat_db->insertMessage(message, dt, friend_pk, true, new_unique_id, failed);
+	}
 }
 
 quint32 QmlCBridge::getCurrentFriendNumber()

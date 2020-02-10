@@ -33,7 +33,6 @@ ApplicationWindow {
 
     property bool appInactive
     onAppInactiveChanged: {
-        // automatically hide keyboard when suspended
         if (!appInactive && keyboardActive) {
             Qt.inputMethod.show()
         }
