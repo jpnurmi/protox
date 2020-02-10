@@ -167,6 +167,9 @@ MessageDialog {
     property int currentFriendNumber: -1
     onYes: {
         bridge.clearFriendChatHistory(currentFriendNumber)
+        if (bridge.getCurrentFriendNumber() === currentFriendNumber) {
+            messagesModel.clear()
+        }
     }
 }
 MessageDialog {
