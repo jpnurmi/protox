@@ -32,6 +32,13 @@ ApplicationWindow {
     }
 
     property bool appInactive
+    onAppInactiveChanged: {
+        // automatically hide keyboard when suspended
+        if (appInactive) {
+            keyboardHeight = 0
+            keyboardActive = false
+        }
+    }
     Connections {
         target: Qt.application
         onStateChanged: {

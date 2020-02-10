@@ -146,7 +146,7 @@ function selectFriend(friend_number) {
 
 property int new_messages: 0
 function insertMessage(text, friend_number, self, message_id, time, unique_id, failed, history) {
-    if (!self && !history && (appInactive || bridge.getCurrentFriendNumber() !== friend_number)) {
+    if (!self && !history && (appInactive || bridge.getCurrentFriendNumber() !== friend_number || settingsWindow.visible)) {
         notification.show({
                           caption : text,
                           title : qsTr("New message from ") + bridge.getFriendNickname(friend_number),
@@ -189,7 +189,7 @@ function insertFriend(friend_number, nickName, request, request_message, friendP
     if (!request) {
         cleanProfile = bridge.getFriendsCount() === 0
     } 
-    if (request && (appInactive || !drawer.opened)) {
+    if (request && (appInactive || !drawer.opened || settingsWindow.visible)) {
         notification.show({
                           caption : request_message,
                           title : qsTr("A new friend request from ") + nickName,
