@@ -37,28 +37,39 @@ Popup {
     readonly property int sf_help: 1 << 3
     readonly property int sf_input: 1 << 4
     readonly property int sf_numbers_only: 1 << 5
+    readonly property int sf_mask: 1 << 6
+    readonly property int sf_placeholder: 1 << 7
+    readonly property int sf_warning: 1 << 8
+    readonly property int sf_reload_chat: 1 << 9
     Component.onCompleted: {
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Tox options") })
-        settingsModel.append({ flags: sf_text | sf_title | sf_help, name: qsTr("These settings require client restart!") })
+        settingsModel.append({ flags: sf_text | sf_title | sf_help | sf_warning, name: qsTr("These settings require client restart!") })
         settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Enable UDP"), prop: "udp_enabled", 
                     value: bridge.getSettingsValue("Toxcore", "udp_enabled", ptype_bool, Boolean(true)) })
         settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Enable IPv6"), prop: "ipv6_enabled", 
                     value: bridge.getSettingsValue("Toxcore", "ipv6_enabled", ptype_bool, Boolean(true)) })
         settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Enable LAN discovery"), prop: "local_discovery_enabled", 
                     value: bridge.getSettingsValue("Toxcore", "local_discovery_enabled", ptype_bool, Boolean(false)) })
-        settingsModel.append({ flags: sf_text | sf_input, itemWidth: 128, 
+        settingsModel.append({ flags: sf_text | sf_input | sf_placeholder, itemWidth: 128, 
                     name: qsTr("Custom nodes .json file"), prop: "nodes_json_file", helperText: "nodes.json",
                     svalue: bridge.getSettingsValue("Client", "nodes_json_file", ptype_string, String("")) })
-        settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only, numberMinLimit: 1, numberMaxLimit: 10000, itemWidth: 96, 
+        settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only | sf_placeholder, numberMinLimit: 1, numberMaxLimit: 10000, itemWidth: 96, 
                     name: qsTr("Maximum bootstrap nodes"), prop: "max_bootstrap_nodes", helperText: "6",
                     svalue: bridge.getSettingsValue("Toxcore", "max_bootstrap_nodes", ptype_string, 6) })
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Client options") })
-        settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only, numberMinLimit: 5, numberMaxLimit: 10000, itemWidth: 96, 
+        settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only | sf_placeholder | sf_reload_chat, 
+                    numberMinLimit: 5, numberMaxLimit: 10000, itemWidth: 96, 
                     name: qsTr("Recent messages limit"), prop: "last_messages_limit", helperText: "128",
                     svalue: bridge.getSettingsValue("Client", "last_messages_limit", ptype_string, 128) })
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Privacy") })
         settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Keep chat history"), prop: "keep_chat_history", 
                     value: bridge.getSettingsValue("Privacy", "keep_chat_history", ptype_bool, Boolean(true)) })
+        settingsModel.append({ flags: sf_text | sf_title | sf_help, 
+                                 name: qsTr("No spam value is a part of your ToxID that can be changed at will.") + "\n" +
+                                       qsTr("If you are getting spammed with friend requests, change this value.") + "\n" +
+                                       qsTr("Only hexadecimal characters are allowed.")})
+        settingsModel.append({ flags: sf_text | sf_input | sf_mask, name: qsTr("No spam"), prop: "no_spam_value", 
+                    svalue: bridge.getNospamValue(), itemWidth: 128, mask: ">HHHHHH;0" })
     }
 
     function open() {
@@ -78,6 +89,7 @@ Popup {
         bridge.setSettingsValue("Toxcore", "max_bootstrap_nodes", String(settingsModel.getValueString("max_bootstrap_nodes")))
         bridge.setSettingsValue("Client", "last_messages_limit", settingsModel.getValueString("last_messages_limit"))
         bridge.setSettingsValue("Privacy", "keep_chat_history", Boolean(settingsModel.getValue("keep_chat_history")))
+        bridge.setNospamValue(settingsModel.getValueString("no_spam_value"))
         if (reloadChatHistory) {
             messages.addTransitionEnabled = false
             bridge.retrieveChatLog()
@@ -151,7 +163,9 @@ Popup {
         model: settingsModel
         delegate: ColumnLayout {
             width: parent.width
-            height: (flags & settingsWindow.sf_title) ? 24 : 56
+            height: (flags & settingsWindow.sf_title) ? (flags & settingsWindow.sf_help 
+                                                      ? ((flags & settingsWindow.sf_warning) 
+                                                      ? 12 : 32) : 24) : 56
             spacing: 0
             RowLayout {
                 width: parent.width
@@ -164,7 +178,9 @@ Popup {
                     font.pointSize: (flags & settingsWindow.sf_title) ? ((flags & settingsWindow.sf_help) ? 12 : 14) : 20
                     font.bold: (flags & settingsWindow.sf_title) && !(flags & settingsWindow.sf_help)
                     font.italic: flags & settingsWindow.sf_help
-                    color: (flags & settingsWindow.sf_title) ? ((flags & settingsWindow.sf_help) ? "red" : "green") : "black"
+                    color: (flags & settingsWindow.sf_title) ? 
+                           ((flags & settingsWindow.sf_help) ? ((flags & settingsWindow.sf_warning) 
+                                                             ? "red" : "black") : "green") : "black"
                 }
                 Loader {
                     Component { 
@@ -190,10 +206,15 @@ Popup {
                             rightInset: 15
                             rightPadding: rightInset
                             text: svalue
-                            placeholderText: helperText
-                            inputMethodHints: (flags & settingsWindow.sf_numbers_only) ? Qt.ImhDigitsOnly : Qt.ImhNoPredictiveText
+                            placeholderText: (flags & settingsWindow.sf_placeholder) ? helperText : ""
+                            inputMethodHints: (flags & settingsWindow.sf_numbers_only) ? Qt.ImhDigitsOnly 
+                                            : ((flags & settingsWindow.sf_mask) ? Qt.ImhSensitiveData | Qt.ImhUppercaseOnly : Qt.ImhSensitiveData)
+                            inputMask: (flags & settingsWindow.sf_mask) ? mask : ""
 
                             onAccepted: {
+                                if ((flags & settingsWindow.sf_mask) && !acceptableInput) {
+                                    return
+                                }
                                 if (flags & settingsWindow.sf_numbers_only) {
                                     if (text.length == 0 || isNaN(text)) {
                                         text = helperText
@@ -203,10 +224,16 @@ Popup {
                                         text = numberMinLimit
                                     }
                                 }
-                                svalue = text
+                                if (flags & settingsWindow.sf_uppercase) {
+                                    svalue = text.toUpperCase()
+                                } else {
+                                    svalue = text
+                                }
                                 text = svalue
                                 focus = false
-                                settingsWindow.reloadChatHistory = true
+                                if (flags & settingsWindow.sf_reload_chat) {
+                                    settingsWindow.reloadChatHistory = true
+                                }
                             }
                         }
                     }

@@ -12,7 +12,7 @@ public:
 	void insertMessage(const QString &message, QDateTime dt, const ToxPk &public_key, bool self = false, quint64 unique_id = 0, bool failed = false);
 	void setMessageReceived(quint64 unique_id, const ToxPk &public_key);
 	ToxMessages getFriendMessages(const ToxPk &public_key, quint32 limit, quint32 start, bool from, bool reverse, QDate fromDate = QDate(1, 1, 1));
-	quint64 getMessagesCountFriend(ToxPk &public_key);
+	quint64 getMessagesCountFriend(const ToxPk &public_key);
 	void clearFriendChatHistory(const ToxPk &public_key);
 	//void insertFriend(ToxPk public_key, const QString name);
 	~ChatDataBase();

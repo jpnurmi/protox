@@ -4,8 +4,8 @@
 #include "common.h"
 
 typedef QList <quint32> ToxFriends; 
-typedef const QByteArray ToxPk;
-typedef const QByteArray ToxId;
+typedef QByteArray ToxPk;
+typedef QByteArray ToxId;
 
 typedef QMap <quint32, TOX_CONNECTION> ToxFriendsConnStatus;
 typedef QMap <quint32, QDateTime> ToxMessagesDateTime;

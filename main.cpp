@@ -313,6 +313,24 @@ void QmlCBridge::setKeyboardAdjustMode(bool adjustNothing)
 #endif
 }
 
+QString QmlCBridge::getNospamValue()
+{
+	quint32 nospam = toxcore_get_nospam(tox);
+	ToxId nospam_bytes;
+	nospam_bytes.append((nospam >> 24) & 0xFF);
+	nospam_bytes.append((nospam >> 16) & 0xFF);
+	nospam_bytes.append((nospam >> 8) & 0xFF);
+	nospam_bytes.append(nospam & 0xFF);
+	return ToxId_To_QString(nospam_bytes);
+}
+
+void QmlCBridge::setNospamValue(QString nospam)
+{
+	ToxId bytes = QString_To_ToxId(nospam);
+	quint32 value = bytes[0] << 24 | bytes[1] << 16 | bytes[2] << 8 | bytes[3];
+	toxcore_set_nospam(tox, value);
+}
+
 static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler(0);
 
 void customMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString & msg)
