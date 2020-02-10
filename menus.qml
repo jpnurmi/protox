@@ -159,8 +159,8 @@ Menu {
 */
 MessageDialog {
     id: clearFriendHistoryDialog
-    title: qsTr("Clearing friend history")
-    text: qsTr("Do you want to remove all history for this contact?")
+    title: qsTr("Clearing char history")
+    text: qsTr("Do you want to remove chat history for this contact?")
     icon: StandardIcon.Question
     standardButtons: StandardButton.Yes | StandardButton.No
     visible: false
@@ -171,7 +171,7 @@ MessageDialog {
 }
 MessageDialog {
     id: removeFriendDialog
-    title: qsTr("Delete current friend")
+    title: qsTr("Deleting current friend")
     property string nickName: ""
     text: qsTr("Are you really want to delete ") + nickName + qsTr(" from your contact list?")
     icon: StandardIcon.Question
