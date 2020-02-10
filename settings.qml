@@ -7,12 +7,14 @@ import QtQuick.Window 2.12
 
 Popup {
     id: settingsWindow
+    y: -keyboardHeight
     width: window.width
     height: window.height
     leftPadding: 0
     rightPadding: 0
     topPadding: 0
     bottomPadding: 0
+    
     enter: Transition {
         NumberAnimation { property: "x"; from: settingsWindow.width; to: 0; easing.type: Easing.OutCubic }
     }
@@ -132,6 +134,7 @@ Popup {
         }
     }
     ListView {
+        id: settingsList
         anchors.top: settingsOverlayHeader.bottom
         anchors.bottom: parent.bottom
         anchors.left: parent.left
@@ -140,7 +143,6 @@ Popup {
         clip: true
         ScrollIndicator.vertical: ScrollIndicator {}
         model: settingsModel
-
         delegate: ColumnLayout {
             width: parent.width
             height: (flags & settingsWindow.sf_title) ? 24 : 56
@@ -186,7 +188,7 @@ Popup {
                             inputMethodHints: (flags & settingsWindow.sf_numbers_only) ? Qt.ImhDigitsOnly : Qt.ImhNoPredictiveText
                             onAccepted: {
                                 if (flags & settingsWindow.sf_numbers_only) {
-                                    if (text.length == 0) {
+                                    if (text.length == 0 || isNaN(text)) {
                                         text = helperText
                                     } else if (parseInt(text) > numberMaxLimit) {
                                         text = numberMaxLimit
