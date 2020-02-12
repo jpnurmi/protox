@@ -32,34 +32,6 @@ ChatDataBase::ChatDataBase(const QString &fileName)
 	db.commit();
 }
 
-void ChatDataBase::asyncCommit()
-{
-	if (future.isRunning()) {
-		if (commitRequests)
-			return;
-		commitRequests = true;
-		another_future = QtConcurrent::run([=]() {
-			while (future.isRunning()) {}
-			db.commit();
-			commitRequests = false;
-		});
-	}
-	if (another_future.isRunning())
-	{
-		if (commitAnotherRequests)
-			return;
-		commitAnotherRequests = true;
-		future = QtConcurrent::run([=]() {
-			while (another_future.isRunning()) {}
-			db.commit();
-			commitAnotherRequests = false;
-		});
-	}
-	future = QtConcurrent::run([=]() {
-		db.commit();
-	});
-}
-
 quint64 ChatDataBase::getMessagesCountFriend(const ToxPk &public_key)
 {
 	QSqlQuery query(db);
