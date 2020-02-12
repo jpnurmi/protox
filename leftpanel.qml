@@ -59,7 +59,7 @@ Drawer {
                     id: accountName
                     leftPadding: 4
                     rightPadding: 4
-                    text: bridge.getNickname(true)
+                    //text: bridge.getNickname(true)
                     font.pointSize: 12
                     font.bold: true
                     Layout.alignment: Qt.AlignLeft
@@ -82,7 +82,7 @@ Drawer {
                                 anchors.rightMargin: 10
                                 anchors.verticalCenter: parent.verticalCenter
                                 color: modelData[1]
-                                width: 15
+                                width: 1
                                 height: width
                                 border.color: "black"
                                 border.width: 1
@@ -125,7 +125,7 @@ Drawer {
                             index = status
                         }
                         Component.onCompleted: {
-                            setStatus(bridge.getStatus())
+                            //setStatus(bridge.getStatus())
                         }
                     }
                     Text {

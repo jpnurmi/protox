@@ -22,8 +22,8 @@ ApplicationWindow {
     onInPortraitChanged: {
         var friend_number = bridge.getCurrentFriendNumber()
         drawer.width = width * 0.5 * (!inPortrait ? (Screen.height / Screen.width) : 1.0)
-        friendNickname.setText(bridge.getFriendNickname(friend_number))
-        friendStatus.setText(bridge.getFriendStatusMessage(friend_number))
+        //friendNickname.setText(bridge.getFriendNickname(friend_number))
+        //friendStatus.setText(bridge.getFriendStatusMessage(friend_number))
     }
 
     onClosing: {
@@ -55,8 +55,9 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
-        cleanProfile = bridge.getFriendsCount() < 1
-        initTimer.start()
+        loginWindow.open()
+        //cleanProfile = bridge.getFriendsCount() < 1
+        //initTimer.start()
     }
 
     Timer {
@@ -64,10 +65,12 @@ ApplicationWindow {
         repeat: false
         interval: 1
         onTriggered: {
+            /*
             messages.addTransitionEnabled = false
             bridge.retrieveChatLog()
             messages.scrollToEnd()
             messages.addTransitionEnabled = true
+            */
             destroy()
         }
     }
@@ -211,4 +214,5 @@ ApplicationWindow {
     //include: header.qml
     //include: leftpanel.qml
     //include: chatarea.qml
+    //include: login.qml
 }

@@ -15,7 +15,7 @@ class QmlCBridge : public QObject
 {
 	Q_OBJECT
 public:
-	QmlCBridge(Tox *_tox, QTimer *_toxcore_timer, quint32 last_friend_number);
+	QmlCBridge();
 	void setComponent(QObject *_component);
 	void insertMessage(const QString &message, quint32 friend_number, bool self = false, quint32 message_id = 0, quint64 unique_id = 0, QDateTime dt = QDateTime::currentDateTime(), bool history = false, bool failed = false);
 	void insertFriend(qint32 friend_number, const QString &nickName, bool request = false, const QString &request_message = "", const ToxPk &friendPk = "");
@@ -56,12 +56,13 @@ public slots:
 	Q_INVOKABLE void addFriend(const QString &friendPk);
 	Q_INVOKABLE int getFriendStatus(quint32 friend_number);
 	Q_INVOKABLE QString getNospamValue();
-	Q_INVOKABLE void setNospamValue(QString nospam);
+	Q_INVOKABLE void setNospamValue(const QString &nospam);
 	Q_INVOKABLE void bootstrapDHT();
 	Q_INVOKABLE QVariant getSettingsValue(const QString &group, const QString &key, int type, const QVariant &default_value);
 	Q_INVOKABLE void setSettingsValue(const QString &group, const QString &key, const QVariant &value);
 	Q_INVOKABLE void setAppInactive(bool inactive) { app_inactive = inactive; }
 	Q_INVOKABLE void setKeyboardAdjustMode(bool adjustNothing);
+	Q_INVOKABLE void signInProfile(const QString &profile);
 
 public:
 	ToxFriendsConnStatus friends_conn_status;

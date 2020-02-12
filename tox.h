@@ -28,7 +28,7 @@ struct ToxMessage {
 };
 typedef QList <ToxMessage> ToxMessages;
 
-Tox *toxcore_create();
+Tox *toxcore_create(const QString &profile);
 void toxcore_destroy(Tox *m);
 QTimer *toxcore_create_qtimer(Tox *m);
 void toxcore_bootstrap_DHT(Tox *m);

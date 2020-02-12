@@ -3,8 +3,6 @@
 #include "tools.h"
 #include "db.h"
 
-#define DEFAULT_PROFILE "profile.tox"
-
 extern QmlCBridge *qmlbridge;
 extern ChatDataBase *chat_db;
 extern QSettings *settings;
@@ -14,6 +12,7 @@ extern QSettings *settings;
 */
 
 int toxcore_connection_status = -1;
+QString toxcore_profile;
 static void toxcore_cb_self_connection_change(Tox *m, TOX_CONNECTION connection_status, void *userdata)
 {
 	Q_UNUSED(m);
@@ -222,7 +221,7 @@ int toxcore_make_friend_request(Tox *m, ToxId id, const QString &friendMessage)
 	quint32 friend_number = tox_friend_add(m, (quint8*)id.data(), (quint8*)msgData.data(), msgData.length(), &error);
 	if (!error) {
 		qmlbridge->insertFriend(friend_number, ToxId_To_QString(toxcore_get_friend_public_key(m, friend_number)));
-		toxcore_save_data(m, GetProgDir() + DEFAULT_PROFILE);
+		toxcore_save_data(m, GetProgDir() + toxcore_profile);
 	}
 	return error;
 }
@@ -230,7 +229,7 @@ int toxcore_make_friend_request(Tox *m, ToxId id, const QString &friendMessage)
 quint32 toxcore_add_friend(Tox *m, const ToxPk &friendPk)
 {
 	quint32 friend_number = tox_friend_add_norequest(m, (quint8*)friendPk.data(), nullptr);
-	toxcore_save_data(m, GetProgDir() + DEFAULT_PROFILE);
+	toxcore_save_data(m, GetProgDir() + toxcore_profile);
 	return friend_number;
 }
 
@@ -261,7 +260,7 @@ void toxcore_set_nickname(Tox *m, const QString &nickname)
 {
 	QByteArray encodedNickname = nickname.toUtf8();
 	tox_self_set_name(m, (quint8*)encodedNickname.data(), encodedNickname.length(), nullptr);
-	toxcore_save_data(m, GetProgDir() + DEFAULT_PROFILE);
+	toxcore_save_data(m, GetProgDir() + toxcore_profile);
 }
 
 int toxcore_get_friend_status(Tox *m, quint32 friend_number)
@@ -288,7 +287,7 @@ void toxcore_set_status_message(Tox *m, const QString &statusMessage)
 {
 	QByteArray encodedMessage = statusMessage.toUtf8();
 	tox_self_set_status_message(m, (quint8*)encodedMessage.data(), encodedMessage.length(), nullptr);
-	toxcore_save_data(m, GetProgDir() + DEFAULT_PROFILE);
+	toxcore_save_data(m, GetProgDir() + toxcore_profile);
 }
 
 /*
@@ -432,8 +431,9 @@ void toxcore_bootstrap_DHT(Tox *m)
 	);
 }
 
-Tox *toxcore_create()
+Tox *toxcore_create(const QString &profile)
 {
+	toxcore_profile = profile;
 	struct Tox_Options tox_opts;
 	memset(&tox_opts, 0, sizeof(struct Tox_Options));
 	tox_options_default(&tox_opts);
@@ -443,9 +443,9 @@ Tox *toxcore_create()
 	tox_opts.local_discovery_enabled = settings->value("local_discovery_enabled", false).toBool();
 	settings->endGroup();
 
-	QFile f(GetProgDir() + DEFAULT_PROFILE);
+	QFile f(GetProgDir() + toxcore_profile);
 	bool clean = !f.exists();
-	Tox *m = toxcore_load_tox(&tox_opts, GetProgDir() + DEFAULT_PROFILE);
+	Tox *m = toxcore_load_tox(&tox_opts, GetProgDir() + toxcore_profile);
 
 	if (!m) {
 		return NULL;
@@ -477,7 +477,7 @@ Tox *toxcore_create()
 		tox_self_set_name(m, (quint8*)username, strlen(username), NULL);
 	}
 
-	toxcore_save_data(m, GetProgDir() + DEFAULT_PROFILE);
+	toxcore_save_data(m, GetProgDir() + toxcore_profile);
 	return m;
 }
 
@@ -504,6 +504,6 @@ ToxId toxcore_get_address(Tox *m)
 
 void toxcore_destroy(Tox *m)
 {
-	toxcore_save_data(m, GetProgDir() + DEFAULT_PROFILE);
+	toxcore_save_data(m, GetProgDir() + toxcore_profile);
 	tox_kill(m);
 }

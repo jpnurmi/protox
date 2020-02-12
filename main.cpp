@@ -12,11 +12,8 @@ QmlCBridge *qmlbridge;
 ChatDataBase *chat_db;
 QSettings *settings;
 
-QmlCBridge::QmlCBridge(Tox *_tox, QTimer *_toxcore_timer, quint32 last_friend_number)
+QmlCBridge::QmlCBridge()
 {
-	tox = _tox;
-	toxcore_timer = _toxcore_timer;
-	current_friend_number = last_friend_number;
 	app_inactive = true;
 }
 
@@ -324,7 +321,7 @@ QString QmlCBridge::getNospamValue()
 	return ToxId_To_QString(nospam_bytes);
 }
 
-void QmlCBridge::setNospamValue(QString nospam)
+void QmlCBridge::setNospamValue(const QString &nospam)
 {
 	ToxId bytes = QString_To_ToxId(nospam);
 	quint32 value = bytes[0] << 24 | bytes[1] << 16 | bytes[2] << 8 | bytes[3];
@@ -360,42 +357,14 @@ extern "C"
 }
 #endif
 
-int main(int argc, char *argv[])
+void QmlCBridge::signInProfile(const QString &profile)
 {
-	QtStatusBar::setColor(QColor("#3F51B5"));
-#if defined (Q_OS_ANDROID)
-	const QString permission_write = "android.permission.WRITE_EXTERNAL_STORAGE";
-	auto permission_result = QtAndroid::checkPermission(permission_write);
-	if(permission_result == QtAndroid::PermissionResult::Denied){
-		QtAndroid::PermissionResultMap resultHash = QtAndroid::requestPermissionsSync(QStringList({permission_write}));
-		if(resultHash[permission_write] == QtAndroid::PermissionResult::Denied) {
-			return 1;
-		}
-	}
-#endif
-	settings = new QSettings(GetProgDir() + "settings.ini", QSettings::IniFormat);
-	Tox *tox = toxcore_create();
+	tox = toxcore_create(profile);
 	toxcore_bootstrap_DHT(tox);
 	Debug("My address: " + ToxId_To_QString(toxcore_get_address(tox)));
 
-	chat_db = new ChatDataBase("chat.db");
-
-	Debug("App started.");
-	QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-	
-	QGuiApplication app(argc, argv);
-	qInstallMessageHandler(customMessageHandler);
-
-	QQmlApplicationEngine engine;
-	const QUrl url(QStringLiteral(QML_MAIN));
-	QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
-					 &app, [url](QObject *obj, const QUrl &objUrl) {
-		if (!obj && url == objUrl)
-			QCoreApplication::exit(-1);
-	}, Qt::QueuedConnection);
-
 	// load config
-	settings->beginGroup("Client");
+	settings->beginGroup("Client_" + profile);
 	ToxPk friendPk = settings->value("last_friend", toxcore_get_friend_public_key(tox, 0)).toByteArray();
 	QList <QVariant> friend_list = settings->value("friend_list", QList <QVariant>()).toList();
 	settings->endGroup();
@@ -422,8 +391,50 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	QTimer *toxcore_timer = toxcore_create_qtimer(tox);
-	qmlbridge = new QmlCBridge(tox, toxcore_timer, last_friend_number);
+	for (auto _friend : friend_list) {
+		qmlbridge->insertFriend(_friend.toUInt(), toxcore_get_friend_name(tox, _friend.toUInt()));
+	}
+
+	toxcore_timer = toxcore_create_qtimer(tox);
+	toxcore_timer->start();
+}
+
+int main(int argc, char *argv[])
+{
+	QtStatusBar::setColor(QColor("#3F51B5"));
+#if defined (Q_OS_ANDROID)
+	const QString permission_write = "android.permission.WRITE_EXTERNAL_STORAGE";
+	auto permission_result = QtAndroid::checkPermission(permission_write);
+	if(permission_result == QtAndroid::PermissionResult::Denied){
+		QtAndroid::PermissionResultMap resultHash = QtAndroid::requestPermissionsSync(QStringList({permission_write}));
+		if(resultHash[permission_write] == QtAndroid::PermissionResult::Denied) {
+			return 1;
+		}
+	}
+#endif
+	settings = new QSettings(GetProgDir() + "settings.ini", QSettings::IniFormat);
+	//Tox *tox = toxcore_create();
+	//toxcore_bootstrap_DHT(tox);
+	//Debug("My address: " + ToxId_To_QString(toxcore_get_address(tox)));
+
+	chat_db = new ChatDataBase("chat.db");
+
+	Debug("App started.");
+	QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+	
+	QGuiApplication app(argc, argv);
+	qInstallMessageHandler(customMessageHandler);
+
+	QQmlApplicationEngine engine;
+	const QUrl url(QStringLiteral(QML_MAIN));
+	QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
+					 &app, [url](QObject *obj, const QUrl &objUrl) {
+		if (!obj && url == objUrl)
+			QCoreApplication::exit(-1);
+	}, Qt::QueuedConnection);
+
+	//QTimer *toxcore_timer = toxcore_create_qtimer(tox);
+	qmlbridge = new QmlCBridge;
 	QQmlContext *root = engine.rootContext();
 	root->setContextProperty("bridge", qmlbridge);
 	QtNotification::declareQML();
@@ -438,20 +449,22 @@ int main(int argc, char *argv[])
 	QObject *component = engine.rootObjects().first();
 	qmlbridge->setComponent(component);
 
-	for (auto _friend : friend_list) {
-		qmlbridge->insertFriend(_friend.toUInt(), toxcore_get_friend_name(tox, _friend.toUInt()));
-	}
+	//for (auto _friend : friend_list) {
+	//	qmlbridge->insertFriend(_friend.toUInt(), toxcore_get_friend_name(tox, _friend.toUInt()));
+	//}
 
-	toxcore_timer->start();
+	//toxcore_timer->start();
 
 	int result = app.exec();
+	/*
 	settings->beginGroup("Client");
 	settings->setValue("last_friend", toxcore_get_friend_public_key(tox, qmlbridge->getCurrentFriendNumber()));
 	settings->setValue("friend_list", qmlbridge->getFriendsModelOrder());
 	settings->endGroup();
 	settings->sync();
-	toxcore_timer->stop();
-	toxcore_destroy(tox);
+	*/
+	//toxcore_timer->stop();
+	//toxcore_destroy(tox);
 	delete qmlbridge;
 	delete chat_db;
 	delete settings;
