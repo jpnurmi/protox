@@ -6,8 +6,6 @@
 
 ChatDataBase::ChatDataBase(const QString &fileName)
 {
-	commitRequests = 0;
-	commitAnotherRequests = 0;
 	db = QSqlDatabase::addDatabase("QSQLITE");
 	db.setDatabaseName(GetProgDir() + fileName);
 	db.open();
@@ -30,34 +28,6 @@ ChatDataBase::ChatDataBase(const QString &fileName)
 			"";
 	query = db.exec(create_command_messages);
 	db.commit();
-}
-
-void ChatDataBase::asyncCommit()
-{
-	if (future.isRunning()) {
-		if (commitRequests)
-			return;
-		commitRequests = true;
-		another_future = QtConcurrent::run([=]() {
-			while (future.isRunning()) {}
-			db.commit();
-			commitRequests = false;
-		});
-	}
-	if (another_future.isRunning())
-	{
-		if (commitAnotherRequests)
-			return;
-		commitAnotherRequests = true;
-		future = QtConcurrent::run([=]() {
-			while (another_future.isRunning()) {}
-			db.commit();
-			commitAnotherRequests = false;
-		});
-	}
-	future = QtConcurrent::run([=]() {
-		db.commit();
-	});
 }
 
 quint64 ChatDataBase::getMessagesCountFriend(const ToxPk &public_key)

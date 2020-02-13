@@ -186,11 +186,13 @@ ColumnLayout {
                             var add = cloudText.plainText.replace("\n", "\n> ")
                             Qt.inputMethod.reset()
                             if (chatMessage.text.length > 0) {
-                                chatMessage.text += "\n> " + add + "\n"
+                                chatMessage.append("\n> " + add + "\n")
                             } else {
-                                chatMessage.text += "> " + add + "\n"
+                                chatMessage.append("> " + add + "\n")
                             }
-                            chatMessage.cursorPosition = chatMessage.text.length
+                            if (chatMessage) {
+                                chatMessage.cursorPosition = chatMessage.length
+                            }
                         }
                     }
                     Component.onCompleted: {
