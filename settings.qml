@@ -88,10 +88,10 @@ Popup {
         settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Keep chat history"), prop: "keep_chat_history", 
                     value: bridge.getSettingsValue("Privacy", "keep_chat_history", ptype_bool, Boolean(true)) })
         settingsModel.append({ flags: sf_text | sf_title | sf_help, 
-                                 name: qsTr("No spam value is a part of your ToxID that can be changed at will.") + "\n" +
+                                 name: qsTr("NoSpam value is a part of your ToxID that can be changed at will.") + "\n" +
                                        qsTr("If you are getting spammed with friend requests, change this value.") + "\n" +
                                        qsTr("Only hexadecimal characters are allowed.")})
-        settingsModel.append({ flags: sf_text | sf_input | sf_mask | sf_button, name: qsTr("No spam"), prop: "no_spam_value", 
+        settingsModel.append({ flags: sf_text | sf_input | sf_mask | sf_button, name: qsTr("NoSpam"), prop: "no_spam_value", 
                     svalue: bridge.getNospamValue(), itemWidth: 128, mask: ">HHHHHHHH;0", buttonText: qsTr("Randomize"), 
                     clickAction: "randomize_nospam"})
     }
