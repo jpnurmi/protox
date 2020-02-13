@@ -261,9 +261,10 @@ Popup {
                             }
                             onPressed: {
                                 forceActiveFocus()
+                                cursorPosition = positionAt(event.x, event.y)
                                 if (selectedText.length > 0) {
                                     deselect()
-                                    cursorPosition = text.length
+                                    cursorPosition = positionAt(event.x, event.y)
                                 }
                                 event.accepted = false
                             }
