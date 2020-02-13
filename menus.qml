@@ -157,8 +157,8 @@ Menu {
 */
 MessageDialog {
     id: clearFriendHistoryDialog
-    title: qsTr("Clearing char history")
-    text: qsTr("Do you want to remove chat history for this contact?")
+    title: qsTr("Deleting chat history")
+    text: qsTr("Do you want to delete chat history for this contact?")
     icon: StandardIcon.Question
     standardButtons: StandardButton.Yes | StandardButton.No
     visible: false
@@ -168,14 +168,14 @@ MessageDialog {
         if (bridge.getCurrentFriendNumber() === currentFriendNumber) {
             messagesModel.clear()
         }
-        toast.show({ message : qsTr("Chat history removed!"), duration : Toast.Short });
+        toast.show({ message : qsTr("Chat history deleted!"), duration : Toast.Short });
     }
 }
 MessageDialog {
     id: removeFriendDialog
-    title: qsTr("Deleting current friend")
+    title: qsTr("Removing current friend")
     property string nickName: ""
-    text: qsTr("Are you really want to delete ") + nickName + qsTr(" from your contact list?")
+    text: qsTr("Are you really want to remove ") + nickName + qsTr(" from your contact list?")
     icon: StandardIcon.Question
     standardButtons: StandardButton.Yes | StandardButton.No
     visible: false
@@ -237,7 +237,7 @@ Menu {
         wrapMode: Text.Wrap
     }
     Button {
-        text: qsTr("Clear chat history")
+        text: qsTr("Delete chat history")
         leftInset: 10
         rightInset: leftInset
         onClicked: {
@@ -248,7 +248,7 @@ Menu {
     Button {
         Text {
             anchors.centerIn: parent
-            text: qsTr("Delete this friend")
+            text: qsTr("Remove this friend")
             color: "red"
             font.pointSize: 14
             font.capitalization: Font.AllUppercase

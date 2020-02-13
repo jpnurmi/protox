@@ -48,7 +48,23 @@ Popup {
     readonly property int sf_placeholder: 1 << 7
     readonly property int sf_warning: 1 << 8
     readonly property int sf_reload_chat: 1 << 9
+    readonly property int sf_button: 1 << 10
     Component.onCompleted: {
+        settingsModel.actions = {
+            "randomize_nospam" : function () {
+                for (var i = 0; i < settingsModel.count; i++) {
+                    if (settingsModel.get(i).prop === "no_spam_value") {
+                        var hex_symbols = "0123456789ABCDEF"
+                        var nospam = ""
+                        for (var j = 0; j < 8; j++) {
+                            nospam += hex_symbols.charAt(Math.floor(Math.random() * hex_symbols.length))
+                        }
+                        settingsModel.get(i).svalue = nospam
+                        return
+                    }
+                }
+            }
+        }
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Tox options") })
         settingsModel.append({ flags: sf_text | sf_title | sf_help | sf_warning, name: qsTr("These settings require client restart!") })
         settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Enable UDP"), prop: "udp_enabled", 
@@ -75,8 +91,9 @@ Popup {
                                  name: qsTr("No spam value is a part of your ToxID that can be changed at will.") + "\n" +
                                        qsTr("If you are getting spammed with friend requests, change this value.") + "\n" +
                                        qsTr("Only hexadecimal characters are allowed.")})
-        settingsModel.append({ flags: sf_text | sf_input | sf_mask, name: qsTr("No spam"), prop: "no_spam_value", 
-                    svalue: bridge.getNospamValue(), itemWidth: 128, mask: ">HHHHHHHH;0" })
+        settingsModel.append({ flags: sf_text | sf_input | sf_mask | sf_button, name: qsTr("No spam"), prop: "no_spam_value", 
+                    svalue: bridge.getNospamValue(), itemWidth: 128, mask: ">HHHHHHHH;0", buttonText: qsTr("Randomize"), 
+                    clickAction: "randomize_nospam"})
     }
 
     function open() {
@@ -144,17 +161,18 @@ Popup {
     }
     ListModel {
         id: settingsModel
+        property variant actions
         function getValue(p) {
-            for (var i = 0; i < settingsModel.count; i++) {
-                if (settingsModel.get(i).prop === p) {
-                    return settingsModel.get(i).value
+            for (var i = 0; i < count; i++) {
+                if (get(i).prop === p) {
+                    return get(i).value
                 }
             }
         }
         function getValueString(p) {
-            for (var i = 0; i < settingsModel.count; i++) {
-                if (settingsModel.get(i).prop === p) {
-                    return settingsModel.get(i).svalue
+            for (var i = 0; i < count; i++) {
+                if (get(i).prop === p) {
+                    return get(i).svalue
                 }
             }
         }
@@ -217,7 +235,6 @@ Popup {
                             inputMethodHints: (flags & settingsWindow.sf_numbers_only) ? Qt.ImhDigitsOnly 
                                             : ((flags & settingsWindow.sf_mask) ? Qt.ImhSensitiveData | Qt.ImhUppercaseOnly : Qt.ImhSensitiveData)
                             inputMask: (flags & settingsWindow.sf_mask) ? mask : ""
-
                             onAccepted: {
                                 if ((flags & settingsWindow.sf_mask) && !acceptableInput) {
                                     return
@@ -242,9 +259,29 @@ Popup {
                                     settingsWindow.reloadChatHistory = true
                                 }
                             }
+                            onPressed: {
+                                forceActiveFocus()
+                                if (selectedText.length > 0) {
+                                    deselect()
+                                    cursorPosition = text.length
+                                }
+                                event.accepted = false
+                            }
                         }
                     }
                     sourceComponent: (flags & settingsWindow.sf_input) ? settingsTextInput : undefined
+                }
+                Loader {
+                    Component {
+                        id: settingsButton
+                        Button {
+                            rightInset: 15
+                            rightPadding: rightInset * 1.5
+                            text: buttonText
+                            onClicked: settingsModel.actions[clickAction]()
+                        }
+                    }
+                    sourceComponent: (flags & settingsWindow.sf_button) ? settingsButton : undefined
                 }
             }
             MenuSeparator { 

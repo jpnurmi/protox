@@ -133,7 +133,11 @@ ToolBar {
             }
             onPressAndHold: {
                 chatMessage.forceActiveFocus()
+                Qt.inputMethod.reset()
                 chatMessage.text += friendNickname.text
+                if (chatMessage) {
+                    chatMessage.cursorPosition = chatMessage.length
+                }
             }
         }
     }
