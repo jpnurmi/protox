@@ -6,8 +6,6 @@
 
 ChatDataBase::ChatDataBase(const QString &fileName)
 {
-	commitRequests = 0;
-	commitAnotherRequests = 0;
 	db = QSqlDatabase::addDatabase("QSQLITE");
 	db.setDatabaseName(GetProgDir() + fileName);
 	db.open();

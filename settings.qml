@@ -76,7 +76,7 @@ Popup {
                                        qsTr("If you are getting spammed with friend requests, change this value.") + "\n" +
                                        qsTr("Only hexadecimal characters are allowed.")})
         settingsModel.append({ flags: sf_text | sf_input | sf_mask, name: qsTr("No spam"), prop: "no_spam_value", 
-                    svalue: bridge.getNospamValue(), itemWidth: 128, mask: ">HHHHHH;0" })
+                    svalue: bridge.getNospamValue(), itemWidth: 128, mask: ">HHHHHHHH;0" })
     }
 
     function open() {

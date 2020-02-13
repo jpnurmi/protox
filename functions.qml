@@ -116,7 +116,7 @@ function chatScrollToEnd() {
     messages.scrollToEnd()
 }
 
-property string each_friend_text: []
+property variant each_friend_text: []
 function selectFriend(friend_number) {
     if (bridge.getCurrentFriendNumber() === friend_number && checkLastMessage(friend_number)) {
         return
@@ -140,7 +140,7 @@ function selectFriend(friend_number) {
     messages.addTransitionEnabled = true
     chatMessage.clear()
     if (each_friend_text[friend_number] !== undefined) {
-        chatMessage.text = each_friend_text[friend_number]
+        chatMessage.append(each_friend_text[friend_number])
     } 
 }
 
