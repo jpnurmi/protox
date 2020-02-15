@@ -244,21 +244,22 @@ Popup {
                                 if ((flags & settingsWindow.sf_mask) && !acceptableInput) {
                                     return
                                 }
+                                var result = ""
                                 if (flags & settingsWindow.sf_numbers_only) {
                                     if (text.length == 0 || isNaN(text)) {
-                                        text = helperText
+                                        result = helperText
                                     } else if (parseInt(text) > numberMaxLimit) {
-                                        text = numberMaxLimit
+                                        result = numberMaxLimit
                                     } else if (parseInt(text) < numberMinLimit) {
-                                        text = numberMinLimit
+                                        result = numberMinLimit
                                     }
                                 }
                                 if (flags & settingsWindow.sf_uppercase) {
-                                    svalue = text.toUpperCase()
+                                    result = text.toUpperCase()
                                 } else {
-                                    svalue = text
+                                    result = text
                                 }
-                                text = svalue
+                                svalue = result
                                 focus = false
                                 if (flags & settingsWindow.sf_reload_chat) {
                                     settingsWindow.reloadChatHistory = true
