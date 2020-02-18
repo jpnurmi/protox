@@ -17,7 +17,7 @@ class QmlCBridge : public QObject
 public:
 	QmlCBridge(Tox *_tox, QTimer *_toxcore_timer, quint32 last_friend_number);
 	void setComponent(QObject *_component);
-	void insertMessage(const QString &message, quint32 friend_number, bool self = false, quint32 message_id = 0, quint64 unique_id = 0, QDateTime dt = QDateTime::currentDateTime(), bool history = false, bool failed = false);
+	void insertMessage(const ToxVariantMessage &message, quint32 friend_number, bool self = false, quint32 message_id = 0, quint64 unique_id = 0, QDateTime dt = QDateTime::currentDateTime(), bool history = false, bool failed = false);
 	void insertFriend(qint32 friend_number, const QString &nickName, bool request = false, const QString &request_message = "", const ToxPk &friendPk = "");
 	void setMessageReceived(quint32 friend_number, quint32 message_id, bool use_uid = false, quint64 unique_id = 0);
 	void setCurrentFriendConnStatus(quint32 friend_number, int conn_status);
