@@ -16,6 +16,7 @@ class QmlCBridge : public QObject
 	Q_OBJECT
 public:
 	QmlCBridge();
+	~QmlCBridge();
 	void setComponent(QObject *_component);
 	void insertMessage(const QString &message, quint32 friend_number, bool self = false, quint32 message_id = 0, quint64 unique_id = 0, QDateTime dt = QDateTime::currentDateTime(), bool history = false, bool failed = false);
 	void insertFriend(qint32 friend_number, const QString &nickName, bool request = false, const QString &request_message = "", const ToxPk &friendPk = "");
@@ -63,6 +64,7 @@ public slots:
 	Q_INVOKABLE void setAppInactive(bool inactive) { app_inactive = inactive; }
 	Q_INVOKABLE void setKeyboardAdjustMode(bool adjustNothing);
 	Q_INVOKABLE void signInProfile(const QString &profile);
+	Q_INVOKABLE QVariant getProfileList();
 
 public:
 	ToxFriendsConnStatus friends_conn_status;
@@ -71,6 +73,7 @@ public:
 	ToxFriendsOnce friends_once;
 private:
 	quint32 current_friend_number;
+	QString current_profile;
 	bool app_inactive;
 private:
 	QObject *component;

@@ -52,17 +52,12 @@ Popup {
     Component.onCompleted: {
         settingsModel.actions = {
             "randomize_nospam" : function () {
-                for (var i = 0; i < settingsModel.count; i++) {
-                    if (settingsModel.get(i).prop === "no_spam_value") {
-                        var hex_symbols = "0123456789ABCDEF"
-                        var nospam = ""
-                        for (var j = 0; j < 8; j++) {
-                            nospam += hex_symbols.charAt(Math.floor(Math.random() * hex_symbols.length))
-                        }
-                        settingsModel.get(i).svalue = nospam
-                        return
-                    }
+                var hex_symbols = "0123456789ABCDEF"
+                var nospam = ""
+                for (var j = 0; j < 8; j++) {
+                    nospam += hex_symbols.charAt(Math.floor(Math.random() * hex_symbols.length))
                 }
+                settingsModel.setValueString("no_spam_value", nospam)
             }
         }
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Tox options") })
@@ -91,14 +86,9 @@ Popup {
                                  name: qsTr("NoSpam value is a part of your ToxID that can be changed at will.") + "\n" +
                                        qsTr("If you are getting spammed with friend requests, change this value.") + "\n" +
                                        qsTr("Only hexadecimal characters are allowed.")})
-<<<<<<< HEAD
-        settingsModel.append({ flags: sf_text | sf_input | sf_mask, name: qsTr("No spam"), prop: "no_spam_value", 
-                    svalue: ""/*bridge.getNospamValue()*/, itemWidth: 128, mask: ">HHHHHH;0" })
-=======
         settingsModel.append({ flags: sf_text | sf_input | sf_mask | sf_button, name: qsTr("NoSpam"), prop: "no_spam_value", 
-                    svalue: bridge.getNospamValue(), itemWidth: 128, mask: ">HHHHHHHH;0", buttonText: qsTr("Randomize"), 
+                    svalue: "" /* will be set later */, itemWidth: 128, mask: ">HHHHHHHH;0", buttonText: qsTr("Randomize"), 
                     clickAction: "randomize_nospam"})
->>>>>>> master
     }
 
     function open() {
@@ -178,6 +168,14 @@ Popup {
             for (var i = 0; i < count; i++) {
                 if (get(i).prop === p) {
                     return get(i).svalue
+                }
+            }
+        }
+        function setValueString(p, sv) {
+            for (var i = 0; i < count; i++) {
+                if (get(i).prop === p) {
+                    get(i).svalue = sv
+                    return
                 }
             }
         }

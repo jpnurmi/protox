@@ -15,6 +15,7 @@ QSettings *settings;
 QmlCBridge::QmlCBridge()
 {
 	app_inactive = true;
+	current_profile = "";
 }
 
 void QmlCBridge::setComponent(QObject *_component)
@@ -359,12 +360,13 @@ extern "C"
 
 void QmlCBridge::signInProfile(const QString &profile)
 {
-	tox = toxcore_create(profile);
+	current_profile = profile;
+	tox = toxcore_create(current_profile);
 	toxcore_bootstrap_DHT(tox);
 	Debug("My address: " + ToxId_To_QString(toxcore_get_address(tox)));
 
 	// load config
-	settings->beginGroup("Client_" + profile);
+	settings->beginGroup("Client_" + current_profile);
 	ToxPk friendPk = settings->value("last_friend", toxcore_get_friend_public_key(tox, 0)).toByteArray();
 	QList <QVariant> friend_list = settings->value("friend_list", QList <QVariant>()).toList();
 	settings->endGroup();
@@ -399,6 +401,24 @@ void QmlCBridge::signInProfile(const QString &profile)
 	toxcore_timer->start();
 }
 
+QmlCBridge::~QmlCBridge()
+{
+	settings->beginGroup("Client_" + current_profile);
+	settings->setValue("last_friend", toxcore_get_friend_public_key(tox, qmlbridge->getCurrentFriendNumber()));
+	settings->setValue("friend_list", qmlbridge->getFriendsModelOrder());
+	settings->endGroup();
+	settings->sync();
+
+	toxcore_timer->stop();
+	toxcore_destroy(tox);
+}
+
+QVariant QmlCBridge::getProfileList()
+{
+	QDir directory(GetProgDir());
+	return directory.entryList(QStringList() << "*.tox", QDir::Files);
+}
+
 int main(int argc, char *argv[])
 {
 	QtStatusBar::setColor(QColor("#3F51B5"));
@@ -413,10 +433,6 @@ int main(int argc, char *argv[])
 	}
 #endif
 	settings = new QSettings(GetProgDir() + "settings.ini", QSettings::IniFormat);
-	//Tox *tox = toxcore_create();
-	//toxcore_bootstrap_DHT(tox);
-	//Debug("My address: " + ToxId_To_QString(toxcore_get_address(tox)));
-
 	chat_db = new ChatDataBase("chat.db");
 
 	Debug("App started.");
@@ -433,7 +449,6 @@ int main(int argc, char *argv[])
 			QCoreApplication::exit(-1);
 	}, Qt::QueuedConnection);
 
-	//QTimer *toxcore_timer = toxcore_create_qtimer(tox);
 	qmlbridge = new QmlCBridge;
 	QQmlContext *root = engine.rootContext();
 	root->setContextProperty("bridge", qmlbridge);
@@ -449,22 +464,7 @@ int main(int argc, char *argv[])
 	QObject *component = engine.rootObjects().first();
 	qmlbridge->setComponent(component);
 
-	//for (auto _friend : friend_list) {
-	//	qmlbridge->insertFriend(_friend.toUInt(), toxcore_get_friend_name(tox, _friend.toUInt()));
-	//}
-
-	//toxcore_timer->start();
-
 	int result = app.exec();
-	/*
-	settings->beginGroup("Client");
-	settings->setValue("last_friend", toxcore_get_friend_public_key(tox, qmlbridge->getCurrentFriendNumber()));
-	settings->setValue("friend_list", qmlbridge->getFriendsModelOrder());
-	settings->endGroup();
-	settings->sync();
-	*/
-	//toxcore_timer->stop();
-	//toxcore_destroy(tox);
 	delete qmlbridge;
 	delete chat_db;
 	delete settings;

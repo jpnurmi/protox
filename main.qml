@@ -39,11 +39,11 @@ ApplicationWindow {
     Connections {
         target: Qt.application
         onStateChanged: {
-            if (splashImageDestroyAnimation !== null) {
+            //if (splashImageDestroyAnimation !== null) {
                 statusBar.theme = Material.Dark
                 statusBar.color = Material.toolBarColor
-                splashImageDestroyAnimation.start()
-            }
+            //    splashImageDestroyAnimation.start()
+            //}
             // select friend when you click on notification
             if(Qt.application.state === Qt.ApplicationActive && notification.getNotificationId() !== -1) {
                 settingsWindow.close()
@@ -53,31 +53,6 @@ ApplicationWindow {
             bridge.setAppInactive(appInactive)
         }
     }
-
-    Component.onCompleted: {
-        loginWindow.open()
-        //cleanProfile = bridge.getFriendsCount() < 1
-        //initTimer.start()
-    }
-
-    Timer {
-        id: initTimer
-        repeat: false
-        interval: 1
-        onTriggered: {
-            /*
-            messages.addTransitionEnabled = false
-            bridge.retrieveChatLog()
-            messages.scrollToEnd()
-            messages.addTransitionEnabled = true
-            */
-            destroy()
-        }
-    }
-
-    /*
-      Splash image
-    */
 
     Image {
         id: splashImage
@@ -96,6 +71,10 @@ ApplicationWindow {
                  }
             }
         }
+    }
+
+    Component.onCompleted: {
+        loginWindow.open()
     }
 
     Image {
@@ -170,7 +149,6 @@ ApplicationWindow {
     readonly property int z_overlay_header: 1
     readonly property int z_menu: 3
     readonly property int z_menu_elements: 4
-    readonly property int z_settings_menu: 1000
     readonly property int z_top: Number.MAX_VALUE-1
     readonly property int z_splash: Number.MAX_VALUE
     readonly property real standardFontPointSize: 17.5

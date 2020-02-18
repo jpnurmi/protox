@@ -12,11 +12,8 @@
         <file>menus.qml</file>
         <file>header.qml</file>
         <file>logo_big.png</file>
-<<<<<<< HEAD
         <file>login.qml</file>
         <file>login.png</file>
-=======
         <file>app.qml</file>
->>>>>>> master
     </qresource>
 </RCC>

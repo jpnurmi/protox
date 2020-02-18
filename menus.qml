@@ -297,7 +297,6 @@ Menu {
         rightPadding: leftPadding
         verticalAlignment: TextInput.AlignVCenter
         width: parent.width
-        //text: bridge.getNickname(false)
         onAccepted: {
             myStatus.focus = true
         }
@@ -316,7 +315,6 @@ Menu {
         rightPadding: leftPadding
         verticalAlignment: TextInput.AlignVCenter
         width: parent.width
-        //text: bridge.getStatusMessage()
         onAccepted: profileMenuApplyItem.onTriggered()
     }
     RowLayout {

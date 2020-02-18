@@ -258,4 +258,26 @@ function setKeyboardHeight(height) {
     }
 }
 
+function signInProfile(profile) {
+    bridge.signInProfile(profile)
+    var friend_number = bridge.getCurrentFriendNumber()
+    cleanProfile = bridge.getFriendsCount() < 1
+    // header
+    friendNickname.setText(bridge.getFriendNickname(friend_number))
+    friendStatus.setText(bridge.getFriendStatusMessage(friend_number))
+    // drawer
+    accountName.text = bridge.getNickname(true)
+    statusIndicator.setStatus(bridge.getStatus())
+    // chat log
+    messages.addTransitionEnabled = false
+    bridge.retrieveChatLog()
+    messages.scrollToEnd()
+    messages.addTransitionEnabled = true
+    // menus
+    myNickname.text = bridge.getNickname(false)
+    myStatus.text = bridge.getStatusMessage()
+    // settings
+    settingsModel.setValueString("no_spam_value", bridge.getNospamValue())
+}
+
 /*[remove]*/ }
