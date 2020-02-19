@@ -2,7 +2,7 @@
 
 **Protox** is a [Tox](https://tox.chat/) client for Android OS written in QML/C++ (Qt 5).
 
-Minimal requirments: Android 6.0 (API level 23).
+Minimum requirments: Android 6.0 (API level 23).
 
 # Features
 
