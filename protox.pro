@@ -60,7 +60,14 @@ DISTFILES += \
 	android/src/notifications/QtAndroidNotifications.java \
 	android/src/activity/QtActivityEx.java \
 	android/src/activity/KeyboardProvider.java \
-	qmlcombiner.py
+	qmlcombiner.py \
+	chatarea.qml \
+	functions.qml \
+	header.qml \
+	leftpanel.qml \
+	main.qml \
+	menus.qml \
+	settings.qml
 
 contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
 	ANDROID_PACKAGE_SOURCE_DIR = \
