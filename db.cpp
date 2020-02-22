@@ -1,7 +1,7 @@
 #include "db.h"
 #include "tools.h"
 
-#define DATABASE_VERSION 1
+#define DATABASE_VERSION 2
 #define APPLICATION_ID ('P' << 24) + ('T' << 16) + ('O' << 8) + 'X'
 
 ChatDataBase::ChatDataBase(const QString &fileName)
@@ -17,16 +17,31 @@ ChatDataBase::ChatDataBase(const QString &fileName)
 			"CREATE TABLE IF NOT EXISTS Messages\n"
 			"(\n"
 			"	public_key BLOB,\n"
-			"	message TEXT,\n"
+			"	type INTEGER,\n"
+			"	reference_id INTEGER,\n"
 			"	self INTEGER,\n"
 			"	received INTEGER,\n"
 			"	datetime INTEGER,\n"
 			"	unique_id INTEGER,\n"
 			"	failed INTEGER,\n"
 			"	PRIMARY KEY(public_key, unique_id)\n"
+			");\n";
+	query = db.exec(create_command_messages);
+	const QString create_command_text_messages = 
+			"CREATE TABLE IF NOT EXISTS TextMessages\n"
+			"(\n"
+			"	reference_id INTEGER PRIMARY KEY,\n"
+			"	message STRING\n"
 			");\n"
 			"";
-	query = db.exec(create_command_messages);
+	query = db.exec(create_command_text_messages);
+	const QString create_command_file_messages = 
+			"CREATE TABLE IF NOT EXISTS FileMessages\n"
+			"(\n"
+			"	reference_id INTEGER PRIMARY KEY,\n"
+			"	file_path STRING,\n"
+			"	size INTEGER\n"
+			");";
 	db.commit();
 }
 
@@ -40,13 +55,31 @@ quint64 ChatDataBase::getMessagesCountFriend(const ToxPk &public_key)
 	return query.value(0).toULongLong();
 }
 
-void ChatDataBase::insertMessage(const QString &message, QDateTime dt, const ToxPk &public_key, bool self, quint64 unique_id, bool failed)
+void ChatDataBase::insertMessage(const ToxVariantMessage &variantMessage, QDateTime dt, const ToxPk &public_key, bool self, quint64 unique_id, bool failed)
 {
+	int type = variantMessage["type"].toInt();
+	QSqlQuery msg_query(db);
+
+	QString table;
+	switch (type) {
+		case ToxVariantMessageType::TOXMSG_TEXT: 
+			msg_query.prepare("INSERT INTO TextMessages (message) " 
+							  "VALUES (:message)");
+			msg_query.bindValue(":message", variantMessage["message"]);
+			table = "TextMessages";
+			break;
+	}
+	msg_query.exec();
+
+	QSqlQuery last_msg_query = db.exec(QString("SELECT reference_id FROM %1 ORDER BY reference_id DESC LIMIT 1").arg(table));
+	last_msg_query.next();
+	
 	QSqlQuery query(db);
-	query.prepare("INSERT INTO Messages (public_key, message, self, received, datetime, unique_id) "
-				  "VALUES (:public_key, :message, :self, :received, :datetime, :unique_id)");
+	query.prepare("INSERT INTO Messages (public_key, type, reference_id, self, received, datetime, unique_id) "
+				  "VALUES (:public_key, :type, :reference_id, :self, :received, :datetime, :unique_id)");
 	query.bindValue(":public_key", public_key);
-	query.bindValue(":message", message);
+	query.bindValue(":type", type);
+	query.bindValue(":reference_id", last_msg_query.value(0).toInt());
 	query.bindValue(":self", self);
 	query.bindValue(":received", false);
 	query.bindValue(":datetime", dt.toSecsSinceEpoch());
@@ -72,29 +105,55 @@ ToxMessages ChatDataBase::getFriendMessages(const ToxPk &public_key, quint32 lim
 	ToxMessages messages;
 	QSqlQuery query(db);
 	query.prepare(QString("SELECT * FROM ("
-				  "SELECT message,datetime,self,received,unique_id,failed FROM Messages WHERE public_key = :public_key AND unique_id %1 :start ORDER BY unique_id %2 LIMIT :limit"
+				  "SELECT type,reference_id,unique_id,datetime,self,received,failed FROM Messages WHERE public_key = :public_key AND unique_id %1 :start ORDER BY unique_id %2 LIMIT :limit"
 				  ") ORDER BY unique_id ASC").arg(reverse ? "<" : ">", from ? "DESC" : "ASC"));
 	query.bindValue(":public_key", public_key);
 	query.bindValue(":start", start);
 	query.bindValue(":limit", limit);
 	query.exec();
 	while (query.next()) {
-		messages.push_back(ToxMessage(query.value(0).toString(),
-									  QDateTime::fromSecsSinceEpoch(query.value(1).toULongLong()),
-									  query.value(2).toBool(),
-									  query.value(3).toBool(),
-									  query.value(4).toULongLong()));
+		QSqlQuery msg_query(db);
+		int type = query.value(0).toInt();
+		quint32 reference_id = query.value(1).toUInt();
+		switch (type) {
+			case ToxVariantMessageType::TOXMSG_TEXT: 
+				msg_query.prepare("SELECT message FROM TextMessages WHERE reference_id = :reference_id");
+				break;
+		}
+		msg_query.bindValue(":reference_id", reference_id);
+		msg_query.exec();
+		ToxVariantMessage variantMessage;
+		variantMessage.insert("type", type);
+		msg_query.next();
+		switch (type) {
+			case ToxVariantMessageType::TOXMSG_TEXT:
+				variantMessage.insert("message", msg_query.value(0).toString());
+				break;
+		}
+		messages.push_back(ToxMessage(variantMessage,
+									  query.value(2).toULongLong(),
+									  QDateTime::fromSecsSinceEpoch(query.value(3).toULongLong()),
+									  query.value(4).toBool(),
+									  query.value(5).toBool()));
 	}
 	return messages;
 }
 
 void ChatDataBase::clearFriendChatHistory(const ToxPk &public_key)
 {
-	QSqlQuery query(db);
-	query.prepare("DELETE FROM Messages WHERE public_key = :public_key");
-	query.bindValue(":public_key", public_key);
-	query.exec();
-	db.commit();
+	db.exec("DROP TABLE IF EXISTS MessagesToDelete");
+	db.exec("CREATE TEMPORARY TABLE MessagesToDelete (\n"
+			"	reference_id INTEGER PRIMARY KEY\n"
+			");");
+	QSqlQuery pre_query(db);
+	pre_query.prepare("INSERT INTO MessagesToDelete (reference_id) "
+					  "SELECT reference_id FROM Messages WHERE public_key = :public_key");
+	pre_query.bindValue(":public_key", public_key);
+	pre_query.exec();
+	db.exec("DELETE FROM TextMessages WHERE reference_id IN MessagesToDelete");
+	db.exec("DELETE FROM FileMessages WHERE reference_id IN MessagesToDelete");
+	db.exec("DELETE FROM Messages WHERE reference_id IN MessagesToDelete");
+	db.exec("DROP TABLE MessagesToDelete");
 }
 
 ChatDataBase::~ChatDataBase()

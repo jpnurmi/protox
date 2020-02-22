@@ -145,26 +145,32 @@ function selectFriend(friend_number) {
 }
 
 property int new_messages: 0
-function insertMessage(text, friend_number, self, message_id, time, unique_id, failed, history) {
+function insertMessage(variantMessage, friend_number, self, message_id, time, unique_id, failed, history) {
     if (!self && !history && (appInactive || bridge.getCurrentFriendNumber() !== friend_number || settingsWindow.visible)) {
-        notification.show({
-                          caption : text,
-                          title : qsTr("New message from ") + bridge.getFriendNickname(friend_number),
-                          id : friend_number
-                        });
+        if (!variantMessage.type) {
+            notification.show({
+                              caption : variantMessage.message,
+                              title : qsTr("New message from ") + bridge.getFriendNickname(friend_number),
+                              id : friend_number
+                            });
+        }
     }
     if (bridge.getCurrentFriendNumber() !== friend_number) {
         return
     }
 
-    messagesModel.append({"msgText": text, 
-                             "msgSelf" : self, 
-                             "msgReceived" : false, 
-                             "msgId" : message_id, 
-                             "msgTime" : time, 
-                             "msgUniqueId" : unique_id,
-                             "msgFailed" : failed,
-                             "msgHistory" : history})
+    var dict = { "msgSelf" : self, 
+        "msgReceived" : false, 
+        "msgId" : message_id, 
+        "msgTime" : time, 
+        "msgUniqueId" : unique_id,
+        "msgFailed" : failed,
+        "msgHistory" : history}
+    
+    if (!variantMessage.type) {
+        dict.msgText = variantMessage.message
+    }
+    messagesModel.append(dict)
 
     if (!history) {
         if (messages.atYEnd) {

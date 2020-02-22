@@ -12,14 +12,20 @@ typedef QMap <quint32, QDateTime> ToxMessagesDateTime;
 typedef QMap <quint32, quint64> ToxMessagesIdUid;
 typedef QMap <quint32, bool> ToxFriendsOnce;
 
+typedef QMap<QString, QVariant> ToxVariantMessage;
+enum ToxVariantMessageType {
+	TOXMSG_TEXT,
+	TOXMSG_FILE
+}; 
+
 struct ToxMessage {
-	QString message;
+	ToxVariantMessage variantMessage;
 	QDateTime dt;
 	bool self;
 	bool received;
 	quint64 unique_id;
-	ToxMessage (QString _message, QDateTime _dt, bool _self, bool _received, quint64 _unique_id) {
-		message = _message;
+	ToxMessage (ToxVariantMessage _variantMessage, quint64 _unique_id, QDateTime _dt, bool _self, bool _received) {
+		variantMessage = _variantMessage;
 		dt = _dt;
 		self = _self;
 		received = _received;
