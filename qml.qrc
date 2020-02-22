@@ -1,16 +1,9 @@
 <RCC>
     <qresource prefix="/">
-        <file>main.qml</file>
         <file>qtquickcontrols2.conf</file>
         <file>send-button.png</file>
         <file>DejaVuSans.ttf</file>
         <file>splash.png</file>
-        <file>chatarea.qml</file>
-        <file>functions.qml</file>
-        <file>leftpanel.qml</file>
-        <file>settings.qml</file>
-        <file>menus.qml</file>
-        <file>header.qml</file>
         <file>logo_big.png</file>
         <file>app.qml</file>
     </qresource>
