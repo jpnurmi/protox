@@ -360,12 +360,8 @@ Menu {
     Image {
         id: toxIDQRCodeImage
         anchors.centerIn: parent
-        //source: "image://QZXing/encode/" + "tox:" + bridge.getToxId() +
-        //        "?correctionLevel=M" +
-        //        "&format=qrcode"
         sourceSize.width: 196
         sourceSize.height: 196
-        cache: false
         width: 196
         height: width
         MouseArea {

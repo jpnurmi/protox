@@ -264,6 +264,9 @@ Popup {
                                 }
                             }
                             onPressed: {
+                                if (!window.keyboardActive) {
+                                    focus = false
+                                }
                                 forceActiveFocus()
                                 cursorPosition = positionAt(event.x, event.y)
                                 if (selectedText.length > 0) {

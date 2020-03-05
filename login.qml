@@ -4,6 +4,8 @@ import QtQuick.Controls.Material 2.2
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.2
 import QtQuick.Window 2.12
+import QtGraphicalEffects 1.0
+import QtQuick.Controls.Styles 1.4
 
 Popup {
     id: loginWindow
@@ -54,30 +56,97 @@ Popup {
                     text: modelData
                     onClicked: {
                         accountSelectionButton.text = modelData
+                        loginPassword.visible = bridge.checkProfileEncrypted(modelData + ".tox")
                     }
                 }
             }
         }
 
+        Image {
+            id: loginImage
+            source: "logo_big.png"
+            smooth: true
+            anchors.bottom: accountSelectionButton.top
+            anchors.bottomMargin: 48
+            anchors.horizontalCenter: accountSelectionButton.horizontalCenter
+            width: 142
+            height: 142 * (sourceSize.height / sourceSize.width)
+        }
+
+        DropShadow {
+            id: loginImageGlow
+            anchors.fill: loginImage
+            radius: 8
+            spread: 0.4
+            samples: 17
+            horizontalOffset: 0
+            verticalOffset: 0
+            color: "#C400AB"
+            source: loginImage
+            property int duration: 4000
+            SequentialAnimation {
+                id: loginImageGlowAnimation
+                running: true
+                loops: Animation.Infinite
+                NumberAnimation { target: loginImageGlow; property: "spread"; to: 0.4; duration: loginImageGlow.duration * 0.5 }
+                NumberAnimation { target: loginImageGlow; property: "spread"; to: 0; duration: loginImageGlow.duration * 0.5 }
+            }
+        }
+
         Button {
             id: accountSelectionButton
+            y: (height + parent.height) * 0.4
+            width: parent.width * 0.75
+            height: 50
             anchors.horizontalCenter: parent.horizontalCenter
-            y: (height + parent.height) * 0.5
             text: "No profile selected"
             Layout.alignment: Qt.AlignCenter
             onClicked: {
                 accountMenu.popup(x, y)
             }
         }
+
+        TextField {
+            id: loginPassword
+            width: parent.width * 0.75
+            anchors.top: accountSelectionButton.bottom
+            anchors.topMargin: 32
+            anchors.horizontalCenter: accountSelectionButton.horizontalCenter
+            inputMethodHints: Qt.ImhSensitiveData
+            color: "white"
+            background: Rectangle {
+                color: loginPassword.activeFocus ? Material.primaryHighlightedTextColor : "gray"
+                height: 2
+                width: parent.width
+                anchors.bottom: parent.bottom
+            }
+            onPressed: {
+                if (!window.keyboardActive) {
+                    focus = false
+                }
+                forceActiveFocus()
+                cursorPosition = positionAt(event.x, event.y)
+                if (selectedText.length > 0) {
+                    deselect()
+                    cursorPosition = positionAt(event.x, event.y)
+                }
+                event.accepted = false
+            }
+        }
+
         Button {
             id: loginButton
-            anchors.top: accountSelectionButton.bottom
-            anchors.horizontalCenter: accountSelectionButton.horizontalCenter
+            width: parent.width * 0.75
+            y: (parent.height - height) * 0.9
+            anchors.horizontalCenter: loginPassword.horizontalCenter
             text: qsTr("Select profile")
             Layout.alignment: Qt.AlignCenter
             onClicked: {
+                if (!signInProfile(accountSelectionButton.text)) {
+                    toast.show({ message : qsTr("Profile loading failed."), duration : Toast.Short });
+                    return
+                }
                 loginWindow.profileSelected = true
-                signInProfile(accountSelectionButton.text)
                 loginWindow.close()
             }
         }

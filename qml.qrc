@@ -5,7 +5,6 @@
         <file>DejaVuSans.ttf</file>
         <file>splash.png</file>
         <file>logo_big.png</file>
-        <file>login.qml</file>
         <file>login.png</file>
         <file>app.qml</file>
     </qresource>

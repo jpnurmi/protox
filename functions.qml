@@ -265,7 +265,8 @@ function setKeyboardHeight(height) {
 }
 
 function signInProfile(profile) {
-    bridge.signInProfile(profile)
+    if (!bridge.signInProfile(profile))
+        return false
     var friend_number = bridge.getCurrentFriendNumber()
     cleanProfile = bridge.getFriendsCount() < 1
     // header
@@ -274,6 +275,10 @@ function signInProfile(profile) {
     // drawer
     accountName.text = bridge.getNickname(true)
     statusIndicator.setStatus(bridge.getStatus())
+    // QR code
+    toxIDQRCodeImage.source = "image://QZXing/encode/" + "tox:" + bridge.getToxId() +
+                              "?correctionLevel=M" +
+                              "&format=qrcode"
     // chat log
     messages.addTransitionEnabled = false
     bridge.retrieveChatLog()
@@ -284,6 +289,7 @@ function signInProfile(profile) {
     myStatus.text = bridge.getStatusMessage()
     // settings
     settingsModel.setValueString("no_spam_value", bridge.getNospamValue())
+    return true
 }
 
 /*[remove]*/ }

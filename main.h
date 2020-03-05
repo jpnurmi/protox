@@ -50,7 +50,6 @@ public slots:
 	Q_INVOKABLE void setStatusMessage(const QString &statusMessage);
 	Q_INVOKABLE int getStatus();
 	Q_INVOKABLE void setStatus(quint32 status);
-	Q_INVOKABLE void changeConnection(bool online);
 	Q_INVOKABLE long getFriendsCount();
 	Q_INVOKABLE quint32 getMessagesCount(quint32 friend_number);
 	Q_INVOKABLE int getConnStatus();
@@ -63,14 +62,14 @@ public slots:
 	Q_INVOKABLE void setSettingsValue(const QString &group, const QString &key, const QVariant &value);
 	Q_INVOKABLE void setAppInactive(bool inactive) { app_inactive = inactive; }
 	Q_INVOKABLE void setKeyboardAdjustMode(bool adjustNothing);
-	Q_INVOKABLE void signInProfile(const QString &profile);
+	Q_INVOKABLE bool signInProfile(const QString &profile, bool create = false);
 	Q_INVOKABLE QVariant getProfileList();
+	Q_INVOKABLE bool checkProfileEncrypted(const QString &profile);
 
 public:
 	ToxFriendsConnStatus friends_conn_status;
 	ToxMessagesIdUid messages_id_uid;
 	ToxMessagesDateTime messages_last_dt;
-	ToxFriendsOnce friends_once;
 private:
 	quint32 current_friend_number;
 	QString current_profile;
