@@ -54,6 +54,14 @@ Popup {
         id: settingsAlertDialog
         visible: false
     }
+    function setProfileEncrypted (encrypted) {
+        for (var i = 0; i < settingsModel.count; i++) {
+            if (settingsModel.get(i).prop === "profile_encrypted") {
+                settingsModel.get(i).name = encrypted ? qsTr("The password is set.") : qsTr("The password is not set.")
+                return
+            }
+        }
+    }
     Component.onCompleted: {
         settingsModel.actions = {
             "randomize_nospam" : function () {
@@ -77,8 +85,11 @@ Popup {
                     return
                 }
                 bridge.generateToxPasswordKey(password)
-                toast.show({ message : qsTr("Password changed successfully!"), duration : Toast.Short })
                 bridge.saveProfile()
+                toast.show({ message : qsTr("Password changed successfully!"), duration : Toast.Short })
+                settingsWindow.setProfileEncrypted(password.length > 0)
+                settingsModel.setValueString("password", "")
+                settingsModel.setValueString("repeated_password", "")
             }
         }
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Tox options") })
@@ -110,6 +121,7 @@ Popup {
         settingsModel.append({ flags: sf_text | sf_input | sf_mask | sf_button, name: qsTr("NoSpam"), prop: "no_spam_value", 
                     svalue: "" /* will be set later */, itemWidth: 128, mask: ">HHHHHHHH;0", buttonText: qsTr("Randomize"), 
                     clickAction: "randomize_nospam"})
+        settingsModel.append({ flags: sf_text | sf_title | sf_help, name: "", prop: "profile_encrypted"})
         settingsModel.append({ flags: sf_text | sf_input | sf_password, name: qsTr("Password"), prop: "password", 
                     svalue: "", itemWidth: 128
                     })

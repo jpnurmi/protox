@@ -49,6 +49,7 @@ Popup {
         loginWindowReopenAnimation.start()
         resetUI()
         goBack(false)
+        loginPassword.visible = bridge.checkProfileEncrypted(accountMenu.profileName)
     }
     function goBack(fadeout) {
         loginWindow.profileCreation = false
@@ -105,12 +106,14 @@ Popup {
             id: accountMenu
             z: z_top
             implicitWidth: accountSelectionButton.width
+            property string profileName
             Repeater {
                 id: profileRepeater
                 model: bridge.getProfileList()
                 MenuItem {
                     text: modelData
                     onClicked: {
+                        accountMenu.profileName = modelData
                         accountSelectionButton.text = modelData
                         loginPassword.visible = bridge.checkProfileEncrypted(modelData)
                         loginPassword.clear()
@@ -251,7 +254,8 @@ Popup {
                     toast.show({ message : qsTr("Specify a user name."), duration : Toast.Short })
                     return
                 }
-                var profile = loginWindow.profileCreation ? loginUsername.text + ".tox" : accountSelectionButton.text
+                var profile = loginWindow.profileCreation ? loginUsername.text + ".tox" : accountMenu.profileName
+                loginWindow.enabled = false
                 var error = signInProfile(profile, loginWindow.profileCreation, loginPassword.text)
                 if (error > 0) {
                     var reason;
@@ -269,7 +273,7 @@ Popup {
                 loginWindow.close()
                 loginPassword.clear()
                 loginUsername.clear()
-                loginPassword.lastVisible = loginPassword.visible
+                loginWindow.enabled = true
             }
             onClicked: login()
         }

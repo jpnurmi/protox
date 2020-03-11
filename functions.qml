@@ -290,6 +290,7 @@ function signInProfile(profile, create, password) {
     myStatus.text = bridge.getStatusMessage()
     // settings
     settingsModel.setValueString("no_spam_value", bridge.getNospamValue())
+    settingsWindow.setProfileEncrypted(bridge.checkProfileEncrypted(profile))
     return 0
 }
 
