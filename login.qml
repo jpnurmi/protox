@@ -16,7 +16,9 @@ Popup {
     rightPadding: 0
     topPadding: 0
     bottomPadding: 0
+    closePolicy: profileCreation ? Popup.NoAutoClose : Popup.CloseOnEscape
     property bool profileSelected: false
+    property bool profileCreation: false
     // enable adjustTop only for this window
     Connections {
         target: window
@@ -41,9 +43,22 @@ Popup {
         }
     }
 
+
+
     Image {
+        id: loginBackground
         anchors.fill: parent
         source: "login.png"
+
+        Image {
+            id: loginBackgroundNewProfile
+            anchors.fill: parent
+            source: "profileCreation.png"
+            opacity: 0
+        }
+
+        NumberAnimation { id: loginFadeIn; target: loginBackgroundNewProfile; property: "opacity"; from: 0.0; to: 1.0 }
+        NumberAnimation { id: loginFadeOut; target: loginBackgroundNewProfile; property: "opacity"; from: 1.0; to: 0.0 }
 
         Menu {
             id: accountMenu
@@ -56,7 +71,8 @@ Popup {
                     text: modelData
                     onClicked: {
                         accountSelectionButton.text = modelData
-                        loginPassword.visible = bridge.checkProfileEncrypted(modelData + ".tox")
+                        loginPassword.visible = bridge.checkProfileEncrypted(modelData)
+                        loginPassword.clear()
                     }
                 }
             }
@@ -98,24 +114,26 @@ Popup {
             y: (height + parent.height) * 0.4
             width: parent.width * 0.75
             height: 50
+            visible: !loginWindow.profileCreation
             anchors.horizontalCenter: parent.horizontalCenter
             text: "No profile selected"
-            Layout.alignment: Qt.AlignCenter
             onClicked: {
                 accountMenu.popup(x, y)
             }
         }
 
         TextField {
-            id: loginPassword
+            id: loginUsername
+            visible: loginWindow.profileCreation
             width: parent.width * 0.75
-            anchors.top: accountSelectionButton.bottom
-            anchors.topMargin: 32
-            anchors.horizontalCenter: accountSelectionButton.horizontalCenter
+            placeholderText: qsTr("Username")
+            anchors.centerIn: accountSelectionButton
             inputMethodHints: Qt.ImhSensitiveData
             color: "white"
+            placeholderTextColor: "gray"
+            horizontalAlignment: TextInput.AlignHCenter
             background: Rectangle {
-                color: loginPassword.activeFocus ? Material.primaryHighlightedTextColor : "gray"
+                color: loginUsername.activeFocus ? Material.primaryHighlightedTextColor : "gray"
                 height: 2
                 width: parent.width
                 anchors.bottom: parent.bottom
@@ -134,23 +152,93 @@ Popup {
             }
         }
 
+        TextField {
+            id: loginPassword
+            visible: false
+            property bool lastVisible: false
+            width: parent.width * 0.75
+            placeholderText: qsTr("Password")
+            anchors.top: accountSelectionButton.bottom
+            anchors.topMargin: 32
+            anchors.horizontalCenter: accountSelectionButton.horizontalCenter
+            inputMethodHints: Qt.ImhSensitiveData
+            color: "white"
+            placeholderTextColor: "gray"
+            echoMode: TextInput.Password
+            passwordCharacter: "*"
+            horizontalAlignment: TextInput.AlignHCenter
+            background: Rectangle {
+                color: loginPassword.activeFocus ? Material.primaryHighlightedTextColor : "gray"
+                height: 2
+                width: parent.width
+                anchors.bottom: parent.bottom
+            }
+            onPressed: {
+                if (!window.keyboardActive) {
+                    focus = false
+                }
+                forceActiveFocus()
+                cursorPosition = positionAt(event.x, event.y)
+                if (selectedText.length > 0) {
+                    deselect()
+                    cursorPosition = positionAt(event.x, event.y)
+                }
+                event.accepted = false
+            }
+            onAccepted: {
+                focus = false
+            }
+        }
+
         Button {
             id: loginButton
             width: parent.width * 0.75
-            y: (parent.height - height) * 0.9
+            y: (parent.height - height) * 0.8
             anchors.horizontalCenter: loginPassword.horizontalCenter
-            text: qsTr("Select profile")
-            Layout.alignment: Qt.AlignCenter
+            text: (loginWindow.profileCreation ? qsTr("Create") : qsTr("Select")) + " " + qsTr("profile")
             onClicked: {
-                if (!signInProfile(accountSelectionButton.text)) {
-                    toast.show({ message : qsTr("Profile loading failed."), duration : Toast.Short });
+                if (loginWindow.profileCreation && loginPassword.text.length === 0) {
+                    toast.show({ message : qsTr("Specify a user name."), duration : Toast.Short })
+                    return
+                }
+                var profile = loginWindow.profileCreation ? loginUsername.text + ".tox" : accountSelectionButton.text
+                var error = signInProfile(profile, loginWindow.profileCreation, loginPassword.text)
+                if (error > 0) {
+                    var reason;
+                    switch (error) {
+                    case 1: reason = qsTr("Profile loading failed."); break;
+                    case 2: reason = qsTr("Wrong password."); break;
+                    case 3: reason = qsTr("Profile doesn't exist."); break;
+                    }
+                    toast.show({ message : reason, duration : Toast.Short });
                     return
                 }
                 loginWindow.profileSelected = true
                 loginWindow.close()
             }
         }
+        Button {
+            id: createNewProfileButton
+            width: parent.width * 0.75
+            visible: !loginWindow.profileCreation
+            anchors.top: loginButton.bottom
+            anchors.topMargin: 4
+            anchors.horizontalCenter: loginButton.horizontalCenter
+            text: qsTr("Create profile")
+            onClicked: {
+                loginWindow.profileCreation = true
+                loginPassword.lastVisible = loginPassword.visible
+                loginPassword.visible = true
+                loginFadeIn.start()
+            }
+        }
+        Keys.onBackPressed: {
+            loginWindow.profileCreation = false
+            loginPassword.visible = loginPassword.lastVisible
+            loginFadeOut.start()
+        }
     }
+
     onClosed: {
         if (!profileSelected) {
             Qt.quit()

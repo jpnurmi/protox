@@ -47,8 +47,13 @@ Popup {
     readonly property int sf_mask: 1 << 6
     readonly property int sf_placeholder: 1 << 7
     readonly property int sf_warning: 1 << 8
-    readonly property int sf_reload_chat: 1 << 9
+    readonly property int sf_password: 1 << 9
     readonly property int sf_button: 1 << 10
+    readonly property int sf_acceptAction: 1 << 11
+    MessageDialog {
+        id: settingsAlertDialog
+        visible: false
+    }
     Component.onCompleted: {
         settingsModel.actions = {
             "randomize_nospam" : function () {
@@ -58,6 +63,21 @@ Popup {
                     nospam += hex_symbols.charAt(Math.floor(Math.random() * hex_symbols.length))
                 }
                 settingsModel.setValueString("no_spam_value", nospam)
+            },
+            "reload_chat" : function () {
+                settingsWindow.reloadChatHistory = true
+            },
+            "change_password" : function () {
+                var password = String(settingsModel.getValueString("password"))
+                var repeated_password = String(settingsModel.getValueString("repeated_password"))
+                if (password !== repeated_password) {
+                    settingsAlertDialog.title = qsTr("Password change failed!")
+                    settingsAlertDialog.text = qsTr("Password fields don't match.")
+                    settingsAlertDialog.open()
+                    return
+                }
+                bridge.generateToxPasswordKey(password)
+                toast.show({ message : qsTr("Password changed successfully!"), duration : Toast.Short })
             }
         }
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Tox options") })
@@ -75,8 +95,8 @@ Popup {
                     name: qsTr("Maximum bootstrap nodes"), prop: "max_bootstrap_nodes", helperText: "6",
                     svalue: bridge.getSettingsValue("Toxcore", "max_bootstrap_nodes", ptype_string, 6) })
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Client options") })
-        settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only | sf_placeholder | sf_reload_chat, 
-                    numberMinLimit: 5, numberMaxLimit: 10000, itemWidth: 96, 
+        settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only | sf_placeholder | sf_acceptAction, 
+                    acceptAction : "reload_chat", numberMinLimit: 5, numberMaxLimit: 10000, itemWidth: 96, 
                     name: qsTr("Recent messages limit"), prop: "last_messages_limit", helperText: "128",
                     svalue: bridge.getSettingsValue("Client", "last_messages_limit", ptype_string, 128) })
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Privacy") })
@@ -89,6 +109,12 @@ Popup {
         settingsModel.append({ flags: sf_text | sf_input | sf_mask | sf_button, name: qsTr("NoSpam"), prop: "no_spam_value", 
                     svalue: "" /* will be set later */, itemWidth: 128, mask: ">HHHHHHHH;0", buttonText: qsTr("Randomize"), 
                     clickAction: "randomize_nospam"})
+        settingsModel.append({ flags: sf_text | sf_input | sf_password, name: qsTr("Password"), prop: "password", 
+                    svalue: "", itemWidth: 128
+                    })
+        settingsModel.append({ flags: sf_text | sf_input | sf_button | sf_password, name: qsTr("Repeat"), prop: "repeated_password", 
+                    svalue: "", itemWidth: 128, buttonText: qsTr("Change"), clickAction: "change_password"
+                    })
     }
 
     function open() {
@@ -238,6 +264,8 @@ Popup {
                             inputMethodHints: (flags & settingsWindow.sf_numbers_only) ? Qt.ImhDigitsOnly 
                                             : ((flags & settingsWindow.sf_mask) ? Qt.ImhSensitiveData | Qt.ImhUppercaseOnly : Qt.ImhSensitiveData)
                             inputMask: (flags & settingsWindow.sf_mask) ? mask : ""
+                            echoMode: (flags & settingsWindow.sf_password) ? TextInput.Password : TextInput.Normal
+                            passwordCharacter: "*"
                             onAccepted: {
                                 if ((flags & settingsWindow.sf_mask) && !acceptableInput) {
                                     return
@@ -259,8 +287,8 @@ Popup {
                                 }
                                 svalue = result
                                 focus = false
-                                if (flags & settingsWindow.sf_reload_chat) {
-                                    settingsWindow.reloadChatHistory = true
+                                if (flags & settingsWindow.sf_acceptAction) {
+                                    settingsModel.actions[acceptAction]()
                                 }
                             }
                             onPressed: {

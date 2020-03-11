@@ -264,9 +264,10 @@ function setKeyboardHeight(height) {
     }
 }
 
-function signInProfile(profile) {
-    if (!bridge.signInProfile(profile))
-        return false
+function signInProfile(profile, create, password) {
+    var error = bridge.signInProfile(profile, create, password)
+    if (error > 0)
+        return error
     var friend_number = bridge.getCurrentFriendNumber()
     cleanProfile = bridge.getFriendsCount() < 1
     // header
@@ -289,7 +290,7 @@ function signInProfile(profile) {
     myStatus.text = bridge.getStatusMessage()
     // settings
     settingsModel.setValueString("no_spam_value", bridge.getNospamValue())
-    return true
+    return 0
 }
 
 /*[remove]*/ }

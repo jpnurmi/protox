@@ -15,7 +15,13 @@ typedef QMap<QString, QVariant> ToxVariantMessage;
 enum ToxVariantMessageType {
 	TOXMSG_TEXT,
 	TOXMSG_FILE
-}; 
+};
+enum ToxProfileLoadingError {
+	TOX_ERR_LOADING_OK,
+	TOX_ERR_LOADING_NULL,
+	TOX_ERR_LOADING_WRONG_PASSWORD,
+	TOX_ERR_LOADING_NOT_EXISTS
+};
 
 struct ToxMessage {
 	ToxVariantMessage variantMessage;
@@ -34,7 +40,7 @@ struct ToxMessage {
 typedef QList <ToxMessage> ToxMessages;
 
 namespace Toxcore {
-	Tox *create(const QString &profile, bool create_new = false);
+	Tox *create(ToxProfileLoadingError &error, bool create_new = false, const QString password = "");
 	void destroy(Tox *m);
 	QTimer *create_qtimer(Tox *m);
 	void bootstrap_DHT(Tox *m);
@@ -61,6 +67,7 @@ namespace Toxcore {
 	void set_nospam(Tox *m, quint32 nospam);
 	bool check_profile_encrypted(const QString &profile);
 	bool save_data(Tox *m, const QString &path);
+	const Tox_Pass_Key *generate_pass_key(const QString &password);
 }
 
 

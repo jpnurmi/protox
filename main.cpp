@@ -17,6 +17,7 @@ QmlCBridge::QmlCBridge()
 	component = nullptr;
 	tox = nullptr;
 	toxcore_timer = nullptr;
+	tox_pass_key = nullptr;
 	app_inactive = true;
 	current_profile = "";
 	current_friend_number = 0;
@@ -330,6 +331,11 @@ void QmlCBridge::setNospamValue(const QString &nospam)
 	Toxcore::set_nospam(tox, value);
 }
 
+void QmlCBridge::generateToxPasswordKey(const QString &password)
+{
+	tox_pass_key = Toxcore::generate_pass_key(password);
+}
+
 static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler(0);
 
 void customMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString & msg)
@@ -359,13 +365,16 @@ extern "C"
 }
 #endif
 
-bool QmlCBridge::signInProfile(const QString &profile, bool create)
+int QmlCBridge::signInProfile(const QString &profile, bool create, const QString &password)
 {
-	tox = Toxcore::create(profile, create);
-	if (!tox) {
-		return false;
-	}
 	current_profile = profile;
+	tox_pass_key = Toxcore::generate_pass_key(password);
+	ToxProfileLoadingError error;
+	tox = Toxcore::create(error, create, password);
+	if (!tox) {
+		return error;
+	}
+	chat_db = new ChatDataBase("chat_" + QString(current_profile).replace(".tox", ".db"));
 	Toxcore::bootstrap_DHT(tox);
 	Debug("My address: " + ToxId_To_QString(Toxcore::get_address(tox)));
 
@@ -402,7 +411,7 @@ bool QmlCBridge::signInProfile(const QString &profile, bool create)
 
 	toxcore_timer = Toxcore::create_qtimer(tox);
 	toxcore_timer->start();
-	return true;
+	return 0;
 }
 
 QmlCBridge::~QmlCBridge()
@@ -418,6 +427,7 @@ QmlCBridge::~QmlCBridge()
 
 	toxcore_timer->stop();
 	Toxcore::destroy(tox);
+	delete chat_db;
 }
 
 QVariant QmlCBridge::getProfileList()
@@ -440,7 +450,6 @@ int main(int argc, char *argv[])
 	}
 #endif
 	settings = new QSettings(GetProgDir() + "settings.ini", QSettings::IniFormat);
-	chat_db = new ChatDataBase("chat.db");
 
 	Debug("App started.");
 	QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
@@ -473,7 +482,6 @@ int main(int argc, char *argv[])
 
 	int result = app.exec();
 	delete qmlbridge;
-	delete chat_db;
 	delete settings;
 	Debug("Program exited successfully.");
 

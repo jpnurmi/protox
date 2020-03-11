@@ -30,6 +30,8 @@ public:
 	QList<QVariant> getFriendsModelOrder();
 	void setKeyboardHeight(int height);
 	bool getAppInactive() { return app_inactive; }
+	const QString getCurrentProfile() { return current_profile; }
+	const Tox_Pass_Key *getToxPasswordKey() { return tox_pass_key; }
 public slots:
 	Q_INVOKABLE void sendMessage(const QString &message);
 	Q_INVOKABLE quint32 getCurrentFriendNumber();
@@ -62,9 +64,10 @@ public slots:
 	Q_INVOKABLE void setSettingsValue(const QString &group, const QString &key, const QVariant &value);
 	Q_INVOKABLE void setAppInactive(bool inactive) { app_inactive = inactive; }
 	Q_INVOKABLE void setKeyboardAdjustMode(bool adjustNothing);
-	Q_INVOKABLE bool signInProfile(const QString &profile, bool create = false);
+	Q_INVOKABLE int signInProfile(const QString &profile, bool create = false, const QString &password = "");
 	Q_INVOKABLE QVariant getProfileList();
 	Q_INVOKABLE bool checkProfileEncrypted(const QString &profile);
+	Q_INVOKABLE void generateToxPasswordKey(const QString &password);
 
 public:
 	ToxFriendsConnStatus friends_conn_status;
@@ -78,6 +81,7 @@ private:
 	QObject *component;
 	Tox *tox;
 	QTimer *toxcore_timer;
+	const Tox_Pass_Key *tox_pass_key;
 };
 
 #endif // MAIN_H
