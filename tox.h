@@ -20,7 +20,9 @@ enum ToxProfileLoadingError {
 	TOX_ERR_LOADING_OK,
 	TOX_ERR_LOADING_NULL,
 	TOX_ERR_LOADING_WRONG_PASSWORD,
-	TOX_ERR_LOADING_NOT_EXISTS
+	TOX_ERR_LOADING_NOT_EXISTS,
+	TOX_ERR_LOADING_ALREADY_EXISTS,
+	TOX_ERR_LOADING_EMPTY_PASSWORD
 };
 
 struct ToxMessage {
@@ -40,7 +42,7 @@ struct ToxMessage {
 typedef QList <ToxMessage> ToxMessages;
 
 namespace Toxcore {
-	Tox *create(ToxProfileLoadingError &error, bool create_new = false, const QString password = "");
+	Tox *create(ToxProfileLoadingError &error, bool create_new = false);
 	void destroy(Tox *m);
 	QTimer *create_qtimer(Tox *m);
 	void bootstrap_DHT(Tox *m);

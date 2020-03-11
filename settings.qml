@@ -78,6 +78,7 @@ Popup {
                 }
                 bridge.generateToxPasswordKey(password)
                 toast.show({ message : qsTr("Password changed successfully!"), duration : Toast.Short })
+                bridge.saveProfile()
             }
         }
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Tox options") })

@@ -21,6 +21,7 @@ QmlCBridge::QmlCBridge()
 	app_inactive = true;
 	current_profile = "";
 	current_friend_number = 0;
+	profile_password = "";
 }
 
 void QmlCBridge::setComponent(QObject *_component)
@@ -132,7 +133,6 @@ void QmlCBridge::retrieveChatLog(quint32 start, bool from, bool reverse)
 		return;
 	}
 	for (auto msg : messages) {
-		
 		insertMessage(msg.variantMessage, current_friend_number, msg.self, 0, msg.unique_id, msg.dt, true, false);
 		if (!msg.self || msg.received)
 			setMessageReceived(current_friend_number, 0, true, msg.unique_id);
@@ -333,7 +333,18 @@ void QmlCBridge::setNospamValue(const QString &nospam)
 
 void QmlCBridge::generateToxPasswordKey(const QString &password)
 {
-	tox_pass_key = Toxcore::generate_pass_key(password);
+	profile_password = password;
+	regenerateToxPasswordKey();
+}
+
+void QmlCBridge::saveProfile()
+{
+	Toxcore::save_data(tox, GetProgDir() + current_profile);
+}
+
+void QmlCBridge::regenerateToxPasswordKey()
+{
+	tox_pass_key = Toxcore::generate_pass_key(profile_password);
 }
 
 static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler(0);
@@ -368,10 +379,12 @@ extern "C"
 int QmlCBridge::signInProfile(const QString &profile, bool create, const QString &password)
 {
 	current_profile = profile;
-	tox_pass_key = Toxcore::generate_pass_key(password);
+	profile_password = password;
+	regenerateToxPasswordKey();
 	ToxProfileLoadingError error;
-	tox = Toxcore::create(error, create, password);
+	tox = Toxcore::create(error, create);
 	if (!tox) {
+		current_profile.clear();
 		return error;
 	}
 	chat_db = new ChatDataBase("chat_" + QString(current_profile).replace(".tox", ".db"));
@@ -419,6 +432,18 @@ QmlCBridge::~QmlCBridge()
 	if (current_profile.isEmpty()) {
 		return;
 	}
+	signOutProfile();
+}
+
+QVariant QmlCBridge::getProfileList()
+{
+	QDir directory(GetProgDir());
+	return directory.entryList(QStringList() << "*.tox", QDir::Files);
+}
+
+void QmlCBridge::signOutProfile()
+{
+	Debug("Logout.");
 	settings->beginGroup("Client_" + current_profile);
 	settings->setValue("last_friend", Toxcore::get_friend_public_key(tox, qmlbridge->getCurrentFriendNumber()));
 	settings->setValue("friend_list", qmlbridge->getFriendsModelOrder());
@@ -426,14 +451,11 @@ QmlCBridge::~QmlCBridge()
 	settings->sync();
 
 	toxcore_timer->stop();
+	delete toxcore_timer;
 	Toxcore::destroy(tox);
 	delete chat_db;
-}
-
-QVariant QmlCBridge::getProfileList()
-{
-	QDir directory(GetProgDir());
-	return directory.entryList(QStringList() << "*.tox", QDir::Files);
+	current_profile.clear();
+	profile_password.clear();
 }
 
 int main(int argc, char *argv[])
@@ -453,7 +475,7 @@ int main(int argc, char *argv[])
 
 	Debug("App started.");
 	QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-	
+
 	QGuiApplication app(argc, argv);
 	qInstallMessageHandler(customMessageHandler);
 

@@ -42,8 +42,26 @@ Popup {
             }
         }
     }
-
-
+    NumberAnimation { id: loginWindowReopenAnimation; target: loginWindow; property: "opacity"; from: 0.0; to: 1.0 }
+    function reopen() {
+        profileSelected = false
+        open()
+        loginWindowReopenAnimation.start()
+        resetUI()
+        goBack(false)
+    }
+    function goBack(fadeout) {
+        loginWindow.profileCreation = false
+        loginPassword.visible = loginPassword.lastVisible
+        if (fadeout) {
+            loginFadeOut.start()
+        } else {
+            loginBackgroundNewProfile.opacity = 0
+        }
+        loginUsername.focus = false
+        loginPassword.focus = false
+        profileRepeater.model = bridge.getProfileList()
+    }
 
     Image {
         id: loginBackground
@@ -59,6 +77,29 @@ Popup {
 
         NumberAnimation { id: loginFadeIn; target: loginBackgroundNewProfile; property: "opacity"; from: 0.0; to: 1.0 }
         NumberAnimation { id: loginFadeOut; target: loginBackgroundNewProfile; property: "opacity"; from: 1.0; to: 0.0 }
+
+        ToolButton {
+            id: goBackButton
+            visible: loginWindow.profileCreation
+            Text {
+                text: "\u2190"
+                font.family: dejavuSans.name
+                font.pointSize: 32
+                font.bold: true
+                color: parent.highlighted ? Material.highlightedButtonColor : "white"
+                fontSizeMode: Text.Fit
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                leftPadding: 10
+                topPadding: 5
+            }
+            onClicked: {
+                highlighted = true
+                loginWindow.goBack(true)
+            }
+            anchors.left: parent.left
+            anchors.top: parent.top
+        }
 
         Menu {
             id: accountMenu
@@ -150,6 +191,10 @@ Popup {
                 }
                 event.accepted = false
             }
+            onAccepted: {
+                focus = false
+                loginPassword.focus = true
+            }
         }
 
         TextField {
@@ -157,7 +202,7 @@ Popup {
             visible: false
             property bool lastVisible: false
             width: parent.width * 0.75
-            placeholderText: qsTr("Password")
+            placeholderText: qsTr("Password") + (loginWindow.profileCreation ? " " + qsTr("(optional)") : "")
             anchors.top: accountSelectionButton.bottom
             anchors.topMargin: 32
             anchors.horizontalCenter: accountSelectionButton.horizontalCenter
@@ -187,6 +232,11 @@ Popup {
             }
             onAccepted: {
                 focus = false
+                if (!loginWindow.profileCreation) {
+                    loginButton.login()
+                    return
+                }
+                loginImage.focus = true
             }
         }
 
@@ -196,8 +246,8 @@ Popup {
             y: (parent.height - height) * 0.8
             anchors.horizontalCenter: loginPassword.horizontalCenter
             text: (loginWindow.profileCreation ? qsTr("Create") : qsTr("Select")) + " " + qsTr("profile")
-            onClicked: {
-                if (loginWindow.profileCreation && loginPassword.text.length === 0) {
+            function login() {
+                if (loginWindow.profileCreation && loginUsername.text.length === 0) {
                     toast.show({ message : qsTr("Specify a user name."), duration : Toast.Short })
                     return
                 }
@@ -209,37 +259,47 @@ Popup {
                     case 1: reason = qsTr("Profile loading failed."); break;
                     case 2: reason = qsTr("Wrong password."); break;
                     case 3: reason = qsTr("Profile doesn't exist."); break;
+                    case 4: reason = qsTr("Profile with this name already exists."); break;
+                    case 5: reason = qsTr("Password is empty."); break;
                     }
                     toast.show({ message : reason, duration : Toast.Short });
                     return
                 }
                 loginWindow.profileSelected = true
                 loginWindow.close()
+                loginPassword.clear()
+                loginUsername.clear()
+                loginPassword.lastVisible = loginPassword.visible
             }
+            onClicked: login()
         }
         Button {
             id: createNewProfileButton
             width: parent.width * 0.75
             visible: !loginWindow.profileCreation
             anchors.top: loginButton.bottom
-            anchors.topMargin: 4
+            anchors.topMargin: 48
             anchors.horizontalCenter: loginButton.horizontalCenter
             text: qsTr("Create profile")
+            background: Rectangle {
+                color: createNewProfileButton.pressed ? Material.highlightedButtonColor : "green"
+                radius: 2
+            }
             onClicked: {
                 loginWindow.profileCreation = true
                 loginPassword.lastVisible = loginPassword.visible
                 loginPassword.visible = true
                 loginFadeIn.start()
+                loginPassword.focus = false
+                goBackButton.highlighted = false
             }
         }
         Keys.onBackPressed: {
-            loginWindow.profileCreation = false
-            loginPassword.visible = loginPassword.lastVisible
-            loginFadeOut.start()
+            loginWindow.goBack(true)
         }
     }
 
-    onClosed: {
+    onAboutToHide: {
         if (!profileSelected) {
             Qt.quit()
         }

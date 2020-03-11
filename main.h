@@ -32,6 +32,8 @@ public:
 	bool getAppInactive() { return app_inactive; }
 	const QString getCurrentProfile() { return current_profile; }
 	const Tox_Pass_Key *getToxPasswordKey() { return tox_pass_key; }
+	const QString getProfilePassword() { return profile_password; }
+	void regenerateToxPasswordKey();
 public slots:
 	Q_INVOKABLE void sendMessage(const QString &message);
 	Q_INVOKABLE quint32 getCurrentFriendNumber();
@@ -68,6 +70,8 @@ public slots:
 	Q_INVOKABLE QVariant getProfileList();
 	Q_INVOKABLE bool checkProfileEncrypted(const QString &profile);
 	Q_INVOKABLE void generateToxPasswordKey(const QString &password);
+	Q_INVOKABLE void signOutProfile();
+	Q_INVOKABLE void saveProfile();
 
 public:
 	ToxFriendsConnStatus friends_conn_status;
@@ -76,6 +80,7 @@ public:
 private:
 	quint32 current_friend_number;
 	QString current_profile;
+	QString profile_password;
 	bool app_inactive;
 private:
 	QObject *component;

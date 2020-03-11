@@ -27,6 +27,10 @@ ApplicationWindow {
         //friendStatus.setText(bridge.getFriendStatusMessage(friend_number))
     }
 
+    onHeightChanged: {
+        chatScrollToEnd()
+    }
+
     onClosing: {
         close.accepted = false
     }
@@ -40,11 +44,9 @@ ApplicationWindow {
     Connections {
         target: Qt.application
         onStateChanged: {
-            //if (splashImageDestroyAnimation !== null) {
-                statusBar.theme = Material.Dark
-                statusBar.color = Material.toolBarColor
-            //    splashImageDestroyAnimation.start()
-            //}
+            statusBar.theme = Material.Dark
+            statusBar.color = Material.toolBarColor
+
             // select friend when you click on notification
             if(Qt.application.state === Qt.ApplicationActive && notification.getNotificationId() !== -1) {
                 settingsWindow.close()
@@ -66,11 +68,6 @@ ApplicationWindow {
             to: 0
             duration: 200
             running: false
-            onRunningChanged: {
-                 if (!running) {
-                     splashImage.destroy()
-                 }
-            }
         }
     }
 

@@ -74,6 +74,13 @@ ToolBar {
         }
         MenuSeparator {}
         MenuItem {
+            text: qsTr("Logout")
+            onClicked: {
+                bridge.signOutProfile()
+                loginWindow.reopen()
+            }
+        }
+        MenuItem {
             text: qsTr("Quit")
             onClicked: {
                 window.visible = false
