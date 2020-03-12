@@ -105,6 +105,7 @@ Popup {
                 settingsConfirmationDialog.title = qsTr("Profile deletion")
                 settingsConfirmationDialog.text = qsTr("Do you really want to PERMANETLY delete current profile") + " \"" +
                                                   bridge.getCurrentProfile() + "\". " +
+                                                  qsTr("The chat history will be erased as well!") + " " +
                                                   qsTr("You will be logged out automatically.")
                 settingsConfirmationDialog.yesAction = "delete_profile_yes"
                 settingsConfirmationDialog.open()
