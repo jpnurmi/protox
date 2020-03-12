@@ -20,12 +20,12 @@ ToolBar {
         visible: inPortrait
         Text {
             id: leftOverlayButtonText
-            text: "\u2630"
-            font.family: dejavuSans.name
-            font.pointSize: 30
-            font.bold: true
-            x: contentWidth * 0.35
-            y: contentHeight * 0.22
+            text: "\uE68E"
+            anchors.centerIn: parent
+            font.family: themify.name
+            font.pointSize: 28
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
 
             color: parent.highlighted ? Material.highlightedButtonColor : "white"
             SequentialAnimation {
@@ -90,10 +90,10 @@ ToolBar {
     }
     ToolButton {
         id: rightOverlayHeaderButton
-        text: "\u22EE"
-        font.family: dejavuSans.name
-        font.pointSize: 30
-        font.bold: true
+        text: "\uE6E2"
+        font.family: themify.name
+        font.pointSize: 28
+        
         onPressed: {
             if (contextMenuRight.visible) {
                 contextMenuRight.close()

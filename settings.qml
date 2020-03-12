@@ -200,16 +200,14 @@ Popup {
         ToolButton {
             id: closeSettingsButton
             Text {
-                text: "\u2190"
-                font.family: dejavuSans.name
-                font.pointSize: 32
+                text: "\uE629"
+                anchors.centerIn: parent
+                font.family: themify.name
+                font.pointSize: 28
                 font.bold: true
                 color: parent.highlighted ? Material.highlightedButtonColor : "white"
-                fontSizeMode: Text.Fit
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
-                leftPadding: 10
-                topPadding: 5
             }
             onClicked: {
                 closeSettingsButton.highlighted = true

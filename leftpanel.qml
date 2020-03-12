@@ -125,8 +125,10 @@ Drawer {
                         }
                     }
                     Text {
-                        text: "\u25BC"
+                        text: "\uE64B"
+                        font.family: themify.name
                         font.pointSize: 10
+                        font.bold: true
                         anchors.left: statusIndicator.right
                         anchors.leftMargin: 20
                         anchors.verticalCenter: statusIndicator.verticalCenter
@@ -365,12 +367,11 @@ Drawer {
                     id: addFriendButton
                     Layout.alignment: Qt.AlignLeft
                     Text {
-                        text: "\uFF0B"
-                        anchors.fill: parent
-                        font.family: dejavuSans.name
-                        font.pointSize: 32
+                        text: "\uE61A"
+                        anchors.centerIn: parent
+                        font.family: themify.name
+                        font.pointSize: 24
                         font.bold: true
-                        fontSizeMode: Text.Fit
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
                     }
@@ -382,15 +383,13 @@ Drawer {
                     id: showMyInfoButton
                     Layout.alignment: Qt.AlignCenter
                     Text {
-                        text: "\u2302"
-                        anchors.fill: parent
-                        font.family: dejavuSans.name
-                        font.pointSize: 32
+                        text: "\uE602"
+                        anchors.centerIn: parent
+                        font.family: themify.name
+                        font.pointSize: 24
                         font.bold: true
-                        fontSizeMode: Text.Fit
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
-                        bottomPadding: 1
                     }
                     onClicked: {
                         profileInfoMenu.popup()
@@ -400,16 +399,13 @@ Drawer {
                     id: showSettingsButton
                     Layout.alignment: Qt.AlignRight
                     Text {
-                        text: "\u2699"
-                        anchors.fill: parent
-                        font.family: dejavuSans.name
-                        font.pointSize: 29
+                        text: "\uE60F"
+                        anchors.centerIn: parent
+                        font.family: themify.name
+                        font.pointSize: 24
                         font.bold: true
-                        fontSizeMode: Text.Fit
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
-                        topPadding: 3
-                        rightPadding: 1
                     }
                     onClicked: {
                         settingsWindow.open()

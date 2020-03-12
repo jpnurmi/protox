@@ -2,11 +2,11 @@
     <qresource prefix="/">
         <file>qtquickcontrols2.conf</file>
         <file>send-button.png</file>
-        <file>DejaVuSans.ttf</file>
         <file>splash.png</file>
         <file>logo_big.png</file>
         <file>login.png</file>
         <file>app.qml</file>
         <file>profileCreation.png</file>
+        <file>themify.ttf</file>
     </qresource>
 </RCC>

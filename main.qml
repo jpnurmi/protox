@@ -100,7 +100,7 @@ ApplicationWindow {
 
     Text {
         id: welcomeText
-        text: qsTr("This is an alpha version of a tox client.\nClick on «\u2630» to open the friend list, then on «\uFF0B» to add a new friend.\n\n Good luck!")
+        text: qsTr("This is an alpha version of a tox client.\nClick on the left button to open the friend list, then on «+» to add a new friend.\n\n Good luck!")
         wrapMode: Text.Wrap
         anchors.top: welcomeTextTitle.bottom
         anchors.topMargin: 20
@@ -130,8 +130,8 @@ ApplicationWindow {
     }
 
     FontLoader { 
-        id: dejavuSans; 
-        source: "DejaVuSans.ttf"
+        id: themify
+        source: "themify.ttf"
     }
 
     // global properties
