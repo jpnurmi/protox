@@ -128,6 +128,8 @@ Popup {
                         loginPassword.visible = bridge.checkProfileEncrypted(accountMenu.profileName)
                         accountSelectionButton.additiveVisible = true
                     } else {
+                        accountSelectionButton.text = ""
+                        accountMenu.profileName = ""
                         accountSelectionButton.additiveVisible = false
                     }
                 }

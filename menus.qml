@@ -235,6 +235,12 @@ Menu {
         width: parent.width
         horizontalAlignment: Qt.AlignHCenter
         wrapMode: Text.Wrap
+        Text {
+            anchors.centerIn: parent
+            visible: parent.text.length === 0
+            text: qsTr("<empty>")
+            font.italic: true
+        }
     }
     Button {
         text: qsTr("Delete chat history")

@@ -306,6 +306,7 @@ function resetUI() {
     connectionStatus.text = qsTr("Bootstrapping...")
     connectionStatus.color = "orange"
     friendStatusIndicator.color = "gray"
+    new_messages = 0
 }
 
 /*[remove]*/ }
