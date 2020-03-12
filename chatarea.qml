@@ -84,6 +84,7 @@ ColumnLayout {
                     scrollToEndButton.visible = false
                 }
             }
+
             function checkExceedsHeight() {
                 return contentHeight > height
             }

@@ -20,6 +20,7 @@ public class QtActivityEx extends QtActivity
 {
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         processIntent(getIntent());
         new KeyboardProvider(this).init().setListener(new KeyboardProvider.KeyboardListener() {
             @Override
@@ -27,7 +28,6 @@ public class QtActivityEx extends QtActivity
                 keyboardHeightChanged(height);
             }
         });
-        super.onCreate(savedInstanceState);
     }
 
     private static native void keyboardHeightChanged(int height);

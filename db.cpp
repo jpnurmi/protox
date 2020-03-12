@@ -159,4 +159,5 @@ void ChatDataBase::clearFriendChatHistory(const ToxPk &public_key)
 ChatDataBase::~ChatDataBase()
 {
 	db.close();
+	db.removeDatabase(QSqlDatabase::defaultConnection);
 }

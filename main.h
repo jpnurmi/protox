@@ -15,7 +15,8 @@ class QmlCBridge : public QObject
 {
 	Q_OBJECT
 public:
-	QmlCBridge(Tox *_tox, QTimer *_toxcore_timer, quint32 last_friend_number);
+	QmlCBridge();
+	~QmlCBridge();
 	void setComponent(QObject *_component);
 	void insertMessage(const ToxVariantMessage &message, quint32 friend_number, bool self = false, quint32 message_id = 0, quint64 unique_id = 0, QDateTime dt = QDateTime::currentDateTime(), bool history = false, bool failed = false);
 	void insertFriend(qint32 friend_number, const QString &nickName, bool request = false, const QString &request_message = "", const ToxPk &friendPk = "");
@@ -29,6 +30,9 @@ public:
 	QList<QVariant> getFriendsModelOrder();
 	void setKeyboardHeight(int height);
 	bool getAppInactive() { return app_inactive; }
+	const Tox_Pass_Key *getToxPasswordKey() { return tox_pass_key; }
+	const QString getProfilePassword() { return profile_password; }
+	void regenerateToxPasswordKey();
 public slots:
 	Q_INVOKABLE void sendMessage(const QString &message);
 	Q_INVOKABLE quint32 getCurrentFriendNumber();
@@ -49,32 +53,40 @@ public slots:
 	Q_INVOKABLE void setStatusMessage(const QString &statusMessage);
 	Q_INVOKABLE int getStatus();
 	Q_INVOKABLE void setStatus(quint32 status);
-	Q_INVOKABLE void changeConnection(bool online);
 	Q_INVOKABLE long getFriendsCount();
 	Q_INVOKABLE quint32 getMessagesCount(quint32 friend_number);
 	Q_INVOKABLE int getConnStatus();
 	Q_INVOKABLE void addFriend(const QString &friendPk);
 	Q_INVOKABLE int getFriendStatus(quint32 friend_number);
 	Q_INVOKABLE QString getNospamValue();
-	Q_INVOKABLE void setNospamValue(QString nospam);
+	Q_INVOKABLE void setNospamValue(const QString &nospam);
 	Q_INVOKABLE void bootstrapDHT();
 	Q_INVOKABLE QVariant getSettingsValue(const QString &group, const QString &key, int type, const QVariant &default_value);
 	Q_INVOKABLE void setSettingsValue(const QString &group, const QString &key, const QVariant &value);
 	Q_INVOKABLE void setAppInactive(bool inactive) { app_inactive = inactive; }
 	Q_INVOKABLE void setKeyboardAdjustMode(bool adjustNothing);
+	Q_INVOKABLE int signInProfile(const QString &profile, bool create = false, const QString &password = "");
+	Q_INVOKABLE QVariant getProfileList();
+	Q_INVOKABLE bool checkProfileEncrypted(const QString &profile);
+	Q_INVOKABLE void generateToxPasswordKey(const QString &password);
+	Q_INVOKABLE void signOutProfile(bool remove = false);
+	Q_INVOKABLE void saveProfile();
+	Q_INVOKABLE const QString getCurrentProfile() { return current_profile; }
 
 public:
 	ToxFriendsConnStatus friends_conn_status;
 	ToxMessagesIdUid messages_id_uid;
 	ToxMessagesDateTime messages_last_dt;
-	ToxFriendsOnce friends_once;
 private:
 	quint32 current_friend_number;
+	QString current_profile;
+	QString profile_password;
 	bool app_inactive;
 private:
 	QObject *component;
 	Tox *tox;
 	QTimer *toxcore_timer;
+	const Tox_Pass_Key *tox_pass_key;
 };
 
 #endif // MAIN_H

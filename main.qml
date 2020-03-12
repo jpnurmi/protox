@@ -6,6 +6,7 @@ import QtQuick.Dialogs 1.2
 import QtQuick.Window 2.12
 import QtMultimedia 5.12
 import QtGraphicalEffects 1.0
+import QtQuick.Controls.Styles 1.4
 
 import QtNotification 1.0
 import QtStatusBar 1.0
@@ -22,8 +23,12 @@ ApplicationWindow {
     onInPortraitChanged: {
         var friend_number = bridge.getCurrentFriendNumber()
         drawer.width = width * 0.5 * (!inPortrait ? (Screen.height / Screen.width) : 1.0)
-        friendNickname.setText(bridge.getFriendNickname(friend_number))
-        friendStatus.setText(bridge.getFriendStatusMessage(friend_number))
+        //friendNickname.setText(bridge.getFriendNickname(friend_number))
+        //friendStatus.setText(bridge.getFriendStatusMessage(friend_number))
+    }
+
+    onHeightChanged: {
+        chatScrollToEnd()
     }
 
     onClosing: {
@@ -39,11 +44,9 @@ ApplicationWindow {
     Connections {
         target: Qt.application
         onStateChanged: {
-            if (splashImageDestroyAnimation !== null) {
-                statusBar.theme = Material.Dark
-                statusBar.color = Material.toolBarColor
-                splashImageDestroyAnimation.start()
-            }
+            statusBar.theme = Material.Dark
+            statusBar.color = Material.toolBarColor
+
             // select friend when you click on notification
             if(Qt.application.state === Qt.ApplicationActive && notification.getNotificationId() !== -1) {
                 settingsWindow.close()
@@ -53,28 +56,6 @@ ApplicationWindow {
             bridge.setAppInactive(appInactive)
         }
     }
-
-    Component.onCompleted: {
-        cleanProfile = bridge.getFriendsCount() < 1
-        initTimer.start()
-    }
-
-    Timer {
-        id: initTimer
-        repeat: false
-        interval: 1
-        onTriggered: {
-            messages.addTransitionEnabled = false
-            bridge.retrieveChatLog()
-            messages.scrollToEnd()
-            messages.addTransitionEnabled = true
-            destroy()
-        }
-    }
-
-    /*
-      Splash image
-    */
 
     Image {
         id: splashImage
@@ -87,12 +68,11 @@ ApplicationWindow {
             to: 0
             duration: 200
             running: false
-            onRunningChanged: {
-                 if (!running) {
-                     splashImage.destroy()
-                 }
-            }
         }
+    }
+
+    Component.onCompleted: {
+        loginWindow.open()
     }
 
     Image {
@@ -167,7 +147,6 @@ ApplicationWindow {
     readonly property int z_overlay_header: 1
     readonly property int z_menu: 3
     readonly property int z_menu_elements: 4
-    readonly property int z_settings_menu: 1000
     readonly property int z_top: Number.MAX_VALUE-1
     readonly property int z_splash: Number.MAX_VALUE
     readonly property real standardFontPointSize: 17.5
@@ -211,4 +190,5 @@ ApplicationWindow {
     //include: header.qml
     //include: leftpanel.qml
     //include: chatarea.qml
+    //include: login.qml
 }

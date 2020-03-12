@@ -264,4 +264,48 @@ function setKeyboardHeight(height) {
     }
 }
 
+function updateQRcode() {
+    toxIDQRCodeImage.source = "image://QZXing/encode/" + "tox:" + bridge.getToxId() +
+                              "?correctionLevel=M" +
+                              "&format=qrcode"
+}
+
+function signInProfile(profile, create, password) {
+    var error = bridge.signInProfile(profile, create, password)
+    if (error > 0)
+        return error
+    var friend_number = bridge.getCurrentFriendNumber()
+    cleanProfile = bridge.getFriendsCount() < 1
+    // header
+    friendNickname.setText(bridge.getFriendNickname(friend_number))
+    friendStatus.setText(bridge.getFriendStatusMessage(friend_number))
+    // drawer
+    accountName.text = bridge.getNickname(true)
+    statusIndicator.setStatus(bridge.getStatus())
+    // QR code
+    updateQRcode()
+    // chat log
+    messages.addTransitionEnabled = false
+    bridge.retrieveChatLog()
+    messages.scrollToEnd()
+    messages.addTransitionEnabled = true
+    // menus
+    myNickname.text = bridge.getNickname(false)
+    myStatus.text = bridge.getStatusMessage()
+    // settings
+    settingsModel.setValueString("no_spam_value", bridge.getNospamValue())
+    settingsWindow.setProfileEncrypted(bridge.checkProfileEncrypted(profile))
+    return 0
+}
+
+function resetUI() {
+    // the rest in signInProfile will be overwritten on login
+    chatMessage.clear()
+    each_friend_text = []
+    friendsModel.clear()
+    connectionStatus.text = qsTr("Bootstrapping...")
+    connectionStatus.color = "orange"
+    friendStatusIndicator.color = "gray"
+}
+
 /*[remove]*/ }

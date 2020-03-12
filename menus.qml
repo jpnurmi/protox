@@ -297,7 +297,6 @@ Menu {
         rightPadding: leftPadding
         verticalAlignment: TextInput.AlignVCenter
         width: parent.width
-        text: bridge.getNickname(false)
         onAccepted: {
             myStatus.focus = true
         }
@@ -316,7 +315,6 @@ Menu {
         rightPadding: leftPadding
         verticalAlignment: TextInput.AlignVCenter
         width: parent.width
-        text: bridge.getStatusMessage()
         onAccepted: profileMenuApplyItem.onTriggered()
     }
     RowLayout {
@@ -362,12 +360,8 @@ Menu {
     Image {
         id: toxIDQRCodeImage
         anchors.centerIn: parent
-        source: "image://QZXing/encode/" + "tox:" + bridge.getToxId() +
-                "?correctionLevel=M" +
-                "&format=qrcode"
         sourceSize.width: 196
         sourceSize.height: 196
-        cache: false
         width: 196
         height: width
         MouseArea {

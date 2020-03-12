@@ -59,7 +59,6 @@ Drawer {
                     id: accountName
                     leftPadding: 4
                     rightPadding: 4
-                    text: bridge.getNickname(true)
                     font.pointSize: 12
                     font.bold: true
                     Layout.alignment: Qt.AlignLeft
@@ -123,9 +122,6 @@ Drawer {
                             case 3: color = "gray"; break;
                             }
                             index = status
-                        }
-                        Component.onCompleted: {
-                            setStatus(bridge.getStatus())
                         }
                     }
                     Text {
