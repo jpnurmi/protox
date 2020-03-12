@@ -30,7 +30,6 @@ public:
 	QList<QVariant> getFriendsModelOrder();
 	void setKeyboardHeight(int height);
 	bool getAppInactive() { return app_inactive; }
-	const QString getCurrentProfile() { return current_profile; }
 	const Tox_Pass_Key *getToxPasswordKey() { return tox_pass_key; }
 	const QString getProfilePassword() { return profile_password; }
 	void regenerateToxPasswordKey();
@@ -70,8 +69,9 @@ public slots:
 	Q_INVOKABLE QVariant getProfileList();
 	Q_INVOKABLE bool checkProfileEncrypted(const QString &profile);
 	Q_INVOKABLE void generateToxPasswordKey(const QString &password);
-	Q_INVOKABLE void signOutProfile();
+	Q_INVOKABLE void signOutProfile(bool remove = false);
 	Q_INVOKABLE void saveProfile();
+	Q_INVOKABLE const QString getCurrentProfile() { return current_profile; }
 
 public:
 	ToxFriendsConnStatus friends_conn_status;

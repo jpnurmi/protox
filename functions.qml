@@ -264,6 +264,12 @@ function setKeyboardHeight(height) {
     }
 }
 
+function updateQRcode() {
+    toxIDQRCodeImage.source = "image://QZXing/encode/" + "tox:" + bridge.getToxId() +
+                              "?correctionLevel=M" +
+                              "&format=qrcode"
+}
+
 function signInProfile(profile, create, password) {
     var error = bridge.signInProfile(profile, create, password)
     if (error > 0)
@@ -277,9 +283,7 @@ function signInProfile(profile, create, password) {
     accountName.text = bridge.getNickname(true)
     statusIndicator.setStatus(bridge.getStatus())
     // QR code
-    toxIDQRCodeImage.source = "image://QZXing/encode/" + "tox:" + bridge.getToxId() +
-                              "?correctionLevel=M" +
-                              "&format=qrcode"
+    updateQRcode()
     // chat log
     messages.addTransitionEnabled = false
     bridge.retrieveChatLog()

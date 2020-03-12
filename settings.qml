@@ -14,6 +14,7 @@ Popup {
     topPadding: 0
     bottomPadding: 0
     visible: false
+    property bool dontSave: false
     // enable adjustTop only for this window
     Connections {
         target: window
@@ -54,6 +55,15 @@ Popup {
         id: settingsAlertDialog
         visible: false
     }
+    MessageDialog {
+        id: settingsConfirmationDialog
+        visible: false
+        property string yesAction
+        standardButtons: StandardButton.Yes | StandardButton.No
+        onYes: {
+            settingsModel.actions[yesAction]()
+        }
+    }
     function setProfileEncrypted (encrypted) {
         for (var i = 0; i < settingsModel.count; i++) {
             if (settingsModel.get(i).prop === "profile_encrypted") {
@@ -90,6 +100,20 @@ Popup {
                 settingsWindow.setProfileEncrypted(password.length > 0)
                 settingsModel.setValueString("password", "")
                 settingsModel.setValueString("repeated_password", "")
+            },
+            "delete_profile" : function () {
+                settingsConfirmationDialog.title = qsTr("Profile deletion")
+                settingsConfirmationDialog.text = qsTr("Do you really want to PERMANETLY delete current profile") + " \"" +
+                                                  bridge.getCurrentProfile() + "\". " +
+                                                  qsTr("You will be logged out automatically.")
+                settingsConfirmationDialog.yesAction = "delete_profile_yes"
+                settingsConfirmationDialog.open()
+            },
+            "delete_profile_yes" : function () {
+                settingsWindow.dontSave = true
+                settingsWindow.close()
+                bridge.signOutProfile(true)
+                loginWindow.reopen(true)
             }
         }
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Tox options") })
@@ -128,6 +152,9 @@ Popup {
         settingsModel.append({ flags: sf_text | sf_input | sf_button | sf_password, name: qsTr("Repeat"), prop: "repeated_password", 
                     svalue: "", itemWidth: 128, buttonText: qsTr("Change"), clickAction: "change_password"
                     })
+        settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Profile") })
+        settingsModel.append({ flags: sf_text | sf_button, name: "Profile deletion", buttonText: qsTr("Delete"), 
+                                 clickAction: "delete_profile"})
     }
 
     function open() {
@@ -140,6 +167,10 @@ Popup {
     property bool reloadChatHistory: false
     function _close() {
         drawer.dragEnabled = true
+        if (dontSave) {
+            dontSave = false
+            return
+        }
         bridge.setSettingsValue("Toxcore", "udp_enabled", Boolean(settingsModel.getValue("udp_enabled")))
         bridge.setSettingsValue("Toxcore", "ipv6_enabled", Boolean(settingsModel.getValue("ipv6_enabled")))
         bridge.setSettingsValue("Toxcore", "local_discovery_enabled", Boolean(settingsModel.getValue("local_discovery_enabled")))
@@ -148,6 +179,7 @@ Popup {
         bridge.setSettingsValue("Client", "last_messages_limit", settingsModel.getValueString("last_messages_limit"))
         bridge.setSettingsValue("Privacy", "keep_chat_history", Boolean(settingsModel.getValue("keep_chat_history")))
         bridge.setNospamValue(settingsModel.getValueString("no_spam_value"))
+        updateQRcode()
         if (reloadChatHistory) {
             messages.addTransitionEnabled = false
             bridge.retrieveChatLog()

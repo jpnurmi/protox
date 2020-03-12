@@ -441,12 +441,16 @@ QVariant QmlCBridge::getProfileList()
 	return directory.entryList(QStringList() << "*.tox", QDir::Files);
 }
 
-void QmlCBridge::signOutProfile()
+void QmlCBridge::signOutProfile(bool remove)
 {
 	Debug("Logout.");
 	settings->beginGroup("Client_" + current_profile);
-	settings->setValue("last_friend", Toxcore::get_friend_public_key(tox, qmlbridge->getCurrentFriendNumber()));
-	settings->setValue("friend_list", qmlbridge->getFriendsModelOrder());
+	if (remove) {
+		settings->remove("");
+	} else {
+		settings->setValue("last_friend", Toxcore::get_friend_public_key(tox, qmlbridge->getCurrentFriendNumber()));
+		settings->setValue("friend_list", qmlbridge->getFriendsModelOrder());
+	}
 	settings->endGroup();
 	settings->sync();
 
@@ -454,8 +458,13 @@ void QmlCBridge::signOutProfile()
 	delete toxcore_timer;
 	Toxcore::destroy(tox);
 	delete chat_db;
-	current_profile.clear();
 	profile_password.clear();
+
+	if (remove) {
+		QFile::remove(GetProgDir() + current_profile);
+		QFile::remove(GetProgDir() + "chat_" + QString(current_profile).replace(".tox", ".db"));
+	}
+	current_profile.clear();
 }
 
 int main(int argc, char *argv[])

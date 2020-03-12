@@ -43,15 +43,15 @@ Popup {
         }
     }
     NumberAnimation { id: loginWindowReopenAnimation; target: loginWindow; property: "opacity"; from: 0.0; to: 1.0 }
-    function reopen() {
+    function reopen(remove) {
         profileSelected = false
         open()
         loginWindowReopenAnimation.start()
         resetUI()
-        goBack(false)
+        goBack(false, remove)
         loginPassword.visible = bridge.checkProfileEncrypted(accountMenu.profileName)
     }
-    function goBack(fadeout) {
+    function goBack(fadeout, logout) {
         loginWindow.profileCreation = false
         loginPassword.visible = loginPassword.lastVisible
         if (fadeout) {
@@ -61,7 +61,7 @@ Popup {
         }
         loginUsername.focus = false
         loginPassword.focus = false
-        profileRepeater.model = bridge.getProfileList()
+        profileRepeater.updateList(logout)
     }
 
     Image {
@@ -96,7 +96,7 @@ Popup {
             }
             onClicked: {
                 highlighted = true
-                loginWindow.goBack(true)
+                loginWindow.goBack(true, false)
             }
             anchors.left: parent.left
             anchors.top: parent.top
@@ -109,7 +109,7 @@ Popup {
             property string profileName
             Repeater {
                 id: profileRepeater
-                model: bridge.getProfileList()
+                model: []
                 MenuItem {
                     text: modelData
                     onClicked: {
@@ -118,6 +118,23 @@ Popup {
                         loginPassword.visible = bridge.checkProfileEncrypted(modelData)
                         loginPassword.clear()
                     }
+                }
+                function updateList(select) {
+                    var list = bridge.getProfileList()
+                    model = list
+                    if (list.length > 0) {
+                        if (select) {
+                            accountSelectionButton.text = list[0]
+                            accountMenu.profileName = list[0]
+                        }
+                        loginPassword.visible = bridge.checkProfileEncrypted(accountMenu.profileName)
+                        accountSelectionButton.additiveVisible = true
+                    } else {
+                        accountSelectionButton.additiveVisible = false
+                    }
+                }
+                Component.onCompleted: {
+                    profileRepeater.updateList(true)
                 }
             }
         }
@@ -158,7 +175,8 @@ Popup {
             y: (height + parent.height) * 0.4
             width: parent.width * 0.75
             height: 50
-            visible: !loginWindow.profileCreation
+            property bool additiveVisible: true
+            visible: !loginWindow.profileCreation && additiveVisible
             anchors.horizontalCenter: parent.horizontalCenter
             text: "No profile selected"
             onClicked: {
@@ -235,10 +253,13 @@ Popup {
             }
             onAccepted: {
                 focus = false
+                // disabled due to graphical bug
+                /*
                 if (!loginWindow.profileCreation) {
                     loginButton.login()
                     return
                 }
+                */
                 loginImage.focus = true
             }
         }
@@ -249,6 +270,7 @@ Popup {
             y: (parent.height - height) * 0.8
             anchors.horizontalCenter: loginPassword.horizontalCenter
             text: (loginWindow.profileCreation ? qsTr("Create") : qsTr("Select")) + " " + qsTr("profile")
+            visible: loginWindow.profileCreation || accountMenu.profileName.length > 0
             function login() {
                 if (loginWindow.profileCreation && loginUsername.text.length === 0) {
                     toast.show({ message : qsTr("Specify a user name."), duration : Toast.Short })
@@ -267,13 +289,13 @@ Popup {
                     case 5: reason = qsTr("Password is empty."); break;
                     }
                     toast.show({ message : reason, duration : Toast.Short });
+                    loginWindow.enabled = true
                     return
                 }
                 loginWindow.profileSelected = true
                 loginWindow.close()
                 loginPassword.clear()
                 loginUsername.clear()
-                loginWindow.enabled = true
             }
             onClicked: login()
         }
@@ -299,7 +321,7 @@ Popup {
             }
         }
         Keys.onBackPressed: {
-            loginWindow.goBack(true)
+            loginWindow.goBack(true, false)
         }
     }
 
@@ -307,5 +329,8 @@ Popup {
         if (!profileSelected) {
             Qt.quit()
         }
+    }
+    onClosed: {
+        loginWindow.enabled = true
     }
 }
