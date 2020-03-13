@@ -33,6 +33,14 @@ bool QtAndroidNotifier::cancel(int id)
 	return true;
 }
 
+bool QtAndroidNotifier::cancelAll()
+{
+	QAndroidJniObject::callStaticMethod<void>("notifications/QtAndroidNotifications",
+											  "cancelAll");
+
+	return true;
+}
+
 int QtAndroidNotifier::getNotificationId(bool cancel)
 {
 	return QtAndroid::androidActivity().callMethod<int>("getNotificationId", "(Z)I", cancel);

@@ -29,6 +29,13 @@ bool QtNotification::cancel(int id)
 			: _Notifier->cancel(id);
 }
 
+bool QtNotification::cancelAll()
+{
+	return _Notifier == nullptr
+			? false
+			: _Notifier->cancelAll();
+}
+
 int QtNotification::getNotificationId(bool cancel)
 {
 	return _Notifier == nullptr

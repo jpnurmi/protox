@@ -47,9 +47,11 @@ class QtAndroidNotifications {
     }
 
     public static void cancel(int id) {
-        Context context = QtNative.activity();
-        NotificationManager notificationManager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.cancel(id);
+        getManager().cancel(id);
+    }
+
+    public static void cancelAll() {
+        getManager().cancelAll();
     }
 
     private static NotificationManager getManager() {

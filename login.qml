@@ -44,6 +44,7 @@ Popup {
     }
     NumberAnimation { id: loginWindowReopenAnimation; target: loginWindow; property: "opacity"; from: 0.0; to: 1.0 }
     function reopen(remove) {
+        notification.cancelAll()
         profileSelected = false
         open()
         loginWindowReopenAnimation.start()

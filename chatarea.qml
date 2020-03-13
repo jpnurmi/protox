@@ -248,7 +248,7 @@ ColumnLayout {
                             if (i < lines.length - 1) { result += "\n" }
                         }
                         result = result.replace(/((http|https|ftp|sftp)?:\/\/[^\s]+)/g, function(url) {
-                            return '<font color="blue"><a href="' + url + '">' + url + '</a></font>'
+                            return '<font color="#0645AD"><a href="' + url + '">' + url + '</a></font>'
                         })
                         result = result.replace(/(&gt;(.)*)/g, function(quote) {
                             return '<font color="#0b6623">' + quote + '</font>'
