@@ -180,14 +180,15 @@ MessageDialog {
     standardButtons: StandardButton.Yes | StandardButton.No
     visible: false
     onYes: {
+        var friend_number = bridge.getCurrentFriendNumber()
         if (bridge.checkFriendHistoryExists(friend_number)) {
-            clearFriendHistoryDialog.currentFriendNumber = bridge.getCurrentFriendNumber()
+            clearFriendHistoryDialog.currentFriendNumber = friend_number
             clearFriendHistoryDialog.open()
         }
-        bridge.deleteFriend(bridge.getCurrentFriendNumber())
+        bridge.deleteFriend(friend_number)
         for (var i = 0; i < friendsModel.count; i++) {
             var friend = friendsModel.get(i)
-            if (friend.friendNumber === bridge.getCurrentFriendNumber()) {
+            if (friend.friendNumber === friend_number) {
                 friendsModel.remove(i)
             }
         }
