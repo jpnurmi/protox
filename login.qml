@@ -226,7 +226,7 @@ Popup {
             width: parent.width * 0.75
             placeholderText: qsTr("Password") + (loginWindow.profileCreation ? " " + qsTr("(optional)") : "")
             anchors.top: accountSelectionButton.bottom
-            anchors.topMargin: 32
+            anchors.topMargin: 16
             anchors.horizontalCenter: accountSelectionButton.horizontalCenter
             inputMethodHints: Qt.ImhSensitiveData
             color: "white"

@@ -180,8 +180,10 @@ MessageDialog {
     standardButtons: StandardButton.Yes | StandardButton.No
     visible: false
     onYes: {
-        clearFriendHistoryDialog.currentFriendNumber = bridge.getCurrentFriendNumber()
-        clearFriendHistoryDialog.open()
+        if (bridge.checkFriendHistoryExists(friend_number)) {
+            clearFriendHistoryDialog.currentFriendNumber = bridge.getCurrentFriendNumber()
+            clearFriendHistoryDialog.open()
+        }
         bridge.deleteFriend(bridge.getCurrentFriendNumber())
         for (var i = 0; i < friendsModel.count; i++) {
             var friend = friendsModel.get(i)
@@ -247,7 +249,12 @@ Menu {
         leftInset: 10
         rightInset: leftInset
         onClicked: {
-            clearFriendHistoryDialog.currentFriendNumber = bridge.getCurrentFriendNumber()
+            var friend_number = bridge.getCurrentFriendNumber()
+            if (!bridge.checkFriendHistoryExists(friend_number)) {
+                toast.show({ message : qsTr("Nothing to delete."), duration : Toast.Short });
+                return
+            }
+            clearFriendHistoryDialog.currentFriendNumber = friend_number
             clearFriendHistoryDialog.open()
         }
     }

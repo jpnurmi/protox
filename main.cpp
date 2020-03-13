@@ -347,6 +347,11 @@ void QmlCBridge::regenerateToxPasswordKey()
 	tox_pass_key = Toxcore::generate_pass_key(profile_password);
 }
 
+bool QmlCBridge::checkFriendHistoryExists(quint32 friend_number)
+{
+	return chat_db->getMessagesCountFriend(Toxcore::get_friend_public_key(tox, friend_number)) > 0;
+}
+
 static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler(0);
 
 void customMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString & msg)
