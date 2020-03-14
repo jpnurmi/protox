@@ -480,7 +480,6 @@ void QmlCBridge::signOutProfile(bool remove)
 
 int main(int argc, char *argv[])
 {
-	qDebug() << QSqlDatabase::drivers();
 	QtStatusBar::setColor(QColor("#3F51B5"));
 #if defined (Q_OS_ANDROID)
 	const QString permission_write = "android.permission.WRITE_EXTERNAL_STORAGE";
