@@ -274,11 +274,14 @@ Popup {
             visible: loginWindow.profileCreation || accountMenu.profileName.length > 0
             function login() {
                 if (loginWindow.profileCreation && loginUsername.text.length === 0) {
-                    toast.show({ message : qsTr("Specify a user name."), duration : Toast.Short })
+                    toast.show({ message : qsTr("Specify a user name."), duration : Toast.Long })
                     return
                 }
                 var profile = loginWindow.profileCreation ? loginUsername.text + ".tox" : accountMenu.profileName
                 loginWindow.enabled = false
+                if (loginPassword.text.length > 0 && !loginWindow.profileCreation) {
+                    toast.show({ message : qsTr("Decrypting profile..."), duration : Toast.Short })
+                }
                 var error = signInProfile(profile, loginWindow.profileCreation, loginPassword.text)
                 if (error > 0) {
                     var reason;

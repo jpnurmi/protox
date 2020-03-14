@@ -96,6 +96,7 @@ Popup {
                 }
                 bridge.generateToxPasswordKey(password)
                 bridge.saveProfile()
+                bridge.updateDataBasePassword(password)
                 toast.show({ message : qsTr("Password changed successfully!"), duration : Toast.Short })
                 settingsWindow.setProfileEncrypted(password.length > 0)
                 settingsModel.setValueString("password", "")

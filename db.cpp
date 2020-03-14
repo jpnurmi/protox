@@ -4,11 +4,19 @@
 #define DATABASE_VERSION 2
 #define APPLICATION_ID ('P' << 24) + ('T' << 16) + ('O' << 8) + 'X'
 
-ChatDataBase::ChatDataBase(const QString &fileName)
+ChatDataBase::ChatDataBase(const QString &fileName, const QString &password)
 {
-	db = QSqlDatabase::addDatabase("QSQLITE");
+	db = QSqlDatabase::addDatabase("SQLITECIPHER");
 	db.setDatabaseName(GetProgDir() + fileName);
+
+	if (!password.isEmpty()) {
+		db.setPassword(password);
+		if (!checkEncrypted()) {
+			db.setConnectOptions("QSQLITE_CREATE_KEY");
+		}
+	}
 	db.open();
+	qDebug() << "Can not open connection: " << db.lastError().driverText();
 
 	QSqlQuery query;
 	query = db.exec(QString("PRAGMA application_id=%1").arg(APPLICATION_ID));
@@ -154,6 +162,38 @@ void ChatDataBase::clearFriendChatHistory(const ToxPk &public_key)
 	db.exec("DELETE FROM FileMessages WHERE reference_id IN MessagesToDelete");
 	db.exec("DELETE FROM Messages WHERE reference_id IN MessagesToDelete");
 	db.exec("DROP TABLE MessagesToDelete");
+}
+
+void ChatDataBase::updatePassword(const QString &password)
+{
+	if (password.isEmpty()) {
+		db.close();
+		db.setConnectOptions("QSQLITE_REMOVE_KEY");
+		db.open();
+	} else {
+		db.close();
+		if (checkEncrypted()) {
+			db.setConnectOptions("QSQLITE_UPDATE_KEY=" + password);
+		} else {
+			db.setPassword(password);
+			db.setConnectOptions("QSQLITE_CREATE_KEY");
+		}
+		db.open();
+	}
+}
+
+bool ChatDataBase::checkEncrypted()
+{
+	QFile f(db.databaseName());
+	if (!f.open(QFile::ReadOnly)) {
+		return false;
+	}
+	QByteArray data = f.read(15);
+	f.close();
+	if (QString::fromLatin1(data) == "SQLite format 3") {
+		return false;
+	}
+	return true;
 }
 
 ChatDataBase::~ChatDataBase()

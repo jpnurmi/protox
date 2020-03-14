@@ -352,6 +352,11 @@ bool QmlCBridge::checkFriendHistoryExists(quint32 friend_number)
 	return chat_db->getMessagesCountFriend(Toxcore::get_friend_public_key(tox, friend_number)) > 0;
 }
 
+void QmlCBridge::updateDataBasePassword(const QString &password)
+{
+	chat_db->updatePassword(password);
+}
+
 static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler(0);
 
 void customMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString & msg)
@@ -392,7 +397,7 @@ int QmlCBridge::signInProfile(const QString &profile, bool create, const QString
 		current_profile.clear();
 		return error;
 	}
-	chat_db = new ChatDataBase("chat_" + QString(current_profile).replace(".tox", ".db"));
+	chat_db = new ChatDataBase("chat_" + QString(current_profile).replace(".tox", ".db"), password);
 	Toxcore::bootstrap_DHT(tox);
 	Debug("My address: " + ToxId_To_QString(Toxcore::get_address(tox)));
 
@@ -462,6 +467,7 @@ void QmlCBridge::signOutProfile(bool remove)
 	toxcore_timer->stop();
 	delete toxcore_timer;
 	Toxcore::destroy(tox);
+
 	delete chat_db;
 	profile_password.clear();
 
@@ -474,6 +480,7 @@ void QmlCBridge::signOutProfile(bool remove)
 
 int main(int argc, char *argv[])
 {
+	qDebug() << QSqlDatabase::drivers();
 	QtStatusBar::setColor(QColor("#3F51B5"));
 #if defined (Q_OS_ANDROID)
 	const QString permission_write = "android.permission.WRITE_EXTERNAL_STORAGE";
