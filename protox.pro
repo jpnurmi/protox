@@ -70,16 +70,25 @@ DISTFILES += \
 	settings.qml \
 	login.qml
 
+ANDROID_PACKAGE_SOURCE_DIR = \
+	$$PWD/android
+
 contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
 	LIBS += -L$$PWD/libs/armv7
-
-	ANDROID_PACKAGE_SOURCE_DIR = \
-		$$PWD/android
 
 	ANDROID_EXTRA_LIBS = \
 		$$PWD/libs/armv7/libtoxcore.so \
 		$$PWD/libs/armv7/libtoxencryptsave.so \
 		$$PWD/libs/armv7/libsodium.so
+}
+
+contains(ANDROID_TARGET_ARCH,x86) {
+	LIBS += -L$$PWD/libs/x86
+
+	ANDROID_EXTRA_LIBS = \
+		$$PWD/libs/x86/libtoxcore.so \
+		$$PWD/libs/x86/libtoxencryptsave.so \
+		$$PWD/libs/x86/libsodium.so
 }
 
 HEADERS += \
