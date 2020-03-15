@@ -1,25 +1,10 @@
-/*
- * The Tox public API.
+/* SPDX-License-Identifier: GPL-3.0-or-later
+ * Copyright © 2016-2018 The TokTok team.
+ * Copyright © 2013 Tox project.
  */
 
 /*
- * Copyright © 2016-2018 The TokTok team.
- * Copyright © 2013 Tox project.
- *
- * This file is part of Tox, the free peer to peer instant messenger.
- *
- * Tox is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Tox is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Tox.  If not, see <http://www.gnu.org/licenses/>.
+ * The Tox public API.
  */
 #ifndef C_TOXCORE_TOXCORE_TOX_H
 #define C_TOXCORE_TOXCORE_TOX_H
@@ -690,6 +675,20 @@ struct Tox_Options {
      */
     void *log_user_data;
 
+
+    /**
+     * These options are experimental, so avoid writing code that depends on
+     * them. Options marked "experimental" may change their behaviour or go away
+     * entirely in the future, or may be renamed to something non-experimental
+     * if they become part of the supported API.
+     */
+    /**
+     * Make public API functions thread-safe using a per-instance lock.
+     *
+     * Default: false.
+     */
+    bool experimental_thread_safety;
+
 };
 
 
@@ -752,6 +751,10 @@ void tox_options_set_log_callback(struct Tox_Options *options, tox_log_cb *callb
 void *tox_options_get_log_user_data(const struct Tox_Options *options);
 
 void tox_options_set_log_user_data(struct Tox_Options *options, void *user_data);
+
+bool tox_options_get_experimental_thread_safety(const struct Tox_Options *options);
+
+void tox_options_set_experimental_thread_safety(struct Tox_Options *options, bool thread_safety);
 
 /**
  * Initialises a Tox_Options object with the default options.

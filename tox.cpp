@@ -13,6 +13,23 @@ extern QSettings *settings;
 
 namespace Toxcore {
 
+void tox_log_cb(Tox *m, TOX_LOG_LEVEL level, const char *file, uint32_t line, const char *func,
+                        const char *message, void *userdata)
+{
+	Q_UNUSED(m)
+	Q_UNUSED(userdata)
+
+	QString _level;
+	switch (level) {
+	case TOX_LOG_LEVEL_INFO: _level = "INFO"; break;
+	case TOX_LOG_LEVEL_ERROR: _level = "ERROR"; break;
+	case TOX_LOG_LEVEL_DEBUG: _level = "DEBUG"; break;
+	case TOX_LOG_LEVEL_WARNING: _level = "WARNING"; break;
+	case TOX_LOG_LEVEL_TRACE: _level = "TRACE"; break;
+	}
+	Debug(QString(file) + " (line " + QString::number(line) + ") " + _level + ": " + func + " " + message);
+}
+
 int current_connection_status = -1;
 
 static void cb_self_connection_change(Tox *m, TOX_CONNECTION connection_status, void *userdata)
@@ -454,30 +471,27 @@ void bootstrap_DHT(Tox *m)
 	QJsonDocument doc = QJsonDocument::fromJson(json_data.isEmpty() ? default_nodes_json.toUtf8() : json_data);
 	QJsonArray array = doc.object()["nodes"].toArray();
 
-	QtConcurrent::run([=]() {
-		uint32_t succeed = 0;
-		for (auto node : array) {
-			QJsonObject item = node.toObject();
-			QString ipv4 = item["ipv4"].toString();
-			QString ipv6 = item["ipv6"].toString();
-			int port = item["port"].toInt();
-			QString public_key = item["public_key"].toString();
-	
-				TOX_ERR_BOOTSTRAP err;
-				tox_bootstrap(m, ipv4.toStdString().c_str(), (quint16)port, (const quint8*)public_key.toStdString().c_str(), &err);
-				if (use_ipv6 && ipv6 != "-") {
-					tox_bootstrap(m, ipv6.toStdString().c_str(), (quint16)port, (const quint8*)public_key.toStdString().c_str(), &err);
-				}
+	uint32_t succeed = 0;
+	for (auto node : array) {
+		QJsonObject item = node.toObject();
+		QString ipv4 = item["ipv4"].toString();
+		QString ipv6 = item["ipv6"].toString();
+		int port = item["port"].toInt();
+		QString public_key = item["public_key"].toString();
 
-				if (err == TOX_ERR_BOOTSTRAP_OK) {
-					succeed++;
-				}
-				if (succeed == max_bootstrap_nodes) {
-					return;
-				}
-			}
+		TOX_ERR_BOOTSTRAP err, err2;
+		tox_bootstrap(m, ipv4.toStdString().c_str(), (quint16)port, (const quint8*)public_key.toStdString().c_str(), &err);
+		if (use_ipv6 && ipv6 != "-") {
+			tox_bootstrap(m, ipv6.toStdString().c_str(), (quint16)port, (const quint8*)public_key.toStdString().c_str(), &err2);
 		}
-	);
+
+		if (err == TOX_ERR_BOOTSTRAP_OK || err2 == TOX_ERR_BOOTSTRAP_OK) {
+			succeed++;
+		}
+		if (succeed == max_bootstrap_nodes) {
+			return;
+		}
+	}
 }
 
 Tox *create(ToxProfileLoadingError &error, bool create_new)
@@ -499,6 +513,7 @@ Tox *create(ToxProfileLoadingError &error, bool create_new)
 	tox_opts.udp_enabled = settings->value("udp_enabled", true).toBool();
 	tox_opts.ipv6_enabled = settings->value("ipv6_enabled", true).toBool();
 	tox_opts.local_discovery_enabled = settings->value("local_discovery_enabled", false).toBool();
+	tox_opts.log_callback = tox_log_cb;
 	settings->endGroup();
 
 	Tox *m = load_tox(&tox_opts, GetProgDir() + qmlbridge->getCurrentProfile(), error);

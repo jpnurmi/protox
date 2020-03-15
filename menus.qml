@@ -135,10 +135,6 @@ Menu {
                 text: qsTr("Send")
             }
             function send() {
-                if (bridge.getConnStatus() < 1) {
-                    toast.show({ message : qsTr("You are not connected to the Tox network."), duration : Toast.Short });
-                    return
-                }
                 var toxId_text = toxId.text
                 if(toxId_text.substring(0, 4) === "tox:") {
                     toxId_text = toxId_text.slice(4, toxId.text.length)

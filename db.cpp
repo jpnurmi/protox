@@ -16,7 +16,6 @@ ChatDataBase::ChatDataBase(const QString &fileName, const QString &password)
 		}
 	}
 	db.open();
-	qDebug() << "Can not open connection: " << db.lastError().driverText();
 
 	QSqlQuery query;
 	query = db.exec(QString("PRAGMA application_id=%1").arg(APPLICATION_ID));

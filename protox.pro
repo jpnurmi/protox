@@ -75,9 +75,9 @@ contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
 		$$PWD/android
 
 	ANDROID_EXTRA_LIBS = \
-		$$PWD/libs/libtoxcore.so \
-		$$PWD/libs/libtoxencryptsave.so \
-		$$PWD/libs/libsodium.so
+		$$PWD/libs/armv7/libtoxcore.so \
+		$$PWD/libs/armv7/libtoxencryptsave.so \
+		$$PWD/libs/armv7/libsodium.so
 }
 
 HEADERS += \
