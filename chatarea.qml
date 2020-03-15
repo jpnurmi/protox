@@ -229,19 +229,14 @@ ColumnLayout {
                                 continue
                             }
                             line = line.replaceAll(">", "&gt;")
-                            line = line.replace(/(\*{2,2})(.*?)\1/g, function(bold) {
-                                return '<b>' + bold.replace(/^.{2}/, '').replace(/.{2}$/, '') + '</b>'
+                            line = line.replace(/(\*+)(.*)\1/g, function(match, ignore, _text) {
+                                return '<b>' + _text + '</b>'
                             })
-                            /*
-                            line = line.replace(/\B\/(.+)\/\B/g, function(italic) {
-                                return '<i>' + italic.replace(/^.{2}/, '').replace(/.{2}$/, '') + '</i>'
+                            line = line.replace(/(\~+)(.*)\1/g, function(match, ignore, _text) {
+                                return '<s>' + _text + '</s>'
                             })
-                            */
-                            line = line.replace(/(\~{2,2})(.*?)\1/g, function(strike) {
-                                return '<s>' + strike.replace(/^.{2}/, '').replace(/.{2}$/, '') + '</s>'
-                            })
-                            line = line.replace(/(\_{2,2})(.*?)\1/g, function(underline) {
-                                return '<u>' + underline.replace(/^.{2}/, '').replace(/.{2}$/, '') + '</u>'
+                            line = line.replace(/(\_+)(.*)\1/g, function(match, ignore, _text) {
+                                return '<u>' + _text + '</u>'
                             })
                             result += line
                             // put back all next line operators
