@@ -19,7 +19,7 @@ SOURCES += \
         tools.cpp \
         tox.cpp
 
-LIBS += -L$$PWD/libs/ -ltoxcore -ltoxencryptsave
+LIBS += -ltoxcore -ltoxencryptsave
 
 RESOURCES += qml.qrc
 
@@ -71,6 +71,8 @@ DISTFILES += \
 	login.qml
 
 contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
+	LIBS += -L$$PWD/libs/armv7
+
 	ANDROID_PACKAGE_SOURCE_DIR = \
 		$$PWD/android
 
