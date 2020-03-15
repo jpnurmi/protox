@@ -357,6 +357,11 @@ void QmlCBridge::updateDataBasePassword(const QString &password)
 	chat_db->updatePassword(password);
 }
 
+const QString QmlCBridge::getToxcoreVersion()
+{
+	return Toxcore::get_version_string();
+}
+
 static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler(0);
 
 void customMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString & msg)

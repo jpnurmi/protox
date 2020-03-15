@@ -70,6 +70,7 @@ namespace Toxcore {
 	bool check_profile_encrypted(const QString &profile);
 	bool save_data(Tox *m, const QString &path);
 	const Tox_Pass_Key *generate_pass_key(const QString &password);
+	const QString get_version_string();
 }
 
 

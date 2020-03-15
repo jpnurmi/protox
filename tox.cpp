@@ -13,7 +13,7 @@ extern QSettings *settings;
 
 namespace Toxcore {
 
-void tox_log_cb(Tox *m, TOX_LOG_LEVEL level, const char *file, uint32_t line, const char *func,
+void cb_log(Tox *m, TOX_LOG_LEVEL level, const char *file, uint32_t line, const char *func,
                         const char *message, void *userdata)
 {
 	Q_UNUSED(m)
@@ -40,6 +40,7 @@ static void cb_self_connection_change(Tox *m, TOX_CONNECTION connection_status, 
 		case TOX_CONNECTION_NONE:
 			current_connection_status = 0;
 			Debug("Connection to Tox network has been lost.");
+			bootstrap_DHT(m);
 			break;
 
 		case TOX_CONNECTION_TCP:
@@ -509,11 +510,11 @@ Tox *create(ToxProfileLoadingError &error, bool create_new)
 	struct Tox_Options tox_opts;
 	memset(&tox_opts, 0, sizeof(struct Tox_Options));
 	tox_options_default(&tox_opts);
+	tox_opts.log_callback = cb_log;
 	settings->beginGroup("Toxcore");
 	tox_opts.udp_enabled = settings->value("udp_enabled", true).toBool();
 	tox_opts.ipv6_enabled = settings->value("ipv6_enabled", true).toBool();
 	tox_opts.local_discovery_enabled = settings->value("local_discovery_enabled", false).toBool();
-	tox_opts.log_callback = tox_log_cb;
 	settings->endGroup();
 
 	Tox *m = load_tox(&tox_opts, GetProgDir() + qmlbridge->getCurrentProfile(), error);
@@ -599,6 +600,11 @@ const Tox_Pass_Key *generate_pass_key(const QString &password)
 	}
 	QByteArray encodedPassword = password.toUtf8();
 	return tox_pass_key_derive((quint8*)encodedPassword.data(), encodedPassword.length(), nullptr);
+}
+
+const QString get_version_string()
+{
+	return QString::number(tox_version_major()) + "." + QString::number(tox_version_minor()) + "." + QString::number(tox_version_patch());
 }
 
 }

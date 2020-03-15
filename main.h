@@ -74,6 +74,7 @@ public slots:
 	Q_INVOKABLE const QString getCurrentProfile() { return current_profile; }
 	Q_INVOKABLE bool checkFriendHistoryExists(quint32 friend_number);
 	Q_INVOKABLE void updateDataBasePassword(const QString &password);
+	Q_INVOKABLE const QString getToxcoreVersion();
 
 public:
 	ToxFriendsConnStatus friends_conn_status;
