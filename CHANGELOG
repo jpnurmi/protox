@@ -1,14 +1,14 @@
 v1.1alpha:
 
-- Increased the number of Tox nodes and added the ability to add user nodes in .json format.
-- Increased the response time of the chat area when you open the keyboard.
-- Fixed a bug when the application freezes when it's opened from the background.
-- Fixed a bug with missing line breaks after quotes in messages.
-- Fixed a bug that prevented editing text in the chat area by sending text cursor to the end of line.
+- Increased number of Tox nodes and added the ability to add user nodes in .json format.
+- Increased response time of the chat area when you open the keyboard.
+- Fixed bug when the application freezes when it's opened from the background.
+- Fixed bug with missing line breaks after quotes in messages.
+- Fixed bug that prevented editing text in the chat area by sending text cursor to the end of line.
 - Added confirmation dialog when deleting a friend from the contact list.
-- Added the ability to delete chat history for contacts.
-- Added the ability to enable or disable saving chat to history.
-- Added the ability to change noSpam value (toxcore).
+- Added ability to delete chat history for contacts.
+- Added ability to enable or disable saving chat to history.
+- Added ability to change noSpam value (toxcore).
 
 v1.2alpha
 
