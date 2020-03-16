@@ -11,7 +11,6 @@ HEADERS += \
     $$PWD/sqlitecipher_p.h
 
 SOURCES += \
-    $$PWD/smain.cpp \
     $$PWD/sqlcachedresult.cpp \
     $$PWD/sqlitecipher.cpp
 
