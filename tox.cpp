@@ -39,8 +39,8 @@ static void cb_self_connection_change(Tox *m, TOX_CONNECTION connection_status, 
 	switch (connection_status) {
 		case TOX_CONNECTION_NONE:
 			current_connection_status = 0;
+			qmlbridge->tryReconnect();
 			Debug("Connection to Tox network has been lost.");
-			bootstrap_DHT(m);
 			break;
 
 		case TOX_CONNECTION_TCP:

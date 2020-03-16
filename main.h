@@ -33,6 +33,7 @@ public:
 	const Tox_Pass_Key *getToxPasswordKey() { return tox_pass_key; }
 	const QString getProfilePassword() { return profile_password; }
 	void regenerateToxPasswordKey();
+	void tryReconnect();
 public slots:
 	Q_INVOKABLE void sendMessage(const QString &message);
 	Q_INVOKABLE quint32 getCurrentFriendNumber();
@@ -89,6 +90,7 @@ private:
 	QObject *component;
 	Tox *tox;
 	QTimer *toxcore_timer;
+	QTimer *reconnection_timer;
 	const Tox_Pass_Key *tox_pass_key;
 };
 

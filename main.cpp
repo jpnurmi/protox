@@ -22,6 +22,17 @@ QmlCBridge::QmlCBridge()
 	current_profile = "";
 	current_friend_number = 0;
 	profile_password = "";
+
+	reconnection_timer = new QTimer;
+	reconnection_timer->setInterval(10000);
+	reconnection_timer->setSingleShot(false);
+	QObject::connect(reconnection_timer, &QTimer::timeout, [=]() { 
+		if (Toxcore::get_connection_status() > 0) {
+			reconnection_timer->stop();
+			return;
+		}
+		Toxcore::bootstrap_DHT(tox);
+	});
 }
 
 void QmlCBridge::setComponent(QObject *_component)
@@ -362,6 +373,11 @@ const QString QmlCBridge::getToxcoreVersion()
 	return Toxcore::get_version_string();
 }
 
+void QmlCBridge::tryReconnect()
+{
+	reconnection_timer->start();
+}
+
 static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler(0);
 
 void customMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString & msg)
@@ -448,6 +464,7 @@ QmlCBridge::~QmlCBridge()
 		return;
 	}
 	signOutProfile();
+	delete reconnection_timer;
 }
 
 QVariant QmlCBridge::getProfileList()
@@ -469,6 +486,7 @@ void QmlCBridge::signOutProfile(bool remove)
 	settings->endGroup();
 	settings->sync();
 
+	reconnection_timer->stop();
 	toxcore_timer->stop();
 	delete toxcore_timer;
 	Toxcore::destroy(tox);
