@@ -9,3 +9,15 @@ v1.1alpha:
 - Added the ability to delete chat history for contacts.
 - Added the ability to enable or disable saving chat to history.
 - Added the ability to change noSpam value (toxcore).
+
+v1.2alpha
+
+- Qt version updated from 5.13.2 to 5.14.1.
+- Added support for x86 architecture.
+- Fixed bug: QR code image doesn't refresh upon NoSpam change.
+- Added profile selection menu and ability to create a new profile.
+- Added ability to delete profiles to settings menu.
+- Added profile and chat history encryption if password is set.
+- Added new UI icons.
+- The application will now work on Android 5 (API 21) and above.
+- Added a timer to resume connection to Tox nodes if the connection was lost before.
