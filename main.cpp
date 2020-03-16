@@ -496,6 +496,7 @@ int main(int argc, char *argv[])
 		}
 	}
 #endif
+	ChatDataBase::registerSQLDriver();
 	settings = new QSettings(GetProgDir() + "settings.ini", QSettings::IniFormat);
 
 	Debug("App started.");

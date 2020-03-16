@@ -1,6 +1,8 @@
 #include "db.h"
 #include "tools.h"
 
+#include "sqlitecipher/sqlitecipher_p.h"
+
 #define DATABASE_VERSION 2
 #define APPLICATION_ID ('P' << 24) + ('T' << 16) + ('O' << 8) + 'X'
 
@@ -15,6 +17,7 @@ ChatDataBase::ChatDataBase(const QString &fileName, const QString &password)
 			db.setConnectOptions("QSQLITE_CREATE_KEY");
 		}
 	}
+
 	db.open();
 
 	QSqlQuery query;
@@ -195,8 +198,13 @@ bool ChatDataBase::checkEncrypted()
 	return true;
 }
 
+void ChatDataBase::registerSQLDriver()
+{
+	QSqlDatabase::registerSqlDriver("SQLITECIPHER", new QSqlDriverCreator<SQLiteCipherDriver>);
+}
+
 ChatDataBase::~ChatDataBase()
 {
 	db.close();
-	db.removeDatabase(QSqlDatabase::defaultConnection);
+	QSqlDatabase::removeDatabase(db.connectionName());
 }

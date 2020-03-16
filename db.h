@@ -15,6 +15,7 @@ public:
 	void clearFriendChatHistory(const ToxPk &public_key);
 	void updatePassword(const QString &password);
 	bool checkEncrypted();
+	static void registerSQLDriver();
 	~ChatDataBase();
 private:
 	QSqlDatabase db;
