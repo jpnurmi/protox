@@ -229,13 +229,13 @@ ColumnLayout {
                                 continue
                             }
                             line = line.replaceAll(">", "&gt;")
-                            line = line.replace(/(\*+)(.*)\1/g, function(match, ignore, _text) {
+                            line = line.replace(/\*+(.*?)\*+(?=\s|$)/g, function(match, _text) {
                                 return '<b>' + _text + '</b>'
                             })
-                            line = line.replace(/(\~+)(.*)\1/g, function(match, ignore, _text) {
+                            line = line.replace(/\~+(.*?)\~+(?=\s|$)/g, function(match, _text) {
                                 return '<s>' + _text + '</s>'
                             })
-                            line = line.replace(/(\_+)(.*)\1/g, function(match, ignore, _text) {
+                            line = line.replace(/\_+(.*?)\_+(?=\s|$)/g, function(match, _text) {
                                 return '<u>' + _text + '</u>'
                             })
                             result += line
