@@ -264,10 +264,15 @@ int QmlCBridge::getConnStatus()
 	return Toxcore::get_connection_status();
 }
 
-void QmlCBridge::addFriend(const QString &friendPk)
+int QmlCBridge::addFriend(const QString &friendPk)
 {
-	quint32 friend_number = Toxcore::add_friend(tox, friendPk.toLatin1());
+	TOX_ERR_FRIEND_ADD error;
+	quint32 friend_number = Toxcore::add_friend(tox, friendPk.toLatin1(), error);
+	if (error > 0) {
+		return error;
+	}
 	insertFriend(friend_number, Toxcore::get_friend_name(tox, friend_number));
+	return 0;
 }
 
 QList<QVariant> QmlCBridge::getFriendsModelOrder()

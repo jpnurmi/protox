@@ -57,7 +57,7 @@ public slots:
 	Q_INVOKABLE long getFriendsCount();
 	Q_INVOKABLE quint32 getMessagesCount(quint32 friend_number);
 	Q_INVOKABLE int getConnStatus();
-	Q_INVOKABLE void addFriend(const QString &friendPk);
+	Q_INVOKABLE int addFriend(const QString &friendPk);
 	Q_INVOKABLE int getFriendStatus(quint32 friend_number);
 	Q_INVOKABLE QString getNospamValue();
 	Q_INVOKABLE void setNospamValue(const QString &nospam);
