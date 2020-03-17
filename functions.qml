@@ -203,7 +203,7 @@ function insertFriend(friend_number, nickName, request, request_message, friendP
                         });
         leftOverlayButtonTextAnimation.start()
     }
-    if (bridge.getFriendsCount() < 2) {
+    if (bridge.getFriendsCount() < 2 && !request) {
         selectFriend(0)
         friendNickname.setText(nickName)
     }

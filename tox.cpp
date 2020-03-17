@@ -62,6 +62,7 @@ static void cb_friend_request(Tox *m, const quint8 *public_key, const quint8 *da
 	Q_UNUSED(userdata);
 
 	ToxPk pk((char*)public_key, TOX_PUBLIC_KEY_SIZE);
+	// hint: friend_number is fake here
 	qmlbridge->insertFriend(0, ToxId_To_QString(pk), 
 							true, QString::fromUtf8((char*)data, length), pk);
 }

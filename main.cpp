@@ -24,6 +24,7 @@ QmlCBridge::QmlCBridge()
 	profile_password = "";
 
 	reconnection_timer = new QTimer;
+	// fixme: should this value be hardcoded?
 	reconnection_timer->setInterval(10000);
 	reconnection_timer->setSingleShot(false);
 	QObject::connect(reconnection_timer, &QTimer::timeout, [=]() { 
