@@ -428,7 +428,7 @@ MessageDialog {
         friendsModel.remove(item_index)
         var error = bridge.addFriend(friendPk)
         if (error > 0) {
-            toast.show({ message : "addFriend failed, error code: " + error, duration : Toast.Short });
+            toast.show({ message : qsTr("addFriend failed, error code: ") + error, duration : Toast.Long });
         }
     }
     onNo: {

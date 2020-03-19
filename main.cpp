@@ -24,14 +24,19 @@ QmlCBridge::QmlCBridge()
 	profile_password = "";
 
 	reconnection_timer = new QTimer;
-	reconnection_timer->setInterval(10000);
+	reconnection_timer->setInterval(20000);
 	reconnection_timer->setSingleShot(false);
 	QObject::connect(reconnection_timer, &QTimer::timeout, [=]() { 
 		if (Toxcore::get_connection_status() > 0) {
 			reconnection_timer->stop();
 			return;
 		}
+		toxcore_timer->stop();
+		Toxcore::destroy(tox);
+		ToxProfileLoadingError error;
+		tox = Toxcore::create(error);
 		Toxcore::bootstrap_DHT(tox);
+		toxcore_timer->start();
 	});
 }
 
@@ -266,7 +271,7 @@ int QmlCBridge::getConnStatus()
 
 int QmlCBridge::addFriend(const QString &friendPk)
 {
-	TOX_ERR_FRIEND_ADD error;
+	int error;
 	quint32 friend_number = Toxcore::add_friend(tox, friendPk.toLatin1(), error);
 	if (error > 0) {
 		return error;

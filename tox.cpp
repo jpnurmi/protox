@@ -248,9 +248,9 @@ int make_friend_request(Tox *m, ToxId id, const QString &friendMessage)
 	return error;
 }
 
-quint32 add_friend(Tox *m, const ToxPk &friendPk, TOX_ERR_FRIEND_ADD &error)
+quint32 add_friend(Tox *m, const ToxPk &friendPk, int &error)
 {
-	quint32 friend_number = tox_friend_add_norequest(m, (quint8*)friendPk.data(), &error);
+	quint32 friend_number = tox_friend_add_norequest(m, (quint8*)friendPk.data(), (TOX_ERR_FRIEND_ADD*)error);
 	save_data(m, GetProgDir() + qmlbridge->getCurrentProfile());
 	return friend_number;
 }
