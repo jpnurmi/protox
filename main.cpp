@@ -37,7 +37,6 @@ QmlCBridge::QmlCBridge()
 		}
 		toxcore_timer->stop();
 		Toxcore::reset(tox);
-		Q_ASSERT(tox == nullptr);
 		Toxcore::bootstrap_DHT(tox);
 		toxcore_timer->start();
 		Debug("Reconnection...");
