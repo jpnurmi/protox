@@ -23,20 +23,24 @@ QmlCBridge::QmlCBridge()
 	current_friend_number = 0;
 	profile_password = "";
 
+	settings->beginGroup("Client");
+	int reconnection_interval = settings->value("reconnection_interval", 60000).toInt();
+	settings->endGroup();
 	reconnection_timer = new QTimer;
-	reconnection_timer->setInterval(20000);
+	reconnection_timer->setInterval(reconnection_interval);
 	reconnection_timer->setSingleShot(false);
-	QObject::connect(reconnection_timer, &QTimer::timeout, [=]() { 
+	QObject::connect(reconnection_timer, &QTimer::timeout, [=]() {
 		if (Toxcore::get_connection_status() > 0) {
 			reconnection_timer->stop();
+			Debug("Reconnection timer aborted: successfully connected!");
 			return;
 		}
 		toxcore_timer->stop();
-		Toxcore::destroy(tox);
-		ToxProfileLoadingError error;
-		tox = Toxcore::create(error);
+		Toxcore::reset(tox);
+		Q_ASSERT(tox == nullptr);
 		Toxcore::bootstrap_DHT(tox);
 		toxcore_timer->start();
+		Debug("Reconnection...");
 	});
 }
 
