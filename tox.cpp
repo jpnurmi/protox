@@ -27,7 +27,7 @@ void cb_log(Tox *m, TOX_LOG_LEVEL level, const char *file, uint32_t line, const 
 	case TOX_LOG_LEVEL_WARNING: _level = "WARNING"; break;
 	case TOX_LOG_LEVEL_TRACE: _level = "TRACE"; break;
 	}
-	Debug(QString(file) + " (line " + QString::number(line) + ") " + _level + ": " + func + " " + message);
+	Debug("Toxcore: " + QString(file) + " (line " + QString::number(line) + ") " + _level + ": " + func + " " + message);
 }
 
 int current_connection_status = -1;
@@ -249,9 +249,9 @@ int make_friend_request(Tox *m, ToxId id, const QString &friendMessage)
 	return error;
 }
 
-quint32 add_friend(Tox *m, const ToxPk &friendPk)
+quint32 add_friend(Tox *m, const ToxPk &friendPk, int &error)
 {
-	quint32 friend_number = tox_friend_add_norequest(m, (quint8*)friendPk.data(), nullptr);
+	quint32 friend_number = tox_friend_add_norequest(m, (quint8*)friendPk.data(), (TOX_ERR_FRIEND_ADD*)error);
 	save_data(m, GetProgDir() + qmlbridge->getCurrentProfile());
 	return friend_number;
 }
@@ -496,6 +496,20 @@ void bootstrap_DHT(Tox *m)
 	}
 }
 
+struct Tox_Options get_opts()
+{
+	struct Tox_Options opts;
+	memset(&opts, 0, sizeof(struct Tox_Options));
+	tox_options_default(&opts);
+	opts.log_callback = cb_log;
+	settings->beginGroup("Toxcore");
+	opts.udp_enabled = settings->value("udp_enabled", true).toBool();
+	opts.ipv6_enabled = settings->value("ipv6_enabled", true).toBool();
+	opts.local_discovery_enabled = settings->value("local_discovery_enabled", false).toBool();
+	settings->endGroup();
+	return opts;
+}
+
 Tox *create(ToxProfileLoadingError &error, bool create_new)
 {
 	QFile f(GetProgDir() + qmlbridge->getCurrentProfile());
@@ -508,16 +522,8 @@ Tox *create(ToxProfileLoadingError &error, bool create_new)
 		error = TOX_ERR_LOADING_ALREADY_EXISTS;
 		return nullptr;
 	}
-	struct Tox_Options tox_opts;
-	memset(&tox_opts, 0, sizeof(struct Tox_Options));
-	tox_options_default(&tox_opts);
-	tox_opts.log_callback = cb_log;
-	settings->beginGroup("Toxcore");
-	tox_opts.udp_enabled = settings->value("udp_enabled", true).toBool();
-	tox_opts.ipv6_enabled = settings->value("ipv6_enabled", true).toBool();
-	tox_opts.local_discovery_enabled = settings->value("local_discovery_enabled", false).toBool();
-	settings->endGroup();
 
+	struct Tox_Options tox_opts = get_opts();
 	Tox *m = load_tox(&tox_opts, GetProgDir() + qmlbridge->getCurrentProfile(), error);
 
 	if (!m) {
@@ -606,6 +612,24 @@ const Tox_Pass_Key *generate_pass_key(const QString &password)
 const QString get_version_string()
 {
 	return QString::number(tox_version_major()) + "." + QString::number(tox_version_minor()) + "." + QString::number(tox_version_patch());
+}
+
+void reset(Tox *m)
+{
+	size_t length = tox_get_savedata_size(m);
+	quint8 data[length];
+	tox_get_savedata(m, data);
+	tox_kill(m);
+	struct Tox_Options tox_opts = get_opts();
+	tox_opts.savedata_type = TOX_SAVEDATA_TYPE_TOX_SAVE;
+	tox_opts.savedata_data = data;
+	tox_opts.savedata_length = length;
+	TOX_ERR_NEW err;
+	m = tox_new(&tox_opts, &err);
+	if (err != TOX_ERR_NEW_OK) {
+		Debug("tox_new failed with error number: " + QString::number(err));
+		m = nullptr;
+	}
 }
 
 }

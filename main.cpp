@@ -23,16 +23,24 @@ QmlCBridge::QmlCBridge()
 	current_friend_number = 0;
 	profile_password = "";
 
+	settings->beginGroup("Client");
+	int reconnection_interval = settings->value("reconnection_interval", 60000).toInt();
+	settings->endGroup();
 	reconnection_timer = new QTimer;
-	// fixme: should this value be hardcoded?
-	reconnection_timer->setInterval(10000);
+	reconnection_timer->setInterval(reconnection_interval);
 	reconnection_timer->setSingleShot(false);
-	QObject::connect(reconnection_timer, &QTimer::timeout, [=]() { 
+	QObject::connect(reconnection_timer, &QTimer::timeout, [=]() {
 		if (Toxcore::get_connection_status() > 0) {
 			reconnection_timer->stop();
+			Debug("Reconnection timer aborted: successfully connected!");
 			return;
 		}
+		toxcore_timer->stop();
+		Toxcore::reset(tox);
+		Q_ASSERT(tox == nullptr);
 		Toxcore::bootstrap_DHT(tox);
+		toxcore_timer->start();
+		Debug("Reconnection...");
 	});
 }
 
@@ -265,10 +273,15 @@ int QmlCBridge::getConnStatus()
 	return Toxcore::get_connection_status();
 }
 
-void QmlCBridge::addFriend(const QString &friendPk)
+int QmlCBridge::addFriend(const QString &friendPk)
 {
-	quint32 friend_number = Toxcore::add_friend(tox, friendPk.toLatin1());
+	int error;
+	quint32 friend_number = Toxcore::add_friend(tox, friendPk.toLatin1(), error);
+	if (error > 0) {
+		return error;
+	}
 	insertFriend(friend_number, Toxcore::get_friend_name(tox, friend_number));
+	return 0;
 }
 
 QList<QVariant> QmlCBridge::getFriendsModelOrder()
