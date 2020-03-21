@@ -275,7 +275,7 @@ int QmlCBridge::getConnStatus()
 int QmlCBridge::addFriend(const QString &friendPk)
 {
 	int error;
-	quint32 friend_number = Toxcore::add_friend(tox, friendPk.toLatin1(), error);
+	quint32 friend_number = Toxcore::add_friend(tox, friendPk.toLatin1(), &error);
 	if (error > 0) {
 		return error;
 	}
