@@ -28,7 +28,7 @@ QmlCBridge::QmlCBridge()
 	settings->endGroup();
 	reconnection_timer = new QTimer;
 	reconnection_timer->setInterval(reconnection_interval);
-	reconnection_timer->setSingleShot(false);
+	reconnection_timer->setSingleShot(true);
 	QObject::connect(reconnection_timer, &QTimer::timeout, [=]() {
 		if (Toxcore::get_connection_status() > 0) {
 			reconnection_timer->stop();
