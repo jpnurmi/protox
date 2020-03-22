@@ -461,7 +461,7 @@ void bootstrap_DHT(Tox *m)
 	QByteArray json_data;
 	if (!json_file.isEmpty()) {
 		QFile file(Tools::getProgDir() + json_file);
-		if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
 			json_data = file.readAll();
 			file.close();
 		}
