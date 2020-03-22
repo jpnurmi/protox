@@ -74,6 +74,9 @@ namespace Toxcore {
 	void reset(Tox *m);
 }
 
-
+namespace ToxConverter {
+	const ToxId toToxId(const QString &str);
+	const QString toString(const ToxId &user_id);
+}
 
 #endif // TOX_H

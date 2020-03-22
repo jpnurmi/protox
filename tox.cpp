@@ -27,7 +27,7 @@ void cb_log(Tox *m, TOX_LOG_LEVEL level, const char *file, uint32_t line, const 
 	case TOX_LOG_LEVEL_WARNING: _level = "WARNING"; break;
 	case TOX_LOG_LEVEL_TRACE: _level = "TRACE"; break;
 	}
-	Debug("Toxcore: " + QString(file) + " (line " + QString::number(line) + ") " + _level + ": " + func + " " + message);
+	Tools::debug("Toxcore: " + QString(file) + " (line " + QString::number(line) + ") " + _level + ": " + func + " " + message);
 }
 
 int current_connection_status = -1;
@@ -40,17 +40,17 @@ static void cb_self_connection_change(Tox *m, TOX_CONNECTION connection_status, 
 		case TOX_CONNECTION_NONE:
 			current_connection_status = 0;
 			qmlbridge->tryReconnect();
-			Debug("Connection to Tox network has been lost.");
+			Tools::debug("Connection to Tox network has been lost.");
 			break;
 
 		case TOX_CONNECTION_TCP:
 			current_connection_status = 1;
-			Debug("Connection to Tox network is weak (using TCP).");
+			Tools::debug("Connection to Tox network is weak (using TCP).");
 			break;
 
 		case TOX_CONNECTION_UDP:
 			current_connection_status = 2;
-			Debug("Connection to Tox network is strong (using UDP).");
+			Tools::debug("Connection to Tox network is strong (using UDP).");
 			break;
 	}
 	qmlbridge->setConnStatus(current_connection_status);
@@ -63,7 +63,7 @@ static void cb_friend_request(Tox *m, const quint8 *public_key, const quint8 *da
 
 	ToxPk pk((char*)public_key, TOX_PUBLIC_KEY_SIZE);
 	// hint: friend_number is fake here
-	qmlbridge->insertFriend(0, ToxId_To_QString(pk), 
+	qmlbridge->insertFriend(0, ToxConverter::toString(pk), 
 							true, QString::fromUtf8((char*)data, length), pk);
 }
 
@@ -111,7 +111,7 @@ static void cb_friend_name(Tox *m, quint32 friend_number, const quint8 *name, si
 	Q_UNUSED(user_data)
 	QString nickName = QString::fromUtf8((char*)name, length);;
 	if (nickName.isEmpty()) {
-		nickName = ToxId_To_QString(get_friend_public_key(m, friend_number));
+		nickName = ToxConverter::toString(get_friend_public_key(m, friend_number));
 	}
 	qmlbridge->updateFriendNickName(friend_number, nickName);
 }
@@ -200,7 +200,7 @@ const QString get_friend_name(Tox *m, quint32 friend_number)
 {
 	size_t length = tox_friend_get_name_size(m, friend_number, nullptr);
 	if (!length)
-		return ToxId_To_QString(get_friend_public_key(m, friend_number));
+		return ToxConverter::toString(get_friend_public_key(m, friend_number));
 	char name[length];
 	if (tox_friend_get_name(m, friend_number, (quint8*)name, nullptr)) {
 		return QString::fromUtf8(name, length);
@@ -243,8 +243,8 @@ int make_friend_request(Tox *m, ToxId id, const QString &friendMessage)
 	QByteArray msgData(friendMessage.toUtf8());
 	quint32 friend_number = tox_friend_add(m, (quint8*)id.data(), (quint8*)msgData.data(), msgData.length(), &error);
 	if (!error) {
-		qmlbridge->insertFriend(friend_number, ToxId_To_QString(get_friend_public_key(m, friend_number)));
-		save_data(m, GetProgDir() + qmlbridge->getCurrentProfile());
+		qmlbridge->insertFriend(friend_number, ToxConverter::toString(get_friend_public_key(m, friend_number)));
+		save_data(m, Tools::getProgDir() + qmlbridge->getCurrentProfile());
 	}
 	return error;
 }
@@ -252,7 +252,7 @@ int make_friend_request(Tox *m, ToxId id, const QString &friendMessage)
 quint32 add_friend(Tox *m, const ToxPk &friendPk, int *error)
 {
 	quint32 friend_number = tox_friend_add_norequest(m, (quint8*)friendPk.data(), (TOX_ERR_FRIEND_ADD*)error);
-	save_data(m, GetProgDir() + qmlbridge->getCurrentProfile());
+	save_data(m, Tools::getProgDir() + qmlbridge->getCurrentProfile());
 	return friend_number;
 }
 
@@ -270,7 +270,7 @@ const QString get_nickname(Tox *m, bool toxId)
 {
 	size_t length = tox_self_get_name_size(m);
 	if (!length) {
-		return toxId ? ToxId_To_QString(get_address(m)) : QString();
+		return toxId ? ToxConverter::toString(get_address(m)) : QString();
 	}
 	char name[length];
 	tox_self_get_name(m, (quint8*)name);
@@ -283,7 +283,7 @@ void set_nickname(Tox *m, const QString &nickname)
 {
 	QByteArray encodedNickname = nickname.toUtf8();
 	tox_self_set_name(m, (quint8*)encodedNickname.data(), encodedNickname.length(), nullptr);
-	save_data(m, GetProgDir() + qmlbridge->getCurrentProfile());
+	save_data(m, Tools::getProgDir() + qmlbridge->getCurrentProfile());
 }
 
 int get_friend_status(Tox *m, quint32 friend_number)
@@ -310,7 +310,7 @@ void set_status_message(Tox *m, const QString &statusMessage)
 {
 	QByteArray encodedMessage = statusMessage.toUtf8();
 	tox_self_set_status_message(m, (quint8*)encodedMessage.data(), encodedMessage.length(), nullptr);
-	save_data(m, GetProgDir() + qmlbridge->getCurrentProfile());
+	save_data(m, Tools::getProgDir() + qmlbridge->getCurrentProfile());
 }
 
 /*
@@ -326,7 +326,7 @@ bool save_data(Tox *m, const QString &path)
 {
 	qmlbridge->regenerateToxPasswordKey();
 	if (path.isEmpty()) {
-		Debug("Warning: save_data failed: path is empty.");
+		Tools::debug("Warning: save_data failed: path is empty.");
 		return false;
 	}
 
@@ -358,7 +358,7 @@ bool save_data(Tox *m, const QString &path)
 	if (result == -1) {
 		free(data);
 		file.close();
-		Debug("Warning: save_data failed: write failed.");
+		Tools::debug("Warning: save_data failed: write failed.");
 		return false;
 	}
 
@@ -377,7 +377,7 @@ static Tox *load_tox(struct Tox_Options *options, const QString &path, ToxProfil
 		m = tox_new(options, &err);
 
 		if (err != TOX_ERR_NEW_OK) {
-			Debug("tox_new failed with error number: " + QString::number(err));
+			Tools::debug("tox_new failed with error number: " + QString::number(err));
 			error = TOX_ERR_LOADING_NULL;
 			return nullptr;
 		}
@@ -433,7 +433,7 @@ static Tox *load_tox(struct Tox_Options *options, const QString &path, ToxProfil
 	m = tox_new(options, &err);
 
 	if (err != TOX_ERR_NEW_OK) {
-		Debug("tox_new failed with error number: " + QString::number(err));
+		Tools::debug("tox_new failed with error number: " + QString::number(err));
 		error = TOX_ERR_LOADING_NULL;
 		return nullptr;
 	}
@@ -464,7 +464,7 @@ void bootstrap_DHT(Tox *m)
 	settings->endGroup();
 	QByteArray json_data;
 	if (!json_file.isEmpty()) {
-		QFile file(GetProgDir() + json_file);
+		QFile file(Tools::getProgDir() + json_file);
 		if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
 			json_data = file.readAll();
 			file.close();
@@ -512,7 +512,7 @@ struct Tox_Options get_opts()
 
 Tox *create(ToxProfileLoadingError &error, bool create_new)
 {
-	QFile f(GetProgDir() + qmlbridge->getCurrentProfile());
+	QFile f(Tools::getProgDir() + qmlbridge->getCurrentProfile());
 	bool clean = !f.exists();
 	if (!create_new && clean) {
 		error = TOX_ERR_LOADING_NOT_EXISTS;
@@ -524,7 +524,7 @@ Tox *create(ToxProfileLoadingError &error, bool create_new)
 	}
 
 	struct Tox_Options tox_opts = get_opts();
-	Tox *m = load_tox(&tox_opts, GetProgDir() + qmlbridge->getCurrentProfile(), error);
+	Tox *m = load_tox(&tox_opts, Tools::getProgDir() + qmlbridge->getCurrentProfile(), error);
 
 	if (!m) {
 		// error is set inside load_tox
@@ -557,14 +557,14 @@ Tox *create(ToxProfileLoadingError &error, bool create_new)
 		tox_self_set_name(m, (quint8*)username, strlen(username), NULL);
 	}
 
-	save_data(m, GetProgDir() + qmlbridge->getCurrentProfile());
+	save_data(m, Tools::getProgDir() + qmlbridge->getCurrentProfile());
 	error = TOX_ERR_LOADING_OK;
 	return m;
 }
 
 bool check_profile_encrypted(const QString &profile)
 {
-	QFile f(GetProgDir() + profile);
+	QFile f(Tools::getProgDir() + profile);
 	if (!f.open(QFile::OpenModeFlag::ReadOnly)) {
 		return false;
 	}
@@ -596,7 +596,7 @@ ToxId get_address(Tox *m)
 
 void destroy(Tox *m)
 {
-	save_data(m, GetProgDir() + qmlbridge->getCurrentProfile());
+	save_data(m, Tools::getProgDir() + qmlbridge->getCurrentProfile());
 	tox_kill(m);
 }
 
@@ -627,9 +627,24 @@ void reset(Tox *m)
 	TOX_ERR_NEW err;
 	m = tox_new(&tox_opts, &err);
 	if (err != TOX_ERR_NEW_OK) {
-		Debug("tox_new failed with error number: " + QString::number(err));
+		Tools::debug("tox_new failed with error number: " + QString::number(err));
 		m = nullptr;
 	}
 }
 
+}
+
+/*
+ * String <-> ToxId converter
+*/
+
+namespace ToxConverter {
+	const ToxId toToxId(const QString &str)
+	{
+		return ToxId::fromHex(str.toLatin1().toUpper());
+	}
+	const QString toString(const ToxId &user_id)
+	{
+		return QString(user_id.toHex().toUpper());
+	}
 }

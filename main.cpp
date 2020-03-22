@@ -32,14 +32,14 @@ QmlCBridge::QmlCBridge()
 	QObject::connect(reconnection_timer, &QTimer::timeout, [=]() {
 		if (Toxcore::get_connection_status() > 0) {
 			reconnection_timer->stop();
-			Debug("Reconnection timer aborted: successfully connected!");
+			Tools::debug("Reconnection timer aborted: successfully connected!");
 			return;
 		}
 		toxcore_timer->stop();
 		Toxcore::reset(tox);
 		Toxcore::bootstrap_DHT(tox);
 		toxcore_timer->start();
-		Debug("Reconnection...");
+		Tools::debug("Reconnection...");
 	});
 }
 
@@ -166,7 +166,7 @@ void QmlCBridge::copyTextToClipboard(QString text)
 
 void QmlCBridge::makeFriendRequest(const QString &toxId, const QString &friendMessage)
 {
-	int error = Toxcore::make_friend_request(tox, QString_To_ToxId(toxId), friendMessage);
+	int error = Toxcore::make_friend_request(tox, ToxConverter::toToxId(toxId), friendMessage);
 	QVariant returnedValue;
 	QMetaObject::invokeMethod(component, "sendFriendRequestStatus",
 		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, error));
@@ -247,7 +247,7 @@ void QmlCBridge::setStatus(quint32 status)
 
 QString QmlCBridge::getToxId()
 {
-	return ToxId_To_QString(Toxcore::get_address(tox));
+	return ToxConverter::toString(Toxcore::get_address(tox));
 }
 
 long QmlCBridge::getFriendsCount()
@@ -345,12 +345,12 @@ QString QmlCBridge::getNospamValue()
 	nospam_bytes.append((nospam >> 16) & 0xFF);
 	nospam_bytes.append((nospam >> 8) & 0xFF);
 	nospam_bytes.append(nospam & 0xFF);
-	return ToxId_To_QString(nospam_bytes);
+	return ToxConverter::toString(nospam_bytes);
 }
 
 void QmlCBridge::setNospamValue(const QString &nospam)
 {
-	ToxId bytes = QString_To_ToxId(nospam);
+	ToxId bytes = ToxConverter::toToxId(nospam);
 	quint32 value = bytes[0] << 24 | bytes[1] << 16 | bytes[2] << 8 | bytes[3];
 	Toxcore::set_nospam(tox, value);
 }
@@ -363,7 +363,7 @@ void QmlCBridge::generateToxPasswordKey(const QString &password)
 
 void QmlCBridge::saveProfile()
 {
-	Toxcore::save_data(tox, GetProgDir() + current_profile);
+	Toxcore::save_data(tox, Tools::getProgDir() + current_profile);
 }
 
 void QmlCBridge::regenerateToxPasswordKey()
@@ -433,7 +433,7 @@ int QmlCBridge::signInProfile(const QString &profile, bool create, const QString
 	}
 	chat_db = new ChatDataBase("chat_" + QString(current_profile).replace(".tox", ".db"), password);
 	Toxcore::bootstrap_DHT(tox);
-	Debug("My address: " + ToxId_To_QString(Toxcore::get_address(tox)));
+	Tools::debug("My address: " + ToxConverter::toString(Toxcore::get_address(tox)));
 
 	// load config
 	settings->beginGroup("Client_" + current_profile);
@@ -482,13 +482,13 @@ QmlCBridge::~QmlCBridge()
 
 QVariant QmlCBridge::getProfileList()
 {
-	QDir directory(GetProgDir());
+	QDir directory(Tools::getProgDir());
 	return directory.entryList(QStringList() << "*.tox", QDir::Files);
 }
 
 void QmlCBridge::signOutProfile(bool remove)
 {
-	Debug("Logout.");
+	Tools::debug("Logout.");
 	settings->beginGroup("Client_" + current_profile);
 	if (remove) {
 		settings->remove("");
@@ -508,8 +508,8 @@ void QmlCBridge::signOutProfile(bool remove)
 	profile_password.clear();
 
 	if (remove) {
-		QFile::remove(GetProgDir() + current_profile);
-		QFile::remove(GetProgDir() + "chat_" + QString(current_profile).replace(".tox", ".db"));
+		QFile::remove(Tools::getProgDir() + current_profile);
+		QFile::remove(Tools::getProgDir() + "chat_" + QString(current_profile).replace(".tox", ".db"));
 	}
 	current_profile.clear();
 }
@@ -528,9 +528,9 @@ int main(int argc, char *argv[])
 	}
 #endif
 	ChatDataBase::registerSQLDriver();
-	settings = new QSettings(GetProgDir() + "settings.ini", QSettings::IniFormat);
+	settings = new QSettings(Tools::getProgDir() + "settings.ini", QSettings::IniFormat);
 
-	Debug("App started.");
+	Tools::debug("App started.");
 	QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
 	QGuiApplication app(argc, argv);
@@ -562,7 +562,7 @@ int main(int argc, char *argv[])
 	int result = app.exec();
 	delete qmlbridge;
 	delete settings;
-	Debug("Program exited successfully.");
+	Tools::debug("Program exited successfully.");
 
 	return result;
 }

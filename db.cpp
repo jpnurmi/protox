@@ -9,7 +9,7 @@
 ChatDataBase::ChatDataBase(const QString &fileName, const QString &password)
 {
 	db = QSqlDatabase::addDatabase("SQLITECIPHER");
-	db.setDatabaseName(GetProgDir() + fileName);
+	db.setDatabaseName(Tools::getProgDir() + fileName);
 
 	if (!password.isEmpty()) {
 		db.setPassword(password);
