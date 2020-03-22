@@ -514,16 +514,20 @@ void QmlCBridge::signOutProfile(bool remove)
 	current_profile.clear();
 }
 
+
+
 int main(int argc, char *argv[])
 {
 	QtStatusBar::setColor(QColor("#3F51B5"));
 #if defined (Q_OS_ANDROID)
-	const QString permission_write = "android.permission.WRITE_EXTERNAL_STORAGE";
-	auto permission_result = QtAndroid::checkPermission(permission_write);
-	if(permission_result == QtAndroid::PermissionResult::Denied){
-		QtAndroid::PermissionResultMap resultHash = QtAndroid::requestPermissionsSync(QStringList({permission_write}));
-		if(resultHash[permission_write] == QtAndroid::PermissionResult::Denied) {
-			return 1;
+	const QStringList permission_list = { "android.permission.WRITE_EXTERNAL_STORAGE" };
+	for (auto permission : permission_list) {
+		auto permission_result = QtAndroid::checkPermission(permission);
+		if(permission_result == QtAndroid::PermissionResult::Denied){
+			QtAndroid::PermissionResultMap resultHash = QtAndroid::requestPermissionsSync(QStringList({permission}));
+			if(resultHash[permission] == QtAndroid::PermissionResult::Denied) {
+				return 1;
+			}
 		}
 	}
 #endif

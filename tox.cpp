@@ -331,19 +331,18 @@ bool save_data(Tox *m, const QString &path)
 	}
 
 	QFile file(path);
-	if (!file.open(QFile::OpenModeFlag::WriteOnly))
+	if (!file.open(QIODevice::WriteOnly))
 		return false;
 
 	size_t data_len = tox_get_savedata_size(m);
-	char *data = (char*)malloc(data_len);
-	tox_get_savedata(m, (quint8*)data);
+	quint8 data[data_len];
+	tox_get_savedata(m, data);
 
 	quint8 encryptedData[data_len + TOX_PASS_ENCRYPTION_EXTRA_LENGTH];
 	const Tox_Pass_Key *pass_key = qmlbridge->getToxPasswordKey();
 	if (pass_key) {
-		if(!tox_pass_key_encrypt(pass_key, (quint8*)data, data_len,
+		if(!tox_pass_key_encrypt(pass_key, data, data_len,
 								 encryptedData, nullptr)) {
-			free(data);
 			return false;
 		}
 	}
@@ -352,17 +351,15 @@ bool save_data(Tox *m, const QString &path)
 	if (pass_key) {
 		result = file.write((char*)encryptedData, data_len + TOX_PASS_ENCRYPTION_EXTRA_LENGTH);
 	} else {
-		result = file.write(data, data_len);
+		result = file.write((char*)data, data_len);
 	}
 
 	if (result == -1) {
-		free(data);
 		file.close();
 		Tools::debug("Warning: save_data failed: write failed.");
 		return false;
 	}
 
-	free(data);
 	file.close();
 	return true;
 }
@@ -372,7 +369,7 @@ static Tox *load_tox(struct Tox_Options *options, const QString &path, ToxProfil
 	QFile file(path);
 	Tox *m = nullptr;
 
-	if (!file.open(QFile::OpenModeFlag::ReadOnly)) {
+	if (!file.open(QIODevice::ReadOnly)) {
 		TOX_ERR_NEW err;
 		m = tox_new(options, &err);
 
@@ -387,8 +384,7 @@ static Tox *load_tox(struct Tox_Options *options, const QString &path, ToxProfil
 		return m;
 	}
 
-	QFile test(path);
-	size_t data_len = test.size();
+	quint64 data_len = file.size();
 
 	if (data_len == 0) {
 		file.close();
@@ -402,6 +398,7 @@ static Tox *load_tox(struct Tox_Options *options, const QString &path, ToxProfil
 		error = TOX_ERR_LOADING_NULL;
 		return nullptr;
 	}
+	file.close();
 
 	quint8 decrypted_data[data_len - TOX_PASS_ENCRYPTION_EXTRA_LENGTH];
 	QByteArray encodedPassword = qmlbridge->getProfilePassword().toUtf8();
@@ -438,7 +435,6 @@ static Tox *load_tox(struct Tox_Options *options, const QString &path, ToxProfil
 		return nullptr;
 	}
 
-	file.close();
 	error = TOX_ERR_LOADING_OK;
 	return m;
 }
@@ -482,9 +478,9 @@ void bootstrap_DHT(Tox *m)
 		QString public_key = item["public_key"].toString();
 
 		TOX_ERR_BOOTSTRAP err, err2;
-		tox_bootstrap(m, ipv4.toStdString().c_str(), (quint16)port, (const quint8*)public_key.toStdString().c_str(), &err);
+		tox_bootstrap(m, ipv4.toStdString().c_str(), (quint16)port, (quint8*)public_key.toStdString().c_str(), &err);
 		if (use_ipv6 && ipv6 != "-") {
-			tox_bootstrap(m, ipv6.toStdString().c_str(), (quint16)port, (const quint8*)public_key.toStdString().c_str(), &err2);
+			tox_bootstrap(m, ipv6.toStdString().c_str(), (quint16)port, (quint8*)public_key.toStdString().c_str(), &err2);
 		}
 
 		if (err == TOX_ERR_BOOTSTRAP_OK || err2 == TOX_ERR_BOOTSTRAP_OK) {
@@ -565,7 +561,7 @@ Tox *create(ToxProfileLoadingError &error, bool create_new)
 bool check_profile_encrypted(const QString &profile)
 {
 	QFile f(Tools::getProgDir() + profile);
-	if (!f.open(QFile::OpenModeFlag::ReadOnly)) {
+	if (!f.open(QIODevice::ReadOnly)) {
 		return false;
 	}
 	bool encrypted = tox_is_data_encrypted((quint8*)f.readAll().data());
@@ -573,15 +569,10 @@ bool check_profile_encrypted(const QString &profile)
 	return encrypted;
 }
 
-void step(Tox *m)
-{
-	tox_iterate(m, NULL);
-}
-
 QTimer *create_qtimer(Tox *m)
 {
-	QTimer *timer = new QTimer();
-	QObject::connect(timer, &QTimer::timeout, [=]() { step(m); });
+	QTimer *timer = new QTimer;
+	QObject::connect(timer, &QTimer::timeout, [=]() { tox_iterate(m, nullptr); });
 	timer->setSingleShot(false);
 	timer->setInterval(tox_iteration_interval(m));
 	return timer;
