@@ -226,18 +226,14 @@ void set_status(Tox *m, quint32 status)
 
 quint32 send_message(Tox *m, quint32 friend_number, const QString &message, bool &failed)
 {
-	TOX_ERR_FRIEND_SEND_MESSAGE error;
+	TOX_ERR_FRIEND_SEND_MESSAGE err;
 	QByteArray encodedMessage = message.toUtf8();
-	quint32 message_id = tox_friend_send_message(m, friend_number, TOX_MESSAGE_TYPE_NORMAL, (quint8*)encodedMessage.data(), encodedMessage.size(), &error);
-	switch (error) {
-	case TOX_ERR_FRIEND_SEND_MESSAGE_OK:
-		failed = false;
-		break;
-	case TOX_ERR_FRIEND_SEND_MESSAGE_FRIEND_NOT_CONNECTED:
+	quint32 message_id = tox_friend_send_message(m, friend_number, TOX_MESSAGE_TYPE_NORMAL, (quint8*)encodedMessage.data(), encodedMessage.size(), &err);
+	if (err > 0) {
 		failed = true;
-		break;
-	default:
-		break;
+		Tools::debug("tox_friend_send_message failed with error number: " + QString::number(err));
+	} else {
+		failed = false;
 	}
 	return message_id;
 }
