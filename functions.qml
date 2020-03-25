@@ -210,6 +210,9 @@ function insertFriend(friend_number, nickName, request, request_message, friendP
 }
 
 function setMessageReceived(friend_number, message_id, use_uid, unique_id) {
+    if (bridge.getCurrentFriendNumber() !== friend_number) {
+        return
+    }
     for (var i = 0; i < messagesModel.count; i++) {
         var message = messagesModel.get(i)
         if (!message.msgSelf)

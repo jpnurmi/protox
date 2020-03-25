@@ -72,10 +72,15 @@ void cb_friend_read_receipt(Tox *m, quint32 friend_number, quint32 message_id, v
 {
 	Q_UNUSED(m);
 	Q_UNUSED(userdata);
-	if (qmlbridge->getCurrentFriendNumber() != friend_number)
-		return;
 
-	chat_db->setMessageReceived(qmlbridge->messages_id_uid[message_id], get_friend_public_key(m, friend_number));
+	for (int i = 0; i < qmlbridge->pending_messages.count(); i++) {
+		if (qmlbridge->pending_messages[i].message_id == message_id && qmlbridge->pending_messages[i].friend_number == friend_number) {
+			chat_db->setMessageReceived(qmlbridge->pending_messages[i].unique_id, get_friend_public_key(m, friend_number));
+			qmlbridge->pending_messages.removeAt(i);
+			break;
+		}
+	}
+
 	qmlbridge->setMessageReceived(friend_number, message_id);
 }
 

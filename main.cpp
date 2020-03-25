@@ -107,7 +107,7 @@ void QmlCBridge::sendMessage(const QString &message)
 	variantMessage.insert("type", ToxVariantMessageType::TOXMSG_TEXT);
 	variantMessage.insert("message", message);
 	insertMessage(variantMessage, current_friend_number, true, message_id, new_unique_id, dt, false, failed);
-	messages_id_uid[message_id] = new_unique_id;
+	pending_messages.push_back(ToxMsgFriendReadMessage(message_id, new_unique_id, current_friend_number));
 	settings->beginGroup("Privacy");
 	bool keep_chat_history = settings->value("keep_chat_history", true).toBool();
 	settings->endGroup();
@@ -517,6 +517,8 @@ void QmlCBridge::signOutProfile(bool remove)
 		QFile::remove(Tools::getProgDir() + "chat_" + QString(current_profile).replace(".tox", ".db"));
 	}
 	current_profile.clear();
+	friends_conn_status.clear();
+	pending_messages.clear();
 }
 
 

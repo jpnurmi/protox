@@ -80,8 +80,7 @@ public slots:
 
 public:
 	ToxFriendsConnStatus friends_conn_status;
-	ToxMessagesIdUid messages_id_uid;
-	ToxMessagesDateTime messages_last_dt;
+	ToxMsgFriendReadMessages pending_messages;
 private:
 	quint32 current_friend_number;
 	QString current_profile;

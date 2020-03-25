@@ -8,8 +8,17 @@ typedef QByteArray ToxPk;
 typedef QByteArray ToxId;
 
 typedef QMap <quint32, TOX_CONNECTION> ToxFriendsConnStatus;
-typedef QMap <quint32, QDateTime> ToxMessagesDateTime;
-typedef QMap <quint32, quint64> ToxMessagesIdUid;
+struct ToxMsgFriendReadMessage {
+	quint32 message_id;
+	quint32 unique_id;
+	quint32 friend_number;
+	ToxMsgFriendReadMessage(quint32 _message_id, quint32 _unique_id, quint32 _friend_number) {
+		message_id = _message_id;
+		unique_id = _unique_id;
+		friend_number = _friend_number;
+	}
+};
+typedef QList<ToxMsgFriendReadMessage> ToxMsgFriendReadMessages;
 
 typedef QMap<QString, QVariant> ToxVariantMessage;
 enum ToxVariantMessageType {
