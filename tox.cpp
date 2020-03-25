@@ -13,6 +13,9 @@ extern QSettings *settings;
 
 namespace Toxcore {
 
+int current_connection_status = -1;
+struct Tox_Options *opts = nullptr;
+
 void cb_log(Tox *m, TOX_LOG_LEVEL level, const char *file, uint32_t line, const char *func,
                         const char *message, void *userdata)
 {
@@ -29,8 +32,6 @@ void cb_log(Tox *m, TOX_LOG_LEVEL level, const char *file, uint32_t line, const 
 	}
 	Tools::debug("Toxcore: " + QString(file) + " (line " + QString::number(line) + ") " + _level + ": " + func + " " + message);
 }
-
-int current_connection_status = -1;
 
 static void cb_self_connection_change(Tox *m, TOX_CONNECTION connection_status, void *userdata)
 {
@@ -137,9 +138,9 @@ static void cb_friend_typing(Tox *m, quint32 friend_number, bool is_typing, void
 	qmlbridge->setFriendTyping(friend_number, is_typing);
 }
 
-static void cb_friend_status_message(Tox *tox, quint32 friend_number, const quint8 *message, size_t length, void *user_data)
+static void cb_friend_status_message(Tox *m, quint32 friend_number, const quint8 *message, size_t length, void *user_data)
 {
-	Q_UNUSED(tox)
+	Q_UNUSED(m)
 	Q_UNUSED(user_data)
 
 	qmlbridge->setFriendStatusMessage(friend_number, QString::fromUtf8((char*)message, length));
@@ -492,16 +493,20 @@ void bootstrap_DHT(Tox *m)
 	}
 }
 
-struct Tox_Options get_opts()
+struct Tox_Options *get_opts()
 {
-	struct Tox_Options opts;
-	memset(&opts, 0, sizeof(struct Tox_Options));
-	tox_options_default(&opts);
-	opts.log_callback = cb_log;
+	TOX_ERR_OPTIONS_NEW error;
+	struct Tox_Options *opts = tox_options_new(&error);
+	if (error > 0) {
+		return nullptr;
+	}
+	memset(opts, 0, sizeof(struct Tox_Options));
+	tox_options_default(opts);
+	opts->log_callback = cb_log;
 	settings->beginGroup("Toxcore");
-	opts.udp_enabled = settings->value("udp_enabled", true).toBool();
-	opts.ipv6_enabled = settings->value("ipv6_enabled", true).toBool();
-	opts.local_discovery_enabled = settings->value("local_discovery_enabled", false).toBool();
+	opts->udp_enabled = settings->value("udp_enabled", true).toBool();
+	opts->ipv6_enabled = settings->value("ipv6_enabled", true).toBool();
+	opts->local_discovery_enabled = settings->value("local_discovery_enabled", false).toBool();
 	settings->endGroup();
 	return opts;
 }
@@ -519,8 +524,8 @@ Tox *create(ToxProfileLoadingError &error, bool create_new)
 		return nullptr;
 	}
 
-	struct Tox_Options tox_opts = get_opts();
-	Tox *m = load_tox(&tox_opts, Tools::getProgDir() + qmlbridge->getCurrentProfile(), error);
+	opts = get_opts();
+	Tox *m = load_tox(opts, Tools::getProgDir() + qmlbridge->getCurrentProfile(), error);
 
 	if (!m) {
 		// error is set inside load_tox
@@ -532,8 +537,6 @@ Tox *create(ToxProfileLoadingError &error, bool create_new)
 	tox_callback_friend_request(m, cb_friend_request);
 	tox_callback_friend_message(m, cb_friend_message);
 	tox_callback_friend_name(m, cb_friend_name);
-	//tox_callback_conference_invite(m, cb_group_invite);
-	//tox_callback_conference_title(m, cb_group_titlechange);
 	tox_callback_friend_read_receipt(m, cb_friend_read_receipt);
 	tox_callback_friend_typing(m, cb_friend_typing);
 	tox_callback_friend_status_message(m, cb_friend_status_message);
@@ -589,6 +592,7 @@ void destroy(Tox *m)
 {
 	save_data(m, Tools::getProgDir() + qmlbridge->getCurrentProfile());
 	tox_kill(m);
+	tox_options_free(opts);
 }
 
 const Tox_Pass_Key *generate_pass_key(const QString &password)
@@ -611,12 +615,13 @@ void reset(Tox *m)
 	quint8 data[length];
 	tox_get_savedata(m, data);
 	tox_kill(m);
-	struct Tox_Options tox_opts = get_opts();
-	tox_opts.savedata_type = TOX_SAVEDATA_TYPE_TOX_SAVE;
-	tox_opts.savedata_data = data;
-	tox_opts.savedata_length = length;
+	tox_options_free(opts);
+	opts = get_opts();
+	opts->savedata_type = TOX_SAVEDATA_TYPE_TOX_SAVE;
+	opts->savedata_data = data;
+	opts->savedata_length = length;
 	TOX_ERR_NEW err;
-	m = tox_new(&tox_opts, &err);
+	m = tox_new(opts, &err);
 	if (err != TOX_ERR_NEW_OK) {
 		Tools::debug("tox_new failed with error number: " + QString::number(err));
 		m = nullptr;

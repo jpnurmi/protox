@@ -43,6 +43,11 @@ QmlCBridge::QmlCBridge()
 	});
 }
 
+void QmlCBridge::test()
+{
+	// for testing
+}
+
 void QmlCBridge::setComponent(QObject *_component)
 {
 	component = _component;
