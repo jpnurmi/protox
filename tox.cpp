@@ -85,13 +85,12 @@ static void cb_friend_message(Tox *m, quint32 friend_number, TOX_MESSAGE_TYPE ty
 	if (type != TOX_MESSAGE_TYPE_NORMAL) {
 		return;
 	}
-
 	char public_key[TOX_PUBLIC_KEY_SIZE];
-
-	if (!tox_friend_get_public_key(m, friend_number, (quint8 *)public_key, NULL)) {
+	TOX_ERR_FRIEND_GET_PUBLIC_KEY err;
+	if (!tox_friend_get_public_key(m, friend_number, (quint8 *)public_key, &err)) {
+		Tools::debug("tox_friend_get_public_key failed with error number: " + QString::number(err));
 		return;
 	}
-
 	QString message(QByteArray((char*)string, length));
 	ToxPk friend_pk = get_friend_public_key(m, friend_number);
 	quint64 new_unique_id = chat_db->getMessagesCountFriend(friend_pk) + 1;
@@ -495,9 +494,10 @@ void bootstrap_DHT(Tox *m)
 
 struct Tox_Options *get_opts()
 {
-	TOX_ERR_OPTIONS_NEW error;
-	struct Tox_Options *opts = tox_options_new(&error);
-	if (error > 0) {
+	TOX_ERR_OPTIONS_NEW err;
+	struct Tox_Options *opts = tox_options_new(&err);
+	if (err > 0) {
+		Tools::debug("tox_options_new failed with error number: " + QString::number(err));
 		return nullptr;
 	}
 	memset(opts, 0, sizeof(struct Tox_Options));
