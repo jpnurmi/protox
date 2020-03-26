@@ -610,25 +610,6 @@ const QString get_version_string()
 	return QString::number(tox_version_major()) + "." + QString::number(tox_version_minor()) + "." + QString::number(tox_version_patch());
 }
 
-void reset(Tox *m)
-{
-	size_t length = tox_get_savedata_size(m);
-	quint8 data[length];
-	tox_get_savedata(m, data);
-	tox_kill(m);
-	tox_options_free(opts);
-	opts = get_opts();
-	opts->savedata_type = TOX_SAVEDATA_TYPE_TOX_SAVE;
-	opts->savedata_data = data;
-	opts->savedata_length = length;
-	TOX_ERR_NEW err;
-	m = tox_new(opts, &err);
-	if (err != TOX_ERR_NEW_OK) {
-		Tools::debug("tox_new failed with error number: " + QString::number(err));
-		m = nullptr;
-	}
-}
-
 }
 
 /*

@@ -35,10 +35,7 @@ QmlCBridge::QmlCBridge()
 			Tools::debug("Reconnection timer aborted: successfully connected!");
 			return;
 		}
-		toxcore_timer->stop();
-		Toxcore::reset(tox);
 		Toxcore::bootstrap_DHT(tox);
-		toxcore_timer->start();
 		Tools::debug("Reconnection...");
 	});
 }
@@ -545,6 +542,7 @@ int main(int argc, char *argv[])
 	QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
 	QGuiApplication app(argc, argv);
+
 	qInstallMessageHandler(customMessageHandler);
 
 	QQmlApplicationEngine engine;

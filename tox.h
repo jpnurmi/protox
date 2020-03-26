@@ -80,7 +80,6 @@ namespace Toxcore {
 	bool save_data(Tox *m, const QString &path);
 	const Tox_Pass_Key *generate_pass_key(const QString &password);
 	const QString get_version_string();
-	void reset(Tox *m);
 }
 
 namespace ToxConverter {
