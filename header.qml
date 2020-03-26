@@ -23,7 +23,7 @@ ToolBar {
             text: "\uE68E"
             anchors.centerIn: parent
             font.family: themify.name
-            font.pointSize: 28
+            font.pointSize: fontMetrics.normalize(28)
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
 
@@ -92,7 +92,7 @@ ToolBar {
         id: rightOverlayHeaderButton
         text: "\uE6E2"
         font.family: themify.name
-        font.pointSize: 28
+        font.pointSize: fontMetrics.normalize(28)
         
         onPressed: {
             if (contextMenuRight.visible) {
@@ -123,11 +123,13 @@ ToolBar {
 
     Label {
         id: friendNickname
-        anchors.centerIn: parent
+        anchors.top: parent.top
+        anchors.topMargin: 10 / fontMetrics.getFontScaling()
+        anchors.horizontalCenter: parent.horizontalCenter
         property int charsLimit: 20
         function setText(t) {
             var mult = !inPortrait ? 1.5 : 1.0
-            text = limitString(t, Math.round(charsLimit * mult))
+            text = limitString(t, Math.round(charsLimit * mult / fontMetrics.getFontScaling() * 0.8))
         }
         MouseArea {
             anchors.fill: parent
@@ -152,12 +154,12 @@ ToolBar {
         id: friendStatus
         anchors.top: friendNickname.bottom
         anchors.horizontalCenter: friendNickname.horizontalCenter
-        font.pointSize: 10
+        font.pointSize: fontMetrics.normalize(10)
         font.italic: true
         property int charsLimit: 52
         function setText(t) {
             var mult = !inPortrait ? 1.5 : 1.0
-            text = limitString(t, Math.round(charsLimit * mult))
+            text = limitString(t, Math.round(charsLimit * mult / fontMetrics.getFontScaling()))
         }
     }
 }

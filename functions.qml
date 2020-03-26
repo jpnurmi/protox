@@ -312,4 +312,8 @@ function resetUI() {
     new_messages = 0
 }
 
+function fontSize(size) {
+    
+}
+
 /*[remove]*/ }

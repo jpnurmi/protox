@@ -59,7 +59,7 @@ Drawer {
                     id: accountName
                     leftPadding: 4
                     rightPadding: 4
-                    font.pointSize: 12
+                    font.pointSize: fontMetrics.normalize(12)
                     font.bold: true
                     Layout.alignment: Qt.AlignLeft
                     Layout.leftMargin: 4
@@ -75,17 +75,24 @@ Drawer {
                     Repeater {
                         model: [[qsTr("Online"), "lightgreen"],[qsTr("Away"), "yellow"],[qsTr("Busy"), "red"]/*,[qsTr("Offline"), "gray"]*/]
                         delegate: MenuItem {
-                            text: modelData[0]
-                            Rectangle {
-                                anchors.right: parent.right
-                                anchors.rightMargin: 10
-                                anchors.verticalCenter: parent.verticalCenter
-                                color: modelData[1]
-                                width: 15
-                                height: width
-                                border.color: "black"
-                                border.width: 1
-                                radius: width * 0.5
+                            RowLayout {
+                                anchors.fill: parent
+                                Text {
+                                    Layout.alignment: Qt.AlignLeft
+                                    Layout.leftMargin: 10
+                                    text: modelData[0]
+                                    wrapMode: Text.Wrap
+                                }
+                                Rectangle {
+                                    Layout.alignment: Qt.AlignRight
+                                    Layout.rightMargin: 10
+                                    color: modelData[1]
+                                    width: 15
+                                    height: width
+                                    border.color: "black"
+                                    border.width: 1
+                                    radius: width * 0.5
+                                }
                             }
                             onClicked: {
                                 //if (index < 3) {
@@ -148,7 +155,7 @@ Drawer {
                 text: qsTr("Bootstrapping...")
                 color: "orange"
                 font.italic: true
-                font.pointSize: 12
+                font.pointSize: fontMetrics.normalize(12)
                 Layout.alignment: Qt.AlignHCenter
             }
             MenuSeparator { 

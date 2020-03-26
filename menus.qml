@@ -69,7 +69,7 @@ Menu {
     }
     TextField {
         id: toxId
-        font.pointSize: standardFontPointSize
+        font.pointSize: fontMetrics.normalize(standardFontPointSize)
         leftPadding: 10
         rightPadding: leftPadding
         verticalAlignment: TextInput.AlignVCenter
@@ -96,7 +96,7 @@ Menu {
     }
     TextField {
         id: addFriendMessage
-        font.pointSize: standardFontPointSize
+        font.pointSize: fontMetrics.normalize(standardFontPointSize)
         leftPadding: 10
         rightPadding: leftPadding
         verticalAlignment: TextInput.AlignVCenter
@@ -111,10 +111,11 @@ Menu {
         id: friendRequestStatusText
         padding: 5
         font.bold: true
-        font.pointSize: 15
+        font.pointSize: fontMetrics.normalize(15)
         width: parent.width
         horizontalAlignment: Qt.AlignHCenter
         text: ""
+        wrapMode: Text.Wrap
     }
     RowLayout {
         MenuItem {
@@ -260,7 +261,7 @@ Menu {
             anchors.centerIn: parent
             text: qsTr("Remove this friend")
             color: "red"
-            font.pointSize: 14
+            font.pointSize: fontMetrics.normalize(14)
             font.capitalization: Font.AllUppercase
             font.bold: true
         }
@@ -302,7 +303,7 @@ Menu {
     }
     TextField {
         id: myNickname
-        font.pointSize: standardFontPointSize
+        font.pointSize: fontMetrics.normalize(standardFontPointSize)
         leftPadding: 10
         rightPadding: leftPadding
         verticalAlignment: TextInput.AlignVCenter
@@ -320,7 +321,7 @@ Menu {
     }
     TextField {
         id: myStatus
-        font.pointSize: standardFontPointSize
+        font.pointSize: fontMetrics.normalize(standardFontPointSize)
         leftPadding: 10
         rightPadding: leftPadding
         verticalAlignment: TextInput.AlignVCenter
@@ -386,6 +387,7 @@ Menu {
         id: toxIDHelperText
         horizontalAlignment: Qt.AlignHCenter
         text: qsTr("Click on image to copy your ToxID.")
+        wrapMode: Text.Wrap
         topPadding: 10
     }
 }

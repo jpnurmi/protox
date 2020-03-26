@@ -42,6 +42,7 @@ ApplicationWindow {
             Qt.inputMethod.show()
         }
     }
+
     Connections {
         target: Qt.application
         onStateChanged: {
@@ -92,8 +93,9 @@ ApplicationWindow {
         id: welcomeTextTitle
         x: (window.width - width) / 2
         text: qsTr("Welcome to Protox!")
+        wrapMode: Text.Wrap
         font.bold: true
-        font.pointSize: 32
+        font.pointSize: fontMetrics.normalizeAverage(32)
         anchors.top: welcomeImage.bottom
         anchors.topMargin: 40
         visible: cleanProfile
@@ -133,6 +135,20 @@ ApplicationWindow {
     FontLoader { 
         id: themify
         source: "themify.ttf"
+    }
+
+    FontMetrics {
+        property real defaultSize: 16
+        id: fontMetrics
+        function getFontScaling() {
+            return font.pointSize / defaultSize
+        }
+        function normalize(size) {
+            return size * getFontScaling()
+        }
+        function normalizeAverage(size) {
+            return (defaultSize + normalize(size)) * 0.5
+        }
     }
 
     // global properties

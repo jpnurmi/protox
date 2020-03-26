@@ -152,17 +152,20 @@ ColumnLayout {
                         anchors.left = parent.left
                         anchors.leftMargin = chatContent.chat_margin
                     }
-                    if (msgFailed) {
-                        Qt.createQmlObject("import QtQuick 2.12; Text {
-                                                    text: \"!\"
-                                                    color: \"red\"
-                                                    font.pointSize: 20
-                                                    font.bold: true
-                                                    anchors.right: parent.left
-                                                }", this, "failedText")
+                }
+                Text {
+                    id: failedText
+                    text: "!"
+                    color: "red"
+                    font.pointSize: fontMetrics.normalize(20)
+                    font.bold: true
+                    anchors.right: parent.left
+                    Component.onCompleted: {
+                        if (!msgFailed) {
+                            destroy()
+                        }
                     }
                 }
-                
                 Text {
                     id: cloudText
                     property string plainText: msgText
@@ -170,7 +173,7 @@ ColumnLayout {
                     anchors.fill: parent
                     anchors.margins: chatContent.cloud_margin
                     font.family: "Helvetica"
-                    font.pointSize: standardFontPointSize
+                    font.pointSize: fontMetrics.normalize(standardFontPointSize)
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
@@ -258,7 +261,7 @@ ColumnLayout {
                     id: timeText
                     anchors.top: messageCloud.bottom
                     text: msgTime
-                    font.pointSize: 10
+                    font.pointSize: fontMetrics.normalize(10)
                     Component.onCompleted: {
                         if (!msgSelf) {
                             anchors.left = parent.left
@@ -298,7 +301,7 @@ ColumnLayout {
             id: chatMessage
             Layout.fillWidth: true
             selectByMouse: true
-            font.pointSize: standardFontPointSize
+            font.pointSize: fontMetrics.normalize(standardFontPointSize)
             leftPadding: 10
             verticalAlignment: TextInput.AlignVCenter
             placeholderText: qsTr("Type something")
@@ -403,7 +406,7 @@ Rectangle {
         id: nextPageButtonText
         text: "\u2193 " + qsTr("You have ") + new_messages + qsTr(" new messages") + " \u2193"
         font.bold: true
-        font.pointSize: 12.5
+        font.pointSize: fontMetrics.normalize(12.5)
         opacity: parent.opacity
         anchors.centerIn: parent
     }
