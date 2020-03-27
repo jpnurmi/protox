@@ -122,7 +122,7 @@ Popup {
                     var list = bridge.getProfileList()
                     model = list
                     if (list.length > 0) {
-                        if (select) {
+                        if (select || list.length === 1) {
                             accountSelectionButton.text = list[0]
                             accountMenu.profileName = list[0]
                         }
