@@ -264,9 +264,9 @@ Popup {
         model: settingsModel
         delegate: ColumnLayout {
             width: parent.width
-            height: (flags & settingsWindow.sf_title) ? (flags & settingsWindow.sf_help 
+            height: ((flags & settingsWindow.sf_title) ? (flags & settingsWindow.sf_help 
                                                       ? ((flags & settingsWindow.sf_warning) 
-                                                      ? 12 : 32) : 24) : 56
+                                                      ? 12 : 32) : 24) : 56) * fontMetrics.getFontScaling()
             spacing: 0
             RowLayout {
                 width: parent.width
@@ -274,7 +274,8 @@ Popup {
                     Layout.leftMargin: 10
                     Layout.alignment: Qt.AlignLeft
                     Layout.fillWidth: true
-                    Layout.topMargin: (flags & settingsWindow.sf_title) && !(flags & settingsWindow.sf_help) ? 10 : 0
+                    Layout.topMargin: ((flags & settingsWindow.sf_title) && 
+                                      !(flags & settingsWindow.sf_help) ? 10 : 0)
                     text: name
                     wrapMode: Text.Wrap
                     font.pointSize: fontMetrics.normalize((flags & settingsWindow.sf_title) ? 

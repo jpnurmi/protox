@@ -58,7 +58,7 @@ function setFriendStatus(friend_number, status) {
 function setFriendStatusMessage(friend_number, message) {
     if (friend_number !== bridge.getCurrentFriendNumber())
         return
-    friendStatus.setText(message)
+    friendStatusMessage.setText(message)
 }
 
 function setFriendTyping(friend_number, typing) {
@@ -87,7 +87,7 @@ function updateFriendNickName(friend_number, nickname) {
         }
     }
     if (friend_number === bridge.getCurrentFriendNumber()) {
-        friendNickname.text = limitString(nickname, friendNickname.charsLimit)
+        friendNickname.setText(nickname)
     }
 }
 function sendFriendRequestStatus(status) {
@@ -127,7 +127,7 @@ function selectFriend(friend_number) {
     each_friend_text[bridge.getCurrentFriendNumber()] = chatMessage.text
     bridge.setCurrentFriend(friend_number)
     friendNickname.setText(bridge.getFriendNickname(friend_number))
-    friendStatus.setText(bridge.getFriendStatusMessage(friend_number))
+    friendStatusMessage.setText(bridge.getFriendStatusMessage(friend_number))
     for (var i = 0; i < friendsModel.count; i++) {
         if (friendsModel.get(i).friendNumber === friend_number) {
             friendStatusIndicator.color = friendsModel.get(i).statusColor
@@ -281,7 +281,7 @@ function signInProfile(profile, create, password) {
     cleanProfile = bridge.getFriendsCount() < 1
     // header
     friendNickname.setText(bridge.getFriendNickname(friend_number))
-    friendStatus.setText(bridge.getFriendStatusMessage(friend_number))
+    friendStatusMessage.setText(bridge.getFriendStatusMessage(friend_number))
     // drawer
     accountName.text = bridge.getNickname(true)
     statusIndicator.setStatus(bridge.getStatus())

@@ -63,7 +63,7 @@ ToolBar {
         }
         onClosed: {
             currentIndex = -1
-            rightOverlayHeaderButton.highlighted = false
+            rightOverlayButton.highlighted = false
         }
 
         MenuItem {
@@ -89,7 +89,7 @@ ToolBar {
         }
     }
     ToolButton {
-        id: rightOverlayHeaderButton
+        id: rightOverlayButton
         text: "\uE6E2"
         font.family: themify.name
         font.pointSize: fontMetrics.normalize(28)
@@ -124,12 +124,12 @@ ToolBar {
     Label {
         id: friendNickname
         anchors.top: parent.top
-        anchors.topMargin: 10 / fontMetrics.getFontScaling()
+        anchors.topMargin: parent.height - height - friendStatusMessage.height
         anchors.horizontalCenter: parent.horizontalCenter
         property int charsLimit: 20
         function setText(t) {
             var mult = !inPortrait ? 1.5 : 1.0
-            text = limitString(t, Math.round(charsLimit * mult / fontMetrics.getFontScaling() * 0.8))
+            text = limitString(t, Math.round(charsLimit * mult / fontMetrics.getFontScaling()))
         }
         MouseArea {
             anchors.fill: parent
@@ -151,7 +151,7 @@ ToolBar {
         }
     }
     Label {
-        id: friendStatus
+        id: friendStatusMessage
         anchors.top: friendNickname.bottom
         anchors.horizontalCenter: friendNickname.horizontalCenter
         font.pointSize: fontMetrics.normalize(10)

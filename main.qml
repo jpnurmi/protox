@@ -25,7 +25,7 @@ ApplicationWindow {
         var friend_number = bridge.getCurrentFriendNumber()
         drawer.width = width * 0.5 * (!inPortrait ? (Screen.height / Screen.width) : 1.0)
         //friendNickname.setText(bridge.getFriendNickname(friend_number))
-        //friendStatus.setText(bridge.getFriendStatusMessage(friend_number))
+        //friendStatusMessage.setText(bridge.getFriendStatusMessage(friend_number))
     }
 
     onHeightChanged: {
@@ -138,8 +138,8 @@ ApplicationWindow {
     }
 
     FontMetrics {
-        property real defaultSize: 16
         id: fontMetrics
+        property real defaultSize: 16
         function getFontScaling() {
             return font.pointSize / defaultSize
         }
