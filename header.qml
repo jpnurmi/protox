@@ -23,7 +23,7 @@ ToolBar {
             text: "\uE68E"
             anchors.centerIn: parent
             font.family: themify.name
-            font.pointSize: fontMetrics.normalize(28)
+            font.pointSize: 28
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
 
@@ -92,7 +92,7 @@ ToolBar {
         id: rightOverlayButton
         text: "\uE6E2"
         font.family: themify.name
-        font.pointSize: fontMetrics.normalize(28)
+        font.pointSize: 28
         
         onPressed: {
             if (contextMenuRight.visible) {
