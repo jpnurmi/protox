@@ -360,7 +360,7 @@ void QmlCBridge::setNospamValue(const QString &nospam)
 void QmlCBridge::generateToxPasswordKey(const QString &password)
 {
 	profile_password = password;
-	regenerateToxPasswordKey();
+	resetToxPasswordKey();
 }
 
 void QmlCBridge::saveProfile()
@@ -368,8 +368,9 @@ void QmlCBridge::saveProfile()
 	Toxcore::save_data(tox, Tools::getProgDir() + current_profile);
 }
 
-void QmlCBridge::regenerateToxPasswordKey()
+void QmlCBridge::resetToxPasswordKey()
 {
+	Toxcore::reset_pass_key(tox_pass_key);
 	tox_pass_key = Toxcore::generate_pass_key(profile_password);
 }
 
@@ -425,8 +426,7 @@ extern "C"
 int QmlCBridge::signInProfile(const QString &profile, bool create, const QString &password)
 {
 	current_profile = profile;
-	profile_password = password;
-	regenerateToxPasswordKey();
+	generateToxPasswordKey(password);
 	ToxProfileLoadingError error;
 	tox = Toxcore::create(error, create);
 	if (!tox) {

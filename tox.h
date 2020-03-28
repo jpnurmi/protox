@@ -78,7 +78,8 @@ namespace Toxcore {
 	void set_nospam(Tox *m, quint32 nospam);
 	bool check_profile_encrypted(const QString &profile);
 	bool save_data(Tox *m, const QString &path);
-	const Tox_Pass_Key *generate_pass_key(const QString &password);
+	Tox_Pass_Key *generate_pass_key(const QString &password);
+	void reset_pass_key(Tox_Pass_Key *key);
 	const QString get_version_string();
 }
 

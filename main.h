@@ -32,7 +32,7 @@ public:
 	bool getAppInactive() { return app_inactive; }
 	const Tox_Pass_Key *getToxPasswordKey() { return tox_pass_key; }
 	const QString getProfilePassword() { return profile_password; }
-	void regenerateToxPasswordKey();
+	void resetToxPasswordKey();
 	void tryReconnect();
 public slots:
 	Q_INVOKABLE void sendMessage(const QString &message);
@@ -88,10 +88,13 @@ private:
 	bool app_inactive;
 private:
 	QObject *component;
-	Tox *tox;
+private:
 	QTimer *toxcore_timer;
 	QTimer *reconnection_timer;
-	const Tox_Pass_Key *tox_pass_key;
+private:
+	// fixme: move to tox.cpp
+	Tox *tox;
+	Tox_Pass_Key *tox_pass_key;
 };
 
 #endif // MAIN_H
