@@ -35,8 +35,9 @@ QmlCBridge::QmlCBridge()
 			Tools::debug("Reconnection timer aborted: successfully connected!");
 			return;
 		}
+		Tools::debug("Bootstrapping...");
+		QMetaObject::invokeMethod(component, "resetConnectionStatus");
 		Toxcore::bootstrap_DHT(tox);
-		Tools::debug("Reconnection...");
 	});
 }
 
@@ -433,9 +434,8 @@ int QmlCBridge::signInProfile(const QString &profile, bool create, const QString
 		current_profile.clear();
 		return error;
 	}
-	chat_db = new ChatDataBase("chat_" + QString(current_profile).replace(".tox", ".db"), password);
-	Toxcore::bootstrap_DHT(tox);
 	Tools::debug("My address: " + ToxConverter::toString(Toxcore::get_address(tox)));
+	chat_db = new ChatDataBase("chat_" + QString(current_profile).replace(".tox", ".db"), password);
 
 	// load config
 	settings->beginGroup("Client_" + current_profile);
@@ -468,6 +468,8 @@ int QmlCBridge::signInProfile(const QString &profile, bool create, const QString
 		qmlbridge->insertFriend(_friend.toUInt(), Toxcore::get_friend_name(tox, _friend.toUInt()));
 	}
 
+	Toxcore::bootstrap_DHT(tox);
+	Tools::debug("Bootstrapping...");
 	toxcore_timer = Toxcore::create_qtimer(tox);
 	toxcore_timer->start();
 	return 0;

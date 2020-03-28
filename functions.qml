@@ -301,13 +301,18 @@ function signInProfile(profile, create, password) {
     return 0
 }
 
+function resetConnectionStatus()
+{
+    connectionStatus.text = qsTr("Bootstrapping...")
+    connectionStatus.color = "orange"
+}
+
 function resetUI() {
     // the rest in signInProfile will be overwritten on login
     chatMessage.clear()
     each_friend_text = []
     friendsModel.clear()
-    connectionStatus.text = qsTr("Bootstrapping...")
-    connectionStatus.color = "orange"
+    resetConnectionStatus()
     friendStatusIndicator.color = "gray"
     new_messages = 0
 }
