@@ -325,7 +325,7 @@ int get_connection_status()
 
 bool save_data(Tox *m, const QString &path)
 {
-	qmlbridge->resetToxPasswordKey();
+	qmlbridge->updateToxPasswordKey();
 	if (path.isEmpty()) {
 		Tools::debug("Warning: save_data failed: path is empty.");
 		return false;

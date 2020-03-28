@@ -32,7 +32,7 @@ public:
 	bool getAppInactive() { return app_inactive; }
 	const Tox_Pass_Key *getToxPasswordKey() { return tox_pass_key; }
 	const QString getProfilePassword() { return profile_password; }
-	void resetToxPasswordKey();
+	void updateToxPasswordKey();
 	void tryReconnect();
 public slots:
 	Q_INVOKABLE void sendMessage(const QString &message);
