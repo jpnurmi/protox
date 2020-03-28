@@ -28,7 +28,7 @@ QmlCBridge::QmlCBridge()
 	settings->endGroup();
 	reconnection_timer = new QTimer;
 	reconnection_timer->setInterval(reconnection_interval);
-	reconnection_timer->setSingleShot(true);
+	reconnection_timer->setSingleShot(false);
 	QObject::connect(reconnection_timer, &QTimer::timeout, [=]() {
 		if (Toxcore::get_connection_status() > 0) {
 			reconnection_timer->stop();
@@ -517,8 +517,6 @@ void QmlCBridge::signOutProfile(bool remove)
 	friends_conn_status.clear();
 	pending_messages.clear();
 }
-
-
 
 int main(int argc, char *argv[])
 {

@@ -16,7 +16,6 @@
 #include <QtSql/QSqlError>
 #include <QDateTime>
 #include <QClipboard>
-#include <QFuture>
 #include <QtConcurrent/QtConcurrent>
 #include <QSettings>
 #include <QJsonDocument>
