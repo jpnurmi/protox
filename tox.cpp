@@ -245,7 +245,6 @@ int make_friend_request(Tox *m, ToxId id, const QString &friendMessage)
 	quint32 friend_number = tox_friend_add(m, (quint8*)id.data(), (quint8*)msgData.data(), msgData.length(), &error);
 	if (!error) {
 		qmlbridge->insertFriend(friend_number, ToxConverter::toString(get_friend_public_key(m, friend_number)));
-		save_data(m, Tools::getProgDir() + qmlbridge->getCurrentProfile());
 	}
 	return error;
 }
@@ -253,7 +252,6 @@ int make_friend_request(Tox *m, ToxId id, const QString &friendMessage)
 quint32 add_friend(Tox *m, const ToxPk &friendPk, int *error)
 {
 	quint32 friend_number = tox_friend_add_norequest(m, (quint8*)friendPk.data(), (TOX_ERR_FRIEND_ADD*)error);
-	save_data(m, Tools::getProgDir() + qmlbridge->getCurrentProfile());
 	return friend_number;
 }
 
@@ -284,7 +282,6 @@ void set_nickname(Tox *m, const QString &nickname)
 {
 	QByteArray encodedNickname = nickname.toUtf8();
 	tox_self_set_name(m, (quint8*)encodedNickname.data(), encodedNickname.length(), nullptr);
-	save_data(m, Tools::getProgDir() + qmlbridge->getCurrentProfile());
 }
 
 int get_friend_status(Tox *m, quint32 friend_number)
@@ -311,7 +308,6 @@ void set_status_message(Tox *m, const QString &statusMessage)
 {
 	QByteArray encodedMessage = statusMessage.toUtf8();
 	tox_self_set_status_message(m, (quint8*)encodedMessage.data(), encodedMessage.length(), nullptr);
-	save_data(m, Tools::getProgDir() + qmlbridge->getCurrentProfile());
 }
 
 /*

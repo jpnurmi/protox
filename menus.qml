@@ -183,6 +183,7 @@ MessageDialog {
             clearFriendHistoryDialog.open()
         }
         bridge.deleteFriend(friend_number)
+        bridge.saveProfile()
         for (var i = 0; i < friendsModel.count; i++) {
             var friend = friendsModel.get(i)
             if (friend.friendNumber === friend_number) {
@@ -350,6 +351,7 @@ Menu {
                 bridge.setNickname(myNickname.text)
                 accountName.text = bridge.getNickname(true)
                 bridge.setStatusMessage(myStatus.text)
+                bridge.saveProfile()
                 profileMenu.close()
             }
         }

@@ -269,6 +269,7 @@ Drawer {
                             id: friendDragAreaIndicator
                             anchors.fill: parent
                             drag.target: friendLayout
+                            enabled: friendsModel.count > 1
                         }
                         Rectangle {
                             id: friendItemStatusIndicator
@@ -436,6 +437,8 @@ MessageDialog {
         var error = bridge.addFriend(friendPk)
         if (error > 0) {
             toast.show({ message : qsTr("addFriend failed, error code: ") + error, duration : Toast.Long });
+        } else {
+            bridge.saveProfile()
         }
     }
     onNo: {

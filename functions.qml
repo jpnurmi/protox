@@ -81,7 +81,7 @@ function setFriendTyping(friend_number, typing) {
 function updateFriendNickName(friend_number, nickname) {
     for (var i = 0; i < friendsModel.count; i++) {
         var friend = friendsModel.get(i)
-        if (friend.friendNumber === friend_number) {
+        if (friend.friendNumber === friend_number && !friend.request) {
             friend.nickName = nickname
             friendsModel.set(i, friend)
         }
@@ -96,6 +96,7 @@ function sendFriendRequestStatus(status) {
     if (addFriendMenu.opened) {
         switch (status) {
         case 0:
+            bridge.saveProfile()
             toast.show({ message : qsTr("Request sent!"), duration : Toast.Short }); 
             addFriendMenu.close();
             toxId.clear()
@@ -315,10 +316,6 @@ function resetUI() {
     resetConnectionStatus()
     friendStatusIndicator.color = "gray"
     new_messages = 0
-}
-
-function fontSize(size) {
-    
 }
 
 /*[remove]*/ }

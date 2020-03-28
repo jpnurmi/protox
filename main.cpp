@@ -520,6 +520,8 @@ void QmlCBridge::signOutProfile(bool remove)
 	pending_messages.clear();
 }
 
+
+
 int main(int argc, char *argv[])
 {
 	QtStatusBar::setColor(QColor("#3F51B5"));
