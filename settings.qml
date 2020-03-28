@@ -266,7 +266,7 @@ Popup {
             width: parent.width
             height: ((flags & settingsWindow.sf_title) ? (flags & settingsWindow.sf_help 
                                                       ? ((flags & settingsWindow.sf_warning) 
-                                                      ? 12 : 32) : 24) : 56) * fontMetrics.getFontScaling()
+                                                      ? 12 : 14) : 24) : 56) * fontMetrics.getFontScaling()
             spacing: 0
             RowLayout {
                 width: parent.width
@@ -285,6 +285,12 @@ Popup {
                     color: (flags & settingsWindow.sf_title) ? 
                            ((flags & settingsWindow.sf_help) ? ((flags & settingsWindow.sf_warning) 
                                                              ? "red" : "black") : "green") : "black"
+                    Component.onCompleted: {
+                        // for multi-line text
+                        if (parent.parent.height < contentHeight) {
+                            parent.parent.height = contentHeight
+                        }
+                    }
                 }
                 Loader {
                     Component { 
