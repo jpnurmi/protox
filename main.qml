@@ -64,13 +64,6 @@ ApplicationWindow {
         source: "splash.png"
         anchors.fill: parent
         z: z_splash
-        cache: true
-        NumberAnimation on opacity {
-            id: splashImageDestroyAnimation
-            to: 0
-            duration: 200
-            running: false
-        }
     }
 
     Component.onCompleted: {

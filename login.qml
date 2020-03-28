@@ -34,13 +34,8 @@ Popup {
         }
     }
     enter: Transition {}
-    exit: Transition {
-        NumberAnimation { property: "opacity"; from: 1.0; to: 0.0 }
-        onRunningChanged: {
-            if (!running) {
-                splashImageDestroyAnimation.start()
-            }
-        }
+    exit: Transition { 
+        NumberAnimation { property: "opacity"; from: 1.0; to: 0.0 } 
     }
     NumberAnimation { id: loginWindowReopenAnimation; target: loginWindow; property: "opacity"; from: 0.0; to: 1.0 }
     function reopen(remove) {
@@ -330,6 +325,9 @@ Popup {
     }
 
     onAboutToHide: {
+        if (splashImage !== null) {
+            splashImage.destroy()
+        }
         if (!profileSelected) {
             Qt.quit()
         }
