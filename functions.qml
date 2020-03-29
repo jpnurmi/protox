@@ -274,8 +274,8 @@ function updateQRcode() {
                               "&format=qrcode"
 }
 
-function signInProfile(profile, create, password) {
-    var error = bridge.signInProfile(profile, create, password)
+function signInProfile(profile, create, password, autoLogin) {
+    var error = bridge.signInProfile(profile, create, password, autoLogin)
     if (error > 0)
         return error
     var friend_number = bridge.getCurrentFriendNumber()

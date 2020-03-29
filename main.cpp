@@ -423,7 +423,7 @@ extern "C"
 }
 #endif
 
-int QmlCBridge::signInProfile(const QString &profile, bool create, const QString &password)
+int QmlCBridge::signInProfile(const QString &profile, bool create, const QString &password, bool autoLogin)
 {
 	current_profile = profile;
 	setToxPassword(password);
@@ -434,6 +434,13 @@ int QmlCBridge::signInProfile(const QString &profile, bool create, const QString
 		current_profile.clear();
 		return error;
 	}
+	settings->beginGroup("Client");
+	if (autoLogin) {
+		settings->setValue("autoProfile", profile);
+	} else {
+		settings->setValue("autoProfile", "");
+	}
+	settings->endGroup();
 	Tools::debug("My address: " + ToxConverter::toString(Toxcore::get_address(tox)));
 	chat_db = new ChatDataBase("chat_" + QString(current_profile).replace(".tox", ".db"), password);
 

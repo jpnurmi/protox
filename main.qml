@@ -7,6 +7,7 @@ import QtQuick.Window 2.12
 import QtMultimedia 5.12
 import QtGraphicalEffects 1.0
 import QtQuick.Controls.Styles 1.4
+import QtQuick.Particles 2.12
 
 import QtNotification 1.0
 import QtStatusBar 1.0
@@ -66,8 +67,23 @@ ApplicationWindow {
         z: z_splash
     }
 
+    Timer {
+        id: delayTimer
+        interval: 1
+        repeat: false
+        onTriggered: {
+            var autoProfile = bridge.getSettingsValue("Client", "autoProfile", ptype_string, String(""))
+            if (autoProfile.length > 0) {
+                loginWindow.login(autoProfile)
+                splashImage.destroy()
+                return
+            }
+            loginWindow.open()
+        }
+    }
+
     Component.onCompleted: {
-        loginWindow.open()
+        delayTimer.start()
     }
 
     Image {
@@ -106,8 +122,6 @@ ApplicationWindow {
         leftPadding: 10
         rightPadding: leftPadding
     }
-
-    //include: settings.qml
 
     /*
       Basic elements
@@ -160,8 +174,8 @@ ApplicationWindow {
     readonly property int z_top: Number.MAX_VALUE-1
     readonly property int z_splash: Number.MAX_VALUE
     readonly property real standardFontPointSize: 17.5
-
-    //include: functions.qml
+    readonly property int ptype_bool: 1
+    readonly property int ptype_string: 10
 
     /*
         Image buffers
@@ -196,6 +210,8 @@ ApplicationWindow {
         }
     }
 
+    //include: functions.qml
+    //include: settings.qml
     //include: menus.qml
     //include: header.qml
     //include: leftpanel.qml

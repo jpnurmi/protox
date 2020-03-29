@@ -36,8 +36,6 @@ Popup {
     exit: Transition {
         NumberAnimation { property: "x"; from: 0; to: settingsWindow.width; easing.type: Easing.OutCubic }
     }
-    readonly property int ptype_bool: 1
-    readonly property int ptype_string: 10
     readonly property int sf_none: 0
     readonly property int sf_text: 1 // unused, text is always present
     readonly property int sf_title: 1 << 1
@@ -98,7 +96,11 @@ Popup {
                 bridge.saveProfile()
                 bridge.updateDataBasePassword(password)
                 toast.show({ message : qsTr("Password changed successfully!"), duration : Toast.Short })
-                settingsWindow.setProfileEncrypted(password.length > 0)
+                var encrypted = password.length > 0
+                settingsWindow.setProfileEncrypted(encrypted)
+                if (encrypted) {
+                    bridge.setSettingsValue("Client", "autoProfile", String(""))
+                }
                 settingsModel.setValueString("password", "")
                 settingsModel.setValueString("repeated_password", "")
             },

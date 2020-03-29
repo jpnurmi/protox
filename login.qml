@@ -6,6 +6,7 @@ import QtQuick.Dialogs 1.2
 import QtQuick.Window 2.12
 import QtGraphicalEffects 1.0
 import QtQuick.Controls.Styles 1.4
+import QtQuick.Particles 2.12
 
 Popup {
     id: loginWindow
@@ -39,6 +40,7 @@ Popup {
     }
     NumberAnimation { id: loginWindowReopenAnimation; target: loginWindow; property: "opacity"; from: 0.0; to: 1.0 }
     function reopen(remove) {
+        enabled = true
         notification.cancelAll()
         profileSelected = false
         open()
@@ -46,6 +48,7 @@ Popup {
         resetUI()
         goBack(false, remove)
         loginPassword.visible = bridge.checkProfileEncrypted(accountMenu.profileName)
+        bridge.setSettingsValue("Client", "autoProfile", String(""))
     }
     function goBack(fadeout, logout) {
         loginWindow.profileCreation = false
@@ -59,6 +62,47 @@ Popup {
         loginPassword.focus = false
         profileRepeater.updateList(logout)
     }
+    function login(profileName) {
+        if (loginWindow.profileCreation && loginUsername.text.length === 0) {
+            toast.show({ message : qsTr("Specify a user name."), duration : Toast.Long })
+            return
+        }
+        var profile
+        var doAutoLogin = profileName !== undefined && profileName.length > 0
+        if (doAutoLogin) {
+            profile = profileName
+        } else {
+            profile = loginWindow.profileCreation ? loginUsername.text + ".tox" : accountMenu.profileName
+        }
+        loginWindow.enabled = false
+        if (loginPassword.text.length > 0 && !loginWindow.profileCreation) {
+            toast.show({ message : qsTr("Decrypting profile..."), duration : Toast.Short })
+        }
+        var error = signInProfile(profile, loginWindow.profileCreation, loginPassword.text, 
+                                  doAutoLogin || (loginCheckbox.checked && loginCheckbox.visible))
+        if (error > 0) {
+            var reason;
+            switch (error) {
+            case 1: reason = qsTr("Profile loading failed."); break;
+            case 2: reason = qsTr("Wrong password."); break;
+            case 3: reason = qsTr("Profile doesn't exist."); break;
+            case 4: reason = qsTr("Profile with this name already exists."); break;
+            case 5: reason = (doAutoLogin ? qsTr("The password is required for this profile.") : qsTr("Password is empty.")); break;
+            }
+            toast.show({ message : reason, duration : Toast.Short });
+            loginWindow.enabled = true
+            if (doAutoLogin) {
+                reopen(true)
+                opacity = 1.0 // prevent fade animation
+                toast.show({ message : qsTr("Auto login failed!"), duration : Toast.Short });
+            }
+            return
+        }
+        loginWindow.profileSelected = true
+        loginWindow.close()
+        loginPassword.clear()
+        loginUsername.clear()
+    }
 
     Image {
         id: loginBackground
@@ -70,6 +114,27 @@ Popup {
             anchors.fill: parent
             source: "profileCreation.png"
             opacity: 0
+        }
+
+        ParticleSystem { id: particleSystem }
+        Emitter {
+            anchors.fill: loginImage
+            startTime: 15000
+            system: particleSystem
+            emitRate: 2
+            lifeSpan: 15000
+            acceleration: PointDirection{
+                y: -12
+                xVariation: 2 
+                yVariation: 2 
+            }
+            size: 24
+            sizeVariation: 16
+        }
+    
+        ImageParticle {
+            source: "particle.png"
+            system: particleSystem
         }
 
         NumberAnimation { id: loginFadeIn; target: loginBackgroundNewProfile; property: "opacity"; from: 0.0; to: 1.0 }
@@ -260,6 +325,38 @@ Popup {
             }
         }
 
+        CheckBox {
+            id: loginCheckbox
+            anchors.centerIn: loginPassword
+            visible: !loginPassword.visible
+
+            indicator: Rectangle {
+                implicitWidth: 20
+                implicitHeight: 20
+                x: loginCheckbox.leftPadding
+                y: parent.height / 2 - height / 2
+                border.color: loginCheckbox.down ? "#dark" : "#grey"
+                radius: 2
+                Text {
+                    anchors.centerIn: parent
+                    text: "\u2713"
+                    font.bold: true
+                    font.pointSize: 16
+                    color: Material.highlightedButtonColor
+                    visible: loginCheckbox.checked
+                }
+            }
+
+            contentItem: Text {
+                leftPadding: loginCheckbox.indicator.width + 4
+                text: qsTr("Auto-login into this profile")
+                color: "white"
+                elide: Text.ElideRight
+                horizontalAlignment: Text.AlignLeft
+                verticalAlignment: Text.AlignVCenter
+            }
+        }
+
         Button {
             id: loginButton
             width: parent.width * 0.75
@@ -267,36 +364,7 @@ Popup {
             anchors.horizontalCenter: loginPassword.horizontalCenter
             text: (loginWindow.profileCreation ? qsTr("Create") : qsTr("Select")) + " " + qsTr("profile")
             visible: loginWindow.profileCreation || accountMenu.profileName.length > 0
-            function login() {
-                if (loginWindow.profileCreation && loginUsername.text.length === 0) {
-                    toast.show({ message : qsTr("Specify a user name."), duration : Toast.Long })
-                    return
-                }
-                var profile = loginWindow.profileCreation ? loginUsername.text + ".tox" : accountMenu.profileName
-                loginWindow.enabled = false
-                if (loginPassword.text.length > 0 && !loginWindow.profileCreation) {
-                    toast.show({ message : qsTr("Decrypting profile..."), duration : Toast.Short })
-                }
-                var error = signInProfile(profile, loginWindow.profileCreation, loginPassword.text)
-                if (error > 0) {
-                    var reason;
-                    switch (error) {
-                    case 1: reason = qsTr("Profile loading failed."); break;
-                    case 2: reason = qsTr("Wrong password."); break;
-                    case 3: reason = qsTr("Profile doesn't exist."); break;
-                    case 4: reason = qsTr("Profile with this name already exists."); break;
-                    case 5: reason = qsTr("Password is empty."); break;
-                    }
-                    toast.show({ message : reason, duration : Toast.Short });
-                    loginWindow.enabled = true
-                    return
-                }
-                loginWindow.profileSelected = true
-                loginWindow.close()
-                loginPassword.clear()
-                loginUsername.clear()
-            }
-            onClicked: login()
+            onClicked: loginWindow.login()
         }
         Button {
             id: createNewProfileButton

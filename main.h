@@ -66,7 +66,7 @@ public slots:
 	Q_INVOKABLE void setSettingsValue(const QString &group, const QString &key, const QVariant &value);
 	Q_INVOKABLE void setAppInactive(bool inactive) { app_inactive = inactive; }
 	Q_INVOKABLE void setKeyboardAdjustMode(bool adjustNothing);
-	Q_INVOKABLE int signInProfile(const QString &profile, bool create = false, const QString &password = "");
+	Q_INVOKABLE int signInProfile(const QString &profile, bool create = false, const QString &password = "", bool autoLogin = false);
 	Q_INVOKABLE QVariant getProfileList();
 	Q_INVOKABLE bool checkProfileEncrypted(const QString &profile);
 	Q_INVOKABLE void setToxPassword(const QString &password);
