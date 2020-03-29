@@ -72,7 +72,7 @@ ApplicationWindow {
         interval: 1
         repeat: false
         onTriggered: {
-            var autoProfile = bridge.getSettingsValue("Client", "autoProfile", ptype_string, String(""))
+            var autoProfile = bridge.getSettingsValue("Profile", "auto_login_profile", ptype_string, String(""))
             if (autoProfile.length > 0) {
                 loginWindow.login(autoProfile)
                 splashImage.destroy()

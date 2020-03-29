@@ -429,11 +429,11 @@ int QmlCBridge::signInProfile(const QString &profile, bool create, const QString
 		current_profile.clear();
 		return error;
 	}
-	settings->beginGroup("Client");
+	settings->beginGroup("Profile");
 	if (autoLogin) {
-		settings->setValue("autoProfile", profile);
+		settings->setValue("auto_login_profile", profile);
 	} else {
-		settings->setValue("autoProfile", "");
+		settings->setValue("auto_login_profile", "");
 	}
 	settings->endGroup();
 	Tools::debug("My address: " + ToxConverter::toString(Toxcore::get_address(tox)));

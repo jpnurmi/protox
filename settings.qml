@@ -107,8 +107,10 @@ Popup {
                 var encrypted = password.length > 0
                 settingsWindow.setProfileEncrypted(encrypted)
                 if (encrypted) {
-                    bridge.setSettingsValue("Client", "autoProfile", String(""))
+                    bridge.setSettingsValue("Profile", "auto_login_profile", String(""))
+                    settingsModel.setValue("auto_login_enabled", false)
                 }
+                settingsModel.setEnabled("auto_login_enabled", !encrypted)
                 settingsModel.setValueString("password", "")
                 settingsModel.setValueString("repeated_password", "")
             },
@@ -130,11 +132,11 @@ Popup {
         }
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Tox options") })
         settingsModel.append({ flags: sf_text | sf_title | sf_help | sf_warning, name: qsTr("These settings require client restart!") })
-        settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Enable UDP"), prop: "udp_enabled", 
+        settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Enable UDP"), itemEnabled: true, prop: "udp_enabled", 
                     value: bridge.getSettingsValue("Toxcore", "udp_enabled", ptype_bool, Boolean(true)) })
-        settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Enable IPv6"), prop: "ipv6_enabled", 
+        settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Enable IPv6"), itemEnabled: true, prop: "ipv6_enabled", 
                     value: bridge.getSettingsValue("Toxcore", "ipv6_enabled", ptype_bool, Boolean(true)) })
-        settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Enable LAN discovery"), prop: "local_discovery_enabled", 
+        settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Enable LAN discovery"), itemEnabled: true, prop: "local_discovery_enabled", 
                     value: bridge.getSettingsValue("Toxcore", "local_discovery_enabled", ptype_bool, Boolean(false)) })
         settingsModel.append({ flags: sf_text | sf_input | sf_placeholder, itemWidth: 128, 
                     name: qsTr("Custom nodes .json file"), prop: "nodes_json_file", helperText: "nodes.json",
@@ -149,7 +151,7 @@ Popup {
                     name: qsTr("Recent messages limit"), prop: "last_messages_limit", helperText: "128",
                     svalue: bridge.getSettingsValue("Client", "last_messages_limit", ptype_string, 128) })
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Privacy") })
-        settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Keep chat history"), prop: "keep_chat_history", 
+        settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Keep chat history"), itemEnabled: true, prop: "keep_chat_history", 
                     value: bridge.getSettingsValue("Privacy", "keep_chat_history", ptype_bool, Boolean(true)) })
         settingsModel.append({ flags: sf_text | sf_title | sf_help, name: qsTr("NoSpam value is a part of your ToxID that can be changed at will.")})
         settingsModel.append({ flags: sf_text | sf_title | sf_help, name: qsTr("If you are getting spammed with friend requests, change this value.")})
@@ -165,6 +167,8 @@ Popup {
                     svalue: "", itemWidth: 128, buttonText: qsTr("Change"), clickAction: "change_password"
                     })
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Profile") })
+        settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Auto-login into this profile"), itemEnabled: true, prop: "auto_login_enabled", 
+                    value: false /* will be set later */ })
         settingsModel.append({ flags: sf_text | sf_button, name: "Profile deletion", buttonText: qsTr("Delete"), 
                                  clickAction: "delete_profile"})
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Version") })
@@ -193,6 +197,7 @@ Popup {
         bridge.setSettingsValue("Toxcore", "max_bootstrap_nodes", String(settingsModel.getValueString("max_bootstrap_nodes")))
         bridge.setSettingsValue("Client", "last_messages_limit", settingsModel.getValueString("last_messages_limit"))
         bridge.setSettingsValue("Privacy", "keep_chat_history", Boolean(settingsModel.getValue("keep_chat_history")))
+        bridge.setSettingsValue("Profile", "auto_login_profile", settingsModel.getValue("auto_login_enabled") ? bridge.getCurrentProfile() : "")
         bridge.setNospamValue(settingsModel.getValueString("no_spam_value"))
         updateQRcode()
         if (reloadChatHistory) {
@@ -248,6 +253,14 @@ Popup {
                 }
             }
         }
+        function setValue(p, v) {
+            for (var i = 0; i < count; i++) {
+                if (get(i).prop === p) {
+                    get(i).value = v
+                    return
+                }
+            }
+        }
         function getValueString(p) {
             for (var i = 0; i < count; i++) {
                 if (get(i).prop === p) {
@@ -259,6 +272,14 @@ Popup {
             for (var i = 0; i < count; i++) {
                 if (get(i).prop === p) {
                     get(i).svalue = sv
+                    return
+                }
+            }
+        }
+        function setEnabled(p, en) {
+            for (var i = 0; i < count; i++) {
+                if (get(i).prop === p) {
+                    get(i).itemEnabled = en
                     return
                 }
             }
@@ -309,6 +330,7 @@ Popup {
                         Switch {
                             Layout.alignment: Qt.AlignRight
                             checked: value
+                            enabled: itemEnabled
                             onCheckedChanged: {
                                 value = checked
                                 checked = value

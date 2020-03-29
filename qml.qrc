@@ -9,5 +9,6 @@
         <file>profileCreation.png</file>
         <file>themify.ttf</file>
         <file>particle.png</file>
+        <file>base.png</file>
     </qresource>
 </RCC>
