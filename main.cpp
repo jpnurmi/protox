@@ -358,10 +358,9 @@ void QmlCBridge::setNospamValue(const QString &nospam)
 	Toxcore::set_nospam(tox, value);
 }
 
-void QmlCBridge::generateToxPasswordKey(const QString &password)
+void QmlCBridge::setToxPassword(const QString &password)
 {
 	profile_password = password;
-	updateToxPasswordKey();
 }
 
 void QmlCBridge::saveProfile()
@@ -427,7 +426,8 @@ extern "C"
 int QmlCBridge::signInProfile(const QString &profile, bool create, const QString &password)
 {
 	current_profile = profile;
-	generateToxPasswordKey(password);
+	setToxPassword(password);
+	updateToxPasswordKey();
 	ToxProfileLoadingError error;
 	tox = Toxcore::create(error, create);
 	if (!tox) {

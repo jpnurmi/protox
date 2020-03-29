@@ -69,7 +69,7 @@ public slots:
 	Q_INVOKABLE int signInProfile(const QString &profile, bool create = false, const QString &password = "");
 	Q_INVOKABLE QVariant getProfileList();
 	Q_INVOKABLE bool checkProfileEncrypted(const QString &profile);
-	Q_INVOKABLE void generateToxPasswordKey(const QString &password);
+	Q_INVOKABLE void setToxPassword(const QString &password);
 	Q_INVOKABLE void signOutProfile(bool remove = false);
 	Q_INVOKABLE void saveProfile();
 	Q_INVOKABLE const QString getCurrentProfile() { return current_profile; }
