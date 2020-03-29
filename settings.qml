@@ -70,6 +70,14 @@ Popup {
             }
         }
     }
+    function setAvailableNodes (count) {
+        for (var i = 0; i < settingsModel.count; i++) {
+            if (settingsModel.get(i).prop === "available_nodes") {
+                settingsModel.get(i).name = count + qsTr(" bootstrap nodes available in .json file.")
+                return
+            }
+        }
+    }
     Component.onCompleted: {
         settingsModel.actions = {
             "randomize_nospam" : function () {
@@ -131,6 +139,7 @@ Popup {
         settingsModel.append({ flags: sf_text | sf_input | sf_placeholder, itemWidth: 128, 
                     name: qsTr("Custom nodes .json file"), prop: "nodes_json_file", helperText: "nodes.json",
                     svalue: bridge.getSettingsValue("Client", "nodes_json_file", ptype_string, String("")) })
+        settingsModel.append({ flags: sf_text | sf_title | sf_help, name: "", prop: "available_nodes"})
         settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only | sf_placeholder, numberMinLimit: 1, numberMaxLimit: 10000, itemWidth: 96, 
                     name: qsTr("Maximum bootstrap nodes"), prop: "max_bootstrap_nodes", helperText: "6",
                     svalue: bridge.getSettingsValue("Toxcore", "max_bootstrap_nodes", ptype_string, 6) })

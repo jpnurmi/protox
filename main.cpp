@@ -294,11 +294,6 @@ QList<QVariant> QmlCBridge::getFriendsModelOrder()
 	return returnedValue.toList();
 }
 
-void QmlCBridge::bootstrapDHT()
-{
-	Toxcore::bootstrap_DHT(tox);
-}
-
 void QmlCBridge::setKeyboardHeight(int height)
 {
 	QVariant returnedValue;
@@ -475,8 +470,9 @@ int QmlCBridge::signInProfile(const QString &profile, bool create, const QString
 		qmlbridge->insertFriend(_friend.toUInt(), Toxcore::get_friend_name(tox, _friend.toUInt()));
 	}
 
-	Toxcore::bootstrap_DHT(tox);
 	Tools::debug("Bootstrapping...");
+	Toxcore::bootstrap_DHT(tox);
+	reconnection_timer->start();
 	toxcore_timer = Toxcore::create_qtimer(tox);
 	toxcore_timer->start();
 	return 0;
@@ -523,11 +519,13 @@ void QmlCBridge::signOutProfile(bool remove)
 		QFile::remove(Tools::getProgDir() + "chat_" + QString(current_profile).replace(".tox", ".db"));
 	}
 	current_profile.clear();
-	friends_conn_status.clear();
 	pending_messages.clear();
 }
 
-
+quint32 QmlCBridge::getToxNodesCount()
+{
+	return Toxcore::get_available_nodes();
+}
 
 int main(int argc, char *argv[])
 {

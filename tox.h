@@ -81,6 +81,7 @@ namespace Toxcore {
 	Tox_Pass_Key *generate_pass_key(const QString &password);
 	void reset_pass_key(Tox_Pass_Key *key);
 	const QString get_version_string();
+	quint32 get_available_nodes();
 }
 
 namespace ToxConverter {

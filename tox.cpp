@@ -15,6 +15,7 @@ namespace Toxcore {
 
 int current_connection_status = -1;
 struct Tox_Options *opts = nullptr;
+quint32 available_nodes = 0;
 
 void cb_log(Tox *m, TOX_LOG_LEVEL level, const char *file, uint32_t line, const char *func,
                         const char *message, void *userdata)
@@ -465,6 +466,7 @@ void bootstrap_DHT(Tox *m)
 	}
 	QJsonDocument doc = QJsonDocument::fromJson(json_data.isEmpty() ? default_nodes_json.toUtf8() : json_data);
 	QJsonArray array = doc.object()["nodes"].toArray();
+	available_nodes = array.count();
 
 	uint32_t succeed = 0;
 	for (auto node : array) {
@@ -609,6 +611,11 @@ Tox_Pass_Key *generate_pass_key(const QString &password)
 const QString get_version_string()
 {
 	return QString::number(tox_version_major()) + "." + QString::number(tox_version_minor()) + "." + QString::number(tox_version_patch());
+}
+
+quint32 get_available_nodes()
+{
+	return available_nodes;
 }
 
 }

@@ -299,6 +299,7 @@ function signInProfile(profile, create, password, autoLogin) {
     // settings
     settingsModel.setValueString("no_spam_value", bridge.getNospamValue())
     settingsWindow.setProfileEncrypted(bridge.checkProfileEncrypted(profile))
+    settingsWindow.setAvailableNodes(bridge.getToxNodesCount())
     return 0
 }
 

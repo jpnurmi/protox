@@ -61,7 +61,6 @@ public slots:
 	Q_INVOKABLE int getFriendStatus(quint32 friend_number);
 	Q_INVOKABLE QString getNospamValue();
 	Q_INVOKABLE void setNospamValue(const QString &nospam);
-	Q_INVOKABLE void bootstrapDHT();
 	Q_INVOKABLE QVariant getSettingsValue(const QString &group, const QString &key, int type, const QVariant &default_value);
 	Q_INVOKABLE void setSettingsValue(const QString &group, const QString &key, const QVariant &value);
 	Q_INVOKABLE void setAppInactive(bool inactive) { app_inactive = inactive; }
@@ -77,6 +76,7 @@ public slots:
 	Q_INVOKABLE void updateDataBasePassword(const QString &password);
 	Q_INVOKABLE const QString getToxcoreVersion();
 	Q_INVOKABLE void test();
+	Q_INVOKABLE quint32 getToxNodesCount();
 
 public:
 	ToxFriendsConnStatus friends_conn_status;
