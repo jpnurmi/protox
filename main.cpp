@@ -97,20 +97,23 @@ void QmlCBridge::setCurrentFriendConnStatus(quint32 friend_number, int conn_stat
 void QmlCBridge::sendMessage(const QString &message)
 {
 	ToxPk friend_pk = Toxcore::get_friend_public_key(tox, current_friend_number);
-	bool failed;
-	quint32 message_id = Toxcore::send_message(tox, current_friend_number, message, failed);
-	quint64 new_unique_id = chat_db->getMessagesCountFriend(friend_pk) + 1;
-	QDateTime dt = QDateTime::currentDateTime();
-	ToxVariantMessage variantMessage;
-	variantMessage.insert("type", ToxVariantMessageType::TOXMSG_TEXT);
-	variantMessage.insert("message", message);
-	insertMessage(variantMessage, current_friend_number, true, message_id, new_unique_id, dt, false, failed);
-	pending_messages.push_back(ToxPendingMessage(message_id, new_unique_id, current_friend_number));
 	settings->beginGroup("Privacy");
 	bool keep_chat_history = settings->value("keep_chat_history", true).toBool();
 	settings->endGroup();
-	if (keep_chat_history) {
-		chat_db->insertMessage(variantMessage, dt, friend_pk, true, new_unique_id, failed);
+	QDateTime dt = QDateTime::currentDateTime();
+	const QStringList splitMessage = Tools::qstringSplitUnicode(message, Toxcore::get_message_max_length());
+	for (const auto &msg : splitMessage) {
+		bool failed;
+		quint32 message_id = Toxcore::send_message(tox, current_friend_number, msg, failed);
+		quint64 new_unique_id = chat_db->getMessagesCountFriend(friend_pk) + 1;
+		ToxVariantMessage variantMessage;
+		variantMessage.insert("type", ToxVariantMessageType::TOXMSG_TEXT);
+		variantMessage.insert("message", msg);
+		insertMessage(variantMessage, current_friend_number, true, message_id, new_unique_id, dt, false, failed);
+		pending_messages.push_back(ToxPendingMessage(message_id, new_unique_id, current_friend_number));
+		if (keep_chat_history) {
+			chat_db->insertMessage(variantMessage, dt, friend_pk, true, new_unique_id, failed);
+		}
 	}
 }
 

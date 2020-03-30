@@ -82,6 +82,7 @@ namespace Toxcore {
 	void reset_pass_key(Tox_Pass_Key *key);
 	const QString get_version_string();
 	quint32 get_available_nodes();
+	quint32 get_message_max_length();
 }
 
 namespace ToxConverter {

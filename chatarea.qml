@@ -296,56 +296,81 @@ ColumnLayout {
         Layout.rightMargin: margin
         Layout.topMargin: margin
         Layout.bottomMargin: (chatMessage.focus ? keyboardHeight : 0) + margin
-
-        TextArea {
-            id: chatMessage
+        Flickable {
+            id: chatFlickable
+            readonly property real defaultHeight: 46
+            height: defaultHeight
             Layout.fillWidth: true
-            selectByMouse: true
-            font.pointSize: fontMetrics.normalize(standardFontPointSize)
-            leftPadding: 10
-            verticalAlignment: TextInput.AlignVCenter
-            placeholderText: qsTr("Type something")
-            visible: !cleanProfile
-            property real defaultHeight
-            property real defaultContentHeight
-            wrapMode: Text.Wrap
-            Component.onCompleted: {
-                defaultHeight = height
-                defaultContentHeight = contentHeight
+            boundsBehavior: Flickable.DragAndOvershootBounds
+            clip: true
+            ScrollBar.vertical: ScrollBar {
+                id: chatScrollBar
+                width: 10
+                policy: ScrollBar.AlwaysOn
+                visible: false
+                interactive: false
             }
-            onContentWidthChanged: {
-                updateTyping()
-            }
-            onContentHeightChanged: {
-                messages.scrollToEnd()
-                updateTyping()
-            }
-            Keys.onBackPressed: {
-                focus = false
-            }
-
-            Timer {
-                id: dropTypingTimer
-                interval: 2000
-                repeat: false
-                onTriggered: {
-                    bridge.setTypingFriend(bridge.getCurrentFriendNumber(), false)
+            TextArea.flickable: TextArea {
+                id: chatMessage
+                selectByMouse: true
+                font.pointSize: fontMetrics.normalize(standardFontPointSize)
+                leftPadding: 10
+                rightPadding: leftPadding
+                placeholderText: qsTr("Type something")
+                wrapMode: Text.Wrap
+                visible: !cleanProfile
+                readonly property int maxLines: 9
+                property real defaultHeight
+                property real defaultContentHeight
+                Component.onCompleted: {
+                    defaultHeight = height
+                    defaultContentHeight = contentHeight
                 }
-            }
-
-            function updateTyping() {
-                if (bridge.getConnStatus() < 1) {
-                    return
+                onContentWidthChanged: {
+                    updateTyping()
                 }
-                dropTypingTimer.stop()
-                if (contentWidth > 0 || contentHeight > defaultContentHeight) {
-                    dropTypingTimer.start()
-                    bridge.setTypingFriend(bridge.getCurrentFriendNumber(), true)
-                } else {
-                    bridge.setTypingFriend(bridge.getCurrentFriendNumber(), false)
+                onContentHeightChanged: {
+                    messages.scrollToEnd()
+                    updateTyping()
+                    if (defaultContentHeight !== 0) {
+                        var lines = contentHeight / defaultContentHeight
+                        var actualHeight
+                        if (lines > 1) {
+                            actualHeight = chatFlickable.defaultHeight + defaultContentHeight * (lines - 1)
+                        } else {
+                            actualHeight = chatFlickable.defaultHeight
+                        }
+                        var maxHeight = chatFlickable.defaultHeight + defaultContentHeight * (maxLines - 1)
+                        chatFlickable.implicitHeight = Math.min(actualHeight, maxHeight)
+                        chatScrollBar.visible = actualHeight > maxHeight
+                    }
+                }
+                Keys.onBackPressed: {
+                    focus = false
+                }
+                Timer {
+                    id: dropTypingTimer
+                    interval: 2000
+                    repeat: false
+                    onTriggered: {
+                        bridge.setTypingFriend(bridge.getCurrentFriendNumber(), false)
+                    }
+                }
+                function updateTyping() {
+                    if (bridge.getConnStatus() < 1) {
+                        return
+                    }
+                    dropTypingTimer.stop()
+                    if (contentWidth > 0 || contentHeight > defaultContentHeight) {
+                        dropTypingTimer.start()
+                        bridge.setTypingFriend(bridge.getCurrentFriendNumber(), true)
+                    } else {
+                        bridge.setTypingFriend(bridge.getCurrentFriendNumber(), false)
+                    }
                 }
             }
         }
+
         Button {
             id: send
             Layout.rightMargin: 5

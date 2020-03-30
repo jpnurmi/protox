@@ -618,6 +618,11 @@ quint32 get_available_nodes()
 	return available_nodes;
 }
 
+quint32 get_message_max_length()
+{
+	return tox_max_message_length();
+}
+
 }
 
 /*

@@ -20,6 +20,7 @@
 #include <QSettings>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QTextBoundaryFinder>
 
 #if defined (Q_OS_ANDROID)
 #include <QAndroidService>
