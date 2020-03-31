@@ -78,6 +78,10 @@ Popup {
             }
         }
     }
+    RegExpValidator { id: default_validator; regExp: /.*/gm }
+    RegExpValidator { id: hex_validator; regExp: /[0-9A-F]+/ }
+    IntValidator { id: last_messages_limit_validator; bottom: 5; top: 10000 }
+    IntValidator { id: max_bootstrap_nodes_validator; bottom: 1; top: 10000 }
     Component.onCompleted: {
         settingsModel.actions = {
             "randomize_nospam" : function () {
@@ -138,16 +142,16 @@ Popup {
                     value: bridge.getSettingsValue("Toxcore", "ipv6_enabled", ptype_bool, Boolean(true)) })
         settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Enable LAN discovery"), itemEnabled: true, prop: "local_discovery_enabled", 
                     value: bridge.getSettingsValue("Toxcore", "local_discovery_enabled", ptype_bool, Boolean(false)) })
-        settingsModel.append({ flags: sf_text | sf_input | sf_placeholder, itemWidth: 128, 
+        settingsModel.append({ flags: sf_text | sf_input | sf_placeholder, fieldValidator: default_validator, itemWidth: 128, 
                     name: qsTr("Custom nodes .json file"), prop: "nodes_json_file", helperText: "nodes.json",
                     svalue: bridge.getSettingsValue("Client", "nodes_json_file", ptype_string, String("")) })
         settingsModel.append({ flags: sf_text | sf_title | sf_help, name: "", prop: "available_nodes"})
-        settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only | sf_placeholder, numberMinLimit: 1, numberMaxLimit: 10000, itemWidth: 96, 
+        settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only | sf_placeholder, fieldValidator: max_bootstrap_nodes_validator, itemWidth: 96, 
                     name: qsTr("Maximum bootstrap nodes"), prop: "max_bootstrap_nodes", helperText: "6",
                     svalue: bridge.getSettingsValue("Toxcore", "max_bootstrap_nodes", ptype_string, 6) })
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Client options") })
         settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only | sf_placeholder | sf_acceptAction, 
-                    acceptAction : "reload_chat", numberMinLimit: 5, numberMaxLimit: 10000, itemWidth: 96, 
+                    acceptAction : "reload_chat", fieldValidator: last_messages_limit_validator, itemWidth: 96, 
                     name: qsTr("Recent messages limit"), prop: "last_messages_limit", helperText: "128",
                     svalue: bridge.getSettingsValue("Client", "last_messages_limit", ptype_string, 128) })
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Privacy") })
@@ -156,14 +160,14 @@ Popup {
         settingsModel.append({ flags: sf_text | sf_title | sf_help, name: qsTr("NoSpam value is a part of your ToxID that can be changed at will.")})
         settingsModel.append({ flags: sf_text | sf_title | sf_help, name: qsTr("If you are getting spammed with friend requests, change this value.")})
         settingsModel.append({ flags: sf_text | sf_title | sf_help, name: qsTr("Only hexadecimal characters are allowed.")})
-        settingsModel.append({ flags: sf_text | sf_input | sf_mask | sf_button, name: qsTr("NoSpam"), prop: "no_spam_value", 
+        settingsModel.append({ flags: sf_text | sf_input | sf_mask | sf_button, fieldValidator: hex_validator, name: qsTr("NoSpam"), prop: "no_spam_value", 
                     svalue: "" /* will be set later */, itemWidth: 128, mask: ">HHHHHHHH;0", buttonText: qsTr("Randomize"), 
                     clickAction: "randomize_nospam"})
-        settingsModel.append({ flags: sf_text | sf_title | sf_help, name: "", prop: "profile_encrypted"})
+        settingsModel.append({ flags: sf_text | sf_title | sf_help, fieldValidator: default_validator, name: "", prop: "profile_encrypted"})
         settingsModel.append({ flags: sf_text | sf_input | sf_password, name: qsTr("Password"), prop: "password", 
                     svalue: "", itemWidth: 128
                     })
-        settingsModel.append({ flags: sf_text | sf_input | sf_button | sf_password, name: qsTr("Repeat"), prop: "repeated_password", 
+        settingsModel.append({ flags: sf_text | sf_input | sf_button | sf_password, fieldValidator: default_validator, name: qsTr("Repeat"), prop: "repeated_password", 
                     svalue: "", itemWidth: 128, buttonText: qsTr("Change"), clickAction: "change_password"
                     })
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Profile") })
@@ -355,26 +359,14 @@ Popup {
                             inputMask: (flags & settingsWindow.sf_mask) ? mask : ""
                             echoMode: (flags & settingsWindow.sf_password) ? TextInput.Password : TextInput.Normal
                             passwordCharacter: "*"
+                            validator: fieldValidator === undefined ? default_validator : fieldValidator
+                            color: acceptableInput ? "black" : "red"
                             onAccepted: {
                                 if ((flags & settingsWindow.sf_mask) && !acceptableInput) {
                                     return
                                 }
-                                var result = ""
-                                if (flags & settingsWindow.sf_numbers_only) {
-                                    if (text.length == 0 || isNaN(text)) {
-                                        result = helperText
-                                    } else if (parseInt(text) > numberMaxLimit) {
-                                        result = numberMaxLimit
-                                    } else if (parseInt(text) < numberMinLimit) {
-                                        result = numberMinLimit
-                                    }
-                                }
-                                if (flags & settingsWindow.sf_uppercase) {
-                                    result = text.toUpperCase()
-                                } else {
-                                    result = text
-                                }
-                                svalue = result
+                                svalue = text
+                                text = svalue
                                 focus = false
                                 if (flags & settingsWindow.sf_acceptAction) {
                                     settingsModel.actions[acceptAction]()
