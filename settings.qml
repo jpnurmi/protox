@@ -70,7 +70,9 @@ Popup {
             }
         }
     }
+    IntValidator { id: max_bootstrap_nodes_validator; bottom: 0; top: 10000 }
     function setAvailableNodes (count) {
+        max_bootstrap_nodes_validator.top = count
         for (var i = 0; i < settingsModel.count; i++) {
             if (settingsModel.get(i).prop === "available_nodes") {
                 settingsModel.get(i).name = count + qsTr(" bootstrap nodes available in .json file.")
@@ -81,7 +83,6 @@ Popup {
     RegExpValidator { id: default_validator; regExp: /.*/gm }
     RegExpValidator { id: hex_validator; regExp: /[0-9A-F]+/ }
     IntValidator { id: last_messages_limit_validator; bottom: 5; top: 10000 }
-    IntValidator { id: max_bootstrap_nodes_validator; bottom: 1; top: 10000 }
     Component.onCompleted: {
         settingsModel.actions = {
             "randomize_nospam" : function () {
