@@ -16,9 +16,8 @@ public:
 		m_less = true;
 	}
 	~QBytesValidator() {}
-	QValidator::State validate(QString &input, int &pos) const
+	QValidator::State validate(QString &input, int &) const
 	{
-		Q_UNUSED(pos)
 		int prefix_length = 0;
 		if (!m_prefix.isEmpty() && input.left(m_prefix.length()) == m_prefix) {
 			prefix_length = m_prefix.toUtf8().length();
@@ -35,7 +34,7 @@ public:
 		parent()->setProperty("acceptableInput", true);
 		return QValidator::Acceptable;
 	}
-	void fixup(QString &input) const { Q_UNUSED(input) }
+	void fixup(QString &) const {}
 	static void declareQML() { qmlRegisterType<QBytesValidator>("QtBytesValidator", 1, 0, "BytesValidator"); }
 
 	int getLength() { return m_length; }
