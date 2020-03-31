@@ -95,7 +95,7 @@ HEADERS += \
 	common.h \
 	db.h \
 	main.h \
-	qtbytesvalidator.h \
+	qtutf8bytelimitvalidator.h \
 	toasts.h \
 	tools.h \
 	tox.h

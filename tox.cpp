@@ -582,9 +582,9 @@ QTimer *create_qtimer(Tox *m)
 
 ToxId get_address(Tox *m)
 {
-	char address[TOX_ADDRESS_SIZE];
+	char address[get_tox_address_size()];
 	tox_self_get_address(m, (quint8*)address);
-	return ToxId(address, TOX_ADDRESS_SIZE);
+	return ToxId(address, get_tox_address_size());
 }
 
 void destroy(Tox *m)

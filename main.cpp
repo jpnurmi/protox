@@ -7,7 +7,7 @@
 #include "QtStatusBar.h"
 #include "QZXing.h"
 #include "toasts.h"
-#include "qtbytesvalidator.h"
+#include "qtutf8bytelimitvalidator.h"
 
 QmlCBridge *qmlbridge = nullptr;
 ChatDataBase *chat_db = nullptr;
@@ -590,7 +590,7 @@ int main(int argc, char *argv[])
 	QtNotification::declareQML();
 	QtStatusBar::declareQML();
 	QtToast::declareQML();
-	QBytesValidator::declareQML();
+	QUtf8ByteLimitValidator::declareQML();
 	QZXing::registerQMLTypes();
 	QZXing::registerQMLImageProvider(engine);
 	engine.load(url);

@@ -5,7 +5,7 @@ import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.2
 import QtQuick.Window 2.12
 
-import QtBytesValidator 1.0
+import QtUtf8ByteLimitValidator 1.0
 
 /*[remove]*/ Item {
 

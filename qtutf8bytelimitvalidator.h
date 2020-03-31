@@ -1,21 +1,21 @@
-#ifndef QTBYTESVALIDATOR_H
-#define QTBYTESVALIDATOR_H
+#ifndef QTUTF8BYTELIMITVALIDATOR_H
+#define QTUTF8BYTELIMITVALIDATOR_H
 
 #include <QValidator>
 #include <QQmlComponent>
 
-class QBytesValidator : public QValidator {
+class QUtf8ByteLimitValidator : public QValidator {
 	Q_OBJECT
 	Q_PROPERTY(int length READ getLength WRITE setLength)
 	Q_PROPERTY(QString prefix READ getPrefix WRITE setPrefix)
 	Q_PROPERTY(bool less READ getLess WRITE setLess)
 public:
-	 explicit QBytesValidator(QObject *parent = nullptr) : QValidator(parent) {
-		m_length = 0;
+	 explicit QUtf8ByteLimitValidator(QObject *parent = nullptr) : QValidator(parent) {
+		m_length = UINT_MAX;
 		m_prefix = "";
 		m_less = true;
 	}
-	~QBytesValidator() {}
+	~QUtf8ByteLimitValidator() {}
 	QValidator::State validate(QString &input, int &) const
 	{
 		int prefix_length = 0;
@@ -35,7 +35,7 @@ public:
 		return QValidator::Acceptable;
 	}
 	void fixup(QString &) const {}
-	static void declareQML() { qmlRegisterType<QBytesValidator>("QtBytesValidator", 1, 0, "BytesValidator"); }
+	static void declareQML() { qmlRegisterType<QUtf8ByteLimitValidator>("QtUtf8ByteLimitValidator", 1, 0, "BytesValidator"); }
 
 	int getLength() { return m_length; }
 	void setLength(int length) { m_length = length; }
@@ -44,11 +44,11 @@ public:
 	bool getLess() { return m_less; }
 	void setLess(bool less) { m_less = less; }
 private:
-	Q_DISABLE_COPY(QBytesValidator)
+	Q_DISABLE_COPY(QUtf8ByteLimitValidator)
 
 	int m_length;
 	QString m_prefix;
 	bool m_less;
 };
 
-#endif // QTBYTESVALIDATOR_H
+#endif // QTUTF8BYTELIMITVALIDATOR_H
