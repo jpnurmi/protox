@@ -30,3 +30,5 @@ You can donate if you want to support this project.
 
 
 P.S. To prevent Android from disconnecting application from network in the background mode, under battery settings choose the “Don't Optimise” option for Protox.
+
+[See more here](https://dontkillmyapp.com/)
