@@ -142,7 +142,7 @@ Menu {
             }
             function send() {
                 var toxId_text = toxId.text
-                if(toxId_text.substring(0, 4) === "tox:") {
+                if(toxId_text.substring(0, 4).toUpperCase() === "tox:".toUpperCase()) {
                     toxId_text = toxId_text.slice(4, toxId.text.length)
                 }
                 bridge.makeFriendRequest(toxId_text.toUpperCase(), 

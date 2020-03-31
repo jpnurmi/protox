@@ -19,7 +19,7 @@ public:
 	QValidator::State validate(QString &input, int &) const
 	{
 		int prefix_length = 0;
-		if (!m_prefix.isEmpty() && input.left(m_prefix.length()) == m_prefix) {
+		if (!m_prefix.isEmpty() && input.left(m_prefix.length()).toUpper() == m_prefix.toUpper()) {
 			prefix_length = m_prefix.toUtf8().length();
 		}
 		QByteArray bytes = input.toUtf8();
