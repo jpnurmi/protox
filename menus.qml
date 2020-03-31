@@ -5,6 +5,8 @@ import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.2
 import QtQuick.Window 2.12
 
+import QtBytesValidator 1.0
+
 /*[remove]*/ Item {
 
 /*
@@ -75,6 +77,8 @@ Menu {
         verticalAlignment: TextInput.AlignVCenter
         width: parent.width
         text: ""
+        validator: BytesValidator { length: bridge.getToxAddressSizeHex(); prefix: "tox:"; less: false }
+        color: acceptableInput ? "black" : "red"
         onAccepted: {
             addFriendMessage.focus = true
         }
@@ -102,6 +106,7 @@ Menu {
         verticalAlignment: TextInput.AlignVCenter
         width: parent.width
         placeholderText: qsTr("Add me to your friends. Maybe?")
+        validator: BytesValidator { length: bridge.getFriendRequestMessageMaxLength() }
         onAccepted: {
             focus = false
             sendItem.send()
@@ -290,9 +295,9 @@ Menu {
     onClosed: {
         currentIndex = -1
         myNickname.focus = false
-        myStatus.focus = false
+        myStatusMessage.focus = false
         myNickname.text = bridge.getNickname(false)
-        myStatus.text = bridge.getStatusMessage()
+        myStatusMessage.text = bridge.getStatusMessage()
     }
 
     Text {
@@ -309,8 +314,9 @@ Menu {
         rightPadding: leftPadding
         verticalAlignment: TextInput.AlignVCenter
         width: parent.width
+        validator: BytesValidator { length: bridge.getNicknameMaxLength() }
         onAccepted: {
-            myStatus.focus = true
+            myStatusMessage.focus = true
         }
     }
     Text {
@@ -321,13 +327,14 @@ Menu {
         text: qsTr("Status message")
     }
     TextField {
-        id: myStatus
+        id: myStatusMessage
         font.pointSize: fontMetrics.normalize(standardFontPointSize)
         leftPadding: 10
         rightPadding: leftPadding
         verticalAlignment: TextInput.AlignVCenter
         width: parent.width
         onAccepted: profileMenuApplyItem.onTriggered()
+        validator: BytesValidator { length: bridge.getStatusMessageMaxLength() }
     }
     RowLayout {
         MenuItem {
@@ -350,7 +357,7 @@ Menu {
             onTriggered: {
                 bridge.setNickname(myNickname.text)
                 accountName.text = bridge.getNickname(true)
-                bridge.setStatusMessage(myStatus.text)
+                bridge.setStatusMessage(myStatusMessage.text)
                 bridge.saveProfile()
                 profileMenu.close()
             }

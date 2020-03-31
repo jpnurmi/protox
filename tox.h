@@ -83,6 +83,10 @@ namespace Toxcore {
 	const QString get_version_string();
 	quint32 get_available_nodes();
 	quint32 get_message_max_length();
+	quint32 get_friend_request_message_max_length();
+	quint32 get_nickname_max_length();
+	quint32 get_status_message_max_length();
+	quint32 get_tox_address_size();
 }
 
 namespace ToxConverter {

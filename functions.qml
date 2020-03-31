@@ -295,7 +295,7 @@ function signInProfile(profile, create, password, autoLogin) {
     messages.addTransitionEnabled = true
     // menus
     myNickname.text = bridge.getNickname(false)
-    myStatus.text = bridge.getStatusMessage()
+    myStatusMessage.text = bridge.getStatusMessage()
     // settings
     settingsModel.setValueString("no_spam_value", bridge.getNospamValue())
     settingsModel.setValue("auto_login_enabled", autoLogin)

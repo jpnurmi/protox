@@ -7,6 +7,7 @@
 #include "QtStatusBar.h"
 #include "QZXing.h"
 #include "toasts.h"
+#include "qtbytesvalidator.h"
 
 QmlCBridge *qmlbridge = nullptr;
 ChatDataBase *chat_db = nullptr;
@@ -530,6 +531,26 @@ quint32 QmlCBridge::getToxNodesCount()
 	return Toxcore::get_available_nodes();
 }
 
+quint32 QmlCBridge::getFriendRequestMessageMaxLength()
+{
+	return Toxcore::get_friend_request_message_max_length();
+}
+
+quint32 QmlCBridge::getNicknameMaxLength()
+{
+	return Toxcore::get_nickname_max_length();
+}
+
+quint32 QmlCBridge::getStatusMessageMaxLength()
+{
+	return Toxcore::get_status_message_max_length();
+}
+
+quint32 QmlCBridge::getToxAddressSizeHex()
+{
+	return Toxcore::get_tox_address_size() * 2;
+}
+
 int main(int argc, char *argv[])
 {
 	QtStatusBar::setColor(QColor("#3F51B5"));
@@ -569,6 +590,7 @@ int main(int argc, char *argv[])
 	QtNotification::declareQML();
 	QtStatusBar::declareQML();
 	QtToast::declareQML();
+	QBytesValidator::declareQML();
 	QZXing::registerQMLTypes();
 	QZXing::registerQMLImageProvider(engine);
 	engine.load(url);

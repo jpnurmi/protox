@@ -77,6 +77,10 @@ public slots:
 	Q_INVOKABLE const QString getToxcoreVersion();
 	Q_INVOKABLE void test();
 	Q_INVOKABLE quint32 getToxNodesCount();
+	Q_INVOKABLE quint32 getFriendRequestMessageMaxLength();
+	Q_INVOKABLE quint32 getNicknameMaxLength();
+	Q_INVOKABLE quint32 getStatusMessageMaxLength();
+	Q_INVOKABLE quint32 getToxAddressSizeHex();
 
 public:
 	ToxFriendsConnStatus friends_conn_status;

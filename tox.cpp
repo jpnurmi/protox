@@ -623,6 +623,26 @@ quint32 get_message_max_length()
 	return tox_max_message_length();
 }
 
+quint32 get_friend_request_message_max_length()
+{
+	return tox_max_friend_request_length();
+}
+
+quint32 get_nickname_max_length() 
+{
+	return tox_max_name_length();
+}
+
+quint32 get_status_message_max_length()
+{
+	return tox_max_status_message_length();
+}
+
+quint32 get_tox_address_size()
+{
+	return tox_address_size();
+}
+
 }
 
 /*

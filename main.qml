@@ -11,6 +11,7 @@ import QtQuick.Particles 2.12
 
 import QtNotification 1.0
 import QtStatusBar 1.0
+import QtBytesValidator 1.0
 import QtToast 1.0
 import QZXing 2.3
 
