@@ -25,3 +25,18 @@ v1.2.1alpha
 - Fixed bug: the first received friend request is visible in status bar
 - Added a timer to resume connection to Tox nodes if it has been lost.
 - Added code to fix graphical issues with bug #6 (https://gitlab.com/Monsterovich/protox/-/issues/6)
+
+v1.3alpha
+
+- Improved profile saving.
+- Disable drag & drop if friend list has only one item.
+- Fixed a graphical bug with nickname updates affecting request entries.
+- Show bootstrapping status on reconnection.
+- Fixed a memory leak with password key.
+- Improved login menu fade animation.
+- Fixed a minor bug with user selection: no user is selected when you logout with clean profile.
+- Improved font scaling.
+- Added scrollbar to chat area.
+- Added validators to nickname, status message, toxId, friend request message fields.
+- Improved the look of profile menu.
+- Show the number of available tox nodes in .json.
