@@ -70,7 +70,7 @@ Popup {
             }
         }
     }
-    IntValidator { id: max_bootstrap_nodes_validator; bottom: 0; top: 10000 }
+    IntValidator { id: max_bootstrap_nodes_validator; bottom: 1; top: 10000 }
     function setAvailableNodes (count) {
         max_bootstrap_nodes_validator.top = count
         for (var i = 0; i < settingsModel.count; i++) {

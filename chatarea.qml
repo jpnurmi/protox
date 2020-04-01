@@ -303,6 +303,7 @@ ColumnLayout {
             Layout.fillWidth: true
             boundsBehavior: Flickable.DragAndOvershootBounds
             clip: true
+            visible: !cleanProfile
             ScrollBar.vertical: ScrollBar {
                 id: chatScrollBar
                 width: 10
@@ -318,7 +319,6 @@ ColumnLayout {
                 rightPadding: leftPadding
                 placeholderText: qsTr("Type something")
                 wrapMode: Text.Wrap
-                visible: !cleanProfile
                 readonly property int maxLines: 9
                 property real defaultHeight
                 property real defaultContentHeight
