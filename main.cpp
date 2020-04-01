@@ -52,7 +52,7 @@ void QmlCBridge::setComponent(QObject *_component)
 	component = _component;
 }
 
-void QmlCBridge::insertMessage(const ToxVariantMessage &message, quint32 friend_number, bool self, quint32 message_id, quint64 unique_id, QDateTime dt, bool history, bool failed)
+void QmlCBridge::insertMessage(const ToxVariantMessage &message, quint32 friend_number, const QDateTime &dt, bool self, quint32 message_id, quint64 unique_id, bool history, bool failed)
 {
 	QVariant returnedValue;
 
@@ -110,7 +110,7 @@ void QmlCBridge::sendMessage(const QString &message)
 		ToxVariantMessage variantMessage;
 		variantMessage.insert("type", ToxVariantMessageType::TOXMSG_TEXT);
 		variantMessage.insert("message", msg);
-		insertMessage(variantMessage, current_friend_number, true, message_id, new_unique_id, dt, false, failed);
+		insertMessage(variantMessage, current_friend_number, dt, true, message_id, new_unique_id, false, failed);
 		pending_messages.push_back(ToxPendingMessage(message_id, new_unique_id, current_friend_number));
 		if (keep_chat_history) {
 			chat_db->insertMessage(variantMessage, dt, friend_pk, true, new_unique_id, failed);
@@ -153,13 +153,13 @@ void QmlCBridge::retrieveChatLog(quint32 start, bool from, bool reverse)
 	settings->beginGroup("Client");
 	quint32 limit = settings->value("last_messages_limit", 128).toUInt();
 	settings->endGroup();
-	ToxMessages messages = chat_db->getFriendMessages(Toxcore::get_friend_public_key(tox, current_friend_number), limit, start, from, reverse);
+	const ToxMessages messages = chat_db->getFriendMessages(Toxcore::get_friend_public_key(tox, current_friend_number), limit, start, from, reverse);
 	QMetaObject::invokeMethod(component, "clearChatContent");
 	if (messages.isEmpty()) {
 		return;
 	}
-	for (auto msg : messages) {
-		insertMessage(msg.variantMessage, current_friend_number, msg.self, 0, msg.unique_id, msg.dt, true, false);
+	for (const auto &msg : messages) {
+		insertMessage(msg.variantMessage, current_friend_number, msg.dt, msg.self, 0, msg.unique_id, true, false);
 		if (!msg.self || msg.received)
 			setMessageReceived(current_friend_number, 0, true, msg.unique_id);
 	}

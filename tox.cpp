@@ -106,10 +106,11 @@ static void cb_friend_message(Tox *m, quint32 friend_number, TOX_MESSAGE_TYPE ty
 	ToxVariantMessage variantMessage;
 	variantMessage.insert("type", ToxVariantMessageType::TOXMSG_TEXT);
 	variantMessage.insert("message", message);
+	QDateTime dt = QDateTime::currentDateTime();
 	if (keep_chat_history) {
-		chat_db->insertMessage(variantMessage, QDateTime::currentDateTime(), friend_pk, false, new_unique_id);
+		chat_db->insertMessage(variantMessage, dt, friend_pk, false, new_unique_id);
 	}
-	qmlbridge->insertMessage(variantMessage, friend_number);
+	qmlbridge->insertMessage(variantMessage, friend_number, dt);
 }
 
 static void cb_friend_name(Tox *m, quint32 friend_number, const quint8 *name, size_t length, void *user_data)

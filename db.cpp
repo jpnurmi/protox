@@ -65,7 +65,7 @@ quint64 ChatDataBase::getMessagesCountFriend(const ToxPk &public_key)
 	return query.value(0).toULongLong();
 }
 
-void ChatDataBase::insertMessage(const ToxVariantMessage &variantMessage, QDateTime dt, const ToxPk &public_key, bool self, quint64 unique_id, bool failed)
+void ChatDataBase::insertMessage(const ToxVariantMessage &variantMessage, const QDateTime &dt, const ToxPk &public_key, bool self, quint64 unique_id, bool failed)
 {
 	int type = variantMessage["type"].toInt();
 	QSqlQuery msg_query(db);
@@ -110,7 +110,7 @@ void ChatDataBase::setMessageReceived(quint64 unique_id, const ToxPk &public_key
 	db.commit();
 }
 
-ToxMessages ChatDataBase::getFriendMessages(const ToxPk &public_key, quint32 limit, quint32 start, bool from, bool reverse, QDate fromDate)
+const ToxMessages ChatDataBase::getFriendMessages(const ToxPk &public_key, quint32 limit, quint32 start, bool from, bool reverse)
 {
 	ToxMessages messages;
 	QSqlQuery query(db);
