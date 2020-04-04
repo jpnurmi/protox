@@ -35,7 +35,7 @@ public:
 		return QValidator::Acceptable;
 	}
 	void fixup(QString &) const {}
-	static void declareQML() { qmlRegisterType<QUtf8ByteLimitValidator>("QtUtf8ByteLimitValidator", 1, 0, "BytesValidator"); }
+	static void declareQML() { qmlRegisterType<QUtf8ByteLimitValidator>("QtUtf8ByteLimitValidator", 1, 0, "Utf8ByteLimitValidator"); }
 
 	int getLength() { return m_length; }
 	void setLength(int length) { m_length = length; }
