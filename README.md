@@ -1,3 +1,8 @@
+
+# Protox
+
+![Protox](logo_small.png)
+
 # What is Protox?
 
 **Protox** is a [Tox](https://tox.chat/) client for Android OS written in QML/C++ (Qt 5).
