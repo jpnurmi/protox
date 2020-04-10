@@ -1,7 +1,7 @@
 #include "db.h"
 #include "tools.h"
 
-#include "sqlitecipher/sqlitecipher_p.h"
+#include "deps/sqlitecipher/sqlitecipher_p.h"
 
 #define DATABASE_VERSION 2
 #define APPLICATION_ID ('P' << 24) + ('T' << 16) + ('O' << 8) + 'X'

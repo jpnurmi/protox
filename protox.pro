@@ -13,11 +13,20 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-        db.cpp \
-        main.cpp \
-        toasts.cpp \
-        tools.cpp \
-        tox.cpp
+	sources/cpp/db.cpp \
+	sources/cpp/main.cpp \
+	sources/cpp/toasts.cpp \
+	sources/cpp/tools.cpp \
+	sources/cpp/tox.cpp
+
+HEADERS += \
+	sources/cpp/common.h \
+	sources/cpp/db.h \
+	sources/cpp/main.h \
+	sources/cpp/qtutf8bytelimitvalidator.h \
+	sources/cpp/toasts.h \
+	sources/cpp/tools.h \
+	sources/cpp/tox.h
 
 LIBS += -ltoxcore -ltoxencryptsave
 
@@ -25,18 +34,18 @@ RESOURCES += qml.qrc
 
 extralib.target = extra
 extralib.commands = echo "Running qmlcombiner.py"; \
-                        cd $$PWD; \
-                        python3 $$PWD/qmlcombiner.py $$PWD/main.qml $$PWD/app.qml
+                        cd $$PWD/sources/qml/; \
+                        python3 $$PWD/tools/qmlcombiner.py $$PWD/sources/qml/main.qml $$PWD/.generated/app.qml
 
 extralib.depends =
 
 QMAKE_EXTRA_TARGETS += extralib
 PRE_TARGETDEPS = extra
 
-include(QtMobileNotification/QtMobileNotification.pri)
-include(QtStatusBar/QtStatusBar.pri)
-include(QZXing/QZXing.pri)
-include(sqlitecipher/sqlitecipher.pri)
+include(deps/QtMobileNotification/QtMobileNotification.pri)
+include(deps/QtStatusBar/QtStatusBar.pri)
+include(deps/QZXing/QZXing.pri)
+include(deps/sqlitecipher/sqlitecipher.pri)
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =
@@ -60,15 +69,15 @@ DISTFILES += \
 	android/src/notifications/QtAndroidNotifications.java \
 	android/src/activity/QtActivityEx.java \
 	android/src/activity/KeyboardProvider.java \
-	qmlcombiner.py \
-	chatarea.qml \
-	functions.qml \
-	header.qml \
-	leftpanel.qml \
-	main.qml \
-	menus.qml \
-	settings.qml \
-	login.qml
+	tools/qmlcombiner.py \
+	sources/qml/chatarea.qml \
+	sources/qml/functions.qml \
+	sources/qml/header.qml \
+	sources/qml/leftpanel.qml \
+	sources/qml/main.qml \
+	sources/qml/menus.qml \
+	sources/qml/settings.qml \
+	sources/qml/login.qml
 
 ANDROID_PACKAGE_SOURCE_DIR = \
 	$$PWD/android
@@ -91,14 +100,7 @@ contains(ANDROID_TARGET_ARCH,x86) {
 	LIBS += -L$$PWD/libs/x86
 }
 
-HEADERS += \
-	common.h \
-	db.h \
-	main.h \
-	qtutf8bytelimitvalidator.h \
-	toasts.h \
-	tools.h \
-	tox.h
+
 
 
 

@@ -30,8 +30,4 @@
 #include <QAndroidIntent>
 #endif
 
-// Toxcore
-#include "tox/tox.h"
-#include "tox/toxencryptsave.h"
-
 #endif // COMMON_H

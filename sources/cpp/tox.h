@@ -3,6 +3,10 @@
 
 #include "common.h"
 
+// Toxcore
+#include "deps/tox/tox.h"
+#include "deps/tox/toxencryptsave.h"
+
 typedef QList <quint32> ToxFriends; 
 typedef QByteArray ToxPk;
 typedef QByteArray ToxId;
