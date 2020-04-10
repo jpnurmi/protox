@@ -1,7 +1,6 @@
-
 # Protox
 
-![Protox](logo_small.png)
+![Protox](resources/logo_small.png)
 
 # What is Protox?
 
