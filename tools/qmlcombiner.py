@@ -4,6 +4,7 @@
 import os
 import sys
 import errno
+from stat import S_IREAD, S_IRGRP, S_IROTH
 
 if (len(sys.argv) < 2):
     print('Usage: qmlcombiner.py <main qml file> <output>')
@@ -17,6 +18,8 @@ if not os.path.exists(os.path.dirname(output_file)):
     except OSError as exc:
         if exc.errno != errno.EEXIST:
             raise
+if os.path.isfile(output_file):
+    os.remove(output_file)
 handle = open(sys.argv[1], "r")
 data = handle.readlines()
 operator = "//include:"
@@ -55,3 +58,4 @@ handle.write('// Do not edit by hand!\n')
 for line in output:
     handle.write(line)
 handle.close()
+os.chmod(output_file, S_IREAD|S_IRGRP|S_IROTH)

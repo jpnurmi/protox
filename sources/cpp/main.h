@@ -9,7 +9,7 @@
 
 #include "tools.h"
 
-#define QML_MAIN "qrc:/app.qml"
+#define QML_MAIN "qrc:/.app.qml"
 
 class QmlCBridge : public QObject
 {

@@ -106,12 +106,12 @@ Popup {
     Image {
         id: loginBackground
         anchors.fill: parent
-        source: "login.png"
+        source: "resources/login.png"
 
         Image {
             id: loginBackgroundNewProfile
             anchors.fill: parent
-            source: "profileCreation.png"
+            source: "resources/profileCreation.png"
             opacity: 0
         }
 
@@ -132,7 +132,7 @@ Popup {
         }
     
         ImageParticle {
-            source: "particle.png"
+            source: "resources/particle.png"
             system: particleSystem
         }
 
@@ -202,7 +202,7 @@ Popup {
 
         Image {
             id: loginImage
-            source: "logo_big.png"
+            source: "resources/logo_big.png"
             smooth: true
             anchors.bottom: accountSelectionButton.top
             anchors.bottomMargin: 48

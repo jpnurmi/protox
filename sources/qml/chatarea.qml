@@ -402,7 +402,7 @@ ColumnLayout {
             Image {
                 id: send_arrow
                 anchors.fill: parent
-                source: "send-button.png"
+                source: "resources/send-button.png"
                 antialiasing: true
             }
             TapHandler {

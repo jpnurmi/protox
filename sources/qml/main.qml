@@ -63,7 +63,7 @@ ApplicationWindow {
 
     Image {
         id: splashImage
-        source: "splash.png"
+        source: "resources/splash.png"
         anchors.fill: parent
         z: z_splash
     }
@@ -90,7 +90,7 @@ ApplicationWindow {
     Image {
         id: welcomeImage
         x: (window.width - width) / 2
-        source: "logo_big.png"
+        source: "resources/logo_big.png"
         smooth: true
         anchors.top: overlayHeader.bottom
         anchors.topMargin: 40
@@ -142,7 +142,7 @@ ApplicationWindow {
 
     FontLoader { 
         id: themify
-        source: "themify.ttf"
+        source: "resources/themify.ttf"
     }
 
     FontMetrics {
