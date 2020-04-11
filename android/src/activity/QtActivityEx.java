@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.Window;
 import android.graphics.Rect;
 
 import KeyboardProvider.KeyboardProvider;

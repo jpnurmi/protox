@@ -1,14 +1,14 @@
 <RCC>
     <qresource prefix="/">
-        <file>resources/qtquickcontrols2.conf</file>
-        <file>resources/send-button.png</file>
-        <file>resources/splash.png</file>
-        <file>resources/logo_big.png</file>
-        <file>resources/login.png</file>
-        <file>resources/profileCreation.png</file>
-        <file>resources/themify.ttf</file>
-        <file>resources/particle.png</file>
-        <file>resources/base.png</file>
-        <file>.generated/app.qml</file>
+        <file>qtquickcontrols2.conf</file>
+        <file>send-button.png</file>
+        <file>splash.png</file>
+        <file>logo_big.png</file>
+        <file>login.png</file>
+        <file>profileCreation.png</file>
+        <file>themify.ttf</file>
+        <file>particle.png</file>
+        <file>base.png</file>
+        <file>app.qml</file>
     </qresource>
 </RCC>
