@@ -6,6 +6,18 @@ import QtQuick 2.12
 
 /*[remove]*/ Item {
 
+function safe_bridge() {
+    if (bridge !== null) {
+        return bridge
+    }
+    var empty_bridge = {}
+    empty_bridge.getToxAddressSizeHex = function() { return 0 }
+    empty_bridge.getStatusMessageMaxLength = function() { return 0 }
+    empty_bridge.getNicknameMaxLength = function() { return 0 }
+    empty_bridge.getFriendRequestMessageMaxLength = function() { return 0 }
+    return empty_bridge
+}
+
 function checkLastMessage(friend_number) {
     if (!messagesModel.count) {
         return true

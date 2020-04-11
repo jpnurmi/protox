@@ -77,7 +77,7 @@ Menu {
         verticalAlignment: TextInput.AlignVCenter
         width: parent.width
         text: ""
-        validator: Utf8ByteLimitValidator { length: bridge.getToxAddressSizeHex(); prefix: "tox:"; less: false }
+        validator: Utf8ByteLimitValidator { length: safe_bridge().getToxAddressSizeHex(); prefix: "tox:"; less: false }
         color: acceptableInput ? "black" : "red"
         onAccepted: {
             addFriendMessage.focus = true
@@ -106,7 +106,7 @@ Menu {
         verticalAlignment: TextInput.AlignVCenter
         width: parent.width
         placeholderText: qsTr("Add me to your friends. Maybe?")
-        validator: Utf8ByteLimitValidator { length: bridge.getFriendRequestMessageMaxLength() }
+        validator: Utf8ByteLimitValidator { length: safe_bridge().getFriendRequestMessageMaxLength() }
         onAccepted: {
             focus = false
             sendItem.send()
@@ -314,7 +314,7 @@ Menu {
         rightPadding: leftPadding
         verticalAlignment: TextInput.AlignVCenter
         width: parent.width
-        validator: Utf8ByteLimitValidator { length: bridge.getNicknameMaxLength() }
+        validator: Utf8ByteLimitValidator { length: safe_bridge().getNicknameMaxLength() }
         onAccepted: {
             myStatusMessage.focus = true
         }
@@ -334,7 +334,7 @@ Menu {
         verticalAlignment: TextInput.AlignVCenter
         width: parent.width
         onAccepted: profileMenuApplyItem.onTriggered()
-        validator: Utf8ByteLimitValidator { length: bridge.getStatusMessageMaxLength() }
+        validator: Utf8ByteLimitValidator { length: safe_bridge().getStatusMessageMaxLength() }
     }
     RowLayout {
         MenuItem {
