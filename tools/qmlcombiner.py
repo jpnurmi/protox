@@ -1,14 +1,22 @@
 #!/usr/bin/python3
 # This Python file uses the following encoding: utf-8
 
+import os
 import sys
+import errno
 
 if (len(sys.argv) < 2):
-    print('Usage: combiner.py <main qml file> <output>')
+    print('Usage: qmlcombiner.py <main qml file> <output>')
     exit(1)
 
 output_file = sys.argv[2]
-
+if not os.path.exists(os.path.dirname(output_file)):
+    try:
+        os.makedirs(os.path.dirname(output_file))
+        print('Creating directory ' + os.path.dirname(output_file))
+    except OSError as exc:
+        if exc.errno != errno.EEXIST:
+            raise
 handle = open(sys.argv[1], "r")
 data = handle.readlines()
 operator = "//include:"
@@ -24,7 +32,7 @@ for line in data:
                 _spaces += 1
         spaces = ' ' * (_spaces - 1)
         print('Found include file: ' + incf)
-        include = open(incf, "r")
+        include = open(os.path.join(os.path.dirname(sys.argv[1]), incf), "r")
         proceed = []
         for _line in include:
             if _line[:12] == "/*[remove]*/":

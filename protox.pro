@@ -34,8 +34,6 @@ RESOURCES += qml.qrc
 
 extralib.target = extra
 extralib.commands = echo "Running qmlcombiner.py"; \
-                        mkdir $$PWD/.generated; \
-                        cd $$PWD/sources/qml/; \
                         python3 $$PWD/tools/qmlcombiner.py $$PWD/sources/qml/main.qml $$PWD/.generated/app.qml
 
 extralib.depends =
