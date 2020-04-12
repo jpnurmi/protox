@@ -84,6 +84,7 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
+        translator.setTranslation(bridge.getSystemLocale())
         delayTimer.start()
     }
 

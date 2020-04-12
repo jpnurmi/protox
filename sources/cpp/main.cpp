@@ -551,6 +551,23 @@ quint32 QmlCBridge::getToxAddressSizeHex()
 	return Toxcore::get_tox_address_size() * 2;
 }
 
+QString QmlCBridge::getSystemLocale()
+{
+	return QLocale::system().name();
+}
+
+QmlTranslator::QmlTranslator(QObject *parent) : QObject(parent) {}
+
+void QmlTranslator::setTranslation(const QString &translation)
+{
+	if (!translator.load(":protox_" + translation, ".")) {
+		Tools::debug("Translation loading failed: " + translation);
+		return;
+	}
+	qApp->installTranslator(&translator);
+	emit languageChanged();
+}
+
 int main(int argc, char *argv[])
 {
 	QtStatusBar::setColor(QColor("#3F51B5"));
@@ -584,9 +601,11 @@ int main(int argc, char *argv[])
 			QCoreApplication::exit(-1);
 	}, Qt::QueuedConnection);
 
+	QmlTranslator qmltranslator;
 	qmlbridge = new QmlCBridge;
 	QQmlContext *root = engine.rootContext();
 	root->setContextProperty("bridge", qmlbridge);
+	root->setContextProperty("translator", &qmltranslator);
 	QtNotification::declareQML();
 	QtStatusBar::declareQML();
 	QtToast::declareQML();

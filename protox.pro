@@ -41,6 +41,8 @@ extralib.depends =
 QMAKE_EXTRA_TARGETS += extralib
 PRE_TARGETDEPS = extra
 
+include(translations/translations.pri)
+
 include(deps/QtMobileNotification/QtMobileNotification.pri)
 include(deps/QtStatusBar/QtStatusBar.pri)
 include(deps/QZXing/QZXing.pri)

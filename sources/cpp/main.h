@@ -81,6 +81,7 @@ public slots:
 	Q_INVOKABLE quint32 getNicknameMaxLength();
 	Q_INVOKABLE quint32 getStatusMessageMaxLength();
 	Q_INVOKABLE quint32 getToxAddressSizeHex();
+	Q_INVOKABLE QString getSystemLocale();
 
 public:
 	ToxFriendsConnStatus friends_conn_status;
@@ -99,6 +100,21 @@ private:
 	// fixme: move to tox.cpp
 	Tox *tox;
 	Tox_Pass_Key *tox_pass_key;
+};
+
+class QmlTranslator : public QObject
+{
+	Q_OBJECT
+public:
+	explicit QmlTranslator(QObject *parent = 0);
+signals:
+	// The signal of change the current language to change the interface translation
+	void languageChanged();
+public:
+	// Translation installation method, which will be available in QML
+	Q_INVOKABLE void setTranslation(const QString &translation);
+private:
+	QTranslator translator;
 };
 
 #endif // MAIN_H
