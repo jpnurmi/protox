@@ -390,7 +390,7 @@ ColumnLayout {
                         return
                     }
                     if (bridge.getConnStatus() < 1) {
-                        toast.show({ message : qsTr("You are not connected to tox network!"), duration: Toast.Short })
+                        toast.show({ message : qsTr("You are not connected to the Tox network!"), duration: Toast.Short })
                         return
                     }
                     bridge.sendMessage(chatMessage.text)

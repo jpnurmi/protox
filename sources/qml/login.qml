@@ -84,9 +84,9 @@ Popup {
             switch (error) {
             case 1: reason = qsTr("Profile loading failed."); break;
             case 2: reason = qsTr("Wrong password."); break;
-            case 3: reason = qsTr("Profile doesn't exist."); break;
-            case 4: reason = qsTr("Profile with this name already exists."); break;
-            case 5: reason = (doAutoLogin ? qsTr("The password is required for this profile.") : qsTr("Password is empty.")); break;
+            case 3: reason = qsTr("The profile doesn't exist."); break;
+            case 4: reason = qsTr("A profile with this name already exists."); break;
+            case 5: reason = (doAutoLogin ? qsTr("A password is required for this profile.") : qsTr("The password is empty.")); break;
             }
             toast.show({ message : reason, duration : Toast.Short });
             loginWindow.enabled = true
@@ -304,7 +304,7 @@ Popup {
             visible: false
             property bool lastVisible: false
             width: parent.width * 0.75
-            placeholderText: qsTr("Password") + (loginWindow.profileCreation ? " " + qsTr("(optional)") : "")
+            placeholderText: loginWindow.profileCreation ? qsTr("Password") : qsTr("Password (optional")
             anchors.top: accountSelectionButton.bottom
             anchors.topMargin: 16
             anchors.horizontalCenter: accountSelectionButton.horizontalCenter
