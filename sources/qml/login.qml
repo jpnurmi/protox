@@ -382,7 +382,7 @@ Popup {
             width: parent.width * 0.75
             y: (parent.height - height) * 0.8
             anchors.horizontalCenter: loginPassword.horizontalCenter
-            text: (loginWindow.profileCreation ? qsTr("Create") : qsTr("Select")) + " " + qsTr("profile")
+            text: loginWindow.profileCreation ? qsTr("Create profile") : qsTr("Select profile")
             visible: loginWindow.profileCreation || accountMenu.profileName.length > 0
             onClicked: loginWindow.login()
         }
