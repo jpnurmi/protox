@@ -80,9 +80,10 @@ function setFriendTyping(friend_number, typing) {
         var nick = bridge.getFriendNickname(friend_number)
         // don't print long nicks
         if (nick.length > friendNickname.charsLimit) {
-            nick = qsTr("A friend")
+            typingText.text = qsTr("A friend is typing...")
+        } else {
+            typingText.text = qsTr("%1 is typing...").arg(nick)
         }
-        typingText.text = nick + qsTr(" is typing...")
         typingText.visible = true
     } else {
         typingText.text = ""
@@ -163,7 +164,7 @@ function insertMessage(variantMessage, friend_number, self, message_id, time, un
         if (!variantMessage.type) {
             notification.show({
                               caption : variantMessage.message,
-                              title : qsTr("New message from ") + bridge.getFriendNickname(friend_number),
+                              title : qsTr("New message from %1").arg(bridge.getFriendNickname(friend_number)),
                               id : friend_number
                             });
         }
@@ -211,7 +212,7 @@ function insertFriend(friend_number, nickName, request, request_message, friendP
     if (request && (appInactive || !drawer.opened || settingsWindow.visible)) {
         notification.show({
                           caption : request_message,
-                          title : qsTr("A new friend request from ") + nickName,
+                          title : qsTr("A new friend request from %1").arg(nickName),
                           id : -1
                         });
         leftOverlayButtonTextAnimation.start()

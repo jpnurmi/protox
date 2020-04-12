@@ -75,7 +75,7 @@ Popup {
         max_bootstrap_nodes_validator.top = count
         for (var i = 0; i < settingsModel.count; i++) {
             if (settingsModel.get(i).prop === "available_nodes") {
-                settingsModel.get(i).name = count + qsTr(" bootstrap nodes available in .json file.")
+                settingsModel.get(i).name = qsTr("%n bootstrap node(s) available in .json file.", "", count)
                 return
             }
         }
