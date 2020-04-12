@@ -304,7 +304,7 @@ Popup {
             visible: false
             property bool lastVisible: false
             width: parent.width * 0.75
-            placeholderText: loginWindow.profileCreation ? qsTr("Password") : qsTr("Password (optional")
+            placeholderText: loginWindow.profileCreation ? qsTr("Password (optional)") : qsTr("Password")
             anchors.top: accountSelectionButton.bottom
             anchors.topMargin: 16
             anchors.horizontalCenter: accountSelectionButton.horizontalCenter
