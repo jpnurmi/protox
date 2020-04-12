@@ -219,7 +219,7 @@ Popup {
                     case 1: toast.show({ message : "We get signal.", duration : Toast.Long }); break;
                     case 2: toast.show({ message : "What?", duration : Toast.Short }); break;
                     case 3: toast.show({ message : "It's you.", duration : Toast.Short });
-                        parent.source = "base.png"
+                        parent.source = "resources/base.png"
                         var lines = ["How are you gentlemen!!!", "ALL YOUR PROFILES ARE BELONG TO US!", 
                                      "You are on the way to destruction.", "You have no chance to survive make your time.", "Ha ha ha ha..."]
                         for (var i = 0; i < lines.length; i++) {
