@@ -429,7 +429,7 @@ Rectangle {
     visible: false
     Text {
         id: nextPageButtonText
-        text: "\u2193 " + qsTr("You have ") + new_messages + qsTr(" new messages") + " \u2193"
+        text: "\u2193 " + qsTr("You have %n new message(s)", "", new_messages) + " \u2193"
         font.bold: true
         font.pointSize: fontMetrics.normalize(12.5)
         opacity: parent.opacity

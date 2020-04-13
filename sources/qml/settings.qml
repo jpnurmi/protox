@@ -174,7 +174,7 @@ Popup {
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Profile") })
         settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Auto-login into this profile"), itemEnabled: true, prop: "auto_login_enabled", 
                     value: false /* will be set later */ })
-        settingsModel.append({ flags: sf_text | sf_button, name: "Profile deletion", buttonText: qsTr("Delete"), 
+        settingsModel.append({ flags: sf_text | sf_button, name: qsTr("Profile deletion"), buttonText: qsTr("Delete"), 
                                  clickAction: "delete_profile"})
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Version") })
         settingsModel.append({ flags: sf_text | sf_title | sf_help, name: "Protox: " + applicationVersion, prop: "application_version"})

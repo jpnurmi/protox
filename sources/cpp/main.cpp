@@ -612,6 +612,7 @@ int main(int argc, char *argv[])
 	QUtf8ByteLimitValidator::declareQML();
 	QZXing::registerQMLTypes();
 	QZXing::registerQMLImageProvider(engine);
+	qmltranslator.setTranslation(qmlbridge->getSystemLocale());
 	engine.load(url);
 #ifdef Q_OS_ANDROID
 	QtAndroid::hideSplashScreen();

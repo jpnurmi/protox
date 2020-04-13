@@ -12,7 +12,10 @@
 Click on the left button to open the friend list, then on «+» to add a new friend.
 
  Good luck!</source>
-        <translation type="unfinished"></translation>
+        <translation>Это альфа версия Tox клиента. 
+Нажмите на левую кнопку, чтобы открыть список друзей, затем на «+» для добавления нового друга. 
+
+Удачи!</translation>
     </message>
     <message>
         <source>A friend is typing...</source>
@@ -28,39 +31,39 @@ Click on the left button to open the friend list, then on «+» to add a new fri
     </message>
     <message>
         <source>You cannot send a friend request to yourself.</source>
-        <translation type="unfinished"></translation>
+        <translation>Вы не можете отправить запрос на добавления друзья самому себе.</translation>
     </message>
     <message>
         <source>The friend is already on the friend list.</source>
-        <translation type="unfinished"></translation>
+        <translation>Друг уже находится в списке друзей.</translation>
     </message>
     <message>
         <source>The friend address is invalid.</source>
-        <translation type="unfinished"></translation>
+        <translation>Адрес друга неверен.</translation>
     </message>
     <message>
         <source>The friend has a different nospam value.</source>
-        <translation type="unfinished"></translation>
+        <translation>Значение nospam друга отличается.</translation>
     </message>
     <message>
         <source>Failed! error code: </source>
-        <translation type="unfinished"></translation>
+        <translation>Неудача! код ошибки: </translation>
     </message>
     <message>
         <source>New message from %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Новое сообщение от %1</translation>
     </message>
     <message>
         <source>A new friend request from %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Новый запрос в друзья от %1</translation>
     </message>
     <message>
         <source>Connection lost</source>
-        <translation type="unfinished"></translation>
+        <translation>Соединение потеряно</translation>
     </message>
     <message>
         <source>Connected (TCP)</source>
-        <translation type="unfinished"></translation>
+        <translation>Подключено (TCP)</translation>
     </message>
     <message>
         <source>Connected (UDP)</source>
@@ -68,347 +71,347 @@ Click on the left button to open the friend list, then on «+» to add a new fri
     </message>
     <message>
         <source>Bootstrapping...</source>
-        <translation type="unfinished"></translation>
+        <translation>Инициализация...</translation>
     </message>
     <message>
         <source>The password is set.</source>
-        <translation type="unfinished"></translation>
+        <translation>Пароль задан.</translation>
     </message>
     <message>
         <source>The password is not set.</source>
-        <translation type="unfinished"></translation>
+        <translation>Пароль не задан.</translation>
     </message>
     <message numerus="yes">
         <source>%n bootstrap node(s) available in .json file.</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%n узлел инициализации доступен в .json файле.</numerusform>
+            <numerusform>%n узла инициализации доступно в .json файле.</numerusform>
+            <numerusform>%n узлов инициализации доступно в .json файле.</numerusform>
         </translation>
     </message>
     <message>
         <source>Password change failed!</source>
-        <translation type="unfinished"></translation>
+        <translation>Смена пароля не удалась!</translation>
     </message>
     <message>
         <source>Password fields don&apos;t match.</source>
-        <translation type="unfinished"></translation>
+        <translation>Поля с паролем не совпадают.</translation>
     </message>
     <message>
         <source>Password changed successfully!</source>
-        <translation type="unfinished"></translation>
+        <translation>Пароль успешно изменен!</translation>
     </message>
     <message>
         <source>Profile deletion</source>
-        <translation type="unfinished"></translation>
+        <translation>Удаление профиля</translation>
     </message>
     <message>
         <source>Do you really want to PERMANENTLY delete the current profile </source>
-        <translation type="unfinished"></translation>
+        <translation>Вы действительно хотите НАВСЕГДА удалить текущий профиль </translation>
     </message>
     <message>
         <source>The chat history will be erased as well!</source>
-        <translation type="unfinished"></translation>
+        <translation>История чата будет также удалена!</translation>
     </message>
     <message>
         <source>You will be logged out automatically.</source>
-        <translation type="unfinished"></translation>
+        <translation>Вы автоматически выйдите из профиля.</translation>
     </message>
     <message>
         <source>Tox options</source>
-        <translation type="unfinished"></translation>
+        <translation>Tox параметры</translation>
     </message>
     <message>
         <source>These settings require client restart!</source>
-        <translation type="unfinished"></translation>
+        <translation>Эти настройки требуют рестарт клиента!</translation>
     </message>
     <message>
         <source>Enable UDP</source>
-        <translation type="unfinished"></translation>
+        <translation>Включить UDP</translation>
     </message>
     <message>
         <source>Enable IPv6</source>
-        <translation type="unfinished"></translation>
+        <translation>Включить IPv6</translation>
     </message>
     <message>
         <source>Enable LAN discovery</source>
-        <translation type="unfinished"></translation>
+        <translation>Включить LAN обнаружение</translation>
     </message>
     <message>
         <source>Custom nodes .json file</source>
-        <translation type="unfinished"></translation>
+        <translation>.json файл с пользовательскими узлами</translation>
     </message>
     <message>
         <source>Maximum bootstrap nodes</source>
-        <translation type="unfinished"></translation>
+        <translation>Максимальное кол-во узлов инициализации</translation>
     </message>
     <message>
         <source>Client options</source>
-        <translation type="unfinished"></translation>
+        <translation>Параметры клиента</translation>
     </message>
     <message>
         <source>Recent messages limit</source>
-        <translation type="unfinished"></translation>
+        <translation>Лимит последних сообщений</translation>
     </message>
     <message>
         <source>Privacy</source>
-        <translation type="unfinished"></translation>
+        <translation>Приватность</translation>
     </message>
     <message>
         <source>Keep chat history</source>
-        <translation type="unfinished"></translation>
+        <translation>Сохранять историю чата</translation>
     </message>
     <message>
         <source>The NoSpam value is a part of your ToxID that can be changed at will.</source>
-        <translation type="unfinished"></translation>
+        <translation>NoSpam это чать вашего ToxID, которая может быть изменена по желанию.</translation>
     </message>
     <message>
         <source>If you are getting spammed with friend requests, change this value.</source>
-        <translation type="unfinished"></translation>
+        <translation>Если вас спамят запросами на добавление в друзья, измените это значение.</translation>
     </message>
     <message>
         <source>Only hexadecimal characters are allowed.</source>
-        <translation type="unfinished"></translation>
+        <translation>Разрешены только шестнадцатеричные символы.</translation>
     </message>
     <message>
         <source>NoSpam</source>
-        <translation type="unfinished"></translation>
+        <translation>NoSpam</translation>
     </message>
     <message>
         <source>Randomize</source>
-        <translation type="unfinished"></translation>
+        <translation>Случаное</translation>
     </message>
     <message>
         <source>Password</source>
-        <translation type="unfinished"></translation>
+        <translation>Пароль</translation>
     </message>
     <message>
         <source>Repeat</source>
-        <translation type="unfinished"></translation>
+        <translation>Повторите</translation>
     </message>
     <message>
         <source>Change</source>
-        <translation type="unfinished"></translation>
+        <translation>Изменить</translation>
     </message>
     <message>
         <source>Profile</source>
-        <translation type="unfinished"></translation>
+        <translation>Профиль</translation>
     </message>
     <message>
         <source>Auto-login into this profile</source>
-        <translation type="unfinished"></translation>
+        <translation>Автоматический вход в этот профиль</translation>
     </message>
     <message>
         <source>Delete</source>
-        <translation type="unfinished"></translation>
+        <translation>Удалить</translation>
     </message>
     <message>
         <source>Version</source>
-        <translation type="unfinished"></translation>
+        <translation>Версия</translation>
     </message>
     <message>
         <source>Settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Настройки</translation>
     </message>
     <message>
         <source>Add a new friend</source>
-        <translation type="unfinished"></translation>
+        <translation>Добавить нового друга</translation>
     </message>
     <message>
         <source>Tox ID</source>
-        <translation type="unfinished"></translation>
+        <translation>Tox ID</translation>
     </message>
     <message>
         <source>Messsage</source>
-        <translation type="unfinished"></translation>
+        <translation>Сообщение</translation>
     </message>
     <message>
         <source>Add me to your friends. Maybe?</source>
-        <translation type="unfinished"></translation>
+        <translation>Добавьте меня в друзья. Наверное?</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>Отменить</translation>
     </message>
     <message>
         <source>Send</source>
-        <translation type="unfinished"></translation>
+        <translation>Отправить</translation>
     </message>
     <message>
         <source>Deleting chat history</source>
-        <translation type="unfinished"></translation>
+        <translation>Удаление истории чата</translation>
     </message>
     <message>
         <source>Do you want to delete chat history for this contact?</source>
-        <translation type="unfinished"></translation>
+        <translation>Вы действительно хотите удалить историю чата для этого контакта?</translation>
     </message>
     <message>
         <source>Chat history deleted!</source>
-        <translation type="unfinished"></translation>
+        <translation>История чата удалена!</translation>
     </message>
     <message>
         <source>Removing current friend</source>
-        <translation type="unfinished"></translation>
+        <translation>Удаление текущего друга</translation>
     </message>
     <message>
         <source>Are you really want to remove </source>
-        <translation type="unfinished"></translation>
+        <translation>Вы действительно хотите удалить </translation>
     </message>
     <message>
         <source> from your contact list?</source>
-        <translation type="unfinished"></translation>
+        <translation> из вашего списка контактов?</translation>
     </message>
     <message>
         <source>Friend removed!</source>
-        <translation type="unfinished"></translation>
+        <translation>Друг удален!</translation>
     </message>
     <message>
         <source>Nickname</source>
-        <translation type="unfinished"></translation>
+        <translation>Имя</translation>
     </message>
     <message>
         <source>Status message</source>
-        <translation type="unfinished"></translation>
+        <translation>Сообщение статуса</translation>
     </message>
     <message>
         <source>&lt;empty&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;пусто&gt;</translation>
     </message>
     <message>
         <source>Delete chat history</source>
-        <translation type="unfinished"></translation>
+        <translation>Удалить историю чата</translation>
     </message>
     <message>
         <source>Nothing to delete.</source>
-        <translation type="unfinished"></translation>
+        <translation>Нечего удалять.</translation>
     </message>
     <message>
         <source>Remove this friend</source>
-        <translation type="unfinished"></translation>
+        <translation>Удалить этого друга</translation>
     </message>
     <message>
         <source>Apply</source>
-        <translation type="unfinished"></translation>
+        <translation>Применить</translation>
     </message>
     <message>
         <source>My profile info</source>
-        <translation type="unfinished"></translation>
+        <translation>Моя информация о профиле</translation>
     </message>
     <message>
         <source>ToxID copied!</source>
-        <translation type="unfinished"></translation>
+        <translation>ToxID скопирован!</translation>
     </message>
     <message>
         <source>Click on image to copy your ToxID.</source>
-        <translation type="unfinished"></translation>
+        <translation>Нажмите на изображение, чтобы скопировать ваш ToxID.</translation>
     </message>
     <message>
         <source>Clear chat</source>
-        <translation type="unfinished"></translation>
+        <translation>Удалить чат</translation>
     </message>
     <message>
         <source>Logout</source>
-        <translation type="unfinished"></translation>
+        <translation>Выйти из профиля</translation>
     </message>
     <message>
         <source>Quit</source>
-        <translation type="unfinished"></translation>
+        <translation>Завершение</translation>
     </message>
     <message>
         <source>Online</source>
-        <translation type="unfinished"></translation>
+        <translation>В сети</translation>
     </message>
     <message>
         <source>Away</source>
-        <translation type="unfinished"></translation>
+        <translation>Отошел</translation>
     </message>
     <message>
         <source>Busy</source>
-        <translation type="unfinished"></translation>
+        <translation>Занят</translation>
     </message>
     <message>
         <source>(no request message specified)</source>
-        <translation type="unfinished"></translation>
+        <translation>(в запросе на добавления в друзья нет сообщения)</translation>
     </message>
     <message>
         <source>A new friend request</source>
-        <translation type="unfinished"></translation>
+        <translation>Новый запрос на добавление в друзья</translation>
     </message>
     <message>
         <source>addFriend failed, error code: </source>
-        <translation type="unfinished"></translation>
+        <translation>addFriend не удался, код ошибки: </translation>
     </message>
     <message>
         <source>Type something</source>
-        <translation type="unfinished"></translation>
+        <translation>Напишите что-нибудь</translation>
     </message>
     <message>
         <source>The friend is not online.</source>
-        <translation type="unfinished"></translation>
+        <translation>Друг не в сети.</translation>
     </message>
     <message>
         <source>You are not connected to the Tox network!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>You have </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source> new messages</source>
-        <translation type="unfinished"></translation>
+        <translation>Вы не подключены к Tox сети!</translation>
     </message>
     <message>
         <source>Specify a user name.</source>
-        <translation type="unfinished"></translation>
+        <translation>Введите имя пользователя.</translation>
     </message>
     <message>
         <source>Decrypting profile...</source>
-        <translation type="unfinished"></translation>
+        <translation>Расшифровка профиля...</translation>
     </message>
     <message>
         <source>Profile loading failed.</source>
-        <translation type="unfinished"></translation>
+        <translation>Загрузка профиля не удалась.</translation>
     </message>
     <message>
         <source>Wrong password.</source>
-        <translation type="unfinished"></translation>
+        <translation>Неверный пароль.</translation>
     </message>
     <message>
         <source>The profile doesn&apos;t exist.</source>
-        <translation type="unfinished"></translation>
+        <translation>Профиль не существует.</translation>
     </message>
     <message>
         <source>A profile with this name already exists.</source>
-        <translation type="unfinished"></translation>
+        <translation>Профиль с этим именем уже существует.</translation>
     </message>
     <message>
         <source>A password is required for this profile.</source>
-        <translation type="unfinished"></translation>
+        <translation>Для этого профиля требуется пароль.</translation>
     </message>
     <message>
         <source>The password is empty.</source>
-        <translation type="unfinished"></translation>
+        <translation>Пароль пуст.</translation>
     </message>
     <message>
         <source>Auto login failed!</source>
-        <translation type="unfinished"></translation>
+        <translation>Автоматический вход не удался!</translation>
     </message>
     <message>
         <source>Username</source>
-        <translation type="unfinished"></translation>
+        <translation>Имя пользователя</translation>
     </message>
     <message>
         <source>Password (optional)</source>
-        <translation type="unfinished"></translation>
+        <translation>Пароль (опционально)</translation>
     </message>
     <message>
         <source>Create profile</source>
-        <translation type="unfinished"></translation>
+        <translation>Создать профиль</translation>
     </message>
     <message>
         <source>Select profile</source>
-        <translation type="unfinished"></translation>
+        <translation>Выбрать профиль</translation>
+    </message>
+    <message numerus="yes">
+        <source>You have %n new message(s)</source>
+        <translation>
+            <numerusform>У вас %n новое сообщение</numerusform>
+            <numerusform>У вас %n новых сообщения</numerusform>
+            <numerusform>У вас %n новых сообщений</numerusform>
+        </translation>
     </message>
 </context>
 <context>
