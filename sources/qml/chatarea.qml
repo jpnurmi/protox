@@ -183,7 +183,7 @@ ColumnLayout {
                                 return
                             }
                             bridge.copyTextToClipboard(cloudText.plainText)
-                            toast.show({ message : "Text copied!", duration : Toast.Short });
+                            toast.show({ message : qsTr("Text copied!"), duration : Toast.Short });
                         }
                         onPressAndHold: {
                             chatMessage.forceActiveFocus()

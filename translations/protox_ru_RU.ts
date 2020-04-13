@@ -413,6 +413,10 @@ Click on the left button to open the friend list, then on «+» to add a new fri
             <numerusform>У вас %n новых сообщений</numerusform>
         </translation>
     </message>
+    <message>
+        <source>Text copied!</source>
+        <translation>Текст скопирован!</translation>
+    </message>
 </context>
 <context>
     <name>SQLiteCipherDriver</name>
