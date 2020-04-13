@@ -1,0 +1,1 @@
+QAndroidPlatformTheme.qml
