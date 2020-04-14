@@ -8,12 +8,14 @@ import org.qtproject.qt5.android.QtNative;
 import android.content.Intent;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Build;
 import android.util.Log;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.Window;
 import android.graphics.Rect;
+import android.graphics.Color;
 
 import KeyboardProvider.KeyboardProvider;
 
@@ -21,6 +23,11 @@ public class QtActivityEx extends QtActivity
 {
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(Color.parseColor("#3F51B5"));
+        }
         super.onCreate(savedInstanceState);
         processIntent(getIntent());
         new KeyboardProvider(this).init().setListener(new KeyboardProvider.KeyboardListener() {

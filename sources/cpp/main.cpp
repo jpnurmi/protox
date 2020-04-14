@@ -570,7 +570,6 @@ void QmlTranslator::setTranslation(const QString &translation)
 
 int main(int argc, char *argv[])
 {
-	QtStatusBar::setColor(QColor("#3F51B5"));
 #if defined (Q_OS_ANDROID)
 	const QStringList permission_list = { "android.permission.WRITE_EXTERNAL_STORAGE" };
 	for (auto permission : permission_list) {
