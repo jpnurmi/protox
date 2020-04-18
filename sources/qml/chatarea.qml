@@ -139,8 +139,9 @@ ColumnLayout {
                 }
                 
                 function calculateMaximumWidth() {
-                    if (cloudText.width > window.width - chatContent.cloud_margin * 2 -  chatContent.chat_margin - (!inPortrait ? drawer.width : 0))
-                        implicitWidth = window.width - chatContent.cloud_margin * 2 - chatContent.chat_margin - (!inPortrait ? drawer.width : 0)
+                    var cwidth = window.width - chatContent.cloud_margin * 2 - chatContent.chat_margin * 2 - (inPortrait ? 0 : drawer.width)
+                    if (cloudText.width > cwidth)
+                        implicitWidth = cwidth
                 }
 
                 Component.onCompleted: {
