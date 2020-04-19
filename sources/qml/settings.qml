@@ -331,23 +331,30 @@ Popup {
                 }
                 Loader {
                     Component { 
-                        id: settingsCheckBox
+                        id: settingsSwitchComponent
                         Switch {
+                            id: settingsSwitch
                             Layout.alignment: Qt.AlignRight
                             checked: value
                             enabled: itemEnabled
+                            Binding {
+                                target: settingsSwitch
+                                property: "checked"
+                                value: value
+                            }
                             onCheckedChanged: {
                                 value = checked
                                 checked = value
                             }
                         }
                     }
-                    sourceComponent: (flags & settingsWindow.sf_switch) ? settingsCheckBox : undefined
+                    sourceComponent: (flags & settingsWindow.sf_switch) ? settingsSwitchComponent : undefined
                 }
                 Loader {
                     Component {
-                        id: settingsTextInput
+                        id: settingsTextInputComponent
                         TextField {
+                            id: settingsTextInput
                             width: itemWidth
                             Layout.alignment: Qt.AlignRight
                             horizontalAlignment: TextInput.AlignHCenter
@@ -362,6 +369,11 @@ Popup {
                             passwordCharacter: "*"
                             validator: fieldValidator === undefined ? default_validator : fieldValidator
                             color: acceptableInput ? "black" : "red"
+                            Binding {
+                                target: settingsTextInput
+                                property: "text"
+                                value: svalue
+                            }
                             onAccepted: {
                                 if ((flags & settingsWindow.sf_mask) && !acceptableInput) {
                                     return
@@ -387,11 +399,11 @@ Popup {
                             }
                         }
                     }
-                    sourceComponent: (flags & settingsWindow.sf_input) ? settingsTextInput : undefined
+                    sourceComponent: (flags & settingsWindow.sf_input) ? settingsTextInputComponent : undefined
                 }
                 Loader {
                     Component {
-                        id: settingsButton
+                        id: settingsButtonComponent
                         Button {
                             rightInset: 15
                             rightPadding: rightInset * 1.5
@@ -399,7 +411,7 @@ Popup {
                             onClicked: settingsModel.actions[clickAction]()
                         }
                     }
-                    sourceComponent: (flags & settingsWindow.sf_button) ? settingsButton : undefined
+                    sourceComponent: (flags & settingsWindow.sf_button) ? settingsButtonComponent : undefined
                 }
             }
             MenuSeparator { 
