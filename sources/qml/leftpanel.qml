@@ -63,6 +63,7 @@ Drawer {
                     font.bold: true
                     Layout.alignment: Qt.AlignLeft
                     Layout.leftMargin: 4
+                    Layout.fillWidth: true
                     implicitWidth: drawer.width * 0.6
                     onClicked: {
                         profileMenu.open()
@@ -110,6 +111,7 @@ Drawer {
                 Button {
                     id: accountStatus
                     Layout.alignment: Qt.AlignRight
+                    Layout.rightMargin: 10
                     Rectangle {
                         id: statusIndicator
                         anchors.left: parent.left
