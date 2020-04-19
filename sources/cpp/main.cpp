@@ -353,8 +353,7 @@ QString QmlCBridge::getNospamValue()
 void QmlCBridge::setNospamValue(const QString &nospam)
 {
 	ToxId bytes = ToxConverter::toToxId(nospam);
-	quint32 value = bytes[0] << 24 | bytes[1] << 16 | bytes[2] << 8 | bytes[3];
-	Toxcore::set_nospam(tox, value);
+	Toxcore::set_nospam(tox, (quint8)bytes[0] << 24 | (quint8)bytes[1] << 16 | (quint8)bytes[2] << 8 | (quint8)bytes[3]);
 }
 
 void QmlCBridge::setToxPassword(const QString &password)
