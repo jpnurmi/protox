@@ -116,7 +116,8 @@ static void cb_friend_message(Tox *m, quint32 friend_number, TOX_MESSAGE_TYPE ty
 static void cb_friend_name(Tox *m, quint32 friend_number, const quint8 *name, size_t length, void *user_data)
 {
 	Q_UNUSED(user_data)
-	QString nickName = QString::fromUtf8((char*)name, length);;
+	// I replace newlines with spaces to not make a mess in UI
+	QString nickName = QString::fromUtf8((char*)name, length).replace("\n", " ");
 	if (nickName.isEmpty()) {
 		nickName = ToxConverter::toString(get_friend_public_key(m, friend_number));
 	}
@@ -149,7 +150,8 @@ static void cb_friend_status_message(Tox *m, quint32 friend_number, const quint8
 	Q_UNUSED(m)
 	Q_UNUSED(user_data)
 
-	qmlbridge->setFriendStatusMessage(friend_number, QString::fromUtf8((char*)message, length));
+	// I replace newlines with spaces to not make a mess in UI
+	qmlbridge->setFriendStatusMessage(friend_number, QString::fromUtf8((char*)message, length).replace("\n", " "));
 }
 
 static void cb_friend_status(Tox *m, uint32_t friend_number, TOX_USER_STATUS status, void *user_data)
