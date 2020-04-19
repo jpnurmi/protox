@@ -204,9 +204,8 @@ Popup {
             id: loginImage
             source: "resources/logo_big.png"
             smooth: true
-            anchors.bottom: accountSelectionButton.top
-            anchors.bottomMargin: 48
-            anchors.horizontalCenter: accountSelectionButton.horizontalCenter
+            x: inPortrait ? (parent.width - width) * 0.5 : (parent.width - width) * 0.15
+            y: inPortrait ? (parent.height - height) * 0.15 : (parent.height - height) * 0.5
             width: 142
             height: 142 * (sourceSize.height / sourceSize.width)
             MouseArea {
@@ -251,162 +250,166 @@ Popup {
             }
         }
 
-        Button {
-            id: accountSelectionButton
-            y: (height + parent.height) * 0.4
-            width: parent.width * 0.75
-            height: 50
-            property bool additiveVisible: true
-            visible: !loginWindow.profileCreation && additiveVisible
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: "No profile selected"
-            onClicked: {
-                accountMenu.popup(x, y)
-            }
-        }
-
-        TextField {
-            id: loginUsername
-            visible: loginWindow.profileCreation
-            width: parent.width * 0.75
-            placeholderText: qsTr("Username")
-            anchors.centerIn: accountSelectionButton
-            inputMethodHints: Qt.ImhSensitiveData
-            color: "white"
-            placeholderTextColor: "gray"
-            horizontalAlignment: TextInput.AlignHCenter
-            background: Rectangle {
-                color: loginUsername.activeFocus ? Material.primaryHighlightedTextColor : "gray"
-                height: 2
-                width: parent.width
-                anchors.bottom: parent.bottom
-            }
-            onPressed: {
-                if (!window.keyboardActive) {
-                    focus = false
-                }
-                forceActiveFocus()
-                cursorPosition = positionAt(event.x, event.y)
-                if (selectedText.length > 0) {
-                    deselect()
-                    cursorPosition = positionAt(event.x, event.y)
-                }
-                event.accepted = false
-            }
-            onAccepted: {
-                focus = false
-                loginPassword.focus = true
-            }
-        }
-
-        TextField {
-            id: loginPassword
-            visible: false
-            property bool lastVisible: false
-            width: parent.width * 0.75
-            placeholderText: loginWindow.profileCreation ? qsTr("Password (optional)") : qsTr("Password")
-            anchors.top: accountSelectionButton.bottom
-            anchors.topMargin: 16
-            anchors.horizontalCenter: accountSelectionButton.horizontalCenter
-            inputMethodHints: Qt.ImhSensitiveData
-            color: "white"
-            placeholderTextColor: "gray"
-            echoMode: TextInput.Password
-            passwordCharacter: "*"
-            horizontalAlignment: TextInput.AlignHCenter
-            background: Rectangle {
-                color: loginPassword.activeFocus ? Material.primaryHighlightedTextColor : "gray"
-                height: 2
-                width: parent.width
-                anchors.bottom: parent.bottom
-            }
-            onPressed: {
-                if (!window.keyboardActive) {
-                    focus = false
-                }
-                forceActiveFocus()
-                cursorPosition = positionAt(event.x, event.y)
-                if (selectedText.length > 0) {
-                    deselect()
-                    cursorPosition = positionAt(event.x, event.y)
-                }
-                event.accepted = false
-            }
-            onAccepted: {
-                focus = false
-                // disabled due to graphical bug
-                /*
-                if (!loginWindow.profileCreation) {
-                    loginButton.login()
-                    return
-                }
-                */
-                loginImage.focus = true
-            }
-        }
-
-        CheckBox {
-            id: loginCheckbox
-            anchors.centerIn: loginPassword
-            visible: !loginPassword.visible
-
-            indicator: Rectangle {
-                implicitWidth: 20
-                implicitHeight: 20
-                x: loginCheckbox.leftPadding
-                y: parent.height / 2 - height / 2
-                border.color: loginCheckbox.down ? "#dark" : "#grey"
-                radius: 2
-                Text {
-                    anchors.centerIn: parent
-                    text: "\u2713"
-                    font.bold: true
-                    font.pointSize: 16
-                    color: Material.highlightedButtonColor
-                    visible: loginCheckbox.checked
+        ColumnLayout {
+            x: inPortrait ? 0 : (parent.width - width) * 0.8
+            y: (height + parent.height) * 0.35
+            anchors.verticalCenter: inPortrait ? undefined : parent.verticalCenter
+            anchors.horizontalCenter: inPortrait ? parent.horizontalCenter : undefined
+            width: parent.width * (inPortrait ? 0.75 : 0.4)
+            Button {
+                id: accountSelectionButton
+                height: 50
+                property bool additiveVisible: true
+                visible: !loginWindow.profileCreation && additiveVisible
+                text: "No profile selected"
+                Layout.fillWidth: true
+                Layout.topMargin: 6
+                onClicked: {
+                    accountMenu.popup(parent.x, parent.y)
                 }
             }
-
-            contentItem: Text {
-                leftPadding: loginCheckbox.indicator.width + 4
-                text: qsTr("Auto-login into this profile")
+            TextField {
+                id: loginUsername
+                visible: loginWindow.profileCreation
+                Layout.fillWidth: true
+                Layout.topMargin: 6
+                placeholderText: qsTr("Username")
+                anchors.centerIn: accountSelectionButton
+                inputMethodHints: Qt.ImhSensitiveData
                 color: "white"
-                elide: Text.ElideRight
-                horizontalAlignment: Text.AlignLeft
-                verticalAlignment: Text.AlignVCenter
+                placeholderTextColor: "gray"
+                horizontalAlignment: TextInput.AlignHCenter
+                background: Rectangle {
+                    color: loginUsername.activeFocus ? Material.primaryHighlightedTextColor : "gray"
+                    height: 2
+                    width: parent.width
+                    anchors.bottom: parent.bottom
+                }
+                onPressed: {
+                    if (!window.keyboardActive) {
+                        focus = false
+                    }
+                    forceActiveFocus()
+                    cursorPosition = positionAt(event.x, event.y)
+                    if (selectedText.length > 0) {
+                        deselect()
+                        cursorPosition = positionAt(event.x, event.y)
+                    }
+                    event.accepted = false
+                }
+                onAccepted: {
+                    focus = false
+                    loginPassword.focus = true
+                }
+            }
+            TextField {
+                id: loginPassword
+                visible: false
+                property bool lastVisible: false
+                placeholderText: loginWindow.profileCreation ? qsTr("Password (optional)") : qsTr("Password")
+                inputMethodHints: Qt.ImhSensitiveData
+                color: "white"
+                placeholderTextColor: "gray"
+                echoMode: TextInput.Password
+                passwordCharacter: "*"
+                horizontalAlignment: TextInput.AlignHCenter
+                Layout.fillWidth: true
+                Layout.topMargin: 6
+                background: Rectangle {
+                    color: loginPassword.activeFocus ? Material.primaryHighlightedTextColor : "gray"
+                    height: 2
+                    width: parent.width
+                    anchors.bottom: parent.bottom
+                }
+                onPressed: {
+                    if (!window.keyboardActive) {
+                        focus = false
+                    }
+                    forceActiveFocus()
+                    cursorPosition = positionAt(event.x, event.y)
+                    if (selectedText.length > 0) {
+                        deselect()
+                        cursorPosition = positionAt(event.x, event.y)
+                    }
+                    event.accepted = false
+                }
+                onAccepted: {
+                    focus = false
+                    // disabled due to graphical bug
+                    /*
+                    if (!loginWindow.profileCreation) {
+                        loginButton.login()
+                        return
+                    }
+                    */
+                    loginImage.focus = true
+                }
+            }
+    
+            CheckBox {
+                id: loginCheckbox
+                anchors.centerIn: loginPassword
+                visible: !loginPassword.visible
+                Layout.alignment: Qt.AlignHCenter
+                Layout.topMargin: 6
+                implicitHeight: loginPassword.height
+                indicator: Rectangle {
+                    implicitWidth: 20
+                    implicitHeight: 20
+                    x: loginCheckbox.leftPadding
+                    y: parent.height / 2 - height / 2
+                    border.color: loginCheckbox.down ? "#dark" : "#grey"
+                    radius: 2
+                    Text {
+                        anchors.centerIn: parent
+                        text: "\u2713"
+                        font.bold: true
+                        font.pointSize: 16
+                        color: Material.highlightedButtonColor
+                        visible: loginCheckbox.checked
+                    }
+                }
+    
+                contentItem: Text {
+                    leftPadding: loginCheckbox.indicator.width + 4
+                    text: qsTr("Auto-login")
+                    wrapMode: Text.Wrap
+                    color: "white"
+                    elide: Text.ElideRight
+                    horizontalAlignment: Text.AlignLeft
+                    verticalAlignment: Text.AlignVCenter
+                }
+            }
+            Button {
+                id: loginButton
+                text: loginWindow.profileCreation ? qsTr("Create profile") : qsTr("Select profile")
+                visible: loginWindow.profileCreation || accountMenu.profileName.length > 0
+                Layout.fillWidth: true
+                Layout.topMargin: 24
+                onClicked: loginWindow.login()
+            }
+            Button {
+                id: createNewProfileButton
+                visible: !loginWindow.profileCreation
+                //anchors.topMargin: inPortrait ? 72 : 48
+                text: qsTr("Create profile")
+                Layout.fillWidth: true
+                Layout.topMargin: 48
+                background: Rectangle {
+                    color: createNewProfileButton.pressed ? Material.highlightedButtonColor : "green"
+                    radius: 2
+                }
+                onClicked: {
+                    loginWindow.profileCreation = true
+                    loginPassword.lastVisible = loginPassword.visible
+                    loginPassword.visible = true
+                    loginFadeIn.start()
+                    loginPassword.focus = false
+                    goBackButton.highlighted = false
+                }
             }
         }
 
-        Button {
-            id: loginButton
-            width: parent.width * 0.75
-            y: (parent.height - height) * 0.8
-            anchors.horizontalCenter: loginPassword.horizontalCenter
-            text: loginWindow.profileCreation ? qsTr("Create profile") : qsTr("Select profile")
-            visible: loginWindow.profileCreation || accountMenu.profileName.length > 0
-            onClicked: loginWindow.login()
-        }
-        Button {
-            id: createNewProfileButton
-            width: parent.width * 0.75
-            visible: !loginWindow.profileCreation
-            anchors.top: loginButton.bottom
-            anchors.topMargin: 48
-            anchors.horizontalCenter: loginButton.horizontalCenter
-            text: qsTr("Create profile")
-            background: Rectangle {
-                color: createNewProfileButton.pressed ? Material.highlightedButtonColor : "green"
-                radius: 2
-            }
-            onClicked: {
-                loginWindow.profileCreation = true
-                loginPassword.lastVisible = loginPassword.visible
-                loginPassword.visible = true
-                loginFadeIn.start()
-                loginPassword.focus = false
-                goBackButton.highlighted = false
-            }
-        }
         Keys.onBackPressed: {
             loginWindow.goBack(true, false)
         }

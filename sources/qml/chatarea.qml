@@ -10,12 +10,16 @@ import QtGraphicalEffects 1.0
 
 ColumnLayout {
     anchors.fill: parent
-    anchors.leftMargin: !inPortrait ? drawer.width : undefined
+    anchors.leftMargin: undefined
     spacing: 0
     Item {
         id: chatContent
         property int chat_margin: 15
         property int cloud_margin: 5
+        property bool request_width_update: false
+        function requestWidthUpdate() {
+            request_width_update = !request_width_update
+        }
         // fixme: convert to Layout.
         anchors.fill: parent
         Rectangle {
@@ -106,6 +110,7 @@ ColumnLayout {
             delegate: Rectangle {
                 id: messageCloud
                 color: !msgSelf ? "lightblue" : (msgReceived ? "orange" : "lightgray")
+                readonly property bool widthUpdate: chatContent.request_width_update
                 radius: 10
                 Rectangle {
                     id: cloudCornerRemover
@@ -139,10 +144,12 @@ ColumnLayout {
                 }
                 
                 function calculateMaximumWidth() {
-                    var cwidth = window.width - chatContent.cloud_margin * 2 - chatContent.chat_margin * 2 - (inPortrait ? 0 : drawer.width)
+                    var cwidth = window.width - chatContent.cloud_margin * 2 - chatContent.chat_margin * 2
                     if (cloudText.width > cwidth)
                         implicitWidth = cwidth
                 }
+
+                onWidthUpdateChanged: calculateMaximumWidth()
 
                 Component.onCompleted: {
                     calculateMaximumWidth()
@@ -320,7 +327,7 @@ ColumnLayout {
                 rightPadding: leftPadding
                 placeholderText: qsTr("Type something")
                 wrapMode: Text.Wrap
-                readonly property int maxLines: 9
+                property int maxLines: inPortrait ? 4 : 2
                 property real defaultHeight
                 property real defaultContentHeight
                 Component.onCompleted: {
@@ -330,9 +337,8 @@ ColumnLayout {
                 onContentWidthChanged: {
                     updateTyping()
                 }
-                onContentHeightChanged: {
-                    messages.scrollToEnd()
-                    updateTyping()
+                function updateHeight() {
+                    maxLines = inPortrait ? 4 : 2
                     if (defaultContentHeight !== 0) {
                         var lines = contentHeight / defaultContentHeight
                         var actualHeight
@@ -345,6 +351,11 @@ ColumnLayout {
                         chatFlickable.implicitHeight = Math.min(actualHeight, maxHeight)
                         chatScrollBar.visible = actualHeight > maxHeight
                     }
+                }
+                onContentHeightChanged: {
+                    messages.scrollToEnd()
+                    updateTyping()
+                    updateHeight()
                 }
                 Keys.onBackPressed: {
                     focus = false
@@ -425,7 +436,7 @@ Rectangle {
     property real alpha: 0.9
     property int bottomMargin: 30
     opacity: alpha
-    x: (parent.width - width) * (inPortrait ? 0.5 : 0.7)
+    x: (parent.width - width)
     y: chatSeparator.y - height - bottomMargin
     visible: false
     Text {

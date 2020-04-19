@@ -23,11 +23,12 @@ ApplicationWindow {
     /*
       Window events
     */
+
     onInPortraitChanged: {
-        var friend_number = bridge.getCurrentFriendNumber()
-        drawer.width = width * 0.5 * (!inPortrait ? (Screen.height / Screen.width) : 1.0)
-        //friendNickname.setText(bridge.getFriendNickname(friend_number))
-        //friendStatusMessage.setText(bridge.getFriendStatusMessage(friend_number))
+        chatMessage.updateHeight()
+        friendNickname.updateText()
+        friendStatusMessage.updateText()
+        chatContent.requestWidthUpdate()
     }
 
     onHeightChanged: {

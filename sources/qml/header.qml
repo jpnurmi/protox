@@ -11,13 +11,11 @@ import QtQuick.Window 2.12
 
 ToolBar {
     id: overlayHeader
-    leftPadding: !inPortrait ? drawer.width : undefined
     z: z_overlay_header
     width: parent.width
 
     ToolButton {
         id: leftOverlayButton
-        visible: inPortrait
         Text {
             id: leftOverlayButtonText
             text: "\uE68E"
@@ -119,16 +117,21 @@ ToolBar {
         anchors.verticalCenter: friendNickname.verticalCenter
         visible: !cleanProfile
     }
-
+    
     Label {
         id: friendNickname
         anchors.top: parent.top
         anchors.topMargin: parent.height - height - friendStatusMessage.height
         anchors.horizontalCenter: parent.horizontalCenter
         property int charsLimit: 20
+        property string realText
+        function updateText() {
+            var wh = Screen.width / Screen.height
+            text = limitString(realText, Math.round(charsLimit * (inPortrait ? 1 : wh) / fontMetrics.getFontScaling()))
+        }
         function setText(t) {
-            var mult = !inPortrait ? 1.5 : 1.0
-            text = limitString(t, Math.round(charsLimit * mult / fontMetrics.getFontScaling()))
+            realText = t
+            updateText()
         }
         MouseArea {
             anchors.fill: parent
@@ -156,9 +159,14 @@ ToolBar {
         font.pointSize: fontMetrics.normalize(10)
         font.italic: true
         property int charsLimit: 52
+        property string realText
+        function updateText() {
+            var wh = Screen.width / Screen.height
+            text = limitString(realText, Math.round(charsLimit * (inPortrait ? 1 : wh) / fontMetrics.getFontScaling()))
+        }
         function setText(t) {
-            var mult = !inPortrait ? 1.5 : 1.0
-            text = limitString(t, Math.round(charsLimit * mult / fontMetrics.getFontScaling()))
+            realText = t
+            updateText()
         }
     }
 }

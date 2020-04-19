@@ -15,13 +15,13 @@ Drawer {
     id: drawer
 
     y: 0
-    width: window.width * 0.5
+    width: window.width * 0.5 / (inPortrait ? 1 : Screen.width / Screen.height)
     height: window.height
 
-    modal: inPortrait
-    interactive: inPortrait
-    position: inPortrait ? 0 : 1
-    visible: !inPortrait
+    modal: true
+    interactive: true
+    position: 0
+    visible: false
     property bool dragEnabled: true
     dragMargin: dragEnabled ? 20 : 0
     z: z_drawer
@@ -328,9 +328,7 @@ Drawer {
                                 addFriendDialog.open()
                                 return
                             }
-                            if (inPortrait) {
-                                drawer.close()
-                            }
+                            drawer.close()
                             selectFriend(friend_number)
                         }
                         Rectangle {

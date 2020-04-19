@@ -200,7 +200,8 @@ const QString get_friend_status_message(Tox *m, quint32 friend_number)
 
 	char message[length];
 	tox_friend_get_status_message(m, friend_number, (quint8*)message, nullptr);
-	return QString::fromUtf8(message, length);
+	// I replace newlines with spaces to not make a mess in UI
+	return QString::fromUtf8(message, length).replace("\n", " ");
 }
 
 const QString get_friend_name(Tox *m, quint32 friend_number)
@@ -210,7 +211,8 @@ const QString get_friend_name(Tox *m, quint32 friend_number)
 		return ToxConverter::toString(get_friend_public_key(m, friend_number));
 	char name[length];
 	if (tox_friend_get_name(m, friend_number, (quint8*)name, nullptr)) {
-		return QString::fromUtf8(name, length);
+		// I replace newlines with spaces to not make a mess in UI
+		return QString::fromUtf8(name, length).replace("\n", " ");
 	} else {
 		return QString();
 	}
