@@ -94,7 +94,7 @@ ApplicationWindow {
         flickableDirection: Flickable.VerticalFlick
         Image {
             id: welcomeImage
-            x: (window.width - width) / 2
+            x: (window.width - width) * 0.5
             source: "resources/logo_big.png"
             smooth: true
             anchors.top: overlayHeader.bottom
@@ -106,7 +106,7 @@ ApplicationWindow {
     
         Text {
             id: welcomeTextTitle
-            x: (window.width - width) / 2
+            x: (window.width - width) * 0.5
             text: qsTr("Welcome to Protox!")
             wrapMode: Text.Wrap
             font.bold: true
