@@ -434,7 +434,7 @@ Rectangle {
     property real alpha: 0.9
     property int bottomMargin: 30
     opacity: alpha
-    x: (parent.width - width)
+    x: (parent.width - width) * 0.5
     y: chatSeparator.y - height - bottomMargin
     visible: false
     Text {
