@@ -106,12 +106,12 @@ Popup {
     Image {
         id: loginBackground
         anchors.fill: parent
-        source: "resources/login.png"
+        source: inPortrait ? "resources/login.png" : "resources/login_ls.png"
 
         Image {
             id: loginBackgroundNewProfile
             anchors.fill: parent
-            source: "resources/profileCreation.png"
+            source: inPortrait ? "resources/profileCreation.png" : "resources/profileCreation_ls.png"
             opacity: 0
         }
 

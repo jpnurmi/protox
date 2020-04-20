@@ -12,5 +12,7 @@
         <file>.app.qml</file>
         <file>sources/qml/dummy/QAndroidPlatformTheme.qml</file>
         <file>sources/qml/dummy/QPlatformTheme.qml</file>
+        <file>resources/login_ls.png</file>
+        <file>resources/profileCreation_ls.png</file>
     </qresource>
 </RCC>
