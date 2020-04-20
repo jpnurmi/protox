@@ -311,7 +311,7 @@ function signInProfile(profile, create, password, autoLogin) {
     myStatusMessage.text = bridge.getStatusMessage()
     // settings
     settingsModel.setValueString("no_spam_value", bridge.getNospamValue())
-    settingsModel.setValue("auto_login_enabled", autoLogin)
+    settingsModel.setValueNumber("auto_login_enabled", autoLogin)
     settingsModel.setEnabled("auto_login_enabled", password.length === 0)
     settingsWindow.setProfileEncrypted(bridge.checkProfileEncrypted(profile))
     settingsWindow.setAvailableNodes(bridge.getToxNodesCount())

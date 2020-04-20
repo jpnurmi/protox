@@ -16,10 +16,6 @@ ColumnLayout {
         id: chatContent
         property int chat_margin: 15
         property int cloud_margin: 5
-        property bool request_width_update: false
-        function requestWidthUpdate() {
-            request_width_update = !request_width_update
-        }
         // fixme: convert to Layout.
         anchors.fill: parent
         Rectangle {
@@ -110,7 +106,6 @@ ColumnLayout {
             delegate: Rectangle {
                 id: messageCloud
                 color: !msgSelf ? "lightblue" : (msgReceived ? "orange" : "lightgray")
-                readonly property bool widthUpdate: chatContent.request_width_update
                 radius: 10
                 Rectangle {
                     id: cloudCornerRemover
@@ -149,7 +144,10 @@ ColumnLayout {
                         implicitWidth = cwidth
                 }
 
-                onWidthUpdateChanged: calculateMaximumWidth()
+                Connections {
+                    target: window
+                    onInPortraitChanged: calculateMaximumWidth()
+                }
 
                 Component.onCompleted: {
                     calculateMaximumWidth()

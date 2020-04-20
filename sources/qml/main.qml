@@ -25,10 +25,8 @@ ApplicationWindow {
     */
 
     onInPortraitChanged: {
+        Qt.inputMethod.hide()
         chatMessage.updateHeight()
-        friendNickname.updateText()
-        friendStatusMessage.updateText()
-        chatContent.requestWidthUpdate()
     }
 
     onHeightChanged: {
@@ -49,9 +47,6 @@ ApplicationWindow {
     Connections {
         target: Qt.application
         onStateChanged: {
-            statusBar.theme = Material.Dark
-            statusBar.color = Material.toolBarColor
-
             // select friend when you click on notification
             if(Qt.application.state === Qt.ApplicationActive && notification.getNotificationId() !== -1) {
                 settingsWindow.close()
@@ -85,44 +80,54 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
+        statusBar.theme = Material.Dark
+        statusBar.color = Material.toolBarColor
         delayTimer.start()
     }
 
-    Image {
-        id: welcomeImage
-        x: (window.width - width) / 2
-        source: "resources/logo_big.png"
-        smooth: true
+    Flickable {
         anchors.top: overlayHeader.bottom
         anchors.topMargin: 40
-        width: 142
-        height: 142 * (sourceSize.height / sourceSize.width)
-        visible: cleanProfile
-    }
-
-    Text {
-        id: welcomeTextTitle
-        x: (window.width - width) / 2
-        text: qsTr("Welcome to Protox!")
-        wrapMode: Text.Wrap
-        font.bold: true
-        font.pointSize: fontMetrics.normalizeAverage(32)
-        anchors.top: welcomeImage.bottom
-        anchors.topMargin: 40
-        visible: cleanProfile
-    }
-
-    Text {
-        id: welcomeText
-        text: qsTr("This is an alpha version of the Tox client.\nClick on the left button to open the friend list, then on «+» to add a new friend.\n\n Good luck!")
-        wrapMode: Text.Wrap
-        anchors.top: welcomeTextTitle.bottom
-        anchors.topMargin: 20
-        visible: cleanProfile
-        width: window.width
-        horizontalAlignment: Text.AlignHCenter
-        leftPadding: 10
-        rightPadding: leftPadding
+        width: parent.width
+        height: parent.height
+        enabled: cleanProfile
+        flickableDirection: Flickable.VerticalFlick
+        Image {
+            id: welcomeImage
+            x: (window.width - width) / 2
+            source: "resources/logo_big.png"
+            smooth: true
+            anchors.top: overlayHeader.bottom
+            anchors.topMargin: 40
+            width: 142
+            height: 142 * (sourceSize.height / sourceSize.width)
+            visible: cleanProfile
+        }
+    
+        Text {
+            id: welcomeTextTitle
+            x: (window.width - width) / 2
+            text: qsTr("Welcome to Protox!")
+            wrapMode: Text.Wrap
+            font.bold: true
+            font.pointSize: fontMetrics.normalizeAverage(32)
+            anchors.top: welcomeImage.bottom
+            anchors.topMargin: 40
+            visible: cleanProfile
+        }
+    
+        Text {
+            id: welcomeText
+            text: qsTr("This is an alpha version of the Tox client.\nClick on the left button to open the friend list, then on «+» to add a new friend.\n\n Good luck!")
+            wrapMode: Text.Wrap
+            anchors.top: welcomeTextTitle.bottom
+            anchors.topMargin: 20
+            visible: cleanProfile
+            width: window.width
+            horizontalAlignment: Text.AlignHCenter
+            leftPadding: 10
+            rightPadding: leftPadding
+        }
     }
 
     /*

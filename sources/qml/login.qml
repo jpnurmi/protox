@@ -274,7 +274,6 @@ Popup {
                 Layout.fillWidth: true
                 Layout.topMargin: 6
                 placeholderText: qsTr("Username")
-                anchors.centerIn: accountSelectionButton
                 inputMethodHints: Qt.ImhSensitiveData
                 color: "white"
                 placeholderTextColor: "gray"
@@ -348,7 +347,6 @@ Popup {
     
             CheckBox {
                 id: loginCheckbox
-                anchors.centerIn: loginPassword
                 visible: !loginPassword.visible
                 Layout.alignment: Qt.AlignHCenter
                 Layout.topMargin: 6
@@ -391,7 +389,6 @@ Popup {
             Button {
                 id: createNewProfileButton
                 visible: !loginWindow.profileCreation
-                //anchors.topMargin: inPortrait ? 72 : 48
                 text: qsTr("Create profile")
                 Layout.fillWidth: true
                 Layout.topMargin: 48

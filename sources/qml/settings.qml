@@ -113,7 +113,7 @@ Popup {
                 settingsWindow.setProfileEncrypted(encrypted)
                 if (encrypted) {
                     bridge.setSettingsValue("Profile", "auto_login_profile", String(""))
-                    settingsModel.setValue("auto_login_enabled", false)
+                    settingsModel.setValueNumber("auto_login_enabled", false)
                 }
                 settingsModel.setEnabled("auto_login_enabled", !encrypted)
                 settingsModel.setValueString("password", "")
@@ -138,11 +138,11 @@ Popup {
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Tox options") })
         settingsModel.append({ flags: sf_text | sf_title | sf_help | sf_warning, name: qsTr("These settings require client restart!") })
         settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Enable UDP"), itemEnabled: true, prop: "udp_enabled", 
-                    value: bridge.getSettingsValue("Toxcore", "udp_enabled", ptype_bool, Boolean(true)) })
+                    nvalue: bridge.getSettingsValue("Toxcore", "udp_enabled", ptype_bool, Boolean(true)) })
         settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Enable IPv6"), itemEnabled: true, prop: "ipv6_enabled", 
-                    value: bridge.getSettingsValue("Toxcore", "ipv6_enabled", ptype_bool, Boolean(true)) })
+                    nvalue: bridge.getSettingsValue("Toxcore", "ipv6_enabled", ptype_bool, Boolean(true)) })
         settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Enable LAN discovery"), itemEnabled: true, prop: "local_discovery_enabled", 
-                    value: bridge.getSettingsValue("Toxcore", "local_discovery_enabled", ptype_bool, Boolean(false)) })
+                    nvalue: bridge.getSettingsValue("Toxcore", "local_discovery_enabled", ptype_bool, Boolean(false)) })
         settingsModel.append({ flags: sf_text | sf_input | sf_placeholder, fieldValidator: default_validator, itemWidth: 128, 
                     name: qsTr("Custom nodes .json file"), prop: "nodes_json_file", helperText: "nodes.json",
                     svalue: bridge.getSettingsValue("Client", "nodes_json_file", ptype_string, String("")) })
@@ -157,7 +157,7 @@ Popup {
                     svalue: bridge.getSettingsValue("Client", "last_messages_limit", ptype_string, 128) })
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Privacy") })
         settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Keep chat history"), itemEnabled: true, prop: "keep_chat_history", 
-                    value: bridge.getSettingsValue("Privacy", "keep_chat_history", ptype_bool, Boolean(true)) })
+                    nvalue: bridge.getSettingsValue("Privacy", "keep_chat_history", ptype_bool, Boolean(true)) })
         settingsModel.append({ flags: sf_text | sf_title | sf_help, name: qsTr("The NoSpam value is a part of your ToxID that can be changed at will.")})
         settingsModel.append({ flags: sf_text | sf_title | sf_help, name: qsTr("If you are getting spammed with friend requests, change this value.")})
         settingsModel.append({ flags: sf_text | sf_title | sf_help, name: qsTr("Only hexadecimal characters are allowed.")})
@@ -173,7 +173,7 @@ Popup {
                     })
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Profile") })
         settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Auto-login into this profile"), itemEnabled: true, prop: "auto_login_enabled", 
-                    value: false /* will be set later */ })
+                    nvalue: false /* will be set later */ })
         settingsModel.append({ flags: sf_text | sf_button, name: qsTr("Profile deletion"), buttonText: qsTr("Delete"), 
                                  clickAction: "delete_profile"})
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Version") })
@@ -195,14 +195,14 @@ Popup {
             dontSave = false
             return
         }
-        bridge.setSettingsValue("Toxcore", "udp_enabled", Boolean(settingsModel.getValue("udp_enabled")))
-        bridge.setSettingsValue("Toxcore", "ipv6_enabled", Boolean(settingsModel.getValue("ipv6_enabled")))
-        bridge.setSettingsValue("Toxcore", "local_discovery_enabled", Boolean(settingsModel.getValue("local_discovery_enabled")))
+        bridge.setSettingsValue("Toxcore", "udp_enabled", Boolean(settingsModel.getValueNumber("udp_enabled")))
+        bridge.setSettingsValue("Toxcore", "ipv6_enabled", Boolean(settingsModel.getValueNumber("ipv6_enabled")))
+        bridge.setSettingsValue("Toxcore", "local_discovery_enabled", Boolean(settingsModel.getValueNumber("local_discovery_enabled")))
         bridge.setSettingsValue("Toxcore", "nodes_json_file", String(settingsModel.getValueString("nodes_json_file")))
         bridge.setSettingsValue("Toxcore", "max_bootstrap_nodes", String(settingsModel.getValueString("max_bootstrap_nodes")))
         bridge.setSettingsValue("Client", "last_messages_limit", settingsModel.getValueString("last_messages_limit"))
-        bridge.setSettingsValue("Privacy", "keep_chat_history", Boolean(settingsModel.getValue("keep_chat_history")))
-        bridge.setSettingsValue("Profile", "auto_login_profile", settingsModel.getValue("auto_login_enabled") ? bridge.getCurrentProfile() : "")
+        bridge.setSettingsValue("Privacy", "keep_chat_history", Boolean(settingsModel.getValueNumber("keep_chat_history")))
+        bridge.setSettingsValue("Profile", "auto_login_profile", settingsModel.getValueNumber("auto_login_enabled") ? bridge.getCurrentProfile() : "")
         bridge.setNospamValue(settingsModel.getValueString("no_spam_value"))
         updateQRcode()
         if (reloadChatHistory) {
@@ -251,17 +251,17 @@ Popup {
     ListModel {
         id: settingsModel
         property variant actions
-        function getValue(p) {
+        function getValueNumber(p) {
             for (var i = 0; i < count; i++) {
                 if (get(i).prop === p) {
-                    return get(i).value
+                    return get(i).nvalue
                 }
             }
         }
-        function setValue(p, v) {
+        function setValueNumber(p, v) {
             for (var i = 0; i < count; i++) {
                 if (get(i).prop === p) {
-                    get(i).value = v
+                    get(i).nvalue = v
                     return
                 }
             }
@@ -335,16 +335,15 @@ Popup {
                         Switch {
                             id: settingsSwitch
                             Layout.alignment: Qt.AlignRight
-                            checked: value
+                            checked: nvalue
                             enabled: itemEnabled
                             Binding {
                                 target: settingsSwitch
                                 property: "checked"
-                                value: value
+                                value: nvalue
                             }
                             onCheckedChanged: {
-                                value = checked
-                                checked = value
+                                nvalue = checked
                             }
                         }
                     }
@@ -379,7 +378,6 @@ Popup {
                                     return
                                 }
                                 svalue = text
-                                text = svalue
                                 focus = false
                                 if (flags & settingsWindow.sf_acceptAction) {
                                     settingsModel.actions[acceptAction]()

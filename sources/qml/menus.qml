@@ -55,8 +55,21 @@ Menu {
     y: (window.height - height - (inPortrait ? keyboardHeight : 0)) * 0.5
     z: z_menu
     modal: true
+    // enable adjustTop only for this menu
+    Connections {
+        target: window
+        onKeyboardActiveChanged: {
+            if (addFriendMenu.visible) {
+                bridge.setKeyboardAdjustMode(!window.keyboardActive)
+            }
+        }
+        onFocusObjectChanged: {
+            if (addFriendMenu.visible && window.keyboardActive) {
+                bridge.setKeyboardAdjustMode(false)
+            }
+        }
+    }
     onClosed: {
-        bridge.setKeyboardAdjustMode(true)
         currentIndex = -1
         toxId.focus = false
         addFriendMessage.focus = false
@@ -79,7 +92,6 @@ Menu {
         text: ""
         validator: Utf8ByteLimitValidator { length: safe_bridge().getToxAddressSizeHex(); prefix: "tox:"; less: false }
         color: acceptableInput ? "black" : "red"
-        onActiveFocusChanged: bridge.setKeyboardAdjustMode(false)
         onAccepted: {
             addFriendMessage.focus = true
         }
@@ -108,7 +120,6 @@ Menu {
         width: parent.width
         placeholderText: qsTr("Add me to your friends. Maybe?")
         validator: Utf8ByteLimitValidator { length: safe_bridge().getFriendRequestMessageMaxLength() }
-        onActiveFocusChanged: bridge.setKeyboardAdjustMode(false)
         onAccepted: {
             focus = false
             sendItem.send()
@@ -294,8 +305,21 @@ Menu {
     y: (window.height - height - (inPortrait ? keyboardHeight : 0)) * 0.5
     z: z_menu
     modal: true
+    // enable adjustTop only for this menu
+    Connections {
+        target: window
+        onKeyboardActiveChanged: {
+            if (profileMenu.visible) {
+                bridge.setKeyboardAdjustMode(!window.keyboardActive)
+            }
+        }
+        onFocusObjectChanged: {
+            if (profileMenu.visible && window.keyboardActive) {
+                bridge.setKeyboardAdjustMode(false)
+            }
+        }
+    }
     onClosed: {
-        bridge.setKeyboardAdjustMode(true)
         currentIndex = -1
         myNickname.focus = false
         myStatusMessage.focus = false
@@ -318,7 +342,6 @@ Menu {
         verticalAlignment: TextInput.AlignVCenter
         width: parent.width
         validator: Utf8ByteLimitValidator { length: safe_bridge().getNicknameMaxLength() }
-        onActiveFocusChanged: bridge.setKeyboardAdjustMode(false)
         onAccepted: {
             myStatusMessage.focus = true
         }
@@ -337,7 +360,6 @@ Menu {
         rightPadding: leftPadding
         verticalAlignment: TextInput.AlignVCenter
         width: parent.width
-        onActiveFocusChanged: bridge.setKeyboardAdjustMode(false)
         onAccepted: profileMenuApplyItem.onTriggered()
         validator: Utf8ByteLimitValidator { length: safe_bridge().getStatusMessageMaxLength() }
     }

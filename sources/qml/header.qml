@@ -133,6 +133,10 @@ ToolBar {
             realText = t
             updateText()
         }
+        Connections {
+            target: window
+            onInPortraitChanged: friendNickname.updateText()
+        }
         MouseArea {
             anchors.fill: parent
             onClicked: {
@@ -167,6 +171,10 @@ ToolBar {
         function setText(t) {
             realText = t
             updateText()
+        }
+        Connections {
+            target: window
+            onInPortraitChanged: friendStatusMessage.updateText()
         }
     }
 }
