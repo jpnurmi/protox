@@ -59,7 +59,7 @@ ApplicationWindow {
 
     Image {
         id: splashImage
-        source: "resources/splash.png"
+        source: inPortrait ? "resources/splash.png" : "resources/splash_ls.png"
         anchors.fill: parent
         z: z_splash
     }

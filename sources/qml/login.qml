@@ -165,6 +165,12 @@ Popup {
             z: z_top
             implicitWidth: accountSelectionButton.width
             property string profileName
+            Connections {
+                target: window
+                onInPortraitChanged: {
+                    accountMenu.close()
+                }
+            }
             Repeater {
                 id: profileRepeater
                 model: []
