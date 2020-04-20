@@ -417,6 +417,10 @@ Click on the left button to open the friend list, then on «+» to add a new fri
         <source>Text copied!</source>
         <translation>Текст скопирован!</translation>
     </message>
+    <message>
+        <source>Auto-login</source>
+        <translation>Автоматический вход</translation>
+    </message>
 </context>
 <context>
     <name>QAndroidPlatformTheme</name>
