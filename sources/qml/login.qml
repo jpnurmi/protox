@@ -353,7 +353,7 @@ Popup {
     
             CheckBox {
                 id: loginCheckbox
-                visible: !loginPassword.visible
+                visible: !loginPassword.visible && profileRepeater.count > 0
                 Layout.alignment: Qt.AlignHCenter
                 Layout.topMargin: 6
                 implicitHeight: loginPassword.height
