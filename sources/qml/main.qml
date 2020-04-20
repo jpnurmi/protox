@@ -97,8 +97,6 @@ ApplicationWindow {
             x: (window.width - width) * 0.5
             source: "resources/logo_big.png"
             smooth: true
-            anchors.top: overlayHeader.bottom
-            anchors.topMargin: 40
             width: 142
             height: 142 * (sourceSize.height / sourceSize.width)
             visible: cleanProfile

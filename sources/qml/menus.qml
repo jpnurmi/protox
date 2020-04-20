@@ -51,8 +51,9 @@ Menu {
     id: addFriendMenu
     width: 300
     title: qsTr("Add a new friend")
+    readonly property bool haveYSpace: keyboardHeight + height <= window.height
     x: (window.width - width) * 0.5
-    y: (window.height - height - (inPortrait ? keyboardHeight : 0)) * 0.5
+    y: (window.height - height - (haveYSpace ? keyboardHeight : 0)) * 0.5
     z: z_menu
     modal: true
     // enable adjustTop only for this menu
@@ -301,8 +302,9 @@ Menu {
     id: profileMenu
     width: 300
     title: "My profile"
+    readonly property bool haveYSpace: keyboardHeight + height <= window.height
     x: (window.width - width) * 0.5
-    y: (window.height - height - (inPortrait ? keyboardHeight : 0)) * 0.5
+    y: (window.height - height - (haveYSpace ? keyboardHeight : 0)) * 0.5
     z: z_menu
     modal: true
     // enable adjustTop only for this menu
