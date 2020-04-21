@@ -300,6 +300,7 @@ Popup {
         ScrollIndicator.vertical: ScrollIndicator {}
         model: settingsModel
         delegate: ColumnLayout {
+            property real originalHeight: 0
             width: parent.width
             height: ((flags & settingsWindow.sf_title) ? (flags & settingsWindow.sf_help 
                                                       ? ((flags & settingsWindow.sf_warning) 
@@ -322,9 +323,13 @@ Popup {
                     color: (flags & settingsWindow.sf_title) ? 
                            ((flags & settingsWindow.sf_help) ? ((flags & settingsWindow.sf_warning) 
                                                              ? "red" : "black") : "green") : "black"
-                    Component.onCompleted: {
+                    onContentWidthChanged: {
+                        if (parent.parent.originalHeight >= contentHeight) {
+                            parent.parent.height = parent.parent.originalHeight
+                        }
                         // for multi-line text
                         if (parent.parent.height < contentHeight) {
+                            parent.parent.originalHeight = parent.parent.height
                             parent.parent.height = contentHeight
                         }
                     }
