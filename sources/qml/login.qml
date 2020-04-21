@@ -41,13 +41,17 @@ Popup {
         NumberAnimation { property: "opacity"; from: loginWindow.instantFadeOut ? 0 : 1.0; to: 0.0 } 
     }
     NumberAnimation { id: loginWindowReopenAnimation; target: loginWindow; property: "opacity"; from: 0.0; to: 1.0 }
-    function reopen(remove) {
+    function reopen(remove, instant) {
         instantFadeOut = false
         enabled = true
         notification.cancelAll()
         profileSelected = false
         open()
-        loginWindowReopenAnimation.start()
+        if (instant) {
+            opacity = 1.0
+        } else {
+            loginWindowReopenAnimation.start()
+        }
         resetUI()
         goBack(false, remove)
         loginPassword.visible = bridge.checkProfileEncrypted(accountMenu.profileName)
@@ -94,8 +98,7 @@ Popup {
             toast.show({ message : reason, duration : Toast.Short });
             loginWindow.enabled = true
             if (doAutoLogin) {
-                reopen(true)
-                opacity = 1.0 // prevent fade animation
+                reopen(true, true)
                 toast.show({ message : qsTr("Auto login failed!"), duration : Toast.Short });
             }
             return

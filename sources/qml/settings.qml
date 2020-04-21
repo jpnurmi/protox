@@ -132,7 +132,7 @@ Popup {
                 settingsWindow.dontSave = true
                 settingsWindow.close()
                 bridge.signOutProfile(true)
-                loginWindow.reopen(true)
+                loginWindow.reopen(true, false)
             }
         }
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Tox options") })
