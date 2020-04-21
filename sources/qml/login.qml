@@ -174,7 +174,7 @@ Popup {
             Connections {
                 target: window
                 onInPortraitChanged: {
-                    accountMenu.close()
+                    accountMenu.visible = false
                 }
             }
             Repeater {
