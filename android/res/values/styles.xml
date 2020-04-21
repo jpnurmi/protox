@@ -1,6 +1,9 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-<style name="ProtoxTheme" parent="@android:style/Theme.NoTitleBar">
+<style name="ProtoxTheme" parent="android:Theme.Material">
     <item name="android:windowBackground">@drawable/logo</item>
+    <item name="android:windowActionBar">false</item>
+    <item name="android:windowNoTitle">true</item>
+    <item name="android:statusBarColor">#3F51B5</item>
 </style>
 </resources>

@@ -1,7 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>resources/send-button.png</file>
-        <file>resources/splash.png</file>
         <file>resources/logo_big.png</file>
         <file>resources/login.png</file>
         <file>resources/profileCreation.png</file>
@@ -14,6 +13,5 @@
         <file>sources/qml/dummy/QPlatformTheme.qml</file>
         <file>resources/login_ls.png</file>
         <file>resources/profileCreation_ls.png</file>
-        <file>resources/splash_ls.png</file>
     </qresource>
 </RCC>

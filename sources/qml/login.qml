@@ -13,6 +13,7 @@ Popup {
     z: z_top
     width: window.width
     height: window.height
+    visible: true
     leftPadding: 0
     rightPadding: 0
     topPadding: 0
@@ -20,6 +21,7 @@ Popup {
     closePolicy: profileCreation ? Popup.NoAutoClose : Popup.CloseOnEscape
     property bool profileSelected: false
     property bool profileCreation: false
+    property bool instantFadeOut: false
     // enable adjustTop only for this window
     Connections {
         target: window
@@ -36,10 +38,11 @@ Popup {
     }
     enter: Transition {}
     exit: Transition { 
-        NumberAnimation { property: "opacity"; from: 1.0; to: 0.0 } 
+        NumberAnimation { property: "opacity"; from: loginWindow.instantFadeOut ? 0 : 1.0; to: 0.0 } 
     }
     NumberAnimation { id: loginWindowReopenAnimation; target: loginWindow; property: "opacity"; from: 0.0; to: 1.0 }
     function reopen(remove) {
+        instantFadeOut = false
         enabled = true
         notification.cancelAll()
         profileSelected = false
@@ -98,6 +101,9 @@ Popup {
             return
         }
         loginWindow.profileSelected = true
+        if (doAutoLogin) {
+            instantFadeOut = true
+        }
         loginWindow.close()
         loginPassword.clear()
         loginUsername.clear()
@@ -397,7 +403,8 @@ Popup {
                 visible: !loginWindow.profileCreation
                 text: qsTr("Create profile")
                 Layout.fillWidth: true
-                Layout.topMargin: 48
+                Layout.topMargin: 42
+                implicitHeight: loginButton.height
                 background: Rectangle {
                     color: createNewProfileButton.pressed ? Material.highlightedButtonColor : "green"
                     radius: 2
@@ -419,9 +426,6 @@ Popup {
     }
 
     onAboutToHide: {
-        if (splashImage !== null) {
-            splashImage.destroy()
-        }
         if (!profileSelected) {
             Qt.quit()
         }

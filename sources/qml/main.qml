@@ -57,13 +57,6 @@ ApplicationWindow {
         }
     }
 
-    Image {
-        id: splashImage
-        source: inPortrait ? "resources/splash.png" : "resources/splash_ls.png"
-        anchors.fill: parent
-        z: z_splash
-    }
-
     Timer {
         id: delayTimer
         interval: 1
@@ -72,10 +65,11 @@ ApplicationWindow {
             var autoProfile = bridge.getSettingsValue("Profile", "auto_login_profile", ptype_string, String(""))
             if (autoProfile.length > 0) {
                 loginWindow.login(autoProfile)
-                splashImage.destroy()
+                bridge.hideSplashScreen()
                 return
             }
             loginWindow.open()
+            bridge.hideSplashScreen()
         }
     }
 

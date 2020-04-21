@@ -507,6 +507,14 @@ void QmlCBridge::signOutProfile(bool remove)
 		settings->setValue("friend_list", qmlbridge->getFriendsModelOrder());
 	}
 	settings->endGroup();
+	if (remove) {
+		settings->beginGroup("Profile");
+		QString autoLoginProfile = settings->value("auto_login_profile").toString();
+		if (autoLoginProfile == current_profile) {
+			settings->setValue("auto_login_profile", "");
+		}
+		settings->endGroup();
+	}
 	settings->sync();
 
 	reconnection_timer->stop();
@@ -555,6 +563,13 @@ QString QmlCBridge::getSystemLocale()
 	return QLocale::system().name();
 }
 
+void QmlCBridge::hideSplashScreen()
+{
+#ifdef Q_OS_ANDROID
+	QtAndroid::hideSplashScreen();
+#endif
+}
+
 QmlTranslator::QmlTranslator(QObject *parent) : QObject(parent) {}
 
 void QmlTranslator::setTranslation(const QString &translation)
@@ -566,6 +581,7 @@ void QmlTranslator::setTranslation(const QString &translation)
 	qApp->installTranslator(&translator);
 	emit languageChanged();
 }
+
 
 int main(int argc, char *argv[])
 {
@@ -612,9 +628,6 @@ int main(int argc, char *argv[])
 	QZXing::registerQMLImageProvider(engine);
 	qmltranslator.setTranslation(qmlbridge->getSystemLocale());
 	engine.load(url);
-#ifdef Q_OS_ANDROID
-	QtAndroid::hideSplashScreen();
-#endif
 	QObject *component = engine.rootObjects().first();
 	qmlbridge->setComponent(component);
 

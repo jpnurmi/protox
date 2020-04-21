@@ -82,6 +82,7 @@ public slots:
 	Q_INVOKABLE quint32 getStatusMessageMaxLength();
 	Q_INVOKABLE quint32 getToxAddressSizeHex();
 	Q_INVOKABLE QString getSystemLocale();
+	Q_INVOKABLE void hideSplashScreen();
 
 public:
 	ToxFriendsConnStatus friends_conn_status;
