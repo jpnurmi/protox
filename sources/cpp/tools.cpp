@@ -16,6 +16,11 @@ const QString getProgDir(bool create)
 	return path;
 }
 
+const QString replaceFileExtension(const QString &file, const QString &with)
+{
+	return file.split(".").first() + with;
+}
+
 const QStringList qstringSplitUnicode(const QString &str, int limit_bytes)
 {
 	QStringList result;

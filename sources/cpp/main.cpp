@@ -440,7 +440,7 @@ int QmlCBridge::signInProfile(const QString &profile, bool create, const QString
 	}
 	settings->endGroup();
 	Tools::debug("My address: " + ToxConverter::toString(Toxcore::get_address(tox)));
-	chat_db = new ChatDataBase("chat_" + QString(current_profile).replace(".tox", ".db"), password);
+	chat_db = new ChatDataBase("chat_" + Tools::replaceFileExtension(current_profile, ".db"), password);
 
 	// load config
 	settings->beginGroup("Client_" + current_profile);
@@ -527,7 +527,7 @@ void QmlCBridge::signOutProfile(bool remove)
 
 	if (remove) {
 		QFile::remove(Tools::getProgDir() + current_profile);
-		QFile::remove(Tools::getProgDir() + "chat_" + QString(current_profile).replace(".tox", ".db"));
+		QFile::remove(Tools::getProgDir() + "chat_" + Tools::replaceFileExtension(current_profile, ".db"));
 	}
 	current_profile.clear();
 	pending_messages.clear();

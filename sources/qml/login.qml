@@ -41,6 +41,7 @@ Popup {
         NumberAnimation { property: "opacity"; from: loginWindow.instantFadeOut ? 0 : 1.0; to: 0.0 } 
     }
     NumberAnimation { id: loginWindowReopenAnimation; target: loginWindow; property: "opacity"; from: 0.0; to: 1.0 }
+    // tip: "remove" means: select the first available profile entry
     function reopen(remove, instant) {
         instantFadeOut = false
         enabled = true
