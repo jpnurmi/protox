@@ -85,6 +85,8 @@ public slots:
 	Q_INVOKABLE QString getSystemLocale();
 	Q_INVOKABLE void hideSplashScreen();
 	Q_INVOKABLE bool checkMessageInPendingList(quint32 friend_number, quint64 unique_id);
+	Q_INVOKABLE void resendMessage(quint32 friend_number, quint64 unique_id);
+	Q_INVOKABLE void removeMessageFromPendingList(quint32 friend_number, quint64 unique_id);
 
 public:
 	ToxFriendsConnStatus friends_conn_status;

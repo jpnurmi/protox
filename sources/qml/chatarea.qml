@@ -171,13 +171,32 @@ ColumnLayout {
                     anchors.right: parent.left
                 }
                 */
+                property bool pending: bridge.checkMessageInPendingList(
+                                           bridge.getCurrentFriendNumber(), 
+                                           msgUniqueId)
+                Image {
+                    id: resendIndicator
+                    source: "resources/resend.png"
+                    visible: msgSelf && !msgReceived && msgHistory && !parent.pending
+                    anchors.right: parent.left
+                    anchors.rightMargin: 5
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 20
+                    height: width
+                    smooth: true
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            msgHistory = false
+                            bridge.resendMessage(bridge.getCurrentFriendNumber(), msgUniqueId)
+                        }
+                    }
+                }
                 Image {
                     id: messagePendingIndicator
                     source: "resources/pending-spinner.png"
                     visible: msgSelf && !msgReceived && 
-                             (!msgHistory || (msgHistory && bridge.checkMessageInPendingList(
-                                                                              bridge.getCurrentFriendNumber(), 
-                                                                              msgUniqueId))) 
+                             (!msgHistory || (msgHistory && parent.pending)) 
                     anchors.right: parent.left
                     anchors.rightMargin: 5
                     anchors.verticalCenter: parent.verticalCenter

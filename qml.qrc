@@ -14,5 +14,6 @@
         <file>resources/login_ls.png</file>
         <file>resources/profileCreation_ls.png</file>
         <file>resources/pending-spinner.png</file>
+        <file>resources/resend.png</file>
     </qresource>
 </RCC>

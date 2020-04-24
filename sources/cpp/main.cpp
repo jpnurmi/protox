@@ -575,7 +575,6 @@ void QmlCBridge::hideSplashScreen()
 
 void QmlCBridge::sendPendingMessages(quint32 friend_number)
 {
-	Tools::debug(QString::number(pending_messages.count()));
 	for (int i = 0; i < pending_messages.count(); i++) {
 		if (friend_number != pending_messages[i].friend_number && !pending_messages[i].failed) {
 			continue;
@@ -604,6 +603,25 @@ bool QmlCBridge::checkMessageInPendingList(quint32 friend_number, quint64 unique
 		}
 	}
 	return false;
+}
+
+void QmlCBridge::resendMessage(quint32 friend_number, quint64 unique_id)
+{
+	bool failed;
+	const QString msg = chat_db->getTextMessage(unique_id, 
+										  Toxcore::get_friend_public_key(tox, friend_number));
+	quint32 message_id = Toxcore::send_message(tox, friend_number, msg, failed);
+	pending_messages.push_back(ToxPendingMessage(message_id, unique_id, friend_number, failed));
+}
+
+void QmlCBridge::removeMessageFromPendingList(quint32 friend_number, quint64 unique_id)
+{
+	for (int i = 0; i < pending_messages.count(); i++) {
+		if (pending_messages[i].friend_number == friend_number && pending_messages[i].unique_id == unique_id) {
+			pending_messages.removeAt(i);
+			return;
+		}
+	}
 }
 
 QmlTranslator::QmlTranslator(QObject *parent) : QObject(parent) {}
