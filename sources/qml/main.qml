@@ -84,6 +84,8 @@ ApplicationWindow {
         anchors.topMargin: 40
         width: parent.width
         height: parent.height
+        contentWidth: parent.width
+        contentHeight: parent.height
         enabled: cleanProfile
         flickableDirection: Flickable.VerticalFlick
         Image {
@@ -99,6 +101,8 @@ ApplicationWindow {
         Text {
             id: welcomeTextTitle
             x: (window.width - width) * 0.5
+            width: window.width
+            horizontalAlignment: Text.AlignHCenter
             text: qsTr("Welcome to Protox!")
             wrapMode: Text.Wrap
             font.bold: true
@@ -110,13 +114,13 @@ ApplicationWindow {
     
         Text {
             id: welcomeText
+            width: window.width
+            horizontalAlignment: Text.AlignHCenter
             text: qsTr("This is an alpha version of the Tox client.\nClick on the left button to open the friend list, then on «+» to add a new friend.\n\n Good luck!")
             wrapMode: Text.Wrap
             anchors.top: welcomeTextTitle.bottom
             anchors.topMargin: 20
             visible: cleanProfile
-            width: window.width
-            horizontalAlignment: Text.AlignHCenter
             leftPadding: 10
             rightPadding: leftPadding
         }

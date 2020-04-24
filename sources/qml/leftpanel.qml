@@ -72,7 +72,8 @@ Drawer {
                 Menu {
                     id: accountStatusMenu
                     z: z_menu_elements
-                    implicitWidth: 100
+                    property real textWidth
+                    width: textWidth + 50
                     Repeater {
                         model: [[qsTr("Online"), "lightgreen"],[qsTr("Away"), "yellow"],[qsTr("Busy"), "red"]/*,[qsTr("Offline"), "gray"]*/]
                         delegate: MenuItem {
@@ -83,6 +84,9 @@ Drawer {
                                     Layout.leftMargin: 10
                                     text: modelData[0]
                                     wrapMode: Text.Wrap
+                                    Component.onCompleted: {
+                                        accountStatusMenu.textWidth = Math.max(accountStatusMenu.textWidth, contentWidth)
+                                    }
                                 }
                                 Rectangle {
                                     Layout.alignment: Qt.AlignRight

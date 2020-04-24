@@ -221,7 +221,7 @@ Popup {
             source: "resources/logo_big.png"
             smooth: true
             x: inPortrait ? (parent.width - width) * 0.5 : (parent.width - width) * 0.15
-            y: inPortrait ? (parent.height - height) * 0.15 : (parent.height - height) * 0.5
+            y: inPortrait ? (parent.height - height) * 0.1 : (parent.height - height) * 0.5
             width: 142
             height: 142 * (sourceSize.height / sourceSize.width)
             MouseArea {
@@ -268,7 +268,7 @@ Popup {
 
         ColumnLayout {
             x: inPortrait ? 0 : (parent.width - width) * 0.8
-            y: (height + parent.height) * 0.35
+            y: (height + parent.height) * 0.3
             anchors.verticalCenter: inPortrait ? undefined : parent.verticalCenter
             anchors.horizontalCenter: inPortrait ? parent.horizontalCenter : undefined
             width: parent.width * (inPortrait ? 0.75 : 0.4)
