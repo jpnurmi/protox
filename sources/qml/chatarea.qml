@@ -192,11 +192,19 @@ ColumnLayout {
                         }
                     }
                 }
+                Timer {
+                    id: messagePendingIndicatorTimer
+                    interval: 1000
+                    repeat: false
+                    running: true
+                }
                 Image {
                     id: messagePendingIndicator
                     source: "resources/pending-spinner.png"
-                    visible: msgSelf && !msgReceived && 
-                             (!msgHistory || (msgHistory && parent.pending)) 
+                    visible: msgSelf 
+                             && !msgReceived 
+                             && (!msgHistory || (msgHistory && parent.pending)) 
+                             && !messagePendingIndicatorTimer.running
                     anchors.right: parent.left
                     anchors.rightMargin: 5
                     anchors.verticalCenter: parent.verticalCenter
