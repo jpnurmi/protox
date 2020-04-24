@@ -52,7 +52,7 @@ void QmlCBridge::setComponent(QObject *_component)
 	component = _component;
 }
 
-void QmlCBridge::insertMessage(const ToxVariantMessage &message, quint32 friend_number, const QDateTime &dt, bool self, quint32 message_id, quint64 unique_id, bool history, bool failed)
+void QmlCBridge::insertMessage(const ToxVariantMessage &message, quint32 friend_number, const QDateTime &dt, bool self, quint64 unique_id, bool history, bool failed)
 {
 	QVariant returnedValue;
 
@@ -60,7 +60,6 @@ void QmlCBridge::insertMessage(const ToxVariantMessage &message, quint32 friend_
 		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, message), 
 							  Q_ARG(QVariant, friend_number), 
 							  Q_ARG(QVariant, self),
-							  Q_ARG(QVariant, message_id),
 							  Q_ARG(QVariant, dt.toString("d MMMM hh:mm:ss")),
 							  Q_ARG(QVariant, unique_id),
 							  Q_ARG(QVariant, failed),
@@ -78,13 +77,11 @@ void QmlCBridge::insertFriend(qint32 friend_number, const QString &nickName, boo
 							  Q_ARG(QVariant, QString::fromLatin1(friendPk)));
 }
 
-void QmlCBridge::setMessageReceived(quint32 friend_number, quint32 message_id, bool use_uid, quint64 unique_id)
+void QmlCBridge::setMessageReceived(quint32 friend_number, quint64 unique_id)
 {
 	QVariant returnedValue;
 	QMetaObject::invokeMethod(component, "setMessageReceived",
 		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, friend_number), 
-							  Q_ARG(QVariant, message_id),
-							  Q_ARG(QVariant, use_uid),
 							  Q_ARG(QVariant, unique_id));
 }
 
@@ -110,10 +107,10 @@ void QmlCBridge::sendMessage(const QString &message)
 		ToxVariantMessage variantMessage;
 		variantMessage.insert("type", ToxVariantMessageType::TOXMSG_TEXT);
 		variantMessage.insert("message", msg);
-		insertMessage(variantMessage, current_friend_number, dt, true, message_id, new_unique_id, false, failed);
-		pending_messages.push_back(ToxPendingMessage(message_id, new_unique_id, current_friend_number));
+		insertMessage(variantMessage, current_friend_number, dt, true, new_unique_id, false, failed);
+		pending_messages.push_back(ToxPendingMessage(message_id, new_unique_id, current_friend_number, failed));
 		if (keep_chat_history) {
-			chat_db->insertMessage(variantMessage, dt, friend_pk, true, new_unique_id, failed);
+			chat_db->insertMessage(variantMessage, dt, friend_pk, true, new_unique_id);
 		}
 	}
 }
@@ -159,9 +156,9 @@ void QmlCBridge::retrieveChatLog(quint32 start, bool from, bool reverse)
 		return;
 	}
 	for (const auto &msg : messages) {
-		insertMessage(msg.variantMessage, current_friend_number, msg.dt, msg.self, 0, msg.unique_id, true, false);
+		insertMessage(msg.variantMessage, current_friend_number, msg.dt, msg.self, msg.unique_id, true, false);
 		if (!msg.self || msg.received)
-			setMessageReceived(current_friend_number, 0, true, msg.unique_id);
+			setMessageReceived(current_friend_number, msg.unique_id);
 	}
 }
 
@@ -574,6 +571,39 @@ void QmlCBridge::hideSplashScreen()
 #ifdef Q_OS_ANDROID
 	QtAndroid::hideSplashScreen();
 #endif
+}
+
+void QmlCBridge::sendPendingMessages(quint32 friend_number)
+{
+	Tools::debug(QString::number(pending_messages.count()));
+	for (int i = 0; i < pending_messages.count(); i++) {
+		if (friend_number != pending_messages[i].friend_number && !pending_messages[i].failed) {
+			continue;
+		}
+		if (pending_messages[i].resent) {
+			continue;
+		}
+		const QString msg = chat_db->getTextMessage(pending_messages[i].unique_id, 
+											  Toxcore::get_friend_public_key(tox, pending_messages[i].friend_number));
+		bool failed;
+		quint32 message_id = Toxcore::send_message(tox, pending_messages[i].friend_number, msg, failed);
+		pending_messages[i].message_id = message_id;
+		pending_messages[i].failed = failed;
+		pending_messages[i].resent = !pending_messages[i].failed;
+	}
+}
+
+bool QmlCBridge::checkMessageInPendingList(quint32 friend_number, quint64 unique_id)
+{
+	for (int i = 0; i < pending_messages.count(); i++) {
+		if (friend_number != pending_messages[i].friend_number) {
+			continue;
+		}
+		if (unique_id == pending_messages[i].unique_id) {
+			return true;
+		}
+	}
+	return false;
 }
 
 QmlTranslator::QmlTranslator(QObject *parent) : QObject(parent) {}

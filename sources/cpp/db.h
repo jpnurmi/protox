@@ -8,9 +8,10 @@ class ChatDataBase : public QObject
 {
 public:
 	ChatDataBase(const QString &fileName, const QString &password = "");
-	void insertMessage(const ToxVariantMessage &variantMessage, const QDateTime &dt, const ToxPk &public_key, bool self = false, quint64 unique_id = 0, bool failed = false);
+	void insertMessage(const ToxVariantMessage &variantMessage, const QDateTime &dt, const ToxPk &public_key, bool self = false, quint64 unique_id = 0);
 	void setMessageReceived(quint64 unique_id, const ToxPk &public_key);
 	const ToxMessages getFriendMessages(const ToxPk &public_key, quint32 limit, quint32 start, bool from, bool reverse);
+	const QString getTextMessage(quint64 unique_id, const ToxPk &public_key);
 	quint64 getMessagesCountFriend(const ToxPk &public_key);
 	void clearFriendChatHistory(const ToxPk &public_key);
 	void updatePassword(const QString &password);

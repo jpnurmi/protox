@@ -159,17 +159,36 @@ ColumnLayout {
                         anchors.leftMargin = chatContent.chat_margin
                     }
                 }
+                // debug
+                /*
                 Text {
                     id: failedText
+                    visible: msgFailed
                     text: "!"
                     color: "red"
                     font.pointSize: fontMetrics.normalize(20)
                     font.bold: true
                     anchors.right: parent.left
-                    Component.onCompleted: {
-                        if (!msgFailed) {
-                            destroy()
-                        }
+                }
+                */
+                Image {
+                    id: messagePendingIndicator
+                    source: "resources/pending-spinner.png"
+                    visible: msgSelf && !msgReceived && 
+                             (!msgHistory || (msgHistory && bridge.checkMessageInPendingList(
+                                                                              bridge.getCurrentFriendNumber(), 
+                                                                              msgUniqueId))) 
+                    anchors.right: parent.left
+                    anchors.rightMargin: 5
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 10
+                    height: width
+                    smooth: true
+                    RotationAnimator on rotation {
+                        from: 0
+                        to: 360
+                        duration: 500
+                        loops: Animation.Infinite
                     }
                 }
                 Text {
@@ -395,6 +414,7 @@ ColumnLayout {
             function sendMessage() {
                 Qt.inputMethod.reset()
                 if (chatMessage.text.length > 0) {
+                    /*
                     if (bridge.getFriendConnStatus(bridge.getCurrentFriendNumber()) < 1) {
                         toast.show({ message : qsTr("The friend is not online."), duration: Toast.Short })
                         return
@@ -403,6 +423,7 @@ ColumnLayout {
                         toast.show({ message : qsTr("You are not connected to the Tox network!"), duration: Toast.Short })
                         return
                     }
+                    */
                     bridge.sendMessage(chatMessage.text)
                     chatMessage.clear()
                 } else {

@@ -159,7 +159,7 @@ function selectFriend(friend_number) {
 }
 
 property int new_messages: 0
-function insertMessage(variantMessage, friend_number, self, message_id, time, unique_id, failed, history) {
+function insertMessage(variantMessage, friend_number, self, time, unique_id, failed, history) {
     if (!self && !history && (appInactive || bridge.getCurrentFriendNumber() !== friend_number || settingsWindow.visible)) {
         if (!variantMessage.type) {
             notification.show({
@@ -175,7 +175,6 @@ function insertMessage(variantMessage, friend_number, self, message_id, time, un
 
     var dict = { "msgSelf" : self, 
         "msgReceived" : false, 
-        "msgId" : message_id, 
         "msgTime" : time, 
         "msgUniqueId" : unique_id,
         "msgFailed" : failed,
@@ -199,6 +198,7 @@ function insertMessage(variantMessage, friend_number, self, message_id, time, un
         }
     }
 }
+
 function insertFriend(friend_number, nickName, request, request_message, friendPk) {
     friendsModel.append({"friendNumber" : friend_number, 
                             "nickName" : nickName, 
@@ -223,7 +223,7 @@ function insertFriend(friend_number, nickName, request, request_message, friendP
     }
 }
 
-function setMessageReceived(friend_number, message_id, use_uid, unique_id) {
+function setMessageReceived(friend_number, unique_id) {
     if (bridge.getCurrentFriendNumber() !== friend_number) {
         return
     }
@@ -231,8 +231,9 @@ function setMessageReceived(friend_number, message_id, use_uid, unique_id) {
         var message = messagesModel.get(i)
         if (!message.msgSelf)
             continue;
-        if ((!use_uid && message.msgId === message_id) || (use_uid && message.msgUniqueId === unique_id)) {
+        if (message.msgUniqueId === unique_id) {
             message.msgReceived = true
+            message.msgFailed = false
             messagesModel.set(i, message)
         }
     }

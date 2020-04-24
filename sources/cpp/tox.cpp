@@ -77,12 +77,11 @@ void cb_friend_read_receipt(Tox *m, quint32 friend_number, quint32 message_id, v
 	for (int i = 0; i < qmlbridge->pending_messages.count(); i++) {
 		if (qmlbridge->pending_messages[i].message_id == message_id && qmlbridge->pending_messages[i].friend_number == friend_number) {
 			chat_db->setMessageReceived(qmlbridge->pending_messages[i].unique_id, get_friend_public_key(m, friend_number));
+			qmlbridge->setMessageReceived(friend_number, qmlbridge->pending_messages[i].unique_id);
 			qmlbridge->pending_messages.removeAt(i);
 			break;
 		}
 	}
-
-	qmlbridge->setMessageReceived(friend_number, message_id);
 }
 
 static void cb_friend_message(Tox *m, quint32 friend_number, TOX_MESSAGE_TYPE type, const quint8 *string, size_t length, void *userdata)
@@ -135,6 +134,9 @@ static void cb_friend_connection_change(Tox *m, quint32 friend_number, TOX_CONNE
 
 	qmlbridge->setCurrentFriendConnStatus(friend_number, connection_status);
 	qmlbridge->friends_conn_status[friend_number] = connection_status;
+	if (connection_status > 0) {
+		qmlbridge->sendPendingMessages(friend_number);
+	}
 }
 
 static void cb_friend_typing(Tox *m, quint32 friend_number, bool is_typing, void *user_data)

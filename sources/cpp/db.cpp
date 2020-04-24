@@ -3,7 +3,7 @@
 
 #include "deps/sqlitecipher/sqlitecipher_p.h"
 
-#define DATABASE_VERSION 2
+#define DATABASE_VERSION 3
 #define APPLICATION_ID ('P' << 24) + ('T' << 16) + ('O' << 8) + 'X'
 
 ChatDataBase::ChatDataBase(const QString &fileName, const QString &password)
@@ -33,7 +33,6 @@ ChatDataBase::ChatDataBase(const QString &fileName, const QString &password)
 			"	received INTEGER,\n"
 			"	datetime INTEGER,\n"
 			"	unique_id INTEGER,\n"
-			"	failed INTEGER,\n"
 			"	PRIMARY KEY(public_key, unique_id)\n"
 			");\n";
 	query = db.exec(create_command_messages);
@@ -65,7 +64,7 @@ quint64 ChatDataBase::getMessagesCountFriend(const ToxPk &public_key)
 	return query.value(0).toULongLong();
 }
 
-void ChatDataBase::insertMessage(const ToxVariantMessage &variantMessage, const QDateTime &dt, const ToxPk &public_key, bool self, quint64 unique_id, bool failed)
+void ChatDataBase::insertMessage(const ToxVariantMessage &variantMessage, const QDateTime &dt, const ToxPk &public_key, bool self, quint64 unique_id)
 {
 	int type = variantMessage["type"].toInt();
 	QSqlQuery msg_query(db);
@@ -94,7 +93,6 @@ void ChatDataBase::insertMessage(const ToxVariantMessage &variantMessage, const 
 	query.bindValue(":received", false);
 	query.bindValue(":datetime", dt.toSecsSinceEpoch());
 	query.bindValue(":unique_id", unique_id);
-	query.bindValue(":failed", failed);
 	query.exec();
 
 	db.commit();
@@ -115,7 +113,7 @@ const ToxMessages ChatDataBase::getFriendMessages(const ToxPk &public_key, quint
 	ToxMessages messages;
 	QSqlQuery query(db);
 	query.prepare(QString("SELECT * FROM ("
-				  "SELECT type,reference_id,unique_id,datetime,self,received,failed FROM Messages WHERE public_key = :public_key AND unique_id %1 :start ORDER BY unique_id %2 LIMIT :limit"
+				  "SELECT type,reference_id,unique_id,datetime,self,received FROM Messages WHERE public_key = :public_key AND unique_id %1 :start ORDER BY unique_id %2 LIMIT :limit"
 				  ") ORDER BY unique_id ASC").arg(reverse ? "<" : ">", from ? "DESC" : "ASC"));
 	query.bindValue(":public_key", public_key);
 	query.bindValue(":start", start);
@@ -147,6 +145,26 @@ const ToxMessages ChatDataBase::getFriendMessages(const ToxPk &public_key, quint
 									  query.value(5).toBool()));
 	}
 	return messages;
+}
+
+const QString ChatDataBase::getTextMessage(quint64 unique_id, const ToxPk &public_key)
+{
+	QSqlQuery query(db);
+	query.prepare("SELECT type,reference_id FROM Messages WHERE unique_id = :unique_id AND public_key = :public_key");
+	query.bindValue(":unique_id", unique_id);
+	query.bindValue(":public_key", public_key);
+	query.exec();
+	query.next();
+	if (query.value(0).toInt() == ToxVariantMessageType::TOXMSG_TEXT) {
+		QSqlQuery msg_query(db);
+		msg_query.prepare("SELECT message FROM TextMessages WHERE reference_id = :reference_id");
+		msg_query.bindValue(":reference_id", query.value(1).toUInt());
+		msg_query.exec();
+		msg_query.next();
+		return msg_query.value(0).toString();
+	} else {
+		return QString();
+	}
 }
 
 void ChatDataBase::clearFriendChatHistory(const ToxPk &public_key)

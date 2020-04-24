@@ -16,10 +16,14 @@ struct ToxPendingMessage {
 	quint32 message_id;
 	quint32 unique_id;
 	quint32 friend_number;
-	ToxPendingMessage(quint32 _message_id, quint32 _unique_id, quint32 _friend_number) {
+	bool failed;
+	bool resent;
+	ToxPendingMessage(quint32 _message_id, quint32 _unique_id, quint32 _friend_number, bool _failed) {
 		message_id = _message_id;
 		unique_id = _unique_id;
 		friend_number = _friend_number;
+		failed = _failed;
+		resent = false;
 	}
 };
 typedef QList<ToxPendingMessage> ToxPendingMessages;
