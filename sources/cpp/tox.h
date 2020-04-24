@@ -55,7 +55,7 @@ struct ToxMessage {
 typedef QList <ToxMessage> ToxMessages;
 
 namespace Toxcore {
-	Tox *create(ToxProfileLoadingError &error, bool create_new = false);
+	Tox *create(ToxProfileLoadingError &error, bool create_new, const QString &password, const QString &profile, const Tox_Pass_Key *pass_key);
 	void destroy(Tox *m);
 	QTimer *create_qtimer(Tox *m);
 	void bootstrap_DHT(Tox *m);
@@ -81,7 +81,7 @@ namespace Toxcore {
 	quint32 get_nospam(Tox *m);
 	void set_nospam(Tox *m, quint32 nospam);
 	bool check_profile_encrypted(const QString &profile);
-	bool save_data(Tox *m, const QString &path);
+	bool save_data(Tox *m, const Tox_Pass_Key *pass_key, const QString &path);
 	Tox_Pass_Key *generate_pass_key(const QString &password);
 	void reset_pass_key(Tox_Pass_Key *key);
 	const QString get_version_string();

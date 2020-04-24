@@ -325,9 +325,8 @@ int get_connection_status()
 	return current_connection_status;
 }
 
-bool save_data(Tox *m, const QString &path)
+bool save_data(Tox *m, const Tox_Pass_Key *pass_key, const QString &path)
 {
-	qmlbridge->updateToxPasswordKey();
 	if (path.isEmpty()) {
 		Tools::debug("Warning: save_data failed: path is empty.");
 		return false;
@@ -342,7 +341,6 @@ bool save_data(Tox *m, const QString &path)
 	tox_get_savedata(m, data);
 
 	quint8 encryptedData[data_len + TOX_PASS_ENCRYPTION_EXTRA_LENGTH];
-	const Tox_Pass_Key *pass_key = qmlbridge->getToxPasswordKey();
 	if (pass_key) {
 		if(!tox_pass_key_encrypt(pass_key, data, data_len,
 								 encryptedData, nullptr)) {
@@ -367,7 +365,7 @@ bool save_data(Tox *m, const QString &path)
 	return true;
 }
 
-static Tox *load_tox(struct Tox_Options *options, const QString &path, ToxProfileLoadingError &error)
+static Tox *load_tox(struct Tox_Options *options, const QString &path, const QString &password, ToxProfileLoadingError &error)
 {
 	QFile file(path);
 	Tox *m = nullptr;
@@ -382,7 +380,6 @@ static Tox *load_tox(struct Tox_Options *options, const QString &path, ToxProfil
 			return nullptr;
 		}
 
-		save_data(m, path);
 		error = TOX_ERR_LOADING_OK;
 		return m;
 	}
@@ -404,10 +401,10 @@ static Tox *load_tox(struct Tox_Options *options, const QString &path, ToxProfil
 	file.close();
 
 	quint8 decrypted_data[data_len - TOX_PASS_ENCRYPTION_EXTRA_LENGTH];
-	QByteArray encodedPassword = qmlbridge->getProfilePassword().toUtf8();
+	QByteArray encodedPassword = password.toUtf8();
 	bool encrypted = tox_is_data_encrypted((quint8*)data);
 	if (encrypted) {
-		if (!qmlbridge->getProfilePassword().isEmpty()) {
+		if (!encodedPassword.isEmpty()) {
 			if (!tox_pass_decrypt((quint8*)data, data_len, 
 								  (quint8*)encodedPassword.data(), encodedPassword.length(), 
 								  decrypted_data, nullptr)) {
@@ -504,20 +501,19 @@ struct Tox_Options *get_opts()
 		Tools::debug("tox_options_new failed with error number: " + QString::number(err));
 		return nullptr;
 	}
-	memset(opts, 0, sizeof(struct Tox_Options));
 	tox_options_default(opts);
-	opts->log_callback = cb_log;
+	tox_options_set_log_callback(opts, cb_log);
 	settings->beginGroup("Toxcore");
-	opts->udp_enabled = settings->value("udp_enabled", true).toBool();
-	opts->ipv6_enabled = settings->value("ipv6_enabled", true).toBool();
-	opts->local_discovery_enabled = settings->value("local_discovery_enabled", false).toBool();
+	tox_options_set_udp_enabled(opts, settings->value("udp_enabled", true).toBool());
+	tox_options_set_ipv6_enabled(opts, settings->value("ipv6_enabled", true).toBool());
+	tox_options_set_local_discovery_enabled(opts, settings->value("local_discovery_enabled", false).toBool());
 	settings->endGroup();
 	return opts;
 }
 
-Tox *create(ToxProfileLoadingError &error, bool create_new)
+Tox *create(ToxProfileLoadingError &error, bool create_new, const QString &password, const QString &profile, const Tox_Pass_Key *pass_key)
 {
-	QFile f(Tools::getProgDir() + qmlbridge->getCurrentProfile());
+	QFile f(Tools::getProgDir() + profile);
 	bool clean = !f.exists();
 	if (!create_new && clean) {
 		error = TOX_ERR_LOADING_NOT_EXISTS;
@@ -529,7 +525,7 @@ Tox *create(ToxProfileLoadingError &error, bool create_new)
 	}
 
 	opts = get_opts();
-	Tox *m = load_tox(opts, Tools::getProgDir() + qmlbridge->getCurrentProfile(), error);
+	Tox *m = load_tox(opts, Tools::getProgDir() + profile, password, error);
 
 	if (!m) {
 		// error is set inside load_tox
@@ -555,12 +551,14 @@ Tox *create(ToxProfileLoadingError &error, bool create_new)
 
 	size_t n_len = tox_self_get_name_size(m);
 
-	const char *username = "Protox";
 	if (!n_len && clean) {
+		const char *username = "Protox";
 		tox_self_set_name(m, (quint8*)username, strlen(username), NULL);
 	}
 
-	save_data(m, Tools::getProgDir() + qmlbridge->getCurrentProfile());
+	if (clean) {
+		save_data(m, pass_key, Tools::getProgDir() + profile);
+	}
 	error = TOX_ERR_LOADING_OK;
 	return m;
 }
@@ -594,7 +592,6 @@ ToxId get_address(Tox *m)
 
 void destroy(Tox *m)
 {
-	save_data(m, Tools::getProgDir() + qmlbridge->getCurrentProfile());
 	tox_kill(m);
 	tox_options_free(opts);
 }

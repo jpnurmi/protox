@@ -15,7 +15,7 @@ class QmlCBridge : public QObject
 {
 	Q_OBJECT
 public:
-	QmlCBridge();
+	explicit QmlCBridge();
 	~QmlCBridge();
 	void setComponent(QObject *_component);
 	void insertMessage(const ToxVariantMessage &message, quint32 friend_number, const QDateTime &dt, bool self = false, quint32 message_id = 0, quint64 unique_id = 0, bool history = false, bool failed = false);
@@ -65,7 +65,7 @@ public slots:
 	Q_INVOKABLE void setSettingsValue(const QString &group, const QString &key, const QVariant &value);
 	Q_INVOKABLE void setAppInactive(bool inactive) { app_inactive = inactive; }
 	Q_INVOKABLE void setKeyboardAdjustMode(bool adjustNothing);
-	Q_INVOKABLE int signInProfile(const QString &profile, bool create = false, const QString &password = "", bool autoLogin = false);
+	Q_INVOKABLE int signInProfile(const QString &profile, bool create_new = false, const QString &password = "", bool autoLogin = false);
 	Q_INVOKABLE QVariant getProfileList();
 	Q_INVOKABLE bool checkProfileEncrypted(const QString &profile);
 	Q_INVOKABLE void setToxPassword(const QString &password);
@@ -98,7 +98,7 @@ private:
 	QTimer *toxcore_timer;
 	QTimer *reconnection_timer;
 private:
-	// fixme: move to tox.cpp
+	// fixme: move to tox.cpp, may be?
 	Tox *tox;
 	Tox_Pass_Key *tox_pass_key;
 };

@@ -363,7 +363,8 @@ void QmlCBridge::setToxPassword(const QString &password)
 
 void QmlCBridge::saveProfile()
 {
-	Toxcore::save_data(tox, Tools::getProgDir() + current_profile);
+	updateToxPasswordKey();
+	Toxcore::save_data(tox, tox_pass_key, Tools::getProgDir() + current_profile);
 }
 
 void QmlCBridge::updateToxPasswordKey()
@@ -421,13 +422,13 @@ extern "C"
 }
 #endif
 
-int QmlCBridge::signInProfile(const QString &profile, bool create, const QString &password, bool autoLogin)
+int QmlCBridge::signInProfile(const QString &profile, bool create_new, const QString &password, bool autoLogin)
 {
 	current_profile = profile;
 	setToxPassword(password);
 	updateToxPasswordKey();
 	ToxProfileLoadingError error;
-	tox = Toxcore::create(error, create);
+	tox = Toxcore::create(error, create_new, password, current_profile, tox_pass_key);
 	if (!tox) {
 		current_profile.clear();
 		return error;
@@ -520,7 +521,12 @@ void QmlCBridge::signOutProfile(bool remove)
 	reconnection_timer->stop();
 	toxcore_timer->stop();
 	delete toxcore_timer;
+	if (!remove) {
+		Toxcore::save_data(tox, tox_pass_key, Tools::getProgDir() + current_profile);
+	}
 	Toxcore::destroy(tox);
+	Toxcore::reset_pass_key(tox_pass_key);
+	tox_pass_key = nullptr;
 
 	delete chat_db;
 	profile_password.clear();
