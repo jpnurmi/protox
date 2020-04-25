@@ -196,7 +196,7 @@ ColumnLayout {
                     id: messagePendingIndicatorTimer
                     interval: 1000
                     repeat: false
-                    running: true
+                    running: !msgHistory
                 }
                 Image {
                     id: messagePendingIndicator
