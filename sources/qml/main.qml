@@ -85,9 +85,12 @@ ApplicationWindow {
         width: parent.width
         height: parent.height
         contentWidth: parent.width
-        contentHeight: parent.height
+        contentHeight: overlayHeader.height + anchors.topMargin + welcomeImage.height + 
+                       welcomeTextTitle.contentHeight + welcomeText.contentHeight + 
+                       welcomeTextTitle.anchors.topMargin + welcomeText.anchors.topMargin
         enabled: cleanProfile
         flickableDirection: Flickable.VerticalFlick
+        boundsMovement: Flickable.StopAtBoundss
         Image {
             id: welcomeImage
             x: (window.width - width) * 0.5

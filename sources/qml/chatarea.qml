@@ -363,10 +363,13 @@ ColumnLayout {
                 visible: false
                 interactive: false
             }
+            Component.onCompleted: returnToBounds()
             TextArea.flickable: TextArea {
                 id: chatMessage
                 selectByMouse: true
-                font.pointSize: fontMetrics.normalize(standardFontPointSize)
+                readonly property real maxFontSize: 22
+                font.pointSize: fontMetrics.normalize(standardFontPointSize) <= maxFontSize ?
+                                    fontMetrics.normalize(standardFontPointSize) : maxFontSize
                 leftPadding: 10
                 rightPadding: leftPadding
                 placeholderText: qsTr("Type something")
