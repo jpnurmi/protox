@@ -79,6 +79,25 @@ ColumnLayout {
             clip: true
             boundsMovement: Flickable.StopAtBounds
             ScrollIndicator.vertical: ScrollIndicator {}
+            Rectangle {
+                id: messageRemovalLine
+                visible: false
+                property bool colision: false
+                color: "#00000000"
+                width: 5
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                LinearGradient {
+                    anchors.fill: parent
+                    start: Qt.point(parent.width, 0)
+                    end: Qt.point(0, 0)
+                    gradient: Gradient {
+                        GradientStop { position: 0.0; color: "#00000000" }
+                        GradientStop { position: 1.0; color: messageRemovalLine.colision ? "red" : "gray" }
+                    }
+                }
+            }
+
             onContentYChanged: {
                 if (atYEnd) {
                     scrollToEndButton.visible = false
@@ -127,21 +146,29 @@ ColumnLayout {
                     yAxis.enabled: false
                 }
                 Drag.dragType: Drag.Automatic
-                readonly property bool dragActive: messageCloudDragHandler.active
+                readonly property bool dragActive: messageCloudDragHandler.active 
+                onXChanged: {
+                    messageRemovalLine.colision = dragActive && x < 0
+                }
                 onDragActiveChanged: {
                     if (dragActive) {
-                        if (!msgReceived && bridge.getFriendConnStatus(bridge.getCurrentFriendNumber()) > 0) {
+                        if (msgSelf && !msgReceived && bridge.getFriendConnStatus(bridge.getCurrentFriendNumber()) > 0) {
                             return
                         }
+                        messageRemovalLine.visible = true
                         removeAnchors()
                     } else {
                         if (x < 0) {
                             var friend_number = bridge.getCurrentFriendNumber()
                             bridge.removeMessageFromPendingList(friend_number, msgUniqueId)
                             bridge.removeMessageFromDB(friend_number, msgUniqueId)
+                            messageRemovalLine.visible = false
+                            messageRemovalLine.colision = false
                             cloudRemoveAnimation.start() 
                         } else {
                             setDefaultAnchors()
+                            messageRemovalLine.visible = false
+                            messageRemovalLine.colision = false
                         }
                     }
                 }
