@@ -214,8 +214,8 @@ MessageDialog {
         if (friendsModel.count > 0) {
             selectFriend(friendsModel.get(0).friendNumber)
         } else {
-            friendNickname.text = ""
-            friendStatus.text = ""
+            friendNickname.setText("")
+            friendStatusMessage.setText("")
         }
         friendInfoMenu.close()
     }
