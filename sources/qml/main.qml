@@ -18,7 +18,7 @@ import QZXing 2.3
 ApplicationWindow {
     id: window
     visible: true
-    property string applicationVersion: "1.3alpha"
+    property string applicationVersion: "1.4alpha"
 
     /*
       Window events
