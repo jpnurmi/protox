@@ -133,6 +133,8 @@ static void cb_friend_connection_change(Tox *m, quint32 friend_number, TOX_CONNE
 	qmlbridge->friends_conn_status[friend_number] = connection_status;
 	if (connection_status > 0) {
 		qmlbridge->sendPendingMessages(friend_number);
+	} else {
+		qmlbridge->removeNonFailedPendingMessages(friend_number);
 	}
 }
 

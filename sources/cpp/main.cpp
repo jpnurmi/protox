@@ -616,6 +616,19 @@ void QmlCBridge::removeMessageFromPendingList(quint32 friend_number, quint64 uni
 	}
 }
 
+void QmlCBridge::removeNonFailedPendingMessages(quint32 friend_number)
+{
+	ToxPendingMessages toRemove;
+	for (int i = 0; i < pending_messages.count(); i++) {
+		if (pending_messages[i].friend_number == friend_number && !pending_messages[i].failed) {
+			toRemove.push_back(pending_messages[i]);
+		}
+	}
+	for (const auto &pendingMessage : toRemove) {
+		pending_messages.removeOne(pendingMessage);
+	}
+}
+
 void QmlCBridge::removeMessageFromDB(quint32 friend_number, quint64 unique_id)
 {
 	chat_db->removeMessage(unique_id, Toxcore::get_friend_public_key(tox, friend_number));

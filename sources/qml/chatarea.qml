@@ -130,8 +130,7 @@ ColumnLayout {
                 readonly property bool dragActive: messageCloudDragHandler.active
                 onDragActiveChanged: {
                     if (dragActive) {
-                        console.log(bridge.getFriendConnStatus(bridge.getCurrentFriendNumber()))
-                        if (bridge.getFriendConnStatus(bridge.getCurrentFriendNumber()) > 0) {
+                        if (!msgReceived && bridge.getFriendConnStatus(bridge.getCurrentFriendNumber()) > 0) {
                             return
                         }
                         removeAnchors()
@@ -202,13 +201,21 @@ ColumnLayout {
                 Connections {
                     target: window
                     onInPortraitChanged: calculateMaximumWidth()
+                    onUpdatePendingChanged: {
+                        if (!msgReceived) {
+                            pending = safe_bridge().checkMessageInPendingList(
+                                        safe_bridge().getCurrentFriendNumber(), 
+                                        msgUniqueId)
+                            msgHistory = true
+                        }
+                    }
                 }
                 Component.onCompleted: {
                     calculateMaximumWidth()
                     setDefaultAnchors()
                 }
-                property bool pending: bridge.checkMessageInPendingList(
-                                           bridge.getCurrentFriendNumber(), 
+                property bool pending: safe_bridge().checkMessageInPendingList(
+                                           safe_bridge().getCurrentFriendNumber(), 
                                            msgUniqueId)
                 Image {
                     id: resendIndicator

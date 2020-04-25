@@ -25,6 +25,13 @@ struct ToxPendingMessage {
 		failed = _failed;
 		resent = false;
 	}
+	friend bool operator==(const ToxPendingMessage &a, const ToxPendingMessage &b) {
+		return a.message_id == b.message_id && 
+				a.unique_id == b.unique_id && 
+				a.friend_number == b.friend_number &&
+				a.failed == b.failed &&
+				a.resent == b.resent;
+	}
 };
 typedef QList<ToxPendingMessage> ToxPendingMessages;
 

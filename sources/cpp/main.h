@@ -33,6 +33,7 @@ public:
 	void updateToxPasswordKey();
 	void tryReconnect();
 	void sendPendingMessages(quint32 friend_number);
+	void removeNonFailedPendingMessages(quint32 friend_number);
 public slots:
 	Q_INVOKABLE void sendMessage(const QString &message);
 	Q_INVOKABLE quint32 getCurrentFriendNumber();
