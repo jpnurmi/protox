@@ -243,7 +243,7 @@ Click on the left button to open the friend list, then on «+» to add a new fri
     </message>
     <message>
         <source>Do you want to delete chat history for this contact?</source>
-        <translation>Вы действительно хотите удалить историю чата для этого контакта?</translation>
+        <translation>Вы хотите удалить историю чата для этого контакта?</translation>
     </message>
     <message>
         <source>Chat history deleted!</source>
@@ -346,14 +346,6 @@ Click on the left button to open the friend list, then on «+» to add a new fri
         <translation>Напишите что-нибудь</translation>
     </message>
     <message>
-        <source>The friend is not online.</source>
-        <translation>Друг не в сети.</translation>
-    </message>
-    <message>
-        <source>You are not connected to the Tox network!</source>
-        <translation>Вы не подключены к Tox сети!</translation>
-    </message>
-    <message>
         <source>Specify a user name.</source>
         <translation>Введите имя пользователя.</translation>
     </message>
@@ -420,6 +412,10 @@ Click on the left button to open the friend list, then on «+» to add a new fri
     <message>
         <source>Auto-login</source>
         <translation>Автоматический вход</translation>
+    </message>
+    <message>
+        <source>Message removed!</source>
+        <translation>Сообщение удалено!</translation>
     </message>
 </context>
 <context>
