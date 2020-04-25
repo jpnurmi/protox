@@ -84,7 +84,6 @@ ColumnLayout {
                     scrollToEndButton.visible = false
                 }
             }
-
             function checkExceedsHeight() {
                 return contentHeight > height
             }
@@ -102,11 +101,51 @@ ColumnLayout {
                 enabled: messages.addTransitionEnabled
                 NumberAnimation { property: "scale"; from: 0; to: 1.0; duration: 300 }
             }
+            displaced: Transition {
+                NumberAnimation { properties: "y"; duration: 400; easing.type: Easing.OutCubic }
+            }
             model: messagesModel
             delegate: Rectangle {
                 id: messageCloud
                 color: !msgSelf ? "lightblue" : (msgReceived ? "orange" : "lightgray")
                 radius: 10
+                property int keptUniqueId
+                NumberAnimation on x {
+                    id: cloudRemoveAnimation
+                    duration: 500
+                    easing.type: Easing.OutCubic
+                    running: false
+                    to: -messageCloud.width - cloudTailImage.width - (msgSelf ? 0 : timeText.width)
+                    onFinished: {
+                        messagesModel.remove(index)
+                        toast.show({ message : qsTr("Message removed!"), duration : Toast.Short })
+                    }
+                }
+                DragHandler {
+                    id: messageCloudDragHandler
+                    target: parent
+                    yAxis.enabled: false
+                }
+                Drag.dragType: Drag.Automatic
+                readonly property bool dragActive: messageCloudDragHandler.active
+                onDragActiveChanged: {
+                    if (dragActive) {
+                        console.log(bridge.getFriendConnStatus(bridge.getCurrentFriendNumber()))
+                        if (bridge.getFriendConnStatus(bridge.getCurrentFriendNumber()) > 0) {
+                            return
+                        }
+                        removeAnchors()
+                    } else {
+                        if (x < 0) {
+                            var friend_number = bridge.getCurrentFriendNumber()
+                            bridge.removeMessageFromPendingList(friend_number, msgUniqueId)
+                            bridge.removeMessageFromDB(friend_number, msgUniqueId)
+                            cloudRemoveAnimation.start() 
+                        } else {
+                            setDefaultAnchors()
+                        }
+                    }
+                }
                 Rectangle {
                     id: cloudCornerRemover
                     z: z_cloud
@@ -137,20 +176,12 @@ ColumnLayout {
                         }
                     }
                 }
-                
                 function calculateMaximumWidth() {
                     var cwidth = window.width - chatContent.cloud_margin * 2 - chatContent.chat_margin * 2
                     if (cloudText.width > cwidth)
                         implicitWidth = cwidth
                 }
-
-                Connections {
-                    target: window
-                    onInPortraitChanged: calculateMaximumWidth()
-                }
-
-                Component.onCompleted: {
-                    calculateMaximumWidth()
+                function setDefaultAnchors() {
                     if (msgSelf) {
                         anchors.right = parent.right
                         anchors.rightMargin = chatContent.chat_margin
@@ -159,18 +190,23 @@ ColumnLayout {
                         anchors.leftMargin = chatContent.chat_margin
                     }
                 }
-                // debug
-                /*
-                Text {
-                    id: failedText
-                    visible: msgFailed
-                    text: "!"
-                    color: "red"
-                    font.pointSize: fontMetrics.normalize(20)
-                    font.bold: true
-                    anchors.right: parent.left
+                function removeAnchors() {
+                    if (msgSelf) {
+                        anchors.right = undefined
+                        anchors.rightMargin = 0
+                    } else {
+                        anchors.left = undefined
+                        anchors.leftMargin = 0
+                    }
                 }
-                */
+                Connections {
+                    target: window
+                    onInPortraitChanged: calculateMaximumWidth()
+                }
+                Component.onCompleted: {
+                    calculateMaximumWidth()
+                    setDefaultAnchors()
+                }
                 property bool pending: bridge.checkMessageInPendingList(
                                            bridge.getCurrentFriendNumber(), 
                                            msgUniqueId)
@@ -188,6 +224,7 @@ ColumnLayout {
                         anchors.fill: parent
                         onClicked: {
                             msgHistory = false
+                            messagePendingIndicatorTimer.stop()
                             bridge.resendMessage(bridge.getCurrentFriendNumber(), msgUniqueId)
                         }
                     }
@@ -227,6 +264,7 @@ ColumnLayout {
                     font.family: "Helvetica"
                     font.pointSize: fontMetrics.normalize(standardFontPointSize)
                     MouseArea {
+                        id: cloudTextArea
                         anchors.fill: parent
                         onClicked: {
                             var link = parent.linkAt(mouseX, mouseY)
@@ -444,16 +482,6 @@ ColumnLayout {
             function sendMessage() {
                 Qt.inputMethod.reset()
                 if (chatMessage.text.length > 0) {
-                    /*
-                    if (bridge.getFriendConnStatus(bridge.getCurrentFriendNumber()) < 1) {
-                        toast.show({ message : qsTr("The friend is not online."), duration: Toast.Short })
-                        return
-                    }
-                    if (bridge.getConnStatus() < 1) {
-                        toast.show({ message : qsTr("You are not connected to the Tox network!"), duration: Toast.Short })
-                        return
-                    }
-                    */
                     bridge.sendMessage(chatMessage.text)
                     chatMessage.clear()
                 } else {

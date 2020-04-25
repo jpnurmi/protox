@@ -98,17 +98,14 @@ static void cb_friend_message(Tox *m, quint32 friend_number, TOX_MESSAGE_TYPE ty
 	}
 	QString message(QByteArray((char*)string, length));
 	ToxPk friend_pk = get_friend_public_key(m, friend_number);
-	quint64 new_unique_id = chat_db->getMessagesCountFriend(friend_pk) + 1;
-	settings->beginGroup("Privacy");
-	bool keep_chat_history = settings->value("keep_chat_history", true).toBool();
-	settings->endGroup();
 	ToxVariantMessage variantMessage;
 	variantMessage.insert("type", ToxVariantMessageType::TOXMSG_TEXT);
 	variantMessage.insert("message", message);
 	QDateTime dt = QDateTime::currentDateTime();
-	if (keep_chat_history) {
-		chat_db->insertMessage(variantMessage, dt, friend_pk, false, new_unique_id);
-	}
+	settings->beginGroup("Privacy");
+	bool keep_chat_history = settings->value("keep_chat_history", true).toBool();
+	settings->endGroup();
+	chat_db->insertMessage(variantMessage, dt, friend_pk, !keep_chat_history, false);
 	qmlbridge->insertMessage(variantMessage, friend_number, dt);
 }
 

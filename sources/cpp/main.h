@@ -30,8 +30,6 @@ public:
 	QList<QVariant> getFriendsModelOrder();
 	void setKeyboardHeight(int height);
 	bool getAppInactive() { return app_inactive; }
-	const Tox_Pass_Key *getToxPasswordKey() { return tox_pass_key; }
-	const QString getProfilePassword() { return profile_password; }
 	void updateToxPasswordKey();
 	void tryReconnect();
 	void sendPendingMessages(quint32 friend_number);
@@ -56,7 +54,6 @@ public slots:
 	Q_INVOKABLE int getStatus();
 	Q_INVOKABLE void setStatus(quint32 status);
 	Q_INVOKABLE long getFriendsCount();
-	Q_INVOKABLE quint32 getMessagesCount(quint32 friend_number);
 	Q_INVOKABLE int getConnStatus();
 	Q_INVOKABLE int addFriend(const QString &friendPk);
 	Q_INVOKABLE int getFriendStatus(quint32 friend_number);
@@ -87,6 +84,7 @@ public slots:
 	Q_INVOKABLE bool checkMessageInPendingList(quint32 friend_number, quint64 unique_id);
 	Q_INVOKABLE void resendMessage(quint32 friend_number, quint64 unique_id);
 	Q_INVOKABLE void removeMessageFromPendingList(quint32 friend_number, quint64 unique_id);
+	Q_INVOKABLE void removeMessageFromDB(quint32 friend_number, quint64 unique_id);
 
 public:
 	ToxFriendsConnStatus friends_conn_status;

@@ -18,13 +18,6 @@ function safe_bridge() {
     return empty_bridge
 }
 
-function checkLastMessage(friend_number) {
-    if (!messagesModel.count) {
-        return true
-    }
-    return bridge.getMessagesCount(friend_number) === messagesModel.get(messagesModel.count - 1).msgUniqueId
-}
-
 function limitString(str, limit) {
     if (str.length > limit) {
         return str.slice(0, limit) + "..."
@@ -132,7 +125,7 @@ function chatScrollToEnd() {
 
 property variant each_friend_text: []
 function selectFriend(friend_number) {
-    if (bridge.getCurrentFriendNumber() === friend_number && checkLastMessage(friend_number)) {
+    if (bridge.getCurrentFriendNumber() === friend_number) {
         return
     }
     notification.cancel(friend_number)

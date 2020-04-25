@@ -32,6 +32,7 @@ ChatDataBase::ChatDataBase(const QString &fileName, const QString &password)
 			"	self INTEGER,\n"
 			"	received INTEGER,\n"
 			"	datetime INTEGER,\n"
+			"	temporary INTEGER,\n"
 			"	unique_id INTEGER,\n"
 			"	PRIMARY KEY(public_key, unique_id)\n"
 			");\n";
@@ -64,7 +65,7 @@ quint64 ChatDataBase::getMessagesCountFriend(const ToxPk &public_key)
 	return query.value(0).toULongLong();
 }
 
-void ChatDataBase::insertMessage(const ToxVariantMessage &variantMessage, const QDateTime &dt, const ToxPk &public_key, bool self, quint64 unique_id)
+quint64 ChatDataBase::insertMessage(const ToxVariantMessage &variantMessage, const QDateTime &dt, const ToxPk &public_key, bool temporary, bool self)
 {
 	int type = variantMessage["type"].toInt();
 	QSqlQuery msg_query(db);
@@ -82,20 +83,29 @@ void ChatDataBase::insertMessage(const ToxVariantMessage &variantMessage, const 
 
 	QSqlQuery last_msg_query = db.exec(QString("SELECT reference_id FROM %1 ORDER BY reference_id DESC LIMIT 1").arg(table));
 	last_msg_query.next();
-	
+
+	QSqlQuery new_unique_id_query;
+	new_unique_id_query.prepare("SELECT MAX(unique_id) + 1 FROM Messages WHERE public_key = :public_key");
+	new_unique_id_query.bindValue(":public_key", public_key);
+	new_unique_id_query.exec();
+	new_unique_id_query.next();
+	quint64 new_unique_id = new_unique_id_query.value(0).toULongLong();
+
 	QSqlQuery query(db);
-	query.prepare("INSERT INTO Messages (public_key, type, reference_id, self, received, datetime, unique_id) "
-				  "VALUES (:public_key, :type, :reference_id, :self, :received, :datetime, :unique_id)");
+	query.prepare("INSERT INTO Messages (public_key, type, reference_id, self, received, datetime, temporary, unique_id) "
+				  "VALUES (:public_key, :type, :reference_id, :self, :received, :datetime, :temporary, :unique_id)");
 	query.bindValue(":public_key", public_key);
 	query.bindValue(":type", type);
 	query.bindValue(":reference_id", last_msg_query.value(0).toInt());
 	query.bindValue(":self", self);
 	query.bindValue(":received", false);
 	query.bindValue(":datetime", dt.toSecsSinceEpoch());
-	query.bindValue(":unique_id", unique_id);
+	query.bindValue(":temporary", temporary);
+	query.bindValue(":unique_id", new_unique_id);
 	query.exec();
 
 	db.commit();
+	return new_unique_id;
 }
 
 void ChatDataBase::setMessageReceived(quint64 unique_id, const ToxPk &public_key)
@@ -114,7 +124,7 @@ const ToxMessages ChatDataBase::getFriendMessages(const ToxPk &public_key, quint
 	QSqlQuery query(db);
 	query.prepare(QString("SELECT * FROM ("
 				  "SELECT type,reference_id,unique_id,datetime,self,received FROM Messages WHERE public_key = :public_key AND unique_id %1 :start ORDER BY unique_id %2 LIMIT :limit"
-				  ") ORDER BY unique_id ASC").arg(reverse ? "<" : ">", from ? "DESC" : "ASC"));
+				  ") ORDER BY unique_id ASC").arg(reverse ? "<=" : ">=", from ? "DESC" : "ASC"));
 	query.bindValue(":public_key", public_key);
 	query.bindValue(":start", start);
 	query.bindValue(":limit", limit);
@@ -167,6 +177,31 @@ const QString ChatDataBase::getTextMessage(quint64 unique_id, const ToxPk &publi
 	}
 }
 
+void ChatDataBase::removeMessage(quint64 unique_id, const ToxPk &public_key)
+{
+	QSqlQuery query(db);
+	query.prepare("SELECT type,reference_id FROM Messages WHERE unique_id = :unique_id AND public_key = :public_key");
+	query.bindValue(":unique_id", unique_id);
+	query.bindValue(":public_key", public_key);
+	query.exec();
+	query.next();
+	QString type;
+	switch (query.value(0).toInt()) {
+		case ToxVariantMessageType::TOXMSG_TEXT: type = "Text"; break;
+		case ToxVariantMessageType::TOXMSG_FILE: type = "File"; break;
+	}
+	quint32 reference_id = query.value(1).toUInt();
+	QSqlQuery remove_query(db);
+	remove_query.prepare(QString("DELETE FROM %1Messages WHERE reference_id = :reference_id").arg(type));
+	remove_query.bindValue(":reference_id", reference_id);
+	remove_query.exec();
+	remove_query.prepare("DELETE FROM Messages WHERE unique_id = :unique_id AND public_key = :public_key");
+	remove_query.bindValue(":unique_id", unique_id);
+	remove_query.bindValue(":public_key", public_key);
+	remove_query.exec();
+	db.commit();
+}
+
 void ChatDataBase::clearFriendChatHistory(const ToxPk &public_key)
 {
 	db.exec("DROP TABLE IF EXISTS MessagesToDelete");
@@ -182,6 +217,22 @@ void ChatDataBase::clearFriendChatHistory(const ToxPk &public_key)
 	db.exec("DELETE FROM FileMessages WHERE reference_id IN MessagesToDelete");
 	db.exec("DELETE FROM Messages WHERE reference_id IN MessagesToDelete");
 	db.exec("DROP TABLE MessagesToDelete");
+	db.commit();
+}
+
+void ChatDataBase::removeAllTemporaryMessages()
+{
+	db.exec("DROP TABLE IF EXISTS MessagesToDelete");
+	db.exec("CREATE TEMPORARY TABLE MessagesToDelete (\n"
+			"	reference_id INTEGER PRIMARY KEY\n"
+			");");
+	db.exec("INSERT INTO MessagesToDelete (reference_id) "
+					  "SELECT reference_id FROM Messages WHERE temporary = 1");
+	db.exec("DELETE FROM TextMessages WHERE reference_id IN MessagesToDelete");
+	db.exec("DELETE FROM FileMessages WHERE reference_id IN MessagesToDelete");
+	db.exec("DELETE FROM Messages WHERE reference_id IN MessagesToDelete");
+	db.exec("DROP TABLE MessagesToDelete");
+	db.commit();
 }
 
 void ChatDataBase::updatePassword(const QString &password)
@@ -223,6 +274,7 @@ void ChatDataBase::registerSQLDriver()
 
 ChatDataBase::~ChatDataBase()
 {
+	removeAllTemporaryMessages();
 	db.close();
 	QSqlDatabase::removeDatabase(db.connectionName());
 }

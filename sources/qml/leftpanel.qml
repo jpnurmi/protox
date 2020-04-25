@@ -36,7 +36,7 @@ Drawer {
 
     ListModel {
         id: friendsModel
-        function smartMove(slot1, slot2) {
+        function swap(slot1, slot2) {
             var min = Math.min(slot1, slot2);
             var max = Math.max(slot1, slot2);
             if (slot1 > slot2) {
@@ -75,7 +75,7 @@ Drawer {
                     property real textWidth
                     width: textWidth + 50
                     Repeater {
-                        model: [[qsTr("Online"), "lightgreen"],[qsTr("Away"), "yellow"],[qsTr("Busy"), "red"]/*,[qsTr("Offline"), "gray"]*/]
+                        model: [[qsTr("Online"), "lightgreen"],[qsTr("Away"), "yellow"],[qsTr("Busy"), "red"]]
                         delegate: MenuItem {
                             RowLayout {
                                 anchors.fill: parent
@@ -100,11 +100,8 @@ Drawer {
                                 }
                             }
                             onClicked: {
-                                //if (index < 3) {
-                                    bridge.setStatus(index)
-                                //} 
+                                bridge.setStatus(index)
                                 statusIndicator.setStatus(index)
-                                //bridge.changeConnection(index != 3)
                             }
                         }
                     }
@@ -305,7 +302,7 @@ Drawer {
                                 if (!request) {
                                     parent.parent.dragEntered = false
                                     friendsModel.get(leftBarLayout.draggedItem).dragStarted = false
-                                    friendsModel.smartMove(index, leftBarLayout.draggedItem)
+                                    friendsModel.swap(index, leftBarLayout.draggedItem)
                                 }
                             }
                         }
@@ -363,7 +360,7 @@ Drawer {
                                 if (!request) {
                                     parent.parent.dragEntered = false
                                     friendsModel.get(leftBarLayout.draggedItem).dragStarted = false
-                                    friendsModel.smartMove(index, leftBarLayout.draggedItem)
+                                    friendsModel.swap(index, leftBarLayout.draggedItem)
                                 }
                             }
                         }
