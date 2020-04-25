@@ -90,7 +90,7 @@ ApplicationWindow {
                        welcomeTextTitle.anchors.topMargin + welcomeText.anchors.topMargin
         enabled: cleanProfile
         flickableDirection: Flickable.VerticalFlick
-        boundsMovement: Flickable.StopAtBoundss
+        boundsMovement: Flickable.StopAtBounds
         Image {
             id: welcomeImage
             x: (window.width - width) * 0.5
