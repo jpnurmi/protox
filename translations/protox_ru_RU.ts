@@ -417,6 +417,14 @@ Click on the left button to open the friend list, then on «+» to add a new fri
         <source>Message removed!</source>
         <translation>Сообщение удалено!</translation>
     </message>
+    <message>
+        <source>This value is measured in minutes. Set to 0 to disable.</source>
+        <translation>Это значение измеряется в минутах. Установите 0 для отключения.</translation>
+    </message>
+    <message>
+        <source>Auto-away after</source>
+        <translation>Авто-смена статуса на &quot;отошел&quot; после</translation>
+    </message>
 </context>
 <context>
     <name>QAndroidPlatformTheme</name>

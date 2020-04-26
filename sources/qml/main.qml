@@ -42,6 +42,16 @@ ApplicationWindow {
         if (!appInactive && keyboardActive) {
             Qt.inputMethod.show()
         }
+        if (appInactive && absentTimer.interval > 0) {
+            absentTimer.start()
+        } else {
+            absentTimer.stop()
+            if (lastStatus != -1) {
+                bridge.setStatus(lastStatus)
+                statusIndicator.setStatus(lastStatus)
+                lastStatus = -1
+            }
+        }
     }
 
     Connections {
@@ -54,6 +64,19 @@ ApplicationWindow {
             }
             appInactive = Qt.application.state === Qt.ApplicationSuspended
             bridge.setAppInactive(appInactive)
+        }
+    }
+
+    property int lastStatus: -1
+    Timer {
+        id: absentTimer
+        repeat: false
+        interval: parseInt(bridge.getSettingsValue("Client", "absent_timer_interval", 
+                                          ptype_string, String("10"))) * 60 * 1000
+        onTriggered: {
+           lastStatus = bridge.getStatus()
+           bridge.setStatus(1)
+           statusIndicator.setStatus(1)
         }
     }
 

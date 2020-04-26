@@ -83,6 +83,7 @@ Popup {
     RegExpValidator { id: default_validator; regExp: /.*/gm }
     RegExpValidator { id: hex_validator; regExp: /[0-9A-F]+/ }
     IntValidator { id: last_messages_limit_validator; bottom: 5; top: 10000 }
+    IntValidator { id: absent_timer_interval_validator; bottom: 0; top: 10000 }
     Component.onCompleted: {
         settingsModel.actions = {
             "randomize_nospam" : function () {
@@ -151,6 +152,11 @@ Popup {
                     name: qsTr("Maximum bootstrap nodes"), prop: "max_bootstrap_nodes", helperText: "6",
                     svalue: bridge.getSettingsValue("Toxcore", "max_bootstrap_nodes", ptype_string, 6) })
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Client options") })
+        settingsModel.append({ flags: sf_text | sf_title | sf_help, name: qsTr("This value is measured in minutes. Set to 0 to disable.")})
+        settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only | sf_placeholder, 
+                    fieldValidator: absent_timer_interval_validator, itemWidth: 96, 
+                    name: qsTr("Auto-away after"), prop: "absent_timer_interval", helperText: "10",
+                    svalue: bridge.getSettingsValue("Client", "absent_timer_interval", ptype_string, String("10"))})
         settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only | sf_placeholder | sf_acceptAction, 
                     acceptAction : "reload_chat", fieldValidator: last_messages_limit_validator, itemWidth: 96, 
                     name: qsTr("Recent messages limit"), prop: "last_messages_limit", helperText: "128",
@@ -200,6 +206,8 @@ Popup {
         bridge.setSettingsValue("Toxcore", "local_discovery_enabled", Boolean(settingsModel.getValueNumber("local_discovery_enabled")))
         bridge.setSettingsValue("Toxcore", "nodes_json_file", String(settingsModel.getValueString("nodes_json_file")))
         bridge.setSettingsValue("Toxcore", "max_bootstrap_nodes", String(settingsModel.getValueString("max_bootstrap_nodes")))
+        bridge.setSettingsValue("Client", "absent_timer_interval", String(settingsModel.getValueString("absent_timer_interval")))
+        absentTimer.interval = parseInt(settingsModel.getValueString("absent_timer_interval")) * 60 * 1000
         bridge.setSettingsValue("Client", "last_messages_limit", settingsModel.getValueString("last_messages_limit"))
         bridge.setSettingsValue("Privacy", "keep_chat_history", Boolean(settingsModel.getValueNumber("keep_chat_history")))
         bridge.setSettingsValue("Profile", "auto_login_profile", settingsModel.getValueNumber("auto_login_enabled") ? bridge.getCurrentProfile() : "")
