@@ -423,7 +423,7 @@ Click on the left button to open the friend list, then on «+» to add a new fri
     </message>
     <message>
         <source>Auto-away after</source>
-        <translation>Авто-смена статуса на &quot;отошел&quot; после</translation>
+        <translation>Авто-смена статуса на &quot;отошел&quot; через</translation>
     </message>
 </context>
 <context>
