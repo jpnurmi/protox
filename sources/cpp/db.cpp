@@ -20,6 +20,8 @@ ChatDataBase::ChatDataBase(const QString &fileName, const QString &password)
 
 	db.open();
 
+	upgradeFromV2toV3();
+
 	QSqlQuery query;
 	query = db.exec(QString("PRAGMA application_id=%1").arg(APPLICATION_ID));
 	query = db.exec(QString("PRAGMA user_version=%1").arg(DATABASE_VERSION));
@@ -53,6 +55,21 @@ ChatDataBase::ChatDataBase(const QString &fileName, const QString &password)
 			"	size INTEGER\n"
 			");";
 	db.commit();
+}
+
+void ChatDataBase::upgradeFromV2toV3()
+{
+	QSqlQuery check = db.exec("PRAGMA user_version");
+	check.next();
+	quint64 user_version = check.value(0).toULongLong();
+	check.finish();
+	if (user_version == 2) {
+		Tools::debug("Detected v2 .db. Upgrading...");
+		QFile::copy(db.databaseName(), db.databaseName() + ".v2bak");
+		// not the best solution, "failed" column will remain but SQLite 3.24 doesn't allow to rename or remove it
+		db.exec("ALTER TABLE Messages ADD COLUMN temporary INTEGER");
+		db.exec("UPDATE Messages SET temporary = 0");
+	}
 }
 
 quint64 ChatDataBase::getMessagesCountFriend(const ToxPk &public_key)

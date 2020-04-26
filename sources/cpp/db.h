@@ -21,6 +21,7 @@ public:
 	~ChatDataBase();
 private:
 	void removeAllTemporaryMessages();
+	void upgradeFromV2toV3();
 private:
 	QSqlDatabase db;
 };
