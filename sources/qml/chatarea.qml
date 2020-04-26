@@ -390,7 +390,7 @@ ColumnLayout {
                         result = result.replace(/((http|https|ftp|sftp)?:\/\/[^\s]+)/g, function(url) {
                             return '<font color="#0645AD"><a href="' + url + '">' + url + '</a></font>'
                         })
-                        result = result.replace(/^(&gt;(.)*)/g, function(quote) {
+                        result = result.replace(/^(&gt;(.)*)/gm, function(quote) {
                             return '<font color="#0b6623">' + quote + '</font>'
                         })
                         result = result.replace(/(\n)/gm, '<br>')
