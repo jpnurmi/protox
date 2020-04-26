@@ -55,7 +55,7 @@ v1.4alpha
 - Redesigned login menu and added more cool backgrounds!
 - Fixed a problem with loading wrong noSpam on x86 architecture
 - Newlines in nickname and status messages will now be replaced by spaces
-- Improved message formating regExp
+- Improved message formatting regExp
 - Added a new splash screen
 - Improved message entry field: multi-line handling on various orientations
 - Improved profile saving/loading performance
