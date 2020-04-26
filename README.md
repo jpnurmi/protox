@@ -26,6 +26,14 @@ You can donate if you want to support this project.
 * BCH: bitcoincash:qq6s9n8kauykxtd2v5h5pymzjtn3yw0ktvd5gp09n8
 * ETH: 0x7575c05460b5c2c9fbd1fcc2dd4cc0a246f7f672
 
+# Screenshots
+
+
+<img src="https://gitlab.com/Monsterovich/protox/-/raw/805af63903a1a7e8637380107d8d0b3ec60ada7b/resources/screenshots/1.png"  width="150">
+<img src="https://gitlab.com/Monsterovich/protox/-/raw/805af63903a1a7e8637380107d8d0b3ec60ada7b/resources/screenshots/3.png"  width="150">
+<img src="https://gitlab.com/Monsterovich/protox/-/raw/805af63903a1a7e8637380107d8d0b3ec60ada7b/resources/screenshots/4.png"  width="150">
+<img src="https://gitlab.com/Monsterovich/protox/-/raw/805af63903a1a7e8637380107d8d0b3ec60ada7b/resources/screenshots/2.png"  width="150">
+
 # Download
 
 * [FDroid repository](https://submarine.strangled.net/fdroid/)
