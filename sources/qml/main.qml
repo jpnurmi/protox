@@ -74,8 +74,8 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
-        statusBar.theme = Material.Dark
-        statusBar.color = Material.toolBarColor
+        statusBar.theme = getTheme().Dark
+        statusBar.color = getTheme().toolBarColor
         delayTimer.start()
     }
 

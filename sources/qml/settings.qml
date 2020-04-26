@@ -230,7 +230,7 @@ Popup {
                 font.family: themify.name
                 font.pointSize: 28
                 font.bold: true
-                color: parent.highlighted ? Material.highlightedButtonColor : "white"
+                color: parent.highlighted ? getTheme().highlightedButtonColor : "white"
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
             }

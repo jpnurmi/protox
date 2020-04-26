@@ -81,19 +81,23 @@ ColumnLayout {
             ScrollIndicator.vertical: ScrollIndicator {}
             Rectangle {
                 id: messageRemovalLine
-                visible: false
+                x: -width
                 property bool colision: false
                 color: "#00000000"
                 width: 5
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
+                NumberAnimation { id: messageRemovalLineIn; target: messageRemovalLine; property: "x"; 
+                    from: -messageRemovalLine.width; to: 0; easing.type: Easing.OutCubic }
+                NumberAnimation { id: messageRemovalLineOut; target: messageRemovalLine; property: "x"; 
+                    from: 0; to: -messageRemovalLine.width; easing.type: Easing.OutCubic }
                 LinearGradient {
                     anchors.fill: parent
                     start: Qt.point(parent.width, 0)
                     end: Qt.point(0, 0)
                     gradient: Gradient {
                         GradientStop { position: 0.0; color: "#00000000" }
-                        GradientStop { position: 1.0; color: messageRemovalLine.colision ? "red" : "gray" }
+                        GradientStop { position: 1.0; color: messageRemovalLine.colision ? "red" : "#565656" }
                     }
                 }
             }
@@ -146,9 +150,22 @@ ColumnLayout {
                     yAxis.enabled: false
                 }
                 Drag.dragType: Drag.Automatic
-                readonly property bool dragActive: messageCloudDragHandler.active 
+                readonly property bool dragActive: messageCloudDragHandler.active
+                function getAdditionalWidth() {
+                    var pos = 0
+                    if (msgSelf) {
+                        if (timeText.contentWidth > width) {
+                            pos += timeText.contentWidth - width
+                        }
+                    } else {
+                        pos += cloudTailImage.width
+                    }
+                    return pos
+                }
                 onXChanged: {
-                    messageRemovalLine.colision = dragActive && x < 0
+                    if (dragActive) {
+                        messageRemovalLine.colision = dragActive && x < getAdditionalWidth()
+                    }
                 }
                 onDragActiveChanged: {
                     if (dragActive) {
@@ -157,17 +174,18 @@ ColumnLayout {
                         }
                         messageRemovalLine.visible = true
                         removeAnchors()
+                        messageRemovalLineIn.start()
                     } else {
-                        if (x < 0) {
+                        if (x < getAdditionalWidth()) {
                             var friend_number = bridge.getCurrentFriendNumber()
                             bridge.removeMessageFromPendingList(friend_number, msgUniqueId)
                             bridge.removeMessageFromDB(friend_number, msgUniqueId)
-                            messageRemovalLine.visible = false
+                            messageRemovalLineOut.start()
                             messageRemovalLine.colision = false
                             cloudRemoveAnimation.start() 
                         } else {
                             setDefaultAnchors()
-                            messageRemovalLine.visible = false
+                            messageRemovalLineOut.start()
                             messageRemovalLine.colision = false
                         }
                     }

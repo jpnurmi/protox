@@ -158,7 +158,7 @@ Popup {
                 font.family: themify.name
                 font.pointSize: 28
                 font.bold: true
-                color: parent.highlighted ? Material.highlightedButtonColor : "white"
+                color: parent.highlighted ? getTheme().highlightedButtonColor : "white"
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
             }
@@ -295,7 +295,7 @@ Popup {
                 placeholderTextColor: "gray"
                 horizontalAlignment: TextInput.AlignHCenter
                 background: Rectangle {
-                    color: loginUsername.activeFocus ? Material.primaryHighlightedTextColor : "gray"
+                    color: loginUsername.activeFocus ? getTheme().primaryHighlightedTextColor : "gray"
                     height: 2
                     width: parent.width
                     anchors.bottom: parent.bottom
@@ -331,7 +331,7 @@ Popup {
                 Layout.fillWidth: true
                 Layout.topMargin: 6
                 background: Rectangle {
-                    color: loginPassword.activeFocus ? Material.primaryHighlightedTextColor : "gray"
+                    color: loginPassword.activeFocus ? getTheme().primaryHighlightedTextColor : "gray"
                     height: 2
                     width: parent.width
                     anchors.bottom: parent.bottom
@@ -379,7 +379,7 @@ Popup {
                         text: "\u2713"
                         font.bold: true
                         font.pointSize: 16
-                        color: Material.highlightedButtonColor
+                        color: getTheme().highlightedButtonColor
                         visible: loginCheckbox.checked
                     }
                 }
@@ -410,7 +410,7 @@ Popup {
                 Layout.topMargin: 42
                 implicitHeight: loginButton.height
                 background: Rectangle {
-                    color: createNewProfileButton.pressed ? Material.highlightedButtonColor : "green"
+                    color: createNewProfileButton.pressed ? getTheme().highlightedButtonColor : "green"
                     radius: 2
                 }
                 onClicked: {

@@ -6,6 +6,10 @@ import QtQuick 2.12
 
 /*[remove]*/ Item {
 
+function getTheme() {
+    return Material
+}
+
 function safe_bridge() {
     if (bridge !== null) {
         return bridge
