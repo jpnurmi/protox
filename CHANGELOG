@@ -22,6 +22,7 @@ v1.2alpha
 - The application will now work on Android 5 (API 21) and above.
 
 v1.2.1alpha
+
 - Fixed bug: the first received friend request is visible in status bar
 - Added a timer to resume connection to Tox nodes if it has been lost.
 - Added code to fix graphical issues with bug #6 (https://gitlab.com/Monsterovich/protox/-/issues/6)
@@ -40,3 +41,22 @@ v1.3alpha
 - Added validators to nickname, status message, toxId, friend request message fields.
 - Improved the look of profile menu.
 - Show the number of available tox nodes in .json.
+
+v1.4alpha
+
+- Added translation support to the application
+- Added Russian translation
+- Added support for landscape orientation
+- Added support for fake offline-messages
+- Added "Auto-away after" feature
+- Added ability to remove messages from history
+- Improved the "Keep chat history" feature: the application will now keep messages and remove them when the application is closed
+- Improved the look of the application on large screens
+- Redesigned login menu and added more cool backgrounds!
+- Fixed a problem with loading wrong noSpam on x86 architecture
+- Newlines in nickname and status messages will now be replaced by spaces
+- Improved message formating regExp
+- Added a new splash screen
+- Improved message entry field: multi-line handling on various orientations
+- Improved profile saving/loading performance
+- Improved the look of the message cloud
