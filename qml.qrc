@@ -6,7 +6,6 @@
         <file>resources/profileCreation.png</file>
         <file>resources/themify.ttf</file>
         <file>resources/particle.png</file>
-        <file>resources/base.png</file>
         <file>qtquickcontrols2.conf</file>
         <file>.app.qml</file>
         <file>sources/qml/dummy/QAndroidPlatformTheme.qml</file>

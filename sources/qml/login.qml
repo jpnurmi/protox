@@ -224,26 +224,6 @@ Popup {
             y: inPortrait ? (parent.height - height) * 0.1 : (parent.height - height) * 0.5
             width: 142
             height: 142 * (sourceSize.height / sourceSize.width)
-            MouseArea {
-                anchors.fill: parent
-                enabled: loginWindow.enabled
-                property int clicks: 0
-                onClicked: {
-                    clicks++
-                    switch (clicks) {
-                    case 1: toast.show({ message : "We get signal.", duration : Toast.Long }); break;
-                    case 2: toast.show({ message : "What?", duration : Toast.Short }); break;
-                    case 3: toast.show({ message : "It's you.", duration : Toast.Short });
-                        parent.source = "resources/base.png"
-                        var lines = ["How are you gentlemen!!!", "ALL YOUR PROFILES ARE BELONG TO US!", 
-                                     "You are on the way to destruction.", "You have no chance to survive make your time.", "Ha ha ha ha..."]
-                        for (var i = 0; i < lines.length; i++) {
-                            toast.show({ message : lines[i], duration : Toast.Long });
-                        }
-                        break;
-                    }
-                }
-            }
         }
 
         DropShadow {
