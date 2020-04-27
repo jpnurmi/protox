@@ -29,7 +29,6 @@ You can donate if you want to support this project.
 # Screenshots
 
 
-<img src="https://gitlab.com/Monsterovich/protox/-/raw/805af63903a1a7e8637380107d8d0b3ec60ada7b/resources/screenshots/1.png"  width="150">
 <img src="https://gitlab.com/Monsterovich/protox/-/raw/805af63903a1a7e8637380107d8d0b3ec60ada7b/resources/screenshots/3.png"  width="150">
 <img src="https://gitlab.com/Monsterovich/protox/-/raw/805af63903a1a7e8637380107d8d0b3ec60ada7b/resources/screenshots/4.png"  width="150">
 <img src="https://gitlab.com/Monsterovich/protox/-/raw/805af63903a1a7e8637380107d8d0b3ec60ada7b/resources/screenshots/2.png"  width="150">
