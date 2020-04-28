@@ -190,6 +190,7 @@ Drawer {
                     property bool dragStarted: false
                     property int default_x
                     property int default_y
+                    property real addWidth
                     function savePosition() {
                         default_x = x
                         default_y = y
@@ -224,7 +225,7 @@ Drawer {
                         }
                     }
                     Drag.dragType: Drag.Automatic
-                    property bool dragActive: friendDragAreaIndicator.drag.active
+                    property bool dragActive: false
                     onDragActiveChanged: {
                         if (dragActive) {
                             friendItemAnimationXBehavior.enabled = true
@@ -254,58 +255,64 @@ Drawer {
                             z = z_friend_item
                         }
                     }
-                    
-                    Rectangle {
-                        id: friendItemStatusIndicatorBody
-                        z: z_friend_icon
-                        width: parent.itemHeight
-                        height: parent.itemHeight
-                        Layout.alignment: Qt.AlignLeft
-                        color: (parent.dragEntered && !parent.dragActive) ? "lightgray" : "#00000000"
-                        visible: !request
-                        Component.onCompleted: {
-                            if (request) {
-                                width = height = 0
-                            }
-                        }
-                        MouseArea {
-                            id: friendDragAreaIndicator
-                            anchors.fill: parent
-                            drag.target: friendLayout
-                            enabled: friendsModel.count > 1
-                        }
-                        Rectangle {
-                            id: friendItemStatusIndicator
-                            color: statusColor
-                            width: 15
-                            height: width
-                            border.color: "black"
-                            border.width: 1
-                            radius: width * 0.5
-                            anchors.centerIn: parent
-                            visible: parent.visible
-                        }
-                        DropArea {
-                            anchors.fill: parent
-                            enabled: !parent.parent.dragActive
-                            onEntered: {
-                                if (!request) {
-                                    parent.parent.dragEntered = true
+                    Loader {
+                        Component {
+                            id: friendItemStatusIndicatorComponent
+                            Rectangle {
+                                id: friendItemStatusIndicatorBody
+                                z: z_friend_icon
+                                width: friendLayout.itemHeight
+                                height: friendLayout.itemHeight
+                                Layout.alignment: Qt.AlignLeft
+                                color: (friendLayout.dragEntered && !friendLayout.dragActive) ? "lightgray" : "#00000000"
+                                Component.onCompleted: {
+                                    friendLayout.addWidth += width
+                                }
+                                MouseArea {
+                                    id: friendDragAreaIndicator
+                                    anchors.fill: parent
+                                    drag.target: friendLayout
+                                    enabled: friendsModel.count > 1
+                                    readonly property bool dragActive: drag.active
+                                    onDragActiveChanged: {
+                                        friendLayout.dragActive = dragActive
+                                    }
+                                }
+                                Rectangle {
+                                    id: friendItemStatusIndicator
+                                    color: statusColor
+                                    width: 15
+                                    height: width
+                                    border.color: "black"
+                                    border.width: 1
+                                    radius: width * 0.5
+                                    anchors.centerIn: parent
+                                    visible: parent.visible
+                                }
+                                DropArea {
+                                    anchors.fill: parent
+                                    enabled: !friendLayout.dragActive
+                                    onEntered: {
+                                        if (!request) {
+                                            friendLayout.dragEntered = true
+                                        }
+                                    }
+                                    onExited: {
+                                        if (!request) {
+                                            friendLayout.dragEntered = false
+                                        }
+                                    }
+                                    onDropped: {
+                                        if (!request) {
+                                            friendLayout.dragEntered = false
+                                            friendsModel.get(leftBarLayout.draggedItem).dragStarted = false
+                                            friendsModel.swap(index, leftBarLayout.draggedItem)
+                                        }
+                                    }
                                 }
                             }
-                            onExited: {
-                                if (!request) {
-                                    parent.parent.dragEntered = false
-                                }
-                            }
-                            onDropped: {
-                                if (!request) {
-                                    parent.parent.dragEntered = false
-                                    friendsModel.get(leftBarLayout.draggedItem).dragStarted = false
-                                    friendsModel.swap(index, leftBarLayout.draggedItem)
-                                }
-                            }
                         }
+                        sourceComponent: request ? undefined : friendItemStatusIndicatorComponent
                     }
                     ItemDelegate {
                         id: friendItem
@@ -341,7 +348,7 @@ Drawer {
                         Component.onCompleted: {
                             implicitWidth = drawer.width
                             if (!request) {
-                                implicitWidth -= friendItemStatusIndicatorBody.width
+                                implicitWidth -= parent.addWidth
                             }
                         }
                         DropArea {
