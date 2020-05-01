@@ -480,9 +480,9 @@ void bootstrap_DHT(Tox *m)
 		QString public_key = item["public_key"].toString();
 
 		TOX_ERR_BOOTSTRAP err, err2;
-		tox_bootstrap(m, ipv4.toStdString().c_str(), (quint16)port, (quint8*)public_key.toStdString().c_str(), &err);
+		tox_bootstrap(m, ipv4.toStdString().c_str(), (quint16)port, (quint8*)ToxConverter::toToxId(public_key).data(), &err);
 		if (use_ipv6 && ipv6 != "-") {
-			tox_bootstrap(m, ipv6.toStdString().c_str(), (quint16)port, (quint8*)public_key.toStdString().c_str(), &err2);
+			tox_bootstrap(m, ipv6.toStdString().c_str(), (quint16)port, (quint8*)ToxConverter::toToxId(public_key).data(), &err2);
 		}
 
 		if (err == TOX_ERR_BOOTSTRAP_OK || err2 == TOX_ERR_BOOTSTRAP_OK) {
