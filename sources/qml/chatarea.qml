@@ -534,6 +534,7 @@ ColumnLayout {
         Button {
             id: send
             Layout.alignment: Qt.AlignVCenter
+            Layout.rightMargin: 2
             visible: !cleanProfile
             implicitWidth: chatMessage.defaultHeight * 0.75
             implicitHeight: implicitWidth
