@@ -144,13 +144,14 @@ ColumnLayout {
                         toast.show({ message : qsTr("Message removed!"), duration : Toast.Short })
                     }
                 }
-                DragHandler {
-                    id: messageCloudDragHandler
-                    target: parent
-                    yAxis.enabled: false
-                }
                 Drag.dragType: Drag.Automatic
-                readonly property bool dragActive: messageCloudDragHandler.active
+                MouseArea {
+                    id: messageCloudArea
+                    anchors.fill: parent
+                    drag.axis: Drag.XAxis
+                    drag.target: parent
+                }
+                readonly property bool dragActive: cloudTextArea.drag.active || messageCloudArea.drag.active
                 function getAdditionalWidth() {
                     var pos = 0
                     if (msgSelf) {
@@ -176,7 +177,7 @@ ColumnLayout {
                         removeAnchors()
                         messageRemovalLineIn.start()
                     } else {
-                        if (x < getAdditionalWidth()) {
+                        if (x < getAdditionalWidth() && drawer.position === 0) {
                             var friend_number = bridge.getCurrentFriendNumber()
                             bridge.removeMessageFromPendingList(friend_number, msgUniqueId)
                             bridge.removeMessageFromDB(friend_number, msgUniqueId)
@@ -318,6 +319,8 @@ ColumnLayout {
                     MouseArea {
                         id: cloudTextArea
                         anchors.fill: parent
+                        drag.target: parent.parent
+                        drag.axis: Drag.XAxis
                         onClicked: {
                             var link = parent.linkAt(mouseX, mouseY)
                             if (link.length > 0) {
