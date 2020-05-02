@@ -278,9 +278,9 @@ ColumnLayout {
                     anchors.right: parent.left
                     anchors.rightMargin: 5
                     anchors.verticalCenter: parent.verticalCenter
-                    width: 20
+                    width: 25
                     height: width
-                    smooth: true
+                    mipmap: true
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
@@ -308,7 +308,7 @@ ColumnLayout {
                     anchors.verticalCenter: parent.verticalCenter
                     width: 10
                     height: width
-                    smooth: true
+                    mipmap: true
                     RotationAnimator on rotation {
                         from: 0
                         to: 360
@@ -533,12 +533,11 @@ ColumnLayout {
 
         Button {
             id: send
-            Layout.rightMargin: 5
             Layout.alignment: Qt.AlignVCenter
             visible: !cleanProfile
+            implicitWidth: chatMessage.defaultHeight * 0.75
+            implicitHeight: implicitWidth
             background: Rectangle {
-                implicitWidth: chatMessage.defaultHeight * 0.75
-                implicitHeight: implicitWidth
                 visible: false
             }
             focusPolicy: Qt.NoFocus
@@ -554,8 +553,9 @@ ColumnLayout {
             Image {
                 id: send_arrow
                 anchors.fill: parent
+                anchors.margins: 4
                 source: "resources/send-button.png"
-                antialiasing: true
+                mipmap: true
             }
             TapHandler {
                 acceptedButtons: Qt.LeftButton
