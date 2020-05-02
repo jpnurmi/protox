@@ -186,7 +186,9 @@ ColumnLayout {
                             cloudRemoveAnimation.start() 
                         } else {
                             setDefaultAnchors()
-                            messageRemovalLineOut.start()
+                            if (messageRemovalLine.x === 0) {
+                                messageRemovalLineOut.start()
+                            }
                             messageRemovalLine.colision = false
                         }
                     }
@@ -258,7 +260,7 @@ ColumnLayout {
                     onEnableDragChanged: {
                         if (dragActive) {
                             setDefaultAnchors()
-                            Drag.drop()
+                            messageRemovalLineOut.start()
                         }
                     }
                 }
