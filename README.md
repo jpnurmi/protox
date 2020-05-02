@@ -17,6 +17,8 @@ All toxcore features are implemented except:
 
 I'm also working on improving user experience and adding more client features. You can help me by [making suggestions and reporting bugs](https://gitlab.com/Monsterovich/protox/issues).
 
+Please check [Known issues](https://gitlab.com/Monsterovich/protox/-/wikis/Known-issues) before reporing new bugs.
+
 # Support Protox!
 
 You can donate if you want to support this project.
