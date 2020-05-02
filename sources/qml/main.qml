@@ -192,6 +192,7 @@ ApplicationWindow {
 
     // global properties (static)
     readonly property bool inPortrait: window.width < window.height
+    readonly property bool enableDrag: drawer.position === 0 && !contextMenuRight.visible
     readonly property int z_cloud: -1
     readonly property int z_friend_icon: -1
     readonly property int z_friend_item_background: 0

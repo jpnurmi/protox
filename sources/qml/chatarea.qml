@@ -177,7 +177,7 @@ ColumnLayout {
                         removeAnchors()
                         messageRemovalLineIn.start()
                     } else {
-                        if (x < getAdditionalWidth() && drawer.position === 0) {
+                        if (x < getAdditionalWidth()) {
                             var friend_number = bridge.getCurrentFriendNumber()
                             bridge.removeMessageFromPendingList(friend_number, msgUniqueId)
                             bridge.removeMessageFromDB(friend_number, msgUniqueId)
@@ -253,6 +253,12 @@ ColumnLayout {
                                         safe_bridge().getCurrentFriendNumber(), 
                                         msgUniqueId)
                             msgHistory = true
+                        }
+                    }
+                    onEnableDragChanged: {
+                        if (dragActive) {
+                            setDefaultAnchors()
+                            Drag.drop()
                         }
                     }
                 }
