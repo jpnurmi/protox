@@ -386,11 +386,16 @@ static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandle
 
 void customMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString & msg)
 {
+	const QStringList skipWarningsList = { "Detected anchors on an item that is managed by a layout.", 
+										   "QML Loader: Possible anchor loop detected on fill." };
 	switch (type) {
 	case QtWarningMsg: {
-		if (!msg.contains("Detected anchors on an item that is managed by a layout.")){
-			(*QT_DEFAULT_MESSAGE_HANDLER)(type, context, msg);
+		for (const auto &warnMsg : skipWarningsList) {
+			if (msg.contains(warnMsg)) {
+				return;
+			}
 		}
+		(*QT_DEFAULT_MESSAGE_HANDLER)(type, context, msg);
 	}
 	break;
 	default:

@@ -151,7 +151,8 @@ ColumnLayout {
                     drag.axis: Drag.XAxis
                     drag.target: parent
                 }
-                readonly property bool dragActive: cloudTextArea.drag.active || messageCloudArea.drag.active
+                property bool cloudTextAreaDragActive
+                readonly property bool dragActive: cloudTextAreaDragActive || messageCloudArea.drag.active
                 function getAdditionalWidth() {
                     var pos = 0
                     if (msgSelf) {
@@ -223,9 +224,10 @@ ColumnLayout {
                         }
                     }
                 }
+                property real cloudTextWidth
                 function calculateMaximumWidth() {
                     var cwidth = window.width - chatContent.cloud_margin * 2 - chatContent.chat_margin * 2
-                    if (cloudText.width > cwidth)
+                    if (cloudTextWidth > cwidth)
                         implicitWidth = cwidth
                 }
                 function setDefaultAnchors() {
@@ -316,99 +318,111 @@ ColumnLayout {
                         loops: Animation.Infinite
                     }
                 }
-                Text {
-                    id: cloudText
-                    property string plainText: msgText
-                    text: plainText
+                Loader {
                     anchors.fill: parent
-                    anchors.margins: chatContent.cloud_margin
-                    font.family: "Helvetica"
-                    font.pointSize: fontMetrics.normalize(standardFontPointSize)
-                    MouseArea {
-                        id: cloudTextArea
-                        anchors.fill: parent
-                        drag.target: parent.parent
-                        drag.axis: Drag.XAxis
-                        onClicked: {
-                            var link = parent.linkAt(mouseX, mouseY)
-                            if (link.length > 0) {
-                                Qt.openUrlExternally(link)
-                                return
+                    Component {
+                        id: cloudTextComponent
+                        Text {
+                            id: cloudText
+                            property string plainText: msgText
+                            text: plainText
+                            anchors.fill: parent
+                            anchors.margins: chatContent.cloud_margin
+                            font.family: "Helvetica"
+                            font.pointSize: fontMetrics.normalize(standardFontPointSize)
+                            MouseArea {
+                                id: cloudTextArea
+                                anchors.fill: parent
+                                drag.target: messageCloud
+                                drag.axis: Drag.XAxis
+                                readonly property bool dragActive: drag.active
+                                onDragActiveChanged: {
+                                    messageCloud.cloudTextAreaDragActive = dragActive
+                                }
+                                onClicked: {
+                                    var link = parent.linkAt(mouseX, mouseY)
+                                    if (link.length > 0) {
+                                        Qt.openUrlExternally(link)
+                                        return
+                                    }
+                                    bridge.copyTextToClipboard(cloudText.plainText)
+                                    toast.show({ message : qsTr("Text copied!"), duration : Toast.Short });
+                                }
+                                onPressAndHold: {
+                                    chatMessage.forceActiveFocus()
+                                    var add = cloudText.plainText.replace("\n", "\n> ")
+                                    Qt.inputMethod.reset()
+                                    if (chatMessage.text.length > 0) {
+                                        chatMessage.append("\n> " + add + "\n")
+                                    } else {
+                                        chatMessage.append("> " + add + "\n")
+                                    }
+                                    if (chatMessage) {
+                                        chatMessage.cursorPosition = chatMessage.length
+                                    }
+                                }
                             }
-                            bridge.copyTextToClipboard(cloudText.plainText)
-                            toast.show({ message : qsTr("Text copied!"), duration : Toast.Short });
-                        }
-                        onPressAndHold: {
-                            chatMessage.forceActiveFocus()
-                            var add = cloudText.plainText.replace("\n", "\n> ")
-                            Qt.inputMethod.reset()
-                            if (chatMessage.text.length > 0) {
-                                chatMessage.append("\n> " + add + "\n")
-                            } else {
-                                chatMessage.append("> " + add + "\n")
+                            Component.onCompleted: {
+                                messageCloud.cloudTextWidth = width
+                                textFormat = Text.StyledText
+                                wrapMode = Text.Wrap
+                                text = processText(plainText)
+                                messageCloud.implicitWidth = contentWidth + chatContent.cloud_margin * 2
                             }
-                            if (chatMessage) {
-                                chatMessage.cursorPosition = chatMessage.length
+                            onContentHeightChanged: {
+                                messageCloud.implicitHeight = contentHeight + chatContent.cloud_margin * 2
+                                messageCloud.implicitWidth = contentWidth + chatContent.cloud_margin * 2
+                            }
+                            wrapMode: Text.Wrap
+                            textFormat: Text.PlainText
+                            function processText(t) {
+                                String.prototype.replaceAll = function(search, replace) {
+                                    return this.split(search).join(replace);
+                                }
+                                var str = String(t)
+                                // deHTML input
+                                str = str.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll("\"", "&quot;")
+                                var result = "";
+                                var lines = str.split("\n")
+                                // parse each line separately
+                                for (var i = 0; i < lines.length; i++) {
+                                    var line = lines[i]
+                                    // skip formatting in quote lines
+                                    if (line.charAt(0) === '>') {
+                                        line = line.replaceAll(">", "&gt;")
+                                        result += line
+                                        // put back all next line operators
+                                        if (i < lines.length - 1) { result += "\n" }
+                                        continue
+                                    }
+                                    line = line.replaceAll(">", "&gt;")
+                                    line = line.replace(/\*+(.*?)\*+(?=\s|$)/g, function(match, _text) {
+                                        return '<b>' + _text + '</b>'
+                                    })
+                                    line = line.replace(/\~+(.*?)\~+(?=\s|$)/g, function(match, _text) {
+                                        return '<s>' + _text + '</s>'
+                                    })
+                                    line = line.replace(/\_+(.*?)\_+(?=\s|$)/g, function(match, _text) {
+                                        return '<u>' + _text + '</u>'
+                                    })
+                                    result += line
+                                    // put back all next line operators
+                                    if (i < lines.length - 1) { result += "\n" }
+                                }
+                                result = result.replace(/((http|https|ftp|sftp)?:\/\/[^\s]+)/g, function(url) {
+                                    return '<font color="#0645AD"><a href="' + url + '">' + url + '</a></font>'
+                                })
+                                result = result.replace(/^(&gt;(.)*)/gm, function(quote) {
+                                    return '<font color="#0b6623">' + quote + '</font>'
+                                })
+                                result = result.replace(/(\n)/gm, '<br>')
+        
+                                //console.log(result)
+                                return result
                             }
                         }
                     }
-                    Component.onCompleted: {
-                        textFormat = Text.StyledText
-                        wrapMode = Text.Wrap
-                        text = processText(plainText)
-                        parent.implicitWidth = contentWidth + chatContent.cloud_margin * 2
-                    }
-                    onContentHeightChanged: {
-                        parent.implicitHeight = contentHeight + chatContent.cloud_margin * 2
-                        parent.implicitWidth = contentWidth + chatContent.cloud_margin * 2
-                    }
-                    wrapMode: Text.Wrap
-                    textFormat: Text.PlainText
-                    function processText(t) {
-                        String.prototype.replaceAll = function(search, replace) {
-                            return this.split(search).join(replace);
-                        }
-                        var str = String(t)
-                        // deHTML input
-                        str = str.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll("\"", "&quot;")
-                        var result = "";
-                        var lines = str.split("\n")
-                        // parse each line separately
-                        for (var i = 0; i < lines.length; i++) {
-                            var line = lines[i]
-                            // skip formatting in quote lines
-                            if (line.charAt(0) === '>') {
-                                line = line.replaceAll(">", "&gt;")
-                                result += line
-                                // put back all next line operators
-                                if (i < lines.length - 1) { result += "\n" }
-                                continue
-                            }
-                            line = line.replaceAll(">", "&gt;")
-                            line = line.replace(/\*+(.*?)\*+(?=\s|$)/g, function(match, _text) {
-                                return '<b>' + _text + '</b>'
-                            })
-                            line = line.replace(/\~+(.*?)\~+(?=\s|$)/g, function(match, _text) {
-                                return '<s>' + _text + '</s>'
-                            })
-                            line = line.replace(/\_+(.*?)\_+(?=\s|$)/g, function(match, _text) {
-                                return '<u>' + _text + '</u>'
-                            })
-                            result += line
-                            // put back all next line operators
-                            if (i < lines.length - 1) { result += "\n" }
-                        }
-                        result = result.replace(/((http|https|ftp|sftp)?:\/\/[^\s]+)/g, function(url) {
-                            return '<font color="#0645AD"><a href="' + url + '">' + url + '</a></font>'
-                        })
-                        result = result.replace(/^(&gt;(.)*)/gm, function(quote) {
-                            return '<font color="#0b6623">' + quote + '</font>'
-                        })
-                        result = result.replace(/(\n)/gm, '<br>')
-
-                        //console.log(result)
-                        return result
-                    }
+                    sourceComponent: msgType ? undefined : cloudTextComponent
                 }
                 Text {
                     id: timeText
