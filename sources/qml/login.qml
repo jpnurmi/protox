@@ -340,7 +340,6 @@ Popup {
                     loginImage.focus = true
                 }
             }
-    
             CheckBox {
                 id: loginCheckbox
                 visible: !loginPassword.visible && profileRepeater.count > 0
@@ -352,7 +351,7 @@ Popup {
                     implicitHeight: 20
                     x: loginCheckbox.leftPadding
                     y: parent.height / 2 - height / 2
-                    border.color: loginCheckbox.down ? "#dark" : "#grey"
+                    border.color: loginCheckbox.down ? "#dark" : "#F5F5F5"
                     radius: 2
                     Text {
                         anchors.centerIn: parent
@@ -363,7 +362,6 @@ Popup {
                         visible: loginCheckbox.checked
                     }
                 }
-    
                 contentItem: Text {
                     leftPadding: loginCheckbox.indicator.width + 4
                     text: qsTr("Auto-login")
@@ -390,7 +388,7 @@ Popup {
                 Layout.topMargin: 42
                 implicitHeight: loginButton.height
                 background: Rectangle {
-                    color: createNewProfileButton.pressed ? getTheme().highlightedButtonColor : "green"
+                    color: createNewProfileButton.pressed ? getTheme().highlightedButtonColor : "#10C410"
                     radius: 2
                 }
                 onClicked: {
@@ -403,7 +401,6 @@ Popup {
                 }
             }
         }
-
         Keys.onBackPressed: {
             loginWindow.goBack(true, false)
         }
