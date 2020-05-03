@@ -14,5 +14,8 @@
         <file>resources/profileCreation_ls.png</file>
         <file>resources/pending-spinner.png</file>
         <file>resources/resend.png</file>
+        <file>resources/attach-file-button.png</file>
+        <file>resources/send-image-button.png</file>
+        <file>resources/send-any-file-button.png</file>
     </qresource>
 </RCC>

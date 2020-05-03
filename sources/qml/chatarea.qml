@@ -463,6 +463,183 @@ ColumnLayout {
         Layout.rightMargin: margin
         Layout.topMargin: margin
         Layout.bottomMargin: (chatMessage.focus ? keyboardHeight : 0) + margin
+        onHeightChanged: {
+            if (loginWindow.profileSelected) {
+                attachFileButton.addiveHeight = (height - attachFileButton.implicitHeight) * 0.5
+                attachFileButton.updateButtonsHeight()
+            }
+        }
+        Button {
+            id: attachFileButton
+            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+            Layout.leftMargin: 2
+            visible: !cleanProfile && !littleSpace
+            implicitWidth: chatMessage.defaultHeight * 0.75
+            implicitHeight: implicitWidth
+            background: Rectangle {
+                visible: false
+            }
+            focusPolicy: Qt.NoFocus
+            Image {
+                id: attachFileButtonImage
+                anchors.fill: parent
+                anchors.margins: 4
+                source: "resources/attach-file-button.png"
+                mipmap: true
+            }
+            property real addiveHeight: 5.75
+            property bool buttonsActivated: false
+            readonly property bool littleSpace: !inPortrait && keyboardActive
+            onLittleSpaceChanged: {
+                if (littleSpace && buttonsActivated) {
+                    hideButtons()
+                }
+            }
+            Connections {
+                target: drawer
+                onOpenedChanged: {
+                    if (drawer.opened && attachFileButton.buttonsActivated) {
+                        attachFileButton.hideButtons()
+                    }
+                }
+            }
+            Connections {
+                target: contextMenuRight
+                onOpenedChanged: {
+                    if (contextMenuRight.opened && attachFileButton.buttonsActivated) {
+                        attachFileButton.hideButtons()
+                    }
+                }
+            }
+            readonly property int buttonsDistance: 80
+            readonly property real fullOpacity: 0.75
+            ParallelAnimation {
+                id: sendAnyFileButtonMoveInAnimation
+                NumberAnimation { target: sendAnyFileButton; property: "y"; 
+                    from: 0; to: -attachFileButton.buttonsDistance - attachFileButton.addiveHeight; easing.type: Easing.OutCubic }
+                NumberAnimation { target: sendAnyFileButton; property: "opacity"; 
+                    from: 0.0; to: attachFileButton.fullOpacity; easing.type: Easing.OutCubic }
+            }
+            ParallelAnimation {
+                id: sendAnyFileButtonMoveOutAnimation
+                NumberAnimation { target: sendAnyFileButton; property: "y"; 
+                    from: -attachFileButton.buttonsDistance - attachFileButton.addiveHeight; to: 0; easing.type: Easing.OutCubic }
+                NumberAnimation { target: sendAnyFileButton; property: "opacity"; 
+                    from: attachFileButton.fullOpacity; to: 0.0; easing.type: Easing.OutCubic }
+                onFinished: {
+                    sendAnyFileButton.visible = false
+                }
+            }
+            ParallelAnimation {
+                id: sendImageButtonMoveInAnimation
+                NumberAnimation { target: sendImageButton; property: "x"; 
+                    from: 0; to: attachFileButton.buttonsDistance * Math.cos(Math.PI * 0.25); easing.type: Easing.OutCubic }
+                NumberAnimation { target: sendImageButton; property: "y"; 
+                    from: 0; to: -attachFileButton.buttonsDistance * Math.sin(Math.PI * 0.25) - attachFileButton.addiveHeight; easing.type: Easing.OutCubic }
+                NumberAnimation { target: sendImageButton; property: "opacity"; 
+                    from: 0.0; to: attachFileButton.fullOpacity; easing.type: Easing.OutCubic }
+            }
+            ParallelAnimation {
+                id: sendImageButtonMoveOutAnimation
+                NumberAnimation { target: sendImageButton; property: "x"; 
+                    from: attachFileButton.buttonsDistance * Math.cos(Math.PI * 0.25); to: 0; easing.type: Easing.OutCubic }
+                NumberAnimation { target: sendImageButton; property: "y"; 
+                    from: -attachFileButton.buttonsDistance * Math.sin(Math.PI * 0.25) - attachFileButton.addiveHeight; to: 0; easing.type: Easing.OutCubic }
+                NumberAnimation { target: sendImageButton; property: "opacity"; 
+                    from: attachFileButton.fullOpacity; to: 0.0; easing.type: Easing.OutCubic }
+                onFinished: {
+                    sendImageButton.visible = false
+                }
+            }
+            Rectangle {
+                id: sendAnyFileButton
+                visible: false
+                width: 40
+                height: width
+                opacity: parent.fullOpacity
+                radius: width * 0.5
+                color: "white"
+                Image {
+                    anchors.fill: parent
+                    anchors.margins: 6
+                    source: "resources/send-any-file-button.png"
+                    mipmap: true
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        attachFileButton.hideButtons()
+                        toast.show({ message : qsTr("Not implemented!"), duration : Toast.Short })
+                    }
+                }
+            }
+            Rectangle {
+                id: sendImageButton
+                visible: false
+                width: 40
+                height: width
+                opacity: parent.fullOpacity
+                radius: width * 0.5
+                color: "white"
+                Image {
+                    anchors.fill: parent
+                    anchors.margins: 6
+                    source: "resources/send-image-button.png"
+                    mipmap: true
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        attachFileButton.hideButtons()
+                        toast.show({ message : qsTr("Not implemented!"), duration : Toast.Short })
+                    }
+                }
+            }
+            DropShadow {
+                anchors.fill: sendAnyFileButton
+                visible: sendAnyFileButton.visible
+                opacity: sendAnyFileButton.opacity
+                radius: 8.0
+                samples: 16
+                color: "#80000000"
+                source: sendAnyFileButton
+            }
+            DropShadow {
+                anchors.fill: sendImageButton
+                visible: sendImageButton.visible
+                opacity: sendImageButton.opacity
+                radius: 8.0
+                samples: 16
+                color: "#80000000"
+                source: sendImageButton
+            }
+            function hideButtons() {
+                buttonsActivated = false
+                sendAnyFileButtonMoveOutAnimation.start()
+                sendImageButtonMoveOutAnimation.start()
+            }
+            function updateButtonsHeight() {
+                if (buttonsActivated) {
+                    sendAnyFileButton.y = -attachFileButton.buttonsDistance - attachFileButton.addiveHeight
+                    sendImageButton.y = -attachFileButton.buttonsDistance * Math.sin(Math.PI * 0.25) - attachFileButton.addiveHeight
+                }
+            }
+            TapHandler {
+                acceptedButtons: Qt.LeftButton
+                onTapped: {
+                    if (parent.buttonsActivated) {
+                        parent.hideButtons()
+                    } else {
+                        sendAnyFileButton.visible = true
+                        sendImageButton.visible = true
+                        sendAnyFileButtonMoveInAnimation.start()
+                        sendImageButtonMoveInAnimation.start()
+                        parent.buttonsActivated = true
+                    }
+                }
+                grabPermissions: PointerHandler.CanTakeOverFromHandlersOfDifferentType | PointerHandler.ApprovesTakeOverByHandlersOfDifferentType
+            }
+        }
         Flickable {
             id: chatFlickable
             readonly property real defaultHeight: 46
@@ -550,7 +727,6 @@ ColumnLayout {
                 }
             }
         }
-
         Button {
             id: sendButton
             Layout.alignment: Qt.AlignVCenter
@@ -572,7 +748,7 @@ ColumnLayout {
                 }
             }
             Image {
-                id: send_arrow
+                id: sendButtomImage
                 anchors.fill: parent
                 anchors.margins: 4
                 source: "resources/send-button.png"
