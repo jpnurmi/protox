@@ -475,6 +475,12 @@ ColumnLayout {
                 rightPadding: leftPadding
                 placeholderText: qsTr("Type something")
                 wrapMode: Text.Wrap
+                clip: true
+                background: Rectangle {
+                    visible: false
+                }
+                bottomPadding: 8
+                verticalAlignment: Qt.AlignVCenter
                 property int maxLines: inPortrait ? 4 : 2
                 property real defaultHeight
                 property real defaultContentHeight
@@ -531,17 +537,13 @@ ColumnLayout {
             }
         }
 
-        Button {
-            id: send
+        Rectangle {
+            id: sendArea
             Layout.alignment: Qt.AlignVCenter
             Layout.rightMargin: 2
             visible: !cleanProfile
             implicitWidth: chatMessage.defaultHeight * 0.75
             implicitHeight: implicitWidth
-            background: Rectangle {
-                visible: false
-            }
-            focusPolicy: Qt.NoFocus
             function sendMessage() {
                 Qt.inputMethod.reset()
                 if (chatMessage.text.length > 0) {
@@ -560,7 +562,7 @@ ColumnLayout {
             }
             TapHandler {
                 acceptedButtons: Qt.LeftButton
-                onTapped: { send.sendMessage() }
+                onTapped: sendArea.sendMessage()
                 grabPermissions: PointerHandler.CanTakeOverFromHandlersOfDifferentType | PointerHandler.ApprovesTakeOverByHandlersOfDifferentType
             }
         }
