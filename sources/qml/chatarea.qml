@@ -537,13 +537,17 @@ ColumnLayout {
             }
         }
 
-        Rectangle {
-            id: sendArea
+        Button {
+            id: sendButton
             Layout.alignment: Qt.AlignVCenter
             Layout.rightMargin: 2
             visible: !cleanProfile
             implicitWidth: chatMessage.defaultHeight * 0.75
             implicitHeight: implicitWidth
+            background: Rectangle {
+                visible: false
+            }
+            focusPolicy: Qt.NoFocus
             function sendMessage() {
                 Qt.inputMethod.reset()
                 if (chatMessage.text.length > 0) {
@@ -562,7 +566,7 @@ ColumnLayout {
             }
             TapHandler {
                 acceptedButtons: Qt.LeftButton
-                onTapped: sendArea.sendMessage()
+                onTapped: sendButton.sendMessage()
                 grabPermissions: PointerHandler.CanTakeOverFromHandlersOfDifferentType | PointerHandler.ApprovesTakeOverByHandlersOfDifferentType
             }
         }
