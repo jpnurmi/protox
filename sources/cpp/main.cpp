@@ -6,10 +6,7 @@
 #include "QtNotification.h"
 #include "QtStatusBar.h"
 #include "QZXing.h"
-#if defined (Q_OS_ANDROID)
-#include "native/android/toasts.h"
-#include "native/android/photodialog.h"
-#endif
+#include "native.h"
 #include "qtutf8bytelimitvalidator.h"
 
 QmlCBridge *qmlbridge = nullptr;
@@ -319,11 +316,7 @@ void QmlCBridge::setSettingsValue(const QString &group, const QString &key, cons
 
 void QmlCBridge::setKeyboardAdjustMode(bool adjustNothing)
 {
-#if defined (Q_OS_ANDROID)
-	QtAndroid::runOnAndroidThread([=]() {
-		QtAndroid::androidActivity().callMethod<void>("setKeyboardAdjustMode", "(Z)V", adjustNothing);
-	});
-#endif
+	Native::setKeyboardAdjustMode(adjustNothing);
 }
 
 bool QmlCBridge::checkProfileEncrypted(const QString &profile)
@@ -406,18 +399,6 @@ void customMessageHandler(QtMsgType type, const QMessageLogContext &context, con
 		break;
 	}
 }
-
-#ifdef Q_OS_ANDROID
-extern "C" 
-{
-	JNIEXPORT void JNICALL Java_org_protox_activity_QtActivityEx_keyboardHeightChanged(JNIEnv *, jobject, jint height)
-	{
-		if (qmlbridge && !qmlbridge->getAppInactive()) {
-			qmlbridge->setKeyboardHeight(height);
-		}
-	}
-}
-#endif
 
 int QmlCBridge::signInProfile(const QString &profile, bool create_new, const QString &password, bool autoLogin)
 {
@@ -568,9 +549,7 @@ QString QmlCBridge::getSystemLocale()
 
 void QmlCBridge::hideSplashScreen()
 {
-#ifdef Q_OS_ANDROID
-	QtAndroid::hideSplashScreen();
-#endif
+	Native::hideSplashScreen();
 }
 
 void QmlCBridge::sendPendingMessages(quint32 friend_number)
@@ -642,21 +621,9 @@ void QmlCBridge::removeMessageFromDB(quint32 friend_number, quint64 unique_id)
 	chat_db->removeMessage(unique_id, Toxcore::get_friend_public_key(tox, friend_number));
 }
 
-QString QmlCBridge::uriToRealPath(const QString &uri)
+QString QmlCBridge::uriToRealPath(const QString &uriString)
 {
-	QString realPath;
-#if defined (Q_OS_ANDROID)
-	QtAndroid::runOnAndroidThreadSync([&]() {
-		QAndroidJniObject javaString = QAndroidJniObject::fromString(uri);
-		QAndroidJniObject path = QAndroidJniObject::callStaticObjectMethod(
-		"org/protox/activity/QtActivityEx",
-		"convertMediaUriToPath",
-		"(Ljava/lang/String;)Ljava/lang/String;", 
-		javaString.object());
-		realPath = path.toString();
-	});
-#endif
-	return realPath;
+	return Native::uriToRealPath(uriString);
 }
 
 QmlTranslator::QmlTranslator(QObject *parent) : QObject(parent) {}
@@ -671,21 +638,11 @@ void QmlTranslator::setTranslation(const QString &translation)
 	emit languageChanged();
 }
 
-
 int main(int argc, char *argv[])
 {
-#if defined (Q_OS_ANDROID)
-	const QStringList permission_list = { "android.permission.WRITE_EXTERNAL_STORAGE" };
-	for (auto permission : permission_list) {
-		auto permission_result = QtAndroid::checkPermission(permission);
-		if(permission_result == QtAndroid::PermissionResult::Denied){
-			QtAndroid::PermissionResultMap resultHash = QtAndroid::requestPermissionsSync(QStringList({permission}));
-			if(resultHash[permission] == QtAndroid::PermissionResult::Denied) {
-				return 1;
-			}
-		}
+	if (!Native::requestApplicationPermissions()) {
+		return 1;
 	}
-#endif
 	ChatDataBase::registerSQLDriver();
 	settings = new QSettings(Tools::getProgDir() + "settings.ini", QSettings::IniFormat);
 
