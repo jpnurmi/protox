@@ -28,6 +28,7 @@
 #include <QAndroidJniObject>
 #include <QAndroidJniEnvironment>
 #include <QAndroidIntent>
+#include <QAndroidActivityResultReceiver>
 #endif
 
 #endif // COMMON_H

@@ -13,6 +13,7 @@ import QtNotification 1.0
 import QtStatusBar 1.0
 import QtUtf8ByteLimitValidator 1.0
 import QtToast 1.0
+import QtPhotoDialog 1.0
 import QZXing 2.3
 
 ApplicationWindow {

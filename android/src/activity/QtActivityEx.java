@@ -16,6 +16,7 @@ import android.view.WindowManager;
 import android.view.Window;
 import android.graphics.Rect;
 import android.graphics.Color;
+import android.provider.MediaStore;
 
 import KeyboardProvider.KeyboardProvider;
 
@@ -69,5 +70,11 @@ public class QtActivityEx extends QtActivity
         // for some reason it doesn't work without QtNative.activity(). Why?
         QtNative.activity().getWindow().setSoftInputMode(adjustNothing ? WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING :
                                                                          WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+    }
+
+    public static Intent createChoosePhotoIntent(String title) {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        intent.setType("image/*");
+        return Intent.createChooser(intent, title);
     }
 }

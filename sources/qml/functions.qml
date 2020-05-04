@@ -6,6 +6,30 @@ import QtQuick 2.12
 
 /*[remove]*/ Item {
 
+// FIXME: contains android specific code, may not work on other OS
+function uriToRealPath(uri) {
+    Array.prototype.last = function() {
+        return this[this.length - 1]
+    }
+    var decodedString = decodeURIComponent(uri)
+    var index = decodedString.indexOf(bridge.getBaseStoragePath())
+    if (index !== -1) {
+        // uri already contains fullpath, no need to convert
+        return decodedString.substring(index, decodedString.length)
+    }
+    var data = decodedString.replace(/^(content:\/{2})/, "").split(":")
+    var device = data[0].split("/").last()
+    var path = data[1]
+    var fullpath = ""
+    if (device === "primary") {
+        fullpath += bridge.getInternalStoragePath()
+    } else {
+        fullpath += bridge.getBaseStoragePath() + device + bridge.getDirSeparator()
+    }
+    fullpath += path
+    return fullpath
+}
+
 function getTheme() {
     return Material
 }

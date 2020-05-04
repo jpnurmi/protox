@@ -6,6 +6,8 @@ import QtQuick.Dialogs 1.2
 import QtQuick.Window 2.12
 import QtGraphicalEffects 1.0
 
+import QtPhotoDialog 1.0
+
 /*[remove]*/ Item {
 
 ColumnLayout {
@@ -569,7 +571,7 @@ ColumnLayout {
                     anchors.fill: parent
                     onClicked: {
                         attachFileButton.hideButtons()
-                        toast.show({ message : qsTr("Not implemented!"), duration : Toast.Short })
+                        chatFilePickerDialog.open()
                     }
                 }
             }
@@ -591,7 +593,7 @@ ColumnLayout {
                     anchors.fill: parent
                     onClicked: {
                         attachFileButton.hideButtons()
-                        toast.show({ message : qsTr("Not implemented!"), duration : Toast.Short })
+                        chatPhotoPickerDialog.open()
                     }
                 }
             }
@@ -760,6 +762,22 @@ ColumnLayout {
                 grabPermissions: PointerHandler.CanTakeOverFromHandlersOfDifferentType | PointerHandler.ApprovesTakeOverByHandlersOfDifferentType
             }
         }
+    }
+}
+
+FileDialog {
+    id: chatFilePickerDialog
+    title: qsTr("Select a file")
+    onAccepted: {
+        toast.show({ message : uriToRealPath(fileUrl.toString()), duration : Toast.Short })
+    }
+}
+
+PhotoDialog {
+    id: chatPhotoPickerDialog
+    title: qsTr("Select an image")
+    onAccepted: {
+        toast.show({ message : uriToRealPath(imageUrl.toString()), duration : Toast.Short })
     }
 }
 

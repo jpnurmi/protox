@@ -1,7 +1,7 @@
 #ifndef ANDROID_H
 #define ANDROID_H
 
-#include "common.h"
+#include "sources/cpp/common.h"
 
 class QtToast : public QObject{
 	Q_OBJECT

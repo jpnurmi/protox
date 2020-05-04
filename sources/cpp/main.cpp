@@ -6,7 +6,10 @@
 #include "QtNotification.h"
 #include "QtStatusBar.h"
 #include "QZXing.h"
-#include "toasts.h"
+#if defined (Q_OS_ANDROID)
+#include "native/android/toasts.h"
+#include "native/android/photodialog.h"
+#endif
 #include "qtutf8bytelimitvalidator.h"
 
 QmlCBridge *qmlbridge = nullptr;
@@ -639,6 +642,21 @@ void QmlCBridge::removeMessageFromDB(quint32 friend_number, quint64 unique_id)
 	chat_db->removeMessage(unique_id, Toxcore::get_friend_public_key(tox, friend_number));
 }
 
+QString QmlCBridge::getBaseStoragePath()
+{
+	return Tools::getBaseStoragePath();
+}
+
+QString QmlCBridge::getInternalStoragePath()
+{
+	return Tools::getInternalStoragePath();
+}
+
+QString QmlCBridge::getDirSeparator()
+{
+	return QDir::separator();
+}
+
 QmlTranslator::QmlTranslator(QObject *parent) : QObject(parent) {}
 
 void QmlTranslator::setTranslation(const QString &translation)
@@ -692,6 +710,7 @@ int main(int argc, char *argv[])
 	QtNotification::declareQML();
 	QtStatusBar::declareQML();
 	QtToast::declareQML();
+	QtPhotoDialog::declareQML();
 	QUtf8ByteLimitValidator::declareQML();
 	QZXing::registerQMLTypes();
 	QZXing::registerQMLImageProvider(engine);

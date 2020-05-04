@@ -7,14 +7,32 @@ void debug(const QString &msg)
 	qDebug() << msg;
 }
 
+const QString getBaseStoragePath()
+{
+#if defined (Q_OS_ANDROID)
+	return QDir::separator() + 
+			QString("storage") + 
+			QDir::separator();
+#endif
+}
+
+const QString getInternalStoragePath() 
+{
+#if defined (Q_OS_ANDROID)
+	return getBaseStoragePath() + QString("emulated") + QDir::separator() + QString("0") + QDir::separator();
+#endif
+}
+
 const QString getProgDir(bool create)
 {
-	QString path = QDir::separator() + QString("sdcard") + QDir::separator() + QString(".protox") + QDir::separator();
+	QString path = getInternalStoragePath() + QString(".protox") + QDir::separator();
 	QDir dir;
 	if (create && !dir.exists(path))
 		dir.mkdir(path);
 	return path;
 }
+
+
 
 const QString replaceFileExtension(const QString &file, const QString &with)
 {
