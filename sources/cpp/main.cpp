@@ -642,19 +642,21 @@ void QmlCBridge::removeMessageFromDB(quint32 friend_number, quint64 unique_id)
 	chat_db->removeMessage(unique_id, Toxcore::get_friend_public_key(tox, friend_number));
 }
 
-QString QmlCBridge::getBaseStoragePath()
+QString QmlCBridge::uriToRealPath(const QString &uri)
 {
-	return Tools::getBaseStoragePath();
-}
-
-QString QmlCBridge::getInternalStoragePath()
-{
-	return Tools::getInternalStoragePath();
-}
-
-QString QmlCBridge::getDirSeparator()
-{
-	return QDir::separator();
+	QString realPath;
+#if defined (Q_OS_ANDROID)
+	QtAndroid::runOnAndroidThreadSync([&]() {
+		QAndroidJniObject javaString = QAndroidJniObject::fromString(uri);
+		QAndroidJniObject path = QAndroidJniObject::callStaticObjectMethod(
+		"org/protox/activity/QtActivityEx",
+		"convertMediaUriToPath",
+		"(Ljava/lang/String;)Ljava/lang/String;", 
+		javaString.object());
+		realPath = path.toString();
+	});
+#endif
+	return realPath;
 }
 
 QmlTranslator::QmlTranslator(QObject *parent) : QObject(parent) {}

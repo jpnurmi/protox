@@ -86,9 +86,7 @@ public slots:
 	Q_INVOKABLE void resendMessage(quint32 friend_number, quint64 unique_id);
 	Q_INVOKABLE void removeMessageFromPendingList(quint32 friend_number, quint64 unique_id);
 	Q_INVOKABLE void removeMessageFromDB(quint32 friend_number, quint64 unique_id);
-	Q_INVOKABLE QString getBaseStoragePath();
-	Q_INVOKABLE QString getInternalStoragePath();
-	Q_INVOKABLE QString getDirSeparator();
+	Q_INVOKABLE QString uriToRealPath(const QString &uri);
 
 public:
 	ToxFriendsConnStatus friends_conn_status;

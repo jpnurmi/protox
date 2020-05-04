@@ -769,7 +769,7 @@ FileDialog {
     id: chatFilePickerDialog
     title: qsTr("Select a file")
     onAccepted: {
-        toast.show({ message : uriToRealPath(fileUrl.toString()), duration : Toast.Short })
+        toast.show({ message : bridge.uriToRealPath(fileUrl.toString()), duration : Toast.Short })
     }
 }
 
@@ -777,7 +777,7 @@ PhotoDialog {
     id: chatPhotoPickerDialog
     title: qsTr("Select an image")
     onAccepted: {
-        toast.show({ message : uriToRealPath(imageUrl.toString()), duration : Toast.Short })
+        toast.show({ message : bridge.uriToRealPath(imageUrl.toString()), duration : Toast.Short })
     }
 }
 
