@@ -281,11 +281,9 @@ Menu {
             anchors.centerIn: parent
             text: qsTr("Remove this friend")
             color: "red"
-            font.pointSize: fontMetrics.normalize(14)
-            font.capitalization: Font.AllUppercase
+            font.pointSize: parent.font.pointSize
             font.bold: true
         }
-        
         leftInset: 10
         rightInset: leftInset
         onClicked: {

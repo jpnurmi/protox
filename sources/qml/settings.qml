@@ -29,12 +29,12 @@ Popup {
             }
         }
     }
-
+    readonly property real shadowWidth: 32
     enter: Transition {
-        NumberAnimation { property: "x"; from: settingsWindow.width; to: 0; easing.type: Easing.OutCubic }
+        NumberAnimation { property: "x"; from: settingsWindow.width + settingsWindow.shadowWidth; to: 0; easing.type: Easing.OutCubic }
     }
     exit: Transition {
-        NumberAnimation { property: "x"; from: 0; to: settingsWindow.width; easing.type: Easing.OutCubic }
+        NumberAnimation { property: "x"; from: 0; to: settingsWindow.width + settingsWindow.shadowWidth; easing.type: Easing.OutCubic }
     }
     readonly property int sf_none: 0
     readonly property int sf_text: 1 // unused, text is always present
