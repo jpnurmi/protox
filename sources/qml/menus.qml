@@ -91,7 +91,7 @@ Menu {
         verticalAlignment: TextInput.AlignVCenter
         width: parent.width
         text: ""
-        validator: Utf8ByteLimitValidator { length: safe_bridge().getToxAddressSizeHex(); prefix: "tox:"; less: false }
+        validator: Utf8ByteLimitValidator { length: safe_bridge().getToxAddressSizeHex(); prefix: "tox:"; less: false; typemore: true }
         color: acceptableInput ? "black" : "red"
         onAccepted: {
             addFriendMessage.focus = true

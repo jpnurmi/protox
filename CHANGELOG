@@ -60,3 +60,14 @@ v1.4alpha
 - Improved message entry field: multi-line handling on various orientations
 - Improved profile saving/loading performance
 - Improved the look of the message cloud
+
+v1.4.1alpha
+- Fixed issues with bootstrapping
+
+v1.4.2alpha
+- Improved the quality of small UI items
+- Redesigned message typing area
+- Many UI improvements: main window, login menu, settings menu
+- Message cloud width will now be correct on screen orientation change
+- Improved validator on Tox ID field
+- Updated Russian translation
