@@ -177,7 +177,8 @@ function insertMessage(variantMessage, friend_number, self, time, unique_id, fai
         "msgTime" : time, 
         "msgUniqueId" : unique_id,
         "msgFailed" : failed,
-        "msgHistory" : history}
+        "msgHistory" : history,
+        "msgType" : variantMessage.type}
     
     if (!variantMessage.type) {
         dict.msgText = variantMessage.message
