@@ -35,6 +35,8 @@ ApplicationWindow {
     }
 
     onClosing: {
+        // Keys.onBackPressed doesn't work
+        attachFileButton.hideButtons()
         close.accepted = false
     }
 

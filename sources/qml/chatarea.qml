@@ -493,14 +493,14 @@ ColumnLayout {
             property bool buttonsActivated: false
             readonly property bool littleSpace: !inPortrait && keyboardActive
             onLittleSpaceChanged: {
-                if (littleSpace && buttonsActivated) {
+                if (littleSpace) {
                     hideButtons()
                 }
             }
             Connections {
                 target: drawer
                 onOpenedChanged: {
-                    if (drawer.opened && attachFileButton.buttonsActivated) {
+                    if (drawer.opened) {
                         attachFileButton.hideButtons()
                     }
                 }
@@ -508,7 +508,7 @@ ColumnLayout {
             Connections {
                 target: contextMenuRight
                 onOpenedChanged: {
-                    if (contextMenuRight.opened && attachFileButton.buttonsActivated) {
+                    if (contextMenuRight.opened) {
                         attachFileButton.hideButtons()
                     }
                 }
@@ -616,9 +616,13 @@ ColumnLayout {
                 source: sendImageButton
             }
             function hideButtons() {
-                buttonsActivated = false
-                sendAnyFileButtonMoveOutAnimation.start()
-                sendImageButtonMoveOutAnimation.start()
+                if (buttonsActivated) {
+                    buttonsActivated = false
+                    sendAnyFileButtonMoveOutAnimation.start()
+                    sendImageButtonMoveOutAnimation.start()
+                    return true
+                }
+                return false
             }
             function updateButtonsHeight() {
                 if (buttonsActivated) {
@@ -629,9 +633,7 @@ ColumnLayout {
             TapHandler {
                 acceptedButtons: Qt.LeftButton
                 onTapped: {
-                    if (parent.buttonsActivated) {
-                        parent.hideButtons()
-                    } else {
+                    if (!parent.hideButtons()) {
                         sendAnyFileButton.visible = true
                         sendImageButton.visible = true
                         sendAnyFileButtonMoveInAnimation.start()
