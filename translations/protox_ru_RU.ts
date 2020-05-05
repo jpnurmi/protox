@@ -75,11 +75,11 @@ Click on the left button to open the friend list, then on «+» to add a new fri
     </message>
     <message>
         <source>The password is set.</source>
-        <translation>Пароль задан.</translation>
+        <translation>Пароль установлен.</translation>
     </message>
     <message>
         <source>The password is not set.</source>
-        <translation>Пароль не задан.</translation>
+        <translation>Пароль не установлен.</translation>
     </message>
     <message numerus="yes">
         <source>%n bootstrap node(s) available in .json file.</source>
