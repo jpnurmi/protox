@@ -7,19 +7,10 @@ void debug(const QString &msg)
 	qDebug() << msg;
 }
 
-const QString getBaseStoragePath()
-{
-#if defined (Q_OS_ANDROID)
-	return QDir::separator() + 
-			QString("storage") + 
-			QDir::separator();
-#endif
-}
-
 const QString getInternalStoragePath() 
 {
 #if defined (Q_OS_ANDROID)
-	return getBaseStoragePath() + QString("emulated") + QDir::separator() + QString("0") + QDir::separator();
+	return QDir::separator() + QString("storage") + QDir::separator() + QString("emulated") + QDir::separator() + QString("0") + QDir::separator();
 #endif
 }
 
