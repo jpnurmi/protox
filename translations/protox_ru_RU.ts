@@ -31,7 +31,7 @@ Click on the left button to open the friend list, then on «+» to add a new fri
     </message>
     <message>
         <source>You cannot send a friend request to yourself.</source>
-        <translation>Вы не можете отправить запрос на добавления друзья самому себе.</translation>
+        <translation>Вы не можете отправить запрос на добавления в друзья самому себе.</translation>
     </message>
     <message>
         <source>The friend is already on the friend list.</source>
