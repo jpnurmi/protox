@@ -74,7 +74,7 @@ ApplicationWindow {
     Timer {
         id: absentTimer
         repeat: false
-        interval: parseInt(bridge.getSettingsValue("Client", "absent_timer_interval", 
+        interval: parseInt(safe_bridge().getSettingsValue("Client", "absent_timer_interval", 
                                           ptype_string, String("10"))) * 60 * 1000
         onTriggered: {
            lastStatus = bridge.getStatus()

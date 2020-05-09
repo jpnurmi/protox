@@ -21,6 +21,7 @@ function safe_bridge() {
     empty_bridge.getFriendRequestMessageMaxLength = function() { return 0 }
     empty_bridge.checkMessageInPendingList = function() { return 0 }
     empty_bridge.getCurrentFriendNumber = function() { return 0 }
+    empty_bridge.getSettingsValue = function() { return 0 }
     return empty_bridge
 }
 
