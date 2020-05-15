@@ -32,7 +32,7 @@ private:
 
 class QtPhotoDialogActivityResultReceiver : public QAndroidActivityResultReceiver {
 public:
-	explicit QtPhotoDialogActivityResultReceiver(QtPhotoDialog *photoPicketDialog);
+	explicit QtPhotoDialogActivityResultReceiver(QtPhotoDialog *photoPickerDialog);
 	void handleActivityResult(int requestCode, int resultCode, const QAndroidJniObject &data);
 private:
 	QtPhotoDialog *m_photoDialog;

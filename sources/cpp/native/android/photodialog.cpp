@@ -25,9 +25,9 @@ bool QtPhotoDialog::open()
 	return true;
 }
 
-QtPhotoDialogActivityResultReceiver::QtPhotoDialogActivityResultReceiver(QtPhotoDialog *photoPicketDialog)
+QtPhotoDialogActivityResultReceiver::QtPhotoDialogActivityResultReceiver(QtPhotoDialog *photoPickerDialog)
 {
-	m_photoDialog = photoPicketDialog;
+	m_photoDialog = photoPickerDialog;
 }
 
 void QtPhotoDialogActivityResultReceiver::handleActivityResult(int requestCode, int resultCode, const QAndroidJniObject &data)
