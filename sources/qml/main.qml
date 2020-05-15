@@ -83,15 +83,12 @@ ApplicationWindow {
         }
     }
 
-    Timer {
-        id: delayTimer
-        interval: 1
-        repeat: false
-        onTriggered: {
+    property bool uiReady: false
+    onUiReadyChanged: {
+        if (uiReady) {
             var autoProfile = bridge.getSettingsValue("Profile", "auto_login_profile", ptype_string, String(""))
             if (autoProfile.length > 0) {
                 loginWindow.login(autoProfile)
-                bridge.hideSplashScreen()
                 return
             }
             loginWindow.open()
@@ -218,11 +215,24 @@ ApplicationWindow {
     //https://forum.qt.io/topic/109114/qml-artifacts-android/9
     Repeater {
         id: canvasBuffer
-        model: ["lightgray", "orange", "lightblue"]
+        readonly property variant colors: ["lightgray", "orange", "lightblue"]
+        model: colors
+        property int imagesLoaded: 0
+        readonly property bool ready: imagesLoaded === colors.length
+        onReadyChanged: {
+            if (ready) {
+                uiReady = true
+            }
+        }
         delegate: Image { 
             id: cloudTailImageFrameBuffer 
             visible: false
             cache: true
+            onStatusChanged: {
+                if (status === Image.Ready) {
+                    canvasBuffer.imagesLoaded++
+                }
+            }
             Canvas {
                 id: cloudTailCanvas
                 width: 256

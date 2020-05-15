@@ -413,5 +413,6 @@ Popup {
     }
     onClosed: {
         loginWindow.enabled = true
+        bridge.hideSplashScreen()
     }
 }
