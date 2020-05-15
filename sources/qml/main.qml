@@ -99,7 +99,6 @@ ApplicationWindow {
     Component.onCompleted: {
         statusBar.theme = getTheme().Dark
         statusBar.color = getTheme().toolBarColor
-        delayTimer.start()
     }
 
     Flickable {
