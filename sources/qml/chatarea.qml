@@ -81,6 +81,7 @@ ColumnLayout {
             clip: true
             boundsMovement: Flickable.StopAtBounds
             ScrollIndicator.vertical: ScrollIndicator {}
+            displayMarginBeginning: 32
             Rectangle {
                 id: messageRemovalLine
                 x: -width
