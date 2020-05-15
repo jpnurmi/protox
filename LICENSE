@@ -6,5 +6,5 @@ Protox builds which are linked with c-toxcore, QtCipherSqlitePlugin are licensed
 The terms of each license can be found in the main directory of the Protox source
 repository:
 
-MIT License: https://gitlab.com/Monsterovich/protox/-/blob/master/LICENSE-MIT.txt
-GPL3 License: https://gitlab.com/Monsterovich/protox/-/blob/master/LICENSE-GPL3.txt
+MIT License: https://gitlab.com/Monsterovich/protox/-/blob/master/LICENSE.MIT
+GPL3 License: https://gitlab.com/Monsterovich/protox/-/blob/master/LICENSE.GPL3
