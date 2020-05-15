@@ -522,6 +522,8 @@ ColumnLayout {
                     from: 0; to: -attachFileButton.buttonsDistance - attachFileButton.addiveHeight; easing.type: Easing.OutCubic }
                 NumberAnimation { target: sendAnyFileButton; property: "opacity"; 
                     from: 0.0; to: attachFileButton.fullOpacity; easing.type: Easing.OutCubic }
+                NumberAnimation { target: sendAnyFileButton; property: "scale"; 
+                    from: 0.0; to: 1.0; easing.type: Easing.Linear }
             }
             ParallelAnimation {
                 id: sendAnyFileButtonMoveOutAnimation
@@ -529,6 +531,8 @@ ColumnLayout {
                     from: -attachFileButton.buttonsDistance - attachFileButton.addiveHeight; to: 0; easing.type: Easing.OutCubic }
                 NumberAnimation { target: sendAnyFileButton; property: "opacity"; 
                     from: attachFileButton.fullOpacity; to: 0.0; easing.type: Easing.OutCubic }
+                NumberAnimation { target: sendAnyFileButton; property: "scale"; 
+                    from: 1.0; to: 0.0; easing.type: Easing.Linear }
                 onFinished: {
                     sendAnyFileButton.visible = false
                 }
@@ -541,6 +545,8 @@ ColumnLayout {
                     from: 0; to: -attachFileButton.buttonsDistance * Math.sin(Math.PI * 0.25) - attachFileButton.addiveHeight; easing.type: Easing.OutCubic }
                 NumberAnimation { target: sendImageButton; property: "opacity"; 
                     from: 0.0; to: attachFileButton.fullOpacity; easing.type: Easing.OutCubic }
+                NumberAnimation { target: sendImageButton; property: "scale"; 
+                    from: 0.0; to: 1.0; easing.type: Easing.Linear }
             }
             ParallelAnimation {
                 id: sendImageButtonMoveOutAnimation
@@ -550,6 +556,8 @@ ColumnLayout {
                     from: -attachFileButton.buttonsDistance * Math.sin(Math.PI * 0.25) - attachFileButton.addiveHeight; to: 0; easing.type: Easing.OutCubic }
                 NumberAnimation { target: sendImageButton; property: "opacity"; 
                     from: attachFileButton.fullOpacity; to: 0.0; easing.type: Easing.OutCubic }
+                NumberAnimation { target: sendImageButton; property: "scale"; 
+                    from: 1.0; to: 0.0; easing.type: Easing.Linear }
                 onFinished: {
                     sendImageButton.visible = false
                 }
