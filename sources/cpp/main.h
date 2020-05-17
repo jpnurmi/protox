@@ -34,6 +34,7 @@ public:
 	void tryReconnect();
 	void sendPendingMessages(quint32 friend_number);
 	void removeNonFailedPendingMessages(quint32 friend_number);
+	void changeFileProgress(quint32 friend_number, quint32 file_number, quint32 bytesTransfered);
 public slots:
 	Q_INVOKABLE void sendMessage(const QString &message);
 	Q_INVOKABLE quint32 getCurrentFriendNumber();
@@ -87,10 +88,13 @@ public slots:
 	Q_INVOKABLE void removeMessageFromPendingList(quint32 friend_number, quint64 unique_id);
 	Q_INVOKABLE void removeMessageFromDB(quint32 friend_number, quint64 unique_id);
 	Q_INVOKABLE QString uriToRealPath(const QString &uriString);
+	Q_INVOKABLE quint32 sendFile(quint32 friend_number, const QString &filepath);
+	Q_INVOKABLE void controlFile(quint32 friend_number, quint32 file_number, const QString &file_id, quint32 control);
 
 public:
 	ToxFriendsConnStatus friends_conn_status;
 	ToxPendingMessages pending_messages;
+	ToxFileTransfers transfers;
 private:
 	quint32 current_friend_number;
 	QString current_profile;
@@ -101,6 +105,7 @@ private:
 private:
 	QTimer *toxcore_timer;
 	QTimer *reconnection_timer;
+	QTimer *transfer_update_timer;
 private:
 	// fixme: move to tox.cpp, may be?
 	Tox *tox;

@@ -2,6 +2,7 @@
 #define TOX_H
 
 #include "common.h"
+#include "tools.h"
 
 // Toxcore
 #include "deps/tox/tox.h"
@@ -10,6 +11,7 @@
 typedef QList <quint32> ToxFriends; 
 typedef QByteArray ToxPk;
 typedef QByteArray ToxId;
+typedef QByteArray ToxFileId;
 
 typedef QMap <quint32, TOX_CONNECTION> ToxFriendsConnStatus;
 struct ToxPendingMessage {
@@ -48,6 +50,40 @@ enum ToxProfileLoadingError {
 	TOX_ERR_LOADING_ALREADY_EXISTS,
 	TOX_ERR_LOADING_EMPTY_PASSWORD
 };
+enum ToxFileSendingError {
+	TOX_ERR_SENDING_OK,
+	TOX_ERR_SENDING_OPEN_FAILED,
+	TOX_ERR_SENDING_TOO_MANY_REQUESTS,
+	TOX_ERR_SENDING_LONG_FILENAME,
+	TOX_ERR_SENDING_FRIEND_OFFLINE,
+	TOX_ERR_SENDING_OTHER
+};
+enum ToxFileState {
+	TOX_FILE_REQUEST,
+	TOX_FILE_INPROGRESS,
+	TOX_FILE_CANCELED
+};
+
+struct ToxFileTransfer {
+	Tox *tox;
+	quint32 friend_number;
+	quint32 file_number;
+	Tools::AsyncFileReader *reader;
+	quint32 bytesTransfered;
+	ToxFileTransfer (Tox *_tox, quint32 _friend_number, quint32 _file_number, Tools::AsyncFileReader *_reader) {
+		tox = _tox;
+		friend_number = _friend_number;
+		file_number = _file_number;
+		reader = _reader;
+		reader->setObjectParent(this);
+		bytesTransfered = 0;
+	}
+	~ToxFileTransfer() {
+		reader->exit();
+		delete reader;
+	}
+};
+typedef QVector <ToxFileTransfer*> ToxFileTransfers;
 
 struct ToxMessage {
 	ToxVariantMessage variantMessage;
@@ -102,6 +138,8 @@ namespace Toxcore {
 	quint32 get_nickname_max_length();
 	quint32 get_status_message_max_length();
 	quint32 get_tox_address_size();
+	quint32 send_file(Tox *m, quint32 friend_number, const QString &path, quint64 &filesize, ToxFileId &file_id, quint32 &error);
+	bool file_control(Tox *m, quint32 friend_number, quint32 file_number, quint32 control);
 }
 
 namespace ToxConverter {

@@ -3,7 +3,7 @@
 
 #include "deps/sqlitecipher/sqlitecipher_p.h"
 
-#define DATABASE_VERSION 3
+#define DATABASE_VERSION 4
 #define APPLICATION_ID ('P' << 24) + ('T' << 16) + ('O' << 8) + 'X'
 
 ChatDataBase::ChatDataBase(const QString &fileName, const QString &password)
@@ -21,6 +21,7 @@ ChatDataBase::ChatDataBase(const QString &fileName, const QString &password)
 	db.open();
 
 	upgradeFromV2toV3();
+	upgradeFromV3toV4();
 
 	QSqlQuery query;
 	query = db.exec(QString("PRAGMA application_id=%1").arg(APPLICATION_ID));
@@ -52,7 +53,9 @@ ChatDataBase::ChatDataBase(const QString &fileName, const QString &password)
 			"(\n"
 			"	reference_id INTEGER PRIMARY KEY,\n"
 			"	file_path STRING,\n"
-			"	size INTEGER\n"
+			"	size INTEGER,\n"
+			"	state INTEGER,\n"
+			"	file_id BLOB\n"
 			");";
 	db.commit();
 }
@@ -69,6 +72,20 @@ void ChatDataBase::upgradeFromV2toV3()
 		// not the best solution, "failed" column will remain but SQLite 3.24 doesn't allow to rename or remove it
 		db.exec("ALTER TABLE Messages ADD COLUMN temporary INTEGER");
 		db.exec("UPDATE Messages SET temporary = 0");
+	}
+}
+
+void ChatDataBase::upgradeFromV3toV4()
+{
+	QSqlQuery check = db.exec("PRAGMA user_version");
+	check.next();
+	quint64 user_version = check.value(0).toULongLong();
+	check.finish();
+	if (user_version == 3) {
+		Tools::debug("Detected v3 .db. Upgrading...");
+		QFile::copy(db.databaseName(), db.databaseName() + ".v3bak");
+		db.exec("ALTER TABLE FileMessages ADD COLUMN state INTEGER");
+		db.exec("ALTER TABLE FileMessages ADD COLUMN file_id BLOB");
 	}
 }
 
@@ -94,6 +111,15 @@ quint64 ChatDataBase::insertMessage(const ToxVariantMessage &variantMessage, con
 							  "VALUES (:message)");
 			msg_query.bindValue(":message", variantMessage["message"]);
 			table = "TextMessages";
+			break;
+		case ToxVariantMessageType::TOXMSG_FILE:
+			msg_query.prepare("INSERT INTO FileMessages (file_path, size, state, file_id) " 
+							  "VALUES (:file_path, :size, :state, :file_id)");
+			msg_query.bindValue(":file_path", variantMessage["file_path"]);
+			msg_query.bindValue(":size", variantMessage["size"]);
+			msg_query.bindValue(":state", variantMessage["state"]);
+			msg_query.bindValue(":file_id", variantMessage["file_id"]);
+			table = "FileMessages";
 			break;
 	}
 	msg_query.exec();

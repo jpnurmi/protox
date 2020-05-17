@@ -163,6 +163,19 @@ static void cb_friend_status(Tox *m, uint32_t friend_number, TOX_USER_STATUS sta
 	qmlbridge->setFriendStatus(friend_number, status);
 }
 
+static void cb_file_chunk_request(Tox *m, uint32_t friend_number, uint32_t file_number, uint64_t position,
+                                       size_t length, void *user_data)
+{
+	Q_UNUSED(m)
+	Q_UNUSED(user_data)
+
+	for (const auto transfer : qmlbridge->transfers) {
+		if (transfer->friend_number == friend_number && transfer->file_number == file_number) {
+			emit transfer->reader->onChunkRequest(position, length);
+		}
+	}
+}
+
 /*
  * Toxcore functions
  * 
@@ -542,6 +555,7 @@ Tox *create(ToxProfileLoadingError &error, bool create_new, const QString &passw
 	tox_callback_friend_typing(m, cb_friend_typing);
 	tox_callback_friend_status_message(m, cb_friend_status_message);
 	tox_callback_friend_status(m, cb_friend_status);
+	tox_callback_file_chunk_request(m, cb_file_chunk_request);
 
 	size_t s_len = tox_self_get_status_message_size(m);
 
@@ -644,6 +658,75 @@ quint32 get_status_message_max_length()
 quint32 get_tox_address_size()
 {
 	return tox_address_size();
+}
+
+static void send_file_chunk(Tox *m, quint32 friend_number, quint32 file_number
+							, quint64 position, const QByteArray &bytesRead)
+{
+	TOX_ERR_FILE_SEND_CHUNK err;
+	tox_file_send_chunk(m, friend_number, file_number, position, (quint8*)bytesRead.data(), bytesRead.length(), &err);
+
+	for (const auto transfer : qmlbridge->transfers) {
+		if (transfer->friend_number == friend_number && transfer->file_number == file_number) {
+			transfer->bytesTransfered += bytesRead.length();
+			if (transfer->bytesTransfered == transfer->reader->getFile()->size()) {
+				qmlbridge->changeFileProgress(friend_number, file_number, transfer->bytesTransfered);
+				delete transfer;
+			} else {
+				qmlbridge->changeFileProgress(friend_number, file_number, transfer->bytesTransfered);
+			}
+		}
+	}
+}
+
+quint32 send_file(Tox *m, quint32 friend_number, const QString &path, quint64 &filesize, ToxFileId &file_id, quint32 &error)
+{
+	QFile *file = new QFile(path);
+	if (!file->open(QIODevice::ReadOnly)) {
+		error = TOX_ERR_SENDING_OPEN_FAILED;
+		return 0;
+	}
+	filesize = file->size();
+	QByteArray encodedFilename = path.split(QDir::separator()).last().toUtf8();
+	file_id.reserve(tox_file_id_length());
+	TOX_ERR_FILE_SEND err;
+	quint32 file_number = tox_file_send(m, friend_number, TOX_FILE_KIND_DATA, filesize, (quint8*)file_id.data(), 
+				  (quint8*)encodedFilename.data(), encodedFilename.length(), &err);
+	Tools::AsyncFileReader *reader = new Tools::AsyncFileReader(file);
+	QObject::connect(reader, &Tools::AsyncFileReader::fileChunkReady, [] (void *parent, const QByteArray &data, quint64 position) {
+		ToxFileTransfer *parent_transfer = (ToxFileTransfer*)parent;
+		send_file_chunk(parent_transfer->tox, parent_transfer->friend_number, parent_transfer->file_number,
+						position, data);
+	});
+	ToxFileTransfer *transfer = new ToxFileTransfer(m, friend_number, file_number, reader);
+	qmlbridge->transfers.push_back(transfer);
+	if (err > 0) {
+		Tools::debug("tox_file_send file failed with error number: " + QString::number(err));
+	}
+	switch (err) {
+		case TOX_ERR_FILE_SEND_TOO_MANY: error = TOX_ERR_SENDING_TOO_MANY_REQUESTS; return 0;
+		case TOX_ERR_FILE_SEND_FRIEND_NOT_CONNECTED: error = TOX_ERR_SENDING_FRIEND_OFFLINE; return 0;
+		case TOX_ERR_FILE_SEND_OK: error = TOX_ERR_SENDING_OK; return file_number;
+		default: error = TOX_ERR_SENDING_OTHER; return 0;
+	}
+}
+
+bool file_control(Tox *m, quint32 friend_number, quint32 file_number, quint32 control)
+{
+	TOX_ERR_FILE_CONTROL err;
+	tox_file_control(m, friend_number, file_number, (TOX_FILE_CONTROL)control, &err);
+	if (err > 0) {
+		Tools::debug("tox_file_send file failed with error number: " + QString::number(err));
+	} else {
+		if (control == TOX_FILE_CONTROL_CANCEL) {
+			for (const auto transfer : qmlbridge->transfers) {
+				if (transfer->friend_number == friend_number && transfer->file_number == file_number) {
+					delete transfer;
+				}
+			}
+		}
+	}
+	return err == 0;
 }
 
 }

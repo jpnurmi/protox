@@ -205,6 +205,13 @@ ApplicationWindow {
     readonly property real standardFontPointSize: 17.5
     readonly property int ptype_bool: 1
     readonly property int ptype_string: 10
+    readonly property int fstate_request: 0
+    readonly property int fstate_inprogress: 1
+    readonly property int fstate_canceled: 2
+    readonly property int fstate_finished: 3
+    readonly property int fcontrol_resume: 0
+    readonly property int fcontrol_pause: 1
+    readonly property int fcontrol_cancel: 2
 
     /*
         Image buffers

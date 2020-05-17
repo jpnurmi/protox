@@ -40,11 +40,14 @@ QmlCBridge::QmlCBridge()
 		QMetaObject::invokeMethod(component, "resetConnectionStatus");
 		Toxcore::bootstrap_DHT(tox);
 	});
+	transfer_update_timer = new QTimer;
+	transfer_update_timer->setInterval(16);
+	transfer_update_timer->setSingleShot(true);
 }
 
 void QmlCBridge::test()
 {
-	// for testing
+
 }
 
 void QmlCBridge::setComponent(QObject *_component)
@@ -467,6 +470,7 @@ QmlCBridge::~QmlCBridge()
 	}
 	signOutProfile();
 	delete reconnection_timer;
+	delete transfer_update_timer;
 }
 
 QVariant QmlCBridge::getProfileList()
@@ -624,6 +628,59 @@ void QmlCBridge::removeMessageFromDB(quint32 friend_number, quint64 unique_id)
 QString QmlCBridge::uriToRealPath(const QString &uriString)
 {
 	return Native::uriToRealPath(uriString);
+}
+
+quint32 QmlCBridge::sendFile(quint32 friend_number, const QString &filepath)
+{
+	quint64 filesize;
+	ToxFileId file_id;
+	quint32 error;
+	quint32 file_number = Toxcore::send_file(tox, friend_number, filepath, filesize, file_id, error);
+	QDateTime dt = QDateTime::currentDateTime();
+	ToxVariantMessage variantMessage;
+	variantMessage.insert("type", ToxVariantMessageType::TOXMSG_FILE);
+	variantMessage.insert("size", filesize);
+	variantMessage.insert("state", ToxFileState::TOX_FILE_REQUEST);
+	variantMessage.insert("file_id", file_id);
+	variantMessage.insert("file_path", filepath);
+	variantMessage.insert("file_number", file_number);
+	// ui only
+	variantMessage.insert("name", filepath.split(QDir::separator()).last());
+	variantMessage.insert("file_id_string", QString::fromLatin1(file_id));
+	if (error > 0) {
+		return error;
+	}
+	quint64 unique_id = chat_db->insertMessage(variantMessage, dt, Toxcore::get_friend_public_key(tox, friend_number), false, true);
+	insertMessage(variantMessage, friend_number, dt, true);
+	return 0;
+}
+
+void QmlCBridge::controlFile(quint32 friend_number, quint32 file_number, const QString &file_id_string, quint32 control)
+{
+	bool success = Toxcore::file_control(tox, friend_number, file_number, control);
+	if (success) {
+		//ToxFileId file_id = file_id_string.toLatin1();
+		QVariant returnedValue;
+		QMetaObject::invokeMethod(component, "fileControlUpdateMessage",
+			Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, friend_number), 
+								  Q_ARG(QVariant, file_number),
+								  Q_ARG(QVariant, file_id_string),
+								  Q_ARG(QVariant, control));
+	}
+}
+
+void QmlCBridge::changeFileProgress(quint32 friend_number, quint32 file_number, quint32 bytesTransfered)
+{
+	if (transfer_update_timer->isActive()) {
+		return;
+	} else {
+		transfer_update_timer->start();
+	}
+	QVariant returnedValue;
+	QMetaObject::invokeMethod(component, "changeFileProgress",
+		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, friend_number), 
+							  Q_ARG(QVariant, file_number),
+							  Q_ARG(QVariant, bytesTransfered));
 }
 
 QmlTranslator::QmlTranslator(QObject *parent) : QObject(parent) {}

@@ -6,6 +6,17 @@ import QtQuick 2.12
 
 /*[remove]*/ Item {
 
+function formatBytes(bytes, decimals = 2) {
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+    if (bytes === 0) {
+        return "0 " + sizes[0];
+    }
+    const k = 1024
+    const dm = decimals < 0 ? 0 : decimals
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i]
+}
+
 function getTheme() {
     return Material
 }
@@ -182,8 +193,23 @@ function insertMessage(variantMessage, friend_number, self, time, unique_id, fai
         "msgType" : variantMessage.type}
     
     if (!variantMessage.type) {
+        dict.msgFilename = ""
+        dict.msgFilesize = 0
+        dict.msgFiletsize = 0
+        dict.msgFilestate = 0
+        dict.msgFilenumber = 0
         dict.msgText = variantMessage.message
+        dict.msgFileid = ""
+    } else {
+        dict.msgText = ""
+        dict.msgFilename = variantMessage.name
+        dict.msgFilesize = variantMessage.size
+        dict.msgFiletsize = 0
+        dict.msgFilestate = variantMessage.state
+        dict.msgFilenumber = variantMessage.file_number
+        dict.msgFileid = variantMessage.file_id_string
     }
+
     messagesModel.append(dict)
 
     if (!history) {
@@ -336,6 +362,48 @@ function resetUI() {
     resetConnectionStatus()
     friendStatusIndicator.color = "gray"
     new_messages = 0
+}
+
+function fileControlUpdateMessage(friend_number, file_number, file_id, control) {
+    if (bridge.getCurrentFriendNumber() !== friend_number) {
+        return
+    }
+    for (var i = 0; i < messagesModel.count; i++) {
+        var message = messagesModel.get(i)
+        if (message.msgFilestate === fstate_canceled || message.msgFilesize === message.msgFiletsize) {
+            continue
+        }
+        console.log(message.msgFileid, file_id)
+        if (message.msgFilenumber === file_number && message.msgFileid === file_id) {
+            switch (control) {
+            case fcontrol_cancel: message.msgFilestate = fstate_canceled; break;
+            }
+            messagesModel.set(i, message)
+            break
+        }
+    }
+}
+
+function changeFileProgress(friend_number, file_number, bytesTransfered) {
+    if (bridge.getCurrentFriendNumber() !== friend_number) {
+        return
+    }
+    for (var i = 0; i < messagesModel.count; i++) {
+        var message = messagesModel.get(i)
+        if (message.msgFilestate === fstate_canceled || message.msgFilestate === fstate_finished) {
+            continue
+        }
+        if (message.msgFilenumber === file_number) {
+            message.msgFiletsize = bytesTransfered
+            if (message.msgFilesize > message.msgFiletsize) {
+                message.msgFilestate = fstate_inprogress
+            } else {
+                message.msgFilestate = fstate_finished
+            }
+            messagesModel.set(i, message)
+            break
+        }
+    }
 }
 
 /*[remove]*/ }

@@ -63,6 +63,14 @@ ToolBar {
             rightOverlayButton.highlighted = false
         }
 
+        /*
+        MenuItem {
+            text: qsTr("test")
+            onClicked: {
+                bridge.test()
+            }
+        }
+        */
         MenuItem {
             text: qsTr("Clear chat")
             onClicked: {

@@ -23,8 +23,6 @@ const QString getProgDir(bool create)
 	return path;
 }
 
-
-
 const QString replaceFileExtension(const QString &file, const QString &with)
 {
 	return file.split(".").first() + with;
@@ -56,6 +54,13 @@ const QStringList qstringSplitUnicode(const QString &str, int limit_bytes)
 	}
 	return result;
 }
+
+void AsyncFileReader::onChunkRequest(quint64 position, quint32 length)
+{
+	m_file->seek(position);
+	QByteArray data = m_file->read(length);
+	emit fileChunkReady(m_parent, data, position);
+} 
 
 }
 

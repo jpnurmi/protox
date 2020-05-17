@@ -22,6 +22,7 @@ public:
 private:
 	void removeAllTemporaryMessages();
 	void upgradeFromV2toV3();
+	void upgradeFromV3toV4();
 private:
 	QSqlDatabase db;
 };

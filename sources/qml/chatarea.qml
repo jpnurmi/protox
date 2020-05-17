@@ -133,7 +133,7 @@ ColumnLayout {
             model: messagesModel
             delegate: Rectangle {
                 id: messageCloud
-                color: !msgSelf ? "lightblue" : (msgReceived ? "orange" : "lightgray")
+                color: !msgSelf ? "lightblue" : ((msgReceived || msgType) ? "orange" : "lightgray")
                 radius: 10
                 property int keptUniqueId
                 NumberAnimation on x {
@@ -216,7 +216,7 @@ ColumnLayout {
                     id: cloudTailImage
                     width: 10
                     height: width
-                    source: msgSelf ? (msgReceived ? canvasBuffer.itemAt(1).source : canvasBuffer.itemAt(0).source) : canvasBuffer.itemAt(2).source
+                    source: msgSelf ? ((msgReceived || msgType) ? canvasBuffer.itemAt(1).source : canvasBuffer.itemAt(0).source) : canvasBuffer.itemAt(2).source
                     mirror: !msgSelf
                     smooth: true
                     Component.onCompleted: {
@@ -279,7 +279,7 @@ ColumnLayout {
                 Image {
                     id: resendIndicator
                     source: "resources/resend.png"
-                    visible: msgSelf && !msgReceived && msgHistory && !parent.pending
+                    visible: msgSelf && !msgReceived && msgHistory && !parent.pending && !msgType
                     anchors.right: parent.left
                     anchors.rightMargin: 5
                     anchors.verticalCenter: parent.verticalCenter
@@ -308,6 +308,7 @@ ColumnLayout {
                              && !msgReceived 
                              && (!msgHistory || (msgHistory && parent.pending)) 
                              && !messagePendingIndicatorTimer.running
+                             && !msgType
                     anchors.right: parent.left
                     anchors.rightMargin: 5
                     anchors.verticalCenter: parent.verticalCenter
@@ -425,7 +426,141 @@ ColumnLayout {
                             }
                         }
                     }
-                    sourceComponent: msgType ? undefined : cloudTextComponent
+                    Component {
+                        id: cloudFileComponent
+                        ColumnLayout {
+                            anchors.fill: parent
+                            anchors.margins: chatContent.cloud_margin
+                            spacing: 0
+                            Text {
+                                id: fileName
+                                Layout.alignment: Qt.AlignLeft
+                                Layout.fillWidth: true
+                                text: msgFilename
+                                font.pointSize: fontMetrics.normalize(standardFontPointSize)
+                            }
+                            Text {
+                                id: fileSize
+                                Layout.alignment: Qt.AlignLeft
+                                text: formatBytes(msgFilesize)
+                                font.pointSize: fontMetrics.normalize(standardFontPointSize)
+                            }
+                            property int lastFileSize: 0
+                            Timer {
+                                id: speedCalcTimer
+                                running: msgFilestate === fstate_inprogress
+                                interval: 1000
+                                repeat: true
+                                onTriggered: {
+                                    parent.transferSpeed = formatBytes(msgFiletsize - parent.lastFileSize)
+                                    parent.lastFileSize = msgFiletsize
+                                }
+                            }
+                            property string transferSpeed: qsTr("Transfer started.")
+                            function addSpeedString() {
+                                if (transferSpeed !== qsTr("Transfer started.")) {
+                                    return qsTr("/s")
+                                }
+                                return ""
+                            }
+                            Text {
+                                id: fileStatus
+                                Layout.alignment: Qt.AlignLeft
+                                Layout.fillWidth: true
+                                visible: msgFilestate !== fstate_request
+                                color: msgFilestate === fstate_finished ? "green" : 
+                                      (msgFilestate === fstate_inprogress ? "black" : "red")
+                                font.pointSize: fontMetrics.normalize(standardFontPointSize)
+                                text: msgFilestate === fstate_canceled ? qsTr("File transfer canceled.") : 
+                                      (msgFilestate === fstate_finished ? qsTr("Transmission success.") : 
+                                      (msgFailed ? qsTr("File transfer failed.") : parent.transferSpeed + parent.addSpeedString()))
+                            }
+                            ProgressBar {
+                                id: fileProgress
+                                Layout.fillWidth: true
+                                Layout.topMargin: 8
+                                value: msgFiletsize / msgFilesize
+                                visible: msgFilestate === fstate_inprogress
+                                //Behavior on value {
+                                //    SmoothedAnimation { velocity: 200 }
+                                //}
+                            }
+                            Rectangle {
+                                Layout.topMargin: 8
+                                Layout.fillWidth: true
+                                height: 1
+                                visible: fileButtonsLayout.visible
+                                gradient: Gradient {
+                                    orientation: Gradient.Horizontal
+                                    GradientStop { position: 0.0; color: "#00000000" }
+                                    GradientStop { position: 0.5; color: "white" }
+                                    GradientStop { position: 1.0; color: "#00000000" }
+                                }
+                            }
+                            RowLayout {
+                                id: fileButtonsLayout
+                                Layout.maximumHeight: 32
+                                Layout.minimumHeight: Layout.maximumHeight
+                                Layout.fillWidth: true
+                                spacing: 0
+                                visible: fileCancelButton.visible
+                                /*
+                                ToolButton {
+                                    Layout.fillWidth: true
+                                    Layout.fillHeight: true
+                                    visible: !msgSelf
+                                    Text {
+                                        anchors.centerIn: parent
+                                        font.family: themify.name
+                                        font.pointSize: 24
+                                        font.bold: true
+                                        text: "\uE64C"
+                                        color: "green"
+                                    }
+                                }
+                                Rectangle {
+                                    width: 1
+                                    Layout.fillHeight: true
+                                    visible: !msgSelf
+                                    gradient: Gradient {
+                                        orientation: Gradient.Vertical
+                                        GradientStop { position: 0.0; color: "white" }
+                                        GradientStop { position: 1.0; color: "#00000000" }
+                                    } 
+                                }
+                                */
+                                ToolButton {
+                                    id: fileCancelButton
+                                    Layout.fillWidth: true
+                                    Layout.fillHeight: true
+                                    visible: msgFilestate !== fstate_canceled && msgFilesize !== msgFiletsize
+                                    onClicked: {
+                                        bridge.controlFile(bridge.getCurrentFriendNumber(), 
+                                                           msgFilenumber, msgFileid, fcontrol_cancel)
+                                    }
+                                    Text {
+                                        anchors.centerIn: parent
+                                        font.family: themify.name
+                                        font.pointSize: 24
+                                        font.bold: true
+                                        text: "\uE646"
+                                        color: "red"
+                                    }
+                                }
+                            }
+                            Component.onCompleted: {
+                                messageCloud.implicitWidth = implicitWidth + chatContent.cloud_margin * 2
+                                messageCloud.implicitHeight = implicitHeight + chatContent.cloud_margin * 2
+                            }
+                            onImplicitWidthChanged: {
+                                messageCloud.implicitWidth = implicitWidth + chatContent.cloud_margin * 2
+                            }
+                            onImplicitHeightChanged: {
+                                messageCloud.implicitHeight = implicitHeight + chatContent.cloud_margin * 2
+                            }
+                        }
+                    }
+                    sourceComponent: msgType ? cloudFileComponent : cloudTextComponent
                 }
                 Text {
                     id: timeText
@@ -780,6 +915,7 @@ FileDialog {
     id: chatFilePickerDialog
     title: qsTr("Select a file")
     onAccepted: {
+        bridge.sendFile(bridge.getCurrentFriendNumber(), bridge.uriToRealPath(fileUrl.toString()))
         toast.show({ message : bridge.uriToRealPath(fileUrl.toString()), duration : Toast.Short })
     }
 }
