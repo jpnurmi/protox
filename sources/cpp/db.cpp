@@ -185,9 +185,6 @@ const ToxMessages ChatDataBase::getFriendMessages(const ToxPk &public_key, quint
 				variantMessage.insert("size", msg_query.value(1).toUInt());
 				variantMessage.insert("state", msg_query.value(2).toUInt());
 				variantMessage.insert("file_id", msg_query.value(3).toByteArray());
-				variantMessage.insert("file_number", 0); // fake
-				// ui only
-				variantMessage.insert("name", Tools::getFilenameFromPath(file_path));
 				break;
 		}
 		messages.push_back(ToxMessage(variantMessage,

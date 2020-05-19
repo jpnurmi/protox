@@ -150,12 +150,19 @@ void QmlCBridge::retrieveChatLog(quint32 start, bool from, bool reverse)
 	settings->beginGroup("Client");
 	quint32 limit = settings->value("last_messages_limit", 128).toUInt();
 	settings->endGroup();
-	const ToxMessages messages = chat_db->getFriendMessages(Toxcore::get_friend_public_key(tox, current_friend_number), limit, start, from, reverse);
+	ToxMessages messages = chat_db->getFriendMessages(Toxcore::get_friend_public_key(tox, current_friend_number), limit, start, from, reverse);
 	QMetaObject::invokeMethod(component, "clearChatContent");
 	if (messages.isEmpty()) {
 		return;
 	}
-	for (const auto &msg : messages) {
+	for (auto &msg : messages) {
+		if (msg.variantMessage["type"].toUInt() == TOXMSG_FILE) {
+			msg.variantMessage.insert("file_number", 0); // fake
+			msg.variantMessage.insert("name", Tools::getFilenameFromPath(msg.variantMessage["file_path"].toString()));
+			if (msg.variantMessage["state"] > TOX_FILE_PAUSED) {
+				msg.received = true;
+			}
+		}
 		insertMessage(msg.variantMessage, current_friend_number, msg.dt, msg.self, msg.unique_id, true, false);
 		if (!msg.self || msg.received)
 			setMessageReceived(current_friend_number, msg.unique_id);
@@ -500,6 +507,9 @@ void QmlCBridge::signOutProfile(bool remove)
 	}
 	settings->sync();
 
+	Toxcore::cancel_all_file_transfers();
+	Toxcore::iterate(tox);
+
 	reconnection_timer->stop();
 	toxcore_timer->stop();
 	delete toxcore_timer;
@@ -519,6 +529,7 @@ void QmlCBridge::signOutProfile(bool remove)
 	}
 	current_profile.clear();
 	pending_messages.clear();
+	transfers.clear();
 	file_messages.clear();
 }
 
@@ -636,7 +647,8 @@ quint32 QmlCBridge::sendFile(quint32 friend_number, const QString &filepath)
 	quint64 filesize;
 	ToxFileId file_id;
 	quint32 error;
-	quint32 file_number = Toxcore::send_file(tox, friend_number, filepath, filesize, file_id, error);
+	ToxFileTransfer *transfer = nullptr;
+	quint32 file_number = Toxcore::send_file(tox, friend_number, filepath, &transfer, filesize, file_id, error);
 	if (error > 0) {
 		return error;
 	}
@@ -651,7 +663,7 @@ quint32 QmlCBridge::sendFile(quint32 friend_number, const QString &filepath)
 	// ui only
 	variantMessage.insert("name", Tools::getFilenameFromPath(filepath));
 	quint64 unique_id = chat_db->insertMessage(variantMessage, dt, Toxcore::get_friend_public_key(tox, friend_number), false, true);
-	file_messages[file_number] = unique_id;
+	file_messages[transfer] = unique_id;
 	insertMessage(variantMessage, friend_number, dt, true, unique_id);
 	return 0;
 }

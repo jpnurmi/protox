@@ -368,12 +368,12 @@ function fileControlUpdateMessage(friend_number, unique_id, control) {
     }
     for (var i = 0; i < messagesModel.count; i++) {
         var message = messagesModel.get(i)
-        if (message.msgFilestate === fstate_canceled || message.msgFilestate === fstate_finished) {
+        if (message.msgType !== msgtype_file || message.msgFilestate === fstate_canceled || message.msgFilestate === fstate_finished) {
             continue
         }
         if (message.msgUniqueId === unique_id) {
             switch (control) {
-            case fcontrol_cancel: message.msgFilestate = fstate_canceled; break;
+            case fcontrol_cancel: message.msgFilestate = fstate_canceled; message.msgReceived = true; break;
             }
             messagesModel.set(i, message)
             break
@@ -387,7 +387,7 @@ function changeFileProgress(friend_number, file_number, bytesTransfered) {
     }
     for (var i = 0; i < messagesModel.count; i++) {
         var message = messagesModel.get(i)
-        if (message.msgFilestate === fstate_canceled || message.msgFilestate === fstate_finished) {
+        if (message.msgType !== msgtype_file || message.msgFilestate === fstate_canceled || message.msgFilestate === fstate_finished) {
             continue
         }
         if (message.msgFilenumber === file_number) {
@@ -396,11 +396,26 @@ function changeFileProgress(friend_number, file_number, bytesTransfered) {
                 message.msgFilestate = fstate_inprogress
             } else {
                 message.msgFilestate = fstate_finished
+                message.msgReceived = true
             }
             messagesModel.set(i, message)
             break
         }
     }
+}
+
+function sendFile(fileUrl) {
+    var result = bridge.sendFile(bridge.getCurrentFriendNumber(), bridge.uriToRealPath(fileUrl.toString()))
+    var msg = ""
+    switch (result) {
+    case 0: msg = qsTr("File sent!"); break;
+    case 1: msg = qsTr("Failed to open a file."); break;
+    case 2: msg = qsTr("Failed. Too many file requests."); break;
+    case 3: msg = qsTr("Failed. Filename is too long."); break;
+    case 4: msg = qsTr("A friend is not online."); break;
+    case 5: msg = qsTr("Unexpected error."); break;
+    }
+    toast.show({ message : msg, duration : Toast.Long })
 }
 
 /*[remove]*/ }

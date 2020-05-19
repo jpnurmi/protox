@@ -23,6 +23,7 @@ namespace Tools {
 		void onChunkRequest(quint64 position, quint32 length);
 	signals:
 		void fileChunkReady(void *parent, const QByteArray &data, quint64 position);
+		void fileTransferEnded(void *parent);
 	private:
 		QFile *m_file;
 		void *m_parent;

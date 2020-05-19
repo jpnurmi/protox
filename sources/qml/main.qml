@@ -207,11 +207,14 @@ ApplicationWindow {
     readonly property int ptype_string: 10
     readonly property int fstate_request: 0
     readonly property int fstate_inprogress: 1
-    readonly property int fstate_canceled: 2
-    readonly property int fstate_finished: 3
+    readonly property int fstate_paused: 2
+    readonly property int fstate_canceled: 3
+    readonly property int fstate_finished: 4
     readonly property int fcontrol_resume: 0
     readonly property int fcontrol_pause: 1
     readonly property int fcontrol_cancel: 2
+    readonly property int msgtype_text: 0
+    readonly property int msgtype_file: 1
 
     /*
         Image buffers

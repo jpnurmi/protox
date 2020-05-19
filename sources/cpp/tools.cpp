@@ -63,6 +63,7 @@ const QString getFilenameFromPath(const QString &path)
 void AsyncFileManager::onChunkRequest(quint64 position, quint32 length)
 {
 	if (!length) {
+		emit fileTransferEnded(m_parent);
 		return;
 	}
 	m_file->seek(position);

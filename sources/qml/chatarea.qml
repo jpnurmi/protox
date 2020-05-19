@@ -473,7 +473,7 @@ ColumnLayout {
                                       (msgFilestate === fstate_inprogress ? "black" : "red")
                                 font.pointSize: fontMetrics.normalize(standardFontPointSize)
                                 text: msgFilestate === fstate_canceled ? qsTr("File transfer canceled.") : 
-                                      (msgFilestate === fstate_finished ? qsTr("Transmission success.") : 
+                                      (msgFilestate === fstate_finished ? qsTr("Transfer succeeded.") : 
                                       (msgFailed ? qsTr("File transfer failed.") : parent.transferSpeed + parent.addSpeedString()))
                                 wrapMode: Text.Wrap
                                 width: parent.width
@@ -916,8 +916,7 @@ FileDialog {
     id: chatFilePickerDialog
     title: qsTr("Select a file")
     onAccepted: {
-        bridge.sendFile(bridge.getCurrentFriendNumber(), bridge.uriToRealPath(fileUrl.toString()))
-        toast.show({ message : bridge.uriToRealPath(fileUrl.toString()), duration : Toast.Short })
+        sendFile(fileUrl)
     }
 }
 
@@ -925,7 +924,7 @@ PhotoDialog {
     id: chatPhotoPickerDialog
     title: qsTr("Select an image")
     onAccepted: {
-        toast.show({ message : bridge.uriToRealPath(imageUrl.toString()), duration : Toast.Short })
+        sendFile(imageUrl)
     }
 }
 
