@@ -163,7 +163,7 @@ Click on the left button to open the friend list, then on «+» to add a new fri
     </message>
     <message>
         <source>The NoSpam value is a part of your ToxID that can be changed at will.</source>
-        <translation>NoSpam это чать вашего ToxID, которая может быть изменена по желанию.</translation>
+        <translation>NoSpam это часть вашего ToxID, которая может быть изменена по желанию.</translation>
     </message>
     <message>
         <source>If you are getting spammed with friend requests, change this value.</source>
