@@ -503,32 +503,51 @@ ColumnLayout {
                                 id: fileButtonsLayout
                                 width: parent.width
                                 spacing: 0
-                                visible: fileCancelButton.visible
-                                /*
+                                visible: fileCancelButton.visible || filePauseButton.visible
                                 ToolButton {
+                                    id: filePauseButton
                                     Layout.fillWidth: true
                                     Layout.fillHeight: true
-                                    visible: !msgSelf
+                                    visible: msgFilestate !== fstate_request 
+                                             && msgFilestate !== fstate_canceled 
+                                             && msgFilestate !== fstate_finished
                                     Text {
                                         anchors.centerIn: parent
                                         font.family: themify.name
                                         font.pointSize: 24
                                         font.bold: true
-                                        text: "\uE64C"
-                                        color: "green"
+                                        text: "\uE6AE"
+                                        color: "black"
+                                    }
+                                    onClicked: {
+                                        var control
+                                        if (msgFilestate === fstate_inprogress) {
+                                            control = fcontrol_pause
+                                        } else if (msgFilestate === fstate_paused) {
+                                            control = fcontrol_resume
+                                        }
+                                        var success = bridge.controlFile(bridge.getCurrentFriendNumber(), 
+                                                           msgFilenumber, msgUniqueId, control)
+                                        if (!success) {
+                                            return
+                                        }
+                                        if (msgFilestate === fstate_inprogress) {
+                                            text = "\uE6AE"
+                                        } else if (msgFilestate === fstate_paused) {
+                                            text = "\uE6AD"
+                                        }
                                     }
                                 }
                                 Rectangle {
                                     width: 1
                                     Layout.fillHeight: true
-                                    visible: !msgSelf
+                                    visible: filePauseButton.visible
                                     gradient: Gradient {
                                         orientation: Gradient.Vertical
                                         GradientStop { position: 0.0; color: "white" }
                                         GradientStop { position: 1.0; color: "#00000000" }
                                     } 
                                 }
-                                */
                                 ToolButton {
                                     id: fileCancelButton
                                     Layout.fillWidth: true
@@ -543,7 +562,7 @@ ColumnLayout {
                                         font.family: themify.name
                                         font.pointSize: 24
                                         font.bold: true
-                                        text: "\uE646"
+                                        text: "\uE6AB"
                                         color: "red"
                                     }
                                 }

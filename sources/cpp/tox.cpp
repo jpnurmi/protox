@@ -135,6 +135,7 @@ static void cb_friend_connection_change(Tox *m, quint32 friend_number, TOX_CONNE
 		qmlbridge->sendPendingMessages(friend_number);
 	} else {
 		qmlbridge->removeNonFailedPendingMessages(friend_number);
+		cancel_all_file_transfers_for_friend(friend_number);
 	}
 }
 
@@ -757,6 +758,23 @@ quint32 send_file(Tox *m, quint32 friend_number, const QString &path, ToxFileTra
 	}
 }
 
+void cancel_all_file_transfers_for_friend(quint32 friend_number)
+{
+	for (const auto transfer : qmlbridge->transfers) {
+		if (transfer->friend_number != friend_number) {
+			continue;
+		}
+		TOX_ERR_FILE_CONTROL err; // we don't care about errors here
+		tox_file_control(transfer->tox, transfer->friend_number, transfer->file_number, TOX_FILE_CONTROL_CANCEL, &err);
+		chat_db->updateFileMessageState(qmlbridge->file_messages[transfer], 
+										get_friend_public_key(transfer->tox, transfer->friend_number), 
+										ToxFileState::TOX_FILE_CANCELED);
+		qmlbridge->file_messages.remove(transfer);
+		qmlbridge->transfers.removeOne(transfer);
+		delete transfer;
+	}
+}
+
 void cancel_all_file_transfers()
 {
 	while (!qmlbridge->transfers.isEmpty()) {
@@ -768,6 +786,7 @@ void cancel_all_file_transfers()
 										ToxFileState::TOX_FILE_CANCELED);
 		qmlbridge->file_messages.remove(transfer);
 		qmlbridge->transfers.removeLast();
+		delete transfer;
 	}
 }
 
@@ -788,6 +807,16 @@ bool file_control(Tox *m, quint32 friend_number, quint32 file_number, quint32 co
 						qmlbridge->file_messages.remove(transfer);
 						qmlbridge->transfers.removeOne(transfer);
 						delete transfer;
+						break;
+					case TOX_FILE_CONTROL_PAUSE:
+						chat_db->updateFileMessageState(qmlbridge->file_messages[transfer], 
+														get_friend_public_key(m, friend_number), 
+														ToxFileState::TOX_FILE_PAUSED);
+						break;
+					case TOX_FILE_CONTROL_RESUME:
+						chat_db->updateFileMessageState(qmlbridge->file_messages[transfer], 
+														get_friend_public_key(m, friend_number), 
+														ToxFileState::TOX_FILE_INPROGRESS);
 						break;
 				}
 			}

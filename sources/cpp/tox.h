@@ -143,6 +143,7 @@ namespace Toxcore {
 	quint32 send_file(Tox *m, quint32 friend_number, const QString &path, ToxFileTransfer **transfer, quint64 &filesize, ToxFileId &file_id, quint32 &error);
 	bool file_control(Tox *m, quint32 friend_number, quint32 file_number, quint32 control);
 	void cancel_all_file_transfers();
+	void cancel_all_file_transfers_for_friend(quint32 friend_number);
 	void iterate(Tox *m);
 }
 

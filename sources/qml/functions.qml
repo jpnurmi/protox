@@ -374,6 +374,8 @@ function fileControlUpdateMessage(friend_number, unique_id, control) {
         if (message.msgUniqueId === unique_id) {
             switch (control) {
             case fcontrol_cancel: message.msgFilestate = fstate_canceled; message.msgReceived = true; break;
+            case fcontrol_pause: message.msgFilestate = fstate_paused; message.msgReceived = false; break;
+            case fcontrol_resume: message.msgFilestate = fstate_inprogress; message.msgReceived = false; break;
             }
             messagesModel.set(i, message)
             break
