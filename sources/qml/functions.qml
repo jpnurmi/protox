@@ -199,7 +199,6 @@ function insertMessage(variantMessage, friend_number, self, time, unique_id, fai
         dict.msgFilestate = 0
         dict.msgFilenumber = 0
         dict.msgText = variantMessage.message
-        dict.msgFileid = ""
     } else {
         dict.msgText = ""
         dict.msgFilename = variantMessage.name
@@ -207,7 +206,6 @@ function insertMessage(variantMessage, friend_number, self, time, unique_id, fai
         dict.msgFiletsize = 0
         dict.msgFilestate = variantMessage.state
         dict.msgFilenumber = variantMessage.file_number
-        dict.msgFileid = variantMessage.file_id_string
     }
 
     messagesModel.append(dict)
@@ -364,17 +362,16 @@ function resetUI() {
     new_messages = 0
 }
 
-function fileControlUpdateMessage(friend_number, file_number, file_id, control) {
+function fileControlUpdateMessage(friend_number, unique_id, control) {
     if (bridge.getCurrentFriendNumber() !== friend_number) {
         return
     }
     for (var i = 0; i < messagesModel.count; i++) {
         var message = messagesModel.get(i)
-        if (message.msgFilestate === fstate_canceled || message.msgFilesize === message.msgFiletsize) {
+        if (message.msgFilestate === fstate_canceled || message.msgFilestate === fstate_finished) {
             continue
         }
-        console.log(message.msgFileid, file_id)
-        if (message.msgFilenumber === file_number && message.msgFileid === file_id) {
+        if (message.msgUniqueId === unique_id) {
             switch (control) {
             case fcontrol_cancel: message.msgFilestate = fstate_canceled; break;
             }

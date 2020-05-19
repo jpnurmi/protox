@@ -428,45 +428,46 @@ ColumnLayout {
                     }
                     Component {
                         id: cloudFileComponent
-                        ColumnLayout {
+                        Column {
+                            id: fileLayout
                             anchors.fill: parent
                             anchors.margins: chatContent.cloud_margin
                             spacing: 0
-                            Text {
-                                id: fileName
-                                Layout.alignment: Qt.AlignLeft
-                                Layout.fillWidth: true
-                                text: msgFilename
-                                font.pointSize: fontMetrics.normalize(standardFontPointSize)
-                            }
-                            Text {
-                                id: fileSize
-                                Layout.alignment: Qt.AlignLeft
-                                text: formatBytes(msgFilesize)
-                                font.pointSize: fontMetrics.normalize(standardFontPointSize)
-                            }
-                            property int lastFileSize: 0
+                            property real maxWidth: messages.width * 0.5
                             Timer {
                                 id: speedCalcTimer
                                 running: msgFilestate === fstate_inprogress
                                 interval: 1000
                                 repeat: true
+                                property int lastFileSize: 0
                                 onTriggered: {
-                                    parent.transferSpeed = formatBytes(msgFiletsize - parent.lastFileSize)
-                                    parent.lastFileSize = msgFiletsize
+                                    parent.transferSpeed = formatBytes(msgFiletsize - lastFileSize)
+                                    lastFileSize = msgFiletsize
                                 }
                             }
-                            property string transferSpeed: qsTr("Transfer started.")
+                            Text {
+                                id: fileName
+                                text: msgFilename
+                                font.pointSize: fontMetrics.normalize(standardFontPointSize)
+                                wrapMode: Text.Wrap
+                                width: parent.width
+                            }
+                            Text {
+                                id: fileSize
+                                text: formatBytes(msgFilesize)
+                                font.pointSize: fontMetrics.normalize(standardFontPointSize)
+                                wrapMode: Text.Wrap
+                                width: parent.width
+                            }
+                            property string transferSpeed: qsTr("Transferring...")
                             function addSpeedString() {
-                                if (transferSpeed !== qsTr("Transfer started.")) {
+                                if (transferSpeed !== qsTr("Transferring...")) {
                                     return qsTr("/s")
                                 }
                                 return ""
                             }
                             Text {
                                 id: fileStatus
-                                Layout.alignment: Qt.AlignLeft
-                                Layout.fillWidth: true
                                 visible: msgFilestate !== fstate_request
                                 color: msgFilestate === fstate_finished ? "green" : 
                                       (msgFilestate === fstate_inprogress ? "black" : "red")
@@ -474,20 +475,21 @@ ColumnLayout {
                                 text: msgFilestate === fstate_canceled ? qsTr("File transfer canceled.") : 
                                       (msgFilestate === fstate_finished ? qsTr("Transmission success.") : 
                                       (msgFailed ? qsTr("File transfer failed.") : parent.transferSpeed + parent.addSpeedString()))
+                                wrapMode: Text.Wrap
+                                width: parent.width
                             }
                             ProgressBar {
                                 id: fileProgress
-                                Layout.fillWidth: true
-                                Layout.topMargin: 8
+                                width: parent.width
                                 value: msgFiletsize / msgFilesize
                                 visible: msgFilestate === fstate_inprogress
-                                //Behavior on value {
-                                //    SmoothedAnimation { velocity: 200 }
-                                //}
+                                Behavior on value {
+                                    SmoothedAnimation { velocity: 200 }
+                                }
                             }
+                            Rectangle { opacity: 0; visible: fileButtonsLayout.visible; width: parent.width; height: 12 }
                             Rectangle {
-                                Layout.topMargin: 8
-                                Layout.fillWidth: true
+                                width: parent.width
                                 height: 1
                                 visible: fileButtonsLayout.visible
                                 gradient: Gradient {
@@ -499,9 +501,7 @@ ColumnLayout {
                             }
                             RowLayout {
                                 id: fileButtonsLayout
-                                Layout.maximumHeight: 32
-                                Layout.minimumHeight: Layout.maximumHeight
-                                Layout.fillWidth: true
+                                width: parent.width
                                 spacing: 0
                                 visible: fileCancelButton.visible
                                 /*
@@ -533,10 +533,10 @@ ColumnLayout {
                                     id: fileCancelButton
                                     Layout.fillWidth: true
                                     Layout.fillHeight: true
-                                    visible: msgFilestate !== fstate_canceled && msgFilesize !== msgFiletsize
+                                    visible: msgFilestate !== fstate_canceled && msgFilestate !== fstate_finished
                                     onClicked: {
                                         bridge.controlFile(bridge.getCurrentFriendNumber(), 
-                                                           msgFilenumber, msgFileid, fcontrol_cancel)
+                                                           msgFilenumber, msgUniqueId, fcontrol_cancel)
                                     }
                                     Text {
                                         anchors.centerIn: parent
@@ -549,15 +549,16 @@ ColumnLayout {
                                 }
                             }
                             Component.onCompleted: {
-                                messageCloud.implicitWidth = implicitWidth + chatContent.cloud_margin * 2
+                                messageCloud.implicitWidth = maxWidth + chatContent.cloud_margin * 2
                                 messageCloud.implicitHeight = implicitHeight + chatContent.cloud_margin * 2
                             }
-                            onImplicitWidthChanged: {
-                                messageCloud.implicitWidth = implicitWidth + chatContent.cloud_margin * 2
+                            
+                            Binding {
+                                target: messageCloud
+                                property: "implicitHeight"
+                                value: implicitHeight + chatContent.cloud_margin * 2
                             }
-                            onImplicitHeightChanged: {
-                                messageCloud.implicitHeight = implicitHeight + chatContent.cloud_margin * 2
-                            }
+                            
                         }
                     }
                     sourceComponent: msgType ? cloudFileComponent : cloudTextComponent

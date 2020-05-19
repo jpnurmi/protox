@@ -12,6 +12,7 @@ public:
 	void setMessageReceived(quint64 unique_id, const ToxPk &public_key);
 	const ToxMessages getFriendMessages(const ToxPk &public_key, quint32 limit, quint32 start, bool from, bool reverse);
 	const QString getTextMessage(quint64 unique_id, const ToxPk &public_key);
+	bool updateFileMessageState(quint64 unique_id, const ToxPk &public_key, ToxFileState state);
 	void removeMessage(quint64 unique_id, const ToxPk &public_key);
 	quint64 getMessagesCountFriend(const ToxPk &public_key);
 	void clearFriendChatHistory(const ToxPk &public_key);
@@ -22,7 +23,8 @@ public:
 private:
 	void removeAllTemporaryMessages();
 	void upgradeFromV2toV3();
-	void upgradeFromV3toV4();
+	void execQuery(QSqlQuery &query);
+	const QSqlQuery execQuery(const QString &query_string);
 private:
 	QSqlDatabase db;
 };

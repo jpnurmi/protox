@@ -34,7 +34,8 @@ public:
 	void tryReconnect();
 	void sendPendingMessages(quint32 friend_number);
 	void removeNonFailedPendingMessages(quint32 friend_number);
-	void changeFileProgress(quint32 friend_number, quint32 file_number, quint32 bytesTransfered);
+	void changeFileProgress(quint32 friend_number, quint32 file_number, quint32 bytesTransfered, bool finished);
+	void fileControlUpdateMessage(quint32 friend_number, quint64 unique_id, quint32 control);
 public slots:
 	Q_INVOKABLE void sendMessage(const QString &message);
 	Q_INVOKABLE quint32 getCurrentFriendNumber();
@@ -89,12 +90,13 @@ public slots:
 	Q_INVOKABLE void removeMessageFromDB(quint32 friend_number, quint64 unique_id);
 	Q_INVOKABLE QString uriToRealPath(const QString &uriString);
 	Q_INVOKABLE quint32 sendFile(quint32 friend_number, const QString &filepath);
-	Q_INVOKABLE void controlFile(quint32 friend_number, quint32 file_number, const QString &file_id, quint32 control);
+	Q_INVOKABLE void controlFile(quint32 friend_number, quint32 file_number, quint64 unique_id, quint32 control);
 
 public:
 	ToxFriendsConnStatus friends_conn_status;
 	ToxPendingMessages pending_messages;
 	ToxFileTransfers transfers;
+	ToxFileMessages file_messages;
 private:
 	quint32 current_friend_number;
 	QString current_profile;

@@ -55,12 +55,31 @@ const QStringList qstringSplitUnicode(const QString &str, int limit_bytes)
 	return result;
 }
 
-void AsyncFileReader::onChunkRequest(quint64 position, quint32 length)
+const QString getFilenameFromPath(const QString &path)
 {
+	return path.split(QDir::separator()).last();
+}
+
+void AsyncFileManager::onChunkRequest(quint64 position, quint32 length)
+{
+	if (!length) {
+		return;
+	}
 	m_file->seek(position);
 	QByteArray data = m_file->read(length);
 	emit fileChunkReady(m_parent, data, position);
 } 
+
+AsyncFileManager::~AsyncFileManager()
+{
+	m_file->close();
+	delete m_file;
+	quit();
+	if (!wait(1000)) {
+		terminate();
+		wait();
+	}
+}
 
 }
 

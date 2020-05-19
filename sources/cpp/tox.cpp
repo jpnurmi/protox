@@ -171,7 +171,34 @@ static void cb_file_chunk_request(Tox *m, uint32_t friend_number, uint32_t file_
 
 	for (const auto transfer : qmlbridge->transfers) {
 		if (transfer->friend_number == friend_number && transfer->file_number == file_number) {
-			emit transfer->reader->onChunkRequest(position, length);
+			emit transfer->manager->onChunkRequest(position, length);
+		}
+	}
+}
+
+static void cb_file_recv_control_cb(Tox *m, uint32_t friend_number, uint32_t file_number, TOX_FILE_CONTROL control,
+                                      void *user_data)
+{
+	Q_UNUSED(m)
+	Q_UNUSED(user_data)
+
+	for (const auto transfer : qmlbridge->transfers) {
+		if (transfer->friend_number == friend_number && transfer->file_number == file_number) {
+			qmlbridge->fileControlUpdateMessage(friend_number, qmlbridge->file_messages[file_number], control);
+			switch (control) {
+				case TOX_FILE_CONTROL_RESUME:
+					chat_db->updateFileMessageState(qmlbridge->file_messages[file_number], 
+													get_friend_public_key(m, friend_number), 
+													ToxFileState::TOX_FILE_INPROGRESS);
+					break;
+				case TOX_FILE_CONTROL_CANCEL:
+					chat_db->updateFileMessageState(qmlbridge->file_messages[file_number], 
+													get_friend_public_key(m, friend_number), 
+													ToxFileState::TOX_FILE_CANCELED);
+					qmlbridge->file_messages.remove(file_number);
+					delete transfer;
+					break;
+			}
 		}
 	}
 }
@@ -556,6 +583,7 @@ Tox *create(ToxProfileLoadingError &error, bool create_new, const QString &passw
 	tox_callback_friend_status_message(m, cb_friend_status_message);
 	tox_callback_friend_status(m, cb_friend_status);
 	tox_callback_file_chunk_request(m, cb_file_chunk_request);
+	tox_callback_file_recv_control(m, cb_file_recv_control_cb);
 
 	size_t s_len = tox_self_get_status_message_size(m);
 
@@ -669,11 +697,17 @@ static void send_file_chunk(Tox *m, quint32 friend_number, quint32 file_number
 	for (const auto transfer : qmlbridge->transfers) {
 		if (transfer->friend_number == friend_number && transfer->file_number == file_number) {
 			transfer->bytesTransfered += bytesRead.length();
-			if (transfer->bytesTransfered == transfer->reader->getFile()->size()) {
-				qmlbridge->changeFileProgress(friend_number, file_number, transfer->bytesTransfered);
+			if (transfer->bytesTransfered == transfer->manager->getFile()->size()) {
+				chat_db->updateFileMessageState(qmlbridge->file_messages[file_number], 
+												get_friend_public_key(m, friend_number), 
+												ToxFileState::TOX_FILE_FINISHED);
+				qmlbridge->changeFileProgress(friend_number, file_number, transfer->bytesTransfered, true);
+				qmlbridge->file_messages.remove(file_number);
 				delete transfer;
+				return;
 			} else {
-				qmlbridge->changeFileProgress(friend_number, file_number, transfer->bytesTransfered);
+				qmlbridge->changeFileProgress(friend_number, file_number, transfer->bytesTransfered, false);
+				return;
 			}
 		}
 	}
@@ -687,18 +721,19 @@ quint32 send_file(Tox *m, quint32 friend_number, const QString &path, quint64 &f
 		return 0;
 	}
 	filesize = file->size();
-	QByteArray encodedFilename = path.split(QDir::separator()).last().toUtf8();
+	QByteArray encodedFilename = Tools::getFilenameFromPath(path).toUtf8();
 	file_id.reserve(tox_file_id_length());
 	TOX_ERR_FILE_SEND err;
 	quint32 file_number = tox_file_send(m, friend_number, TOX_FILE_KIND_DATA, filesize, (quint8*)file_id.data(), 
 				  (quint8*)encodedFilename.data(), encodedFilename.length(), &err);
-	Tools::AsyncFileReader *reader = new Tools::AsyncFileReader(file);
-	QObject::connect(reader, &Tools::AsyncFileReader::fileChunkReady, [] (void *parent, const QByteArray &data, quint64 position) {
+	Tools::AsyncFileManager *manager = new Tools::AsyncFileManager(file);
+	QObject::connect(manager, &Tools::AsyncFileManager::fileChunkReady, [manager] (void *parent, const QByteArray &data, quint64 position) {
+		manager->start();
 		ToxFileTransfer *parent_transfer = (ToxFileTransfer*)parent;
 		send_file_chunk(parent_transfer->tox, parent_transfer->friend_number, parent_transfer->file_number,
 						position, data);
 	});
-	ToxFileTransfer *transfer = new ToxFileTransfer(m, friend_number, file_number, reader);
+	ToxFileTransfer *transfer = new ToxFileTransfer(m, friend_number, file_number, manager);
 	qmlbridge->transfers.push_back(transfer);
 	if (err > 0) {
 		Tools::debug("tox_file_send file failed with error number: " + QString::number(err));
@@ -718,10 +753,16 @@ bool file_control(Tox *m, quint32 friend_number, quint32 file_number, quint32 co
 	if (err > 0) {
 		Tools::debug("tox_file_send file failed with error number: " + QString::number(err));
 	} else {
-		if (control == TOX_FILE_CONTROL_CANCEL) {
-			for (const auto transfer : qmlbridge->transfers) {
-				if (transfer->friend_number == friend_number && transfer->file_number == file_number) {
-					delete transfer;
+		for (const auto transfer : qmlbridge->transfers) {
+			if (transfer->friend_number == friend_number && transfer->file_number == file_number) {
+				switch (control) {
+					case TOX_FILE_CONTROL_CANCEL:
+						chat_db->updateFileMessageState(qmlbridge->file_messages[file_number], 
+														get_friend_public_key(m, friend_number), 
+														ToxFileState::TOX_FILE_CANCELED);
+						qmlbridge->file_messages.remove(file_number);
+						delete transfer;
+						break;
 				}
 			}
 		}

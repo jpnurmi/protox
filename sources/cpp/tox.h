@@ -61,29 +61,30 @@ enum ToxFileSendingError {
 enum ToxFileState {
 	TOX_FILE_REQUEST,
 	TOX_FILE_INPROGRESS,
-	TOX_FILE_CANCELED
+	TOX_FILE_CANCELED,
+	TOX_FILE_FINISHED
 };
 
 struct ToxFileTransfer {
 	Tox *tox;
 	quint32 friend_number;
 	quint32 file_number;
-	Tools::AsyncFileReader *reader;
+	Tools::AsyncFileManager *manager;
 	quint32 bytesTransfered;
-	ToxFileTransfer (Tox *_tox, quint32 _friend_number, quint32 _file_number, Tools::AsyncFileReader *_reader) {
+	ToxFileTransfer (Tox *_tox, quint32 _friend_number, quint32 _file_number, Tools::AsyncFileManager *_manager) {
 		tox = _tox;
 		friend_number = _friend_number;
 		file_number = _file_number;
-		reader = _reader;
-		reader->setObjectParent(this);
+		manager = _manager;
+		manager->setObjectParent(this);
 		bytesTransfered = 0;
 	}
 	~ToxFileTransfer() {
-		reader->exit();
-		delete reader;
+		delete manager;
 	}
 };
 typedef QVector <ToxFileTransfer*> ToxFileTransfers;
+typedef QMap <quint32, quint64> ToxFileMessages;
 
 struct ToxMessage {
 	ToxVariantMessage variantMessage;

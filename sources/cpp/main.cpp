@@ -519,6 +519,7 @@ void QmlCBridge::signOutProfile(bool remove)
 	}
 	current_profile.clear();
 	pending_messages.clear();
+	file_messages.clear();
 }
 
 quint32 QmlCBridge::getToxNodesCount()
@@ -636,6 +637,9 @@ quint32 QmlCBridge::sendFile(quint32 friend_number, const QString &filepath)
 	ToxFileId file_id;
 	quint32 error;
 	quint32 file_number = Toxcore::send_file(tox, friend_number, filepath, filesize, file_id, error);
+	if (error > 0) {
+		return error;
+	}
 	QDateTime dt = QDateTime::currentDateTime();
 	ToxVariantMessage variantMessage;
 	variantMessage.insert("type", ToxVariantMessageType::TOXMSG_FILE);
@@ -645,36 +649,38 @@ quint32 QmlCBridge::sendFile(quint32 friend_number, const QString &filepath)
 	variantMessage.insert("file_path", filepath);
 	variantMessage.insert("file_number", file_number);
 	// ui only
-	variantMessage.insert("name", filepath.split(QDir::separator()).last());
-	variantMessage.insert("file_id_string", QString::fromLatin1(file_id));
-	if (error > 0) {
-		return error;
-	}
+	variantMessage.insert("name", Tools::getFilenameFromPath(filepath));
 	quint64 unique_id = chat_db->insertMessage(variantMessage, dt, Toxcore::get_friend_public_key(tox, friend_number), false, true);
-	insertMessage(variantMessage, friend_number, dt, true);
+	file_messages[file_number] = unique_id;
+	insertMessage(variantMessage, friend_number, dt, true, unique_id);
 	return 0;
 }
 
-void QmlCBridge::controlFile(quint32 friend_number, quint32 file_number, const QString &file_id_string, quint32 control)
+void QmlCBridge::fileControlUpdateMessage(quint32 friend_number, quint64 unique_id, quint32 control)
+{
+	QVariant returnedValue;
+	QMetaObject::invokeMethod(component, "fileControlUpdateMessage",
+		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, friend_number), 
+							  Q_ARG(QVariant, unique_id),
+							  Q_ARG(QVariant, control));
+}
+
+void QmlCBridge::controlFile(quint32 friend_number, quint32 file_number, quint64 unique_id, quint32 control)
 {
 	bool success = Toxcore::file_control(tox, friend_number, file_number, control);
 	if (success) {
-		//ToxFileId file_id = file_id_string.toLatin1();
-		QVariant returnedValue;
-		QMetaObject::invokeMethod(component, "fileControlUpdateMessage",
-			Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, friend_number), 
-								  Q_ARG(QVariant, file_number),
-								  Q_ARG(QVariant, file_id_string),
-								  Q_ARG(QVariant, control));
+		fileControlUpdateMessage(friend_number, unique_id, control);
 	}
 }
 
-void QmlCBridge::changeFileProgress(quint32 friend_number, quint32 file_number, quint32 bytesTransfered)
+void QmlCBridge::changeFileProgress(quint32 friend_number, quint32 file_number, quint32 bytesTransfered, bool finished)
 {
-	if (transfer_update_timer->isActive()) {
-		return;
-	} else {
-		transfer_update_timer->start();
+	if (!finished) {
+		if (transfer_update_timer->isActive()) {
+			return;
+		} else {
+			transfer_update_timer->start();
+		}
 	}
 	QVariant returnedValue;
 	QMetaObject::invokeMethod(component, "changeFileProgress",
