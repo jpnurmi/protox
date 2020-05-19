@@ -428,7 +428,7 @@ int QmlCBridge::signInProfile(const QString &profile, bool create_new, const QSt
 		settings->setValue("auto_login_profile", "");
 	}
 	settings->endGroup();
-	Tools::debug("My address: " + ToxConverter::toString(Toxcore::get_address(tox)));
+	//Tools::debug("My address: " + ToxConverter::toString(Toxcore::get_address(tox)));
 	chat_db = new ChatDataBase("chat_" + Tools::replaceFileExtension(current_profile, ".db"), password);
 
 	// load config
@@ -701,6 +701,11 @@ void QmlCBridge::changeFileProgress(quint32 friend_number, quint32 file_number, 
 							  Q_ARG(QVariant, bytesTransfered));
 }
 
+QString QmlCBridge::getDefaultDownloadsDirectory()
+{
+	return Tools::getDefaultDownloadsDirectory();
+}
+
 QmlTranslator::QmlTranslator(QObject *parent) : QObject(parent) {}
 
 void QmlTranslator::setTranslation(const QString &translation)
@@ -748,6 +753,7 @@ int main(int argc, char *argv[])
 	QtStatusBar::declareQML();
 	QtToast::declareQML();
 	QtPhotoDialog::declareQML();
+	QtFolderDialog::declareQML();
 	QUtf8ByteLimitValidator::declareQML();
 	QZXing::registerQMLTypes();
 	QZXing::registerQMLImageProvider(engine);

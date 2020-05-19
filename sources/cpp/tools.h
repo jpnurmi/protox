@@ -6,10 +6,11 @@
 namespace Tools {
 	void debug(const QString &msg);
 	const QString getInternalStoragePath();
-	const QString getProgDir(bool create = true);
+	const QString getProgDir();
 	const QString replaceFileExtension(const QString &file, const QString &with);
 	const QStringList qstringSplitUnicode(const QString &str, int limit_bytes);
 	const QString getFilenameFromPath(const QString &path);
+	const QString getDefaultDownloadsDirectory();
 	class AsyncFileManager : public QThread
 	{
 		Q_OBJECT

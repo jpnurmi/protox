@@ -85,6 +85,11 @@ public class QtActivityEx extends QtActivity
         return Intent.createChooser(intent, title);
     }
 
+    public static Intent createChooseFolderIntent() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+        return Intent.createChooser(intent, "");
+    }
+
     public static String convertMediaUriToPath(String uriString) {
         Uri uri = Uri.parse(uriString);
         Context context = (Context)QtNative.activity();
@@ -94,7 +99,7 @@ public class QtActivityEx extends QtActivity
             if (isExternalStorageDocument(uri)) {
                 final String docId = DocumentsContract.getDocumentId(uri);
                 final String[] split = docId.split(":");
-                if (split[0].equals("primary")) {
+                if (split[0].equalsIgnoreCase("primary")) {
                     return Environment.getExternalStorageDirectory() + "/" + split[1];
                 } else {
                     return "/storage/" + split[0] + "/" + split[1];
@@ -117,6 +122,21 @@ public class QtActivityEx extends QtActivity
                 selectionArgs = new String[]{
                         split[1]
                 };
+            }
+        }
+        if (DocumentsContract.isTreeUri(uri)) {
+            if (isExternalStorageDocument(uri)) {
+                final String docId = DocumentsContract.getTreeDocumentId(uri);
+                final String[] split = docId.split(":");
+                if (split[0].equalsIgnoreCase("primary")) {
+                    return Environment.getExternalStorageDirectory() + "/" + split[1];
+                } else {
+                    String path = "/storage/" + split[0] + "/";
+                    if (split.length > 1) {
+                        path += split[1];
+                    }
+                    return path;
+                }
             }
         }
         if ("content".equalsIgnoreCase(uri.getScheme())) {

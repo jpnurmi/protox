@@ -14,11 +14,11 @@ const QString getInternalStoragePath()
 #endif
 }
 
-const QString getProgDir(bool create)
+const QString getProgDir()
 {
 	QString path = getInternalStoragePath() + QString(".protox") + QDir::separator();
 	QDir dir;
-	if (create && !dir.exists(path))
+	if (!dir.exists(path))
 		dir.mkdir(path);
 	return path;
 }
@@ -58,6 +58,15 @@ const QStringList qstringSplitUnicode(const QString &str, int limit_bytes)
 const QString getFilenameFromPath(const QString &path)
 {
 	return path.split(QDir::separator()).last();
+}
+
+const QString getDefaultDownloadsDirectory()
+{
+	QString path = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation) + QDir::separator() + "Protox";
+	QDir dir;
+	if (!dir.exists(path))
+		dir.mkdir(path);
+	return path;
 }
 
 void AsyncFileManager::onChunkRequest(quint64 position, quint32 length)

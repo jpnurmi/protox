@@ -1,5 +1,5 @@
-#ifndef PHOTOPICKER_H
-#define PHOTOPICKER_H
+#ifndef PHOTODIALOG_H
+#define PHOTODIALOG_H
 
 #include "sources/cpp/common.h"
 
@@ -40,4 +40,4 @@ private:
 
 
 
-#endif // PHOTOPICKER_H
+#endif // PHOTODIALOG_H

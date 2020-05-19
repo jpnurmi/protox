@@ -6,6 +6,7 @@
 #if defined (Q_OS_ANDROID)
 #include "native/android/toasts.h"
 #include "native/android/photodialog.h"
+#include "native/android/folderdialog.h"
 #endif
 
 namespace Native {
