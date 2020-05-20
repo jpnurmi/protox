@@ -12,7 +12,6 @@ import QtPhotoDialog 1.0
 
 ColumnLayout {
     anchors.fill: parent
-    anchors.leftMargin: undefined
     spacing: 0
     Item {
         id: chatContent
@@ -23,59 +22,13 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.fillHeight: true
         Layout.topMargin: overlayHeader.height
-        Rectangle {
-            id: typingText
-            property int margin: 5
-            property real alpha: 0.9
-            height: 20
-            opacity: alpha
-            z: z_top
-            radius: height * 0.5
-            anchors.left: parent.left
-            anchors.leftMargin: parent.chat_margin
-            anchors.right: parent.right
-            anchors.rightMargin: parent.chat_margin
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: (chatMessage.focus ? keyboardHeight : 0) + chatLayout.height + chatSeparator.separator_margin * 2 + chatSeparator.height + margin
-            color: "white"
-            property string text
-            Text {
-                anchors.left: parent.left
-                anchors.leftMargin: 5
-                anchors.verticalCenter: parent.verticalCenter
-                text: parent.text
-                font.italic: true
-                visible: parent.visible
-            }
-            visible: false
-            onVisibleChanged: {
-                if (messages.atYEnd) {
-                    messages.scrollToEnd()
-                }
-                if (visible) {
-                    messages.bottomMargin += height + margin
-                } else {
-                    messages.bottomMargin -= height + margin
-                }
-            }
-        }
-        DropShadow {
-            anchors.fill: typingText
-            visible: typingText.visible
-            opacity: typingText.opacity
-            radius: 8.0
-            samples: 16
-            color: "#80000000"
-            source: typingText
-        }
         ListModel {
             id: messagesModel
         }
         ListView {
             id: messages
             anchors.fill: parent
-            property int flickable_margin: 25
-            property bool lastItemVisible: false
+            readonly property int flickable_margin: 25
             topMargin: flickable_margin
             bottomMargin: flickable_margin
             spacing: 20
@@ -83,6 +36,51 @@ ColumnLayout {
             boundsMovement: Flickable.StopAtBounds
             ScrollIndicator.vertical: ScrollIndicator {}
             displayMarginBeginning: 32
+            Rectangle {
+                id: typingText
+                readonly property int margin: 5
+                readonly property real alpha: 0.9
+                height: 20
+                opacity: alpha
+                z: z_top
+                radius: height * 0.5
+                anchors.left: parent.left
+                anchors.leftMargin: chatContent.chat_margin
+                anchors.right: parent.right
+                anchors.rightMargin: chatContent.chat_margin
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: margin
+                color: "white"
+                property string text
+                Text {
+                    anchors.left: parent.left
+                    anchors.leftMargin: 5
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: parent.text
+                    font.italic: true
+                    visible: parent.visible
+                }
+                visible: false
+                onVisibleChanged: {
+                    if (messages.atYEnd) {
+                        messages.scrollToEnd()
+                    }
+                    if (visible) {
+                        messages.bottomMargin += height + margin
+                    } else {
+                        messages.bottomMargin -= height + margin
+                    }
+                }
+            }
+            DropShadow {
+                anchors.fill: typingText
+                visible: typingText.visible
+                opacity: typingText.opacity
+                radius: 8.0
+                samples: 16
+                color: "#80000000"
+                source: typingText
+            }
             Rectangle {
                 id: messageRemovalLine
                 x: -width
@@ -111,17 +109,17 @@ ColumnLayout {
                     scrollToEndButton.visible = false
                 }
             }
-            function checkExceedsHeight() {
-                return contentHeight > height
-            }
-            function scrollToStart() {
-                positionViewAtBeginning()
-                contentY -= flickable_margin
-            }
             function scrollToEnd() {
-                positionViewAtIndex(count - 1, ListView.End)
-                contentY += flickable_margin + (typingText.visible ? typingText.height + typingText.margin : 0) +
-                        chatLayout.height + chatSeparator.height
+                contentY += Number.MAX_VALUE
+            }
+            property int defaultHeight
+            Component.onCompleted: {
+                defaultHeight = height
+            }
+            onHeightChanged: {
+                if (height < defaultHeight) {
+                    scrollToEnd()
+                }
             }
             property bool addTransitionEnabled: true
             add: Transition {
@@ -946,6 +944,11 @@ ColumnLayout {
         Layout.alignment: Qt.AlignBottom
         Layout.fillWidth: true
         implicitHeight: chatMessage.focus ? keyboardHeight : 0
+        onImplicitHeightChanged: {
+            if (implicitHeight > 0) {
+                messages.scrollToEnd()
+            }
+        }
     }
 }
 

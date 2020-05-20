@@ -304,9 +304,6 @@ NumberAnimation on keyboardHeight {
 function setKeyboardHeight(height) {
     keyboardActive = height > 0
     keyboardHeight = height / Screen.devicePixelRatio
-    if (keyboardActive && chatMessage.focus) {
-        messages.scrollToEnd()
-    }
 }
 
 function updateQRcode() {
