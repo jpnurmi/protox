@@ -110,6 +110,7 @@ ColumnLayout {
                 }
             }
             function scrollToEnd() {
+                positionViewAtEnd()
                 contentY += Number.MAX_VALUE
             }
             property int defaultHeight
