@@ -19,7 +19,10 @@ ColumnLayout {
         property int chat_margin: 15
         property int cloud_margin: 5
         // fixme: convert to Layout.
-        anchors.fill: parent
+        Layout.alignment: Qt.AlignTop
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+        Layout.topMargin: overlayHeader.height
         Rectangle {
             id: typingText
             property int margin: 5
@@ -73,8 +76,7 @@ ColumnLayout {
             anchors.fill: parent
             property int flickable_margin: 25
             property bool lastItemVisible: false
-            anchors.topMargin: overlayHeader.height
-            anchors.bottomMargin: (chatMessage.focus ? keyboardHeight : 0) + chatLayout.height + chatSeparator.separator_margin * 2 + chatSeparator.height
+            //anchors.bottomMargin: (chatMessage.focus ? keyboardHeight : 0) + chatLayout.height + chatSeparator.separator_margin * 2 + chatSeparator.height
             topMargin: flickable_margin
             bottomMargin: flickable_margin
             spacing: 20
@@ -431,9 +433,11 @@ ColumnLayout {
                         Column {
                             id: fileLayout
                             anchors.fill: parent
-                            anchors.margins: chatContent.cloud_margin
+                            anchors.leftMargin: chatContent.chat_margin * 0.5
+                            anchors.rightMargin: chatContent.chat_margin * 0.5
                             spacing: 0
-                            property real maxWidth: messages.width * 0.5
+                            readonly property real maxWidth: messages.width * 0.5
+                            readonly property real verticalMargins: chatContent.chat_margin * 0.35
                             Timer {
                                 id: speedCalcTimer
                                 running: msgFilestate === fstate_inprogress
@@ -445,6 +449,7 @@ ColumnLayout {
                                     lastFileSize = msgFiletsize
                                 }
                             }
+                            Rectangle { opacity: 0; width: parent.width; height: fileLayout.verticalMargins }
                             Text {
                                 id: fileName
                                 text: msgFilename
@@ -470,7 +475,8 @@ ColumnLayout {
                                 id: fileStatus
                                 visible: msgFilestate !== fstate_request
                                 color: msgFilestate === fstate_finished ? "green" : 
-                                      (msgFilestate === fstate_inprogress ? "black" : "red")
+                                      (msgFilestate === fstate_inprogress 
+                                       || msgFilestate == fstate_paused ? "black" : "red")
                                 font.pointSize: fontMetrics.normalize(standardFontPointSize)
                                 text: msgFilestate === fstate_canceled ? qsTr("File transfer canceled.") : 
                                       (msgFilestate === fstate_finished ? qsTr("Transfer succeeded.") : 
@@ -478,16 +484,17 @@ ColumnLayout {
                                 wrapMode: Text.Wrap
                                 width: parent.width
                             }
+                            Rectangle { opacity: 0; visible: fileButtonsLayout.visible; width: parent.width; height: 8 }
                             ProgressBar {
                                 id: fileProgress
                                 width: parent.width
                                 value: msgFiletsize / msgFilesize
-                                visible: msgFilestate === fstate_inprogress
+                                visible: msgFilestate === fstate_inprogress || msgFilestate == fstate_paused
                                 Behavior on value {
                                     SmoothedAnimation { velocity: 200 }
                                 }
                             }
-                            Rectangle { opacity: 0; visible: fileButtonsLayout.visible; width: parent.width; height: 12 }
+                            Rectangle { opacity: 0; visible: fileButtonsLayout.visible; width: parent.width; height: 8 }
                             Rectangle {
                                 width: parent.width
                                 height: 1
@@ -495,8 +502,22 @@ ColumnLayout {
                                 gradient: Gradient {
                                     orientation: Gradient.Horizontal
                                     GradientStop { position: 0.0; color: "#00000000" }
-                                    GradientStop { position: 0.5; color: "white" }
+                                    GradientStop { position: 0.25; color: "white" }
+                                    GradientStop { position: 0.75; color: "white" }
                                     GradientStop { position: 1.0; color: "#00000000" }
+                                }
+                            }
+                            RowLayout {
+                                spacing: 0
+                                visible: filePauseButton.visible
+                                width: parent.width
+                                height: fileLayout.verticalMargins
+                                Rectangle {
+                                    width: 1
+                                    visible: parent.visible
+                                    Layout.fillHeight: true
+                                    Layout.alignment: Qt.AlignHCenter
+                                    color: "white"
                                 }
                             }
                             RowLayout {
@@ -512,11 +533,11 @@ ColumnLayout {
                                              && msgFilestate !== fstate_canceled 
                                              && msgFilestate !== fstate_finished
                                     Text {
+                                        id: filePauseButtonText
                                         anchors.centerIn: parent
                                         font.family: themify.name
                                         font.pointSize: 24
-                                        font.bold: true
-                                        text: "\uE6AE"
+                                        text: "\uE762"
                                         color: "black"
                                     }
                                     onClicked: {
@@ -528,13 +549,12 @@ ColumnLayout {
                                         }
                                         var success = bridge.controlFile(bridge.getCurrentFriendNumber(), 
                                                            msgFilenumber, msgUniqueId, control)
-                                        if (!success) {
-                                            return
-                                        }
-                                        if (msgFilestate === fstate_inprogress) {
-                                            text = "\uE6AE"
-                                        } else if (msgFilestate === fstate_paused) {
-                                            text = "\uE6AD"
+                                        if (success) {
+                                            if (msgFilestate === fstate_inprogress) {
+                                                filePauseButtonText.text = "\uE762"
+                                            } else if (msgFilestate === fstate_paused) {
+                                                filePauseButtonText.text = "\uE761"
+                                            }
                                         }
                                     }
                                 }
@@ -561,21 +581,20 @@ ColumnLayout {
                                         anchors.centerIn: parent
                                         font.family: themify.name
                                         font.pointSize: 24
-                                        font.bold: true
-                                        text: "\uE6AB"
+                                        text: "\uE760"
                                         color: "red"
                                     }
                                 }
                             }
+                            Rectangle { opacity: 0; width: parent.width; height: fileLayout.verticalMargins }
                             Component.onCompleted: {
                                 messageCloud.implicitWidth = maxWidth + chatContent.cloud_margin * 2
-                                messageCloud.implicitHeight = implicitHeight + chatContent.cloud_margin * 2
+                                messageCloud.implicitHeight = implicitHeight
                             }
-                            
                             Binding {
                                 target: messageCloud
                                 property: "implicitHeight"
-                                value: implicitHeight + chatContent.cloud_margin * 2
+                                value: implicitHeight
                             }
                             
                         }
@@ -605,11 +624,7 @@ ColumnLayout {
         height: 1
         color: "gray"
         opacity: 0.5
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: chatLayout.top
-        property int separator_margin: 5
-        anchors.bottomMargin: separator_margin
+        Layout.fillWidth: true
         visible: !cleanProfile
     }
 
@@ -617,10 +632,7 @@ ColumnLayout {
         id: chatLayout
         Layout.alignment: Qt.AlignBottom | Qt.AlignLeft
         property int margin: 5
-        Layout.leftMargin: margin
-        Layout.rightMargin: margin
-        Layout.topMargin: margin
-        Layout.bottomMargin: (chatMessage.focus ? keyboardHeight : 0) + margin
+        Layout.margins: margin
         onHeightChanged: {
             if (loginWindow.profileSelected) {
                 attachFileButton.addiveHeight = (height - attachFileButton.implicitHeight) * 0.5
@@ -928,6 +940,13 @@ ColumnLayout {
                 grabPermissions: PointerHandler.CanTakeOverFromHandlersOfDifferentType | PointerHandler.ApprovesTakeOverByHandlersOfDifferentType
             }
         }
+    }
+    Rectangle {
+        id: keyboardSpace
+        opacity: 0
+        Layout.alignment: Qt.AlignBottom
+        Layout.fillWidth: true
+        implicitHeight: chatMessage.focus ? keyboardHeight : 0
     }
 }
 

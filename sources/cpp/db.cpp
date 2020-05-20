@@ -336,11 +336,11 @@ void ChatDataBase::execQuery(QSqlQuery &query)
 	query.exec();
 #ifdef SQLDEBUG
 	Tools::debug("SQL: " + query.lastQuery());
+#endif
 	const QString error = query.lastError().text();
 	if (!error.isEmpty()) {
 		Tools::debug("SQL error: " + query.lastError().text());
 	}
-#endif
 }
 
 const QSqlQuery ChatDataBase::execQuery(const QString &query_string)
@@ -348,11 +348,11 @@ const QSqlQuery ChatDataBase::execQuery(const QString &query_string)
 	QSqlQuery query = db.exec(query_string);
 #ifdef SQLDEBUG
 	Tools::debug("SQL: " + query.lastQuery());
+#endif
 	const QString error = query.lastError().text();
 	if (!error.isEmpty()) {
 		Tools::debug("SQL error: " + query.lastError().text());
 	}
-#endif
 	return query;
 }
 

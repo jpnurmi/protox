@@ -677,12 +677,13 @@ void QmlCBridge::fileControlUpdateMessage(quint32 friend_number, quint64 unique_
 							  Q_ARG(QVariant, control));
 }
 
-void QmlCBridge::controlFile(quint32 friend_number, quint32 file_number, quint64 unique_id, quint32 control)
+bool QmlCBridge::controlFile(quint32 friend_number, quint32 file_number, quint64 unique_id, quint32 control)
 {
 	bool success = Toxcore::file_control(tox, friend_number, file_number, control);
 	if (success) {
 		fileControlUpdateMessage(friend_number, unique_id, control);
 	}
+	return success;
 }
 
 void QmlCBridge::changeFileProgress(quint32 friend_number, quint32 file_number, quint32 bytesTransfered, bool finished)
