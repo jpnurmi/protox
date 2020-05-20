@@ -76,7 +76,6 @@ ColumnLayout {
             anchors.fill: parent
             property int flickable_margin: 25
             property bool lastItemVisible: false
-            //anchors.bottomMargin: (chatMessage.focus ? keyboardHeight : 0) + chatLayout.height + chatSeparator.separator_margin * 2 + chatSeparator.height
             topMargin: flickable_margin
             bottomMargin: flickable_margin
             spacing: 20
@@ -120,9 +119,9 @@ ColumnLayout {
                 contentY -= flickable_margin
             }
             function scrollToEnd() {
-                positionViewAtEnd()
+                positionViewAtIndex(count - 1, ListView.End)
                 contentY += flickable_margin + (typingText.visible ? typingText.height + typingText.margin : 0) +
-                        chatLayout.height + chatSeparator.separator_margin * 2 + chatSeparator.height
+                        chatLayout.height + chatSeparator.height
             }
             property bool addTransitionEnabled: true
             add: Transition {
