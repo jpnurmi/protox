@@ -462,6 +462,22 @@ ColumnLayout {
                                 wrapMode: Text.Wrap
                                 width: parent.width
                             }
+                            Rectangle {
+                                width: filePreviewImage.width + 2
+                                height: filePreviewImage.height + 2
+                                color: getTheme().highlightedButtonColor
+                                visible: filePreviewImage.status === Image.Ready
+                                Image {
+                                    id: filePreviewImage
+                                    anchors.centerIn: parent
+                                    source: safe_bridge().checkFileImage(msgFilepath)
+                                    property real ratio: sourceSize.height / sourceSize.width
+                                    width: fileLayout.width
+                                    height: fileLayout.width * ratio
+                                    asynchronous: true
+                                    mipmap: true
+                                }
+                            }
                             property string transferSpeed: qsTr("Transferring...")
                             function addSpeedString() {
                                 if (transferSpeed !== qsTr("Transferring...")) {

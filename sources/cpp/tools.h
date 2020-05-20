@@ -11,6 +11,7 @@ namespace Tools {
 	const QStringList qstringSplitUnicode(const QString &str, int limit_bytes);
 	const QString getFilenameFromPath(const QString &path);
 	const QString getDefaultDownloadsDirectory();
+	const QString checkFileImage(const QString &path);
 	class AsyncFileManager : public QThread
 	{
 		Q_OBJECT

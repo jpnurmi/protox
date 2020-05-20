@@ -33,6 +33,7 @@ function safe_bridge() {
     empty_bridge.checkMessageInPendingList = function() { return 0 }
     empty_bridge.getCurrentFriendNumber = function() { return 0 }
     empty_bridge.getSettingsValue = function() { return 0 }
+    empty_bridge.checkFileImage = function() { return "" }
     return empty_bridge
 }
 
@@ -193,6 +194,7 @@ function insertMessage(variantMessage, friend_number, self, time, unique_id, fai
         "msgType" : variantMessage.type}
     
     if (!variantMessage.type) {
+        dict.msgFilepath = ""
         dict.msgFilename = ""
         dict.msgFilesize = 0
         dict.msgFiletsize = 0
@@ -201,6 +203,7 @@ function insertMessage(variantMessage, friend_number, self, time, unique_id, fai
         dict.msgText = variantMessage.message
     } else {
         dict.msgText = ""
+        dict.msgFilepath = variantMessage.file_path
         dict.msgFilename = variantMessage.name
         dict.msgFilesize = variantMessage.size
         dict.msgFiletsize = 0

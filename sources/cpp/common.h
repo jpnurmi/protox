@@ -21,7 +21,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QTextBoundaryFinder>
-#include <QFutureWatcher>
+#include <QImageReader>
 
 #if defined (Q_OS_ANDROID)
 #include <QAndroidService>

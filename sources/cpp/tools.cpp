@@ -69,6 +69,16 @@ const QString getDefaultDownloadsDirectory()
 	return path;
 }
 
+const QString checkFileImage(const QString &path)
+{
+	QImageReader reader(path);
+	if (reader.canRead()) {
+		return "file:///" + path;
+	} else {
+		return QString();
+	}
+}
+
 void AsyncFileManager::onChunkRequest(quint64 position, quint32 length)
 {
 	if (!length) {

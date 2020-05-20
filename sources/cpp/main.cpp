@@ -707,6 +707,11 @@ QString QmlCBridge::getDefaultDownloadsDirectory()
 	return Tools::getDefaultDownloadsDirectory();
 }
 
+QString QmlCBridge::checkFileImage(const QString &path)
+{
+	return Tools::checkFileImage(path);
+}
+
 QmlTranslator::QmlTranslator(QObject *parent) : QObject(parent) {}
 
 void QmlTranslator::setTranslation(const QString &translation)
