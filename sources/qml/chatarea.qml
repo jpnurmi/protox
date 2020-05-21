@@ -111,6 +111,8 @@ ColumnLayout {
             function scrollToEnd() {
                 positionViewAtEnd()
                 contentY += Number.MAX_VALUE
+                positionViewAtEnd()
+                contentY += flickable_margin
             }
             property int defaultHeight
             Component.onCompleted: {
