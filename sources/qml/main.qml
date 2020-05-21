@@ -31,10 +31,6 @@ ApplicationWindow {
         chatMessage.updateHeight()
     }
 
-    onHeightChanged: {
-        chatScrollToEnd()
-    }
-
     onClosing: {
         // Keys.onBackPressed doesn't work
         attachFileButton.hideButtons()

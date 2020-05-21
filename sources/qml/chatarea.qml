@@ -634,12 +634,10 @@ ColumnLayout {
                                 lastImplicitHeight = implicitHeight
                             }
                             onImplicitHeightChanged: {
-                                if (implicitHeight > lastImplicitHeight) {
-                                    lastImplicitHeight = implicitHeight
-                                    if (messages.atYEnd) {
-                                        messages.scrollToEnd()
-                                    }
+                                if (implicitHeight > lastImplicitHeight && messages.atYEnd) {
+                                    messages.contentY += implicitHeight - lastImplicitHeight
                                 }
+                                lastImplicitHeight = implicitHeight
                             }
                             Binding {
                                 target: messageCloud
