@@ -178,18 +178,21 @@ ColumnLayout {
                         }
                         messageRemovalLine.visible = true
                         removeAnchors()
+                        messageRemovalLineOut.stop()
                         messageRemovalLineIn.start()
                     } else {
                         if (x < getAdditionalWidth()) {
                             var friend_number = bridge.getCurrentFriendNumber()
                             bridge.removeMessageFromPendingList(friend_number, msgUniqueId)
                             bridge.removeMessageFromDB(friend_number, msgUniqueId)
+                            messageRemovalLineIn.stop()
                             messageRemovalLineOut.start()
                             messageRemovalLine.colision = false
                             cloudRemoveAnimation.start() 
                         } else {
                             setDefaultAnchors()
                             if (messageRemovalLine.x === 0) {
+                                messageRemovalLineIn.stop()
                                 messageRemovalLineOut.start()
                             }
                             messageRemovalLine.colision = false
