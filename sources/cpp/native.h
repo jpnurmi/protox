@@ -14,6 +14,7 @@ namespace Native {
 	void setKeyboardAdjustMode(bool adjustNothing);
 	bool requestApplicationPermissions();
 	QString uriToRealPath(const QString &uriString);
+	void viewFile(const QString &path, const QString &type);
 }
 
 #endif // NATIVE_H

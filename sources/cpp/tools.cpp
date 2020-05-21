@@ -73,7 +73,7 @@ const QString checkFileImage(const QString &path)
 {
 	QImageReader reader(path);
 	if (reader.canRead()) {
-		return "file:///" + path;
+		return "file://" + path;
 	} else {
 		return QString();
 	}

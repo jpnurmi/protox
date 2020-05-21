@@ -12,6 +12,7 @@ import android.content.ContentUris;
 import android.os.Bundle;
 import android.os.Build;
 import android.os.Environment;
+import android.os.StrictMode;
 import android.util.Log;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.View;
@@ -23,7 +24,7 @@ import android.provider.MediaStore;
 import android.provider.DocumentsContract;
 import android.database.Cursor;
 import android.net.Uri;
-
+import android.webkit.MimeTypeMap;
 
 import KeyboardProvider.KeyboardProvider;
 
@@ -31,6 +32,9 @@ public class QtActivityEx extends QtActivity
 {
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        // I need this to fix crashes in viewFile
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = getWindow();
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
@@ -176,5 +180,24 @@ public class QtActivityEx extends QtActivity
 
     public static boolean isGooglePhotosUri(Uri uri) {
         return "com.google.android.apps.photos.content".equals(uri.getAuthority());
+    }
+
+    private static String getMimeType(String url) {
+        String type = null;
+        String extension = MimeTypeMap.getFileExtensionFromUrl(url);
+        if (extension != null) {
+            type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+        }
+        return type;
+    }
+
+    public void viewFile(String path, String type) {
+        if (type.equals("*")) {
+            type = getMimeType(path);
+        }
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_VIEW);
+        intent.setDataAndType(Uri.parse("file://" + path), type);
+        startActivity(intent);
     }
 }

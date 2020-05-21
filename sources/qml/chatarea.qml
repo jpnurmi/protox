@@ -15,9 +15,8 @@ ColumnLayout {
     spacing: 0
     Item {
         id: chatContent
-        property int chat_margin: 15
-        property int cloud_margin: 5
-        // fixme: convert to Layout.
+        readonly property int chat_margin: 15
+        readonly property int cloud_margin: 5
         Layout.alignment: Qt.AlignTop
         Layout.fillWidth: true
         Layout.fillHeight: true
@@ -432,7 +431,7 @@ ColumnLayout {
                             id: fileLayout
                             anchors.fill: parent
                             anchors.leftMargin: chatContent.chat_margin * 0.5
-                            anchors.rightMargin: chatContent.chat_margin * 0.5
+                            anchors.rightMargin: chatContent.chat_margin * 0.75
                             spacing: 0
                             readonly property real maxWidth: messages.width * 0.5
                             readonly property real verticalMargins: chatContent.chat_margin * 0.35
@@ -461,22 +460,6 @@ ColumnLayout {
                                 font.pointSize: fontMetrics.normalize(standardFontPointSize)
                                 wrapMode: Text.Wrap
                                 width: parent.width
-                            }
-                            Rectangle {
-                                width: filePreviewImage.width + 2
-                                height: filePreviewImage.height + 2
-                                color: getTheme().highlightedButtonColor
-                                visible: filePreviewImage.status === Image.Ready
-                                Image {
-                                    id: filePreviewImage
-                                    anchors.centerIn: parent
-                                    source: safe_bridge().checkFileImage(msgFilepath)
-                                    property real ratio: sourceSize.height / sourceSize.width
-                                    width: fileLayout.width
-                                    height: fileLayout.width * ratio
-                                    asynchronous: true
-                                    mipmap: true
-                                }
                             }
                             property string transferSpeed: qsTr("Transferring...")
                             function addSpeedString() {
@@ -509,6 +492,30 @@ ColumnLayout {
                                 }
                             }
                             Rectangle { opacity: 0; visible: fileButtonsLayout.visible; width: parent.width; height: 8 }
+                            Rectangle {
+                                readonly property int margins: 2
+                                width: filePreviewImage.width + margins * 2
+                                height: filePreviewImage.height + margins * 2
+                                radius: 2
+                                color: getTheme().highlightedButtonColor
+                                visible: filePreviewImage.status === Image.Ready
+                                Image {
+                                    id: filePreviewImage
+                                    anchors.centerIn: parent
+                                    source: safe_bridge().checkFileImage(msgFilepath)
+                                    readonly property real ratio: sourceSize.height / sourceSize.width
+                                    width: fileLayout.width
+                                    height: fileLayout.width * ratio
+                                    asynchronous: true
+                                    mipmap: true
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        onClicked: {
+                                            bridge.viewFile(msgFilepath, "image/*")
+                                        }
+                                    }
+                                }
+                            }
                             Rectangle {
                                 width: parent.width
                                 height: 1
@@ -600,17 +607,40 @@ ColumnLayout {
                                     }
                                 }
                             }
+                            ToolButton {
+                                id: viewFileButtons
+                                visible: msgFilestate === fstate_finished && !safe_bridge().checkFileImage(msgFilepath).length
+                                onClicked: {
+                                    bridge.viewFile(msgFilepath, "*")
+                                }
+                                Text {
+                                    anchors.centerIn: parent
+                                    font.family: themify.name
+                                    font.pointSize: 24
+                                    text: "\uE6A4"
+                                    color: "black"
+                                }
+                            }
                             Rectangle { opacity: 0; width: parent.width; height: fileLayout.verticalMargins }
+                            property real lastImplicitHeight
                             Component.onCompleted: {
-                                messageCloud.implicitWidth = maxWidth + chatContent.cloud_margin * 2
+                                messageCloud.implicitWidth = maxWidth
                                 messageCloud.implicitHeight = implicitHeight
+                                lastImplicitHeight = implicitHeight
+                            }
+                            onImplicitHeightChanged: {
+                                if (implicitHeight > lastImplicitHeight) {
+                                    lastImplicitHeight = implicitHeight
+                                    if (messages.atYEnd) {
+                                        messages.scrollToEnd()
+                                    }
+                                }
                             }
                             Binding {
                                 target: messageCloud
                                 property: "implicitHeight"
                                 value: implicitHeight
                             }
-                            
                         }
                     }
                     sourceComponent: msgType ? cloudFileComponent : cloudTextComponent
@@ -645,7 +675,7 @@ ColumnLayout {
     RowLayout {
         id: chatLayout
         Layout.alignment: Qt.AlignBottom | Qt.AlignLeft
-        property int margin: 5
+        readonly property int margin: 5
         Layout.margins: margin
         onHeightChanged: {
             if (loginWindow.profileSelected) {

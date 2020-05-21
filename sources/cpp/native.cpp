@@ -67,6 +67,17 @@ QString uriToRealPath(const QString &uriString)
 	return realPath;
 }
 
-
+void viewFile(const QString &path, const QString &type)
+{
+#if defined (Q_OS_ANDROID)
+	QtAndroid::runOnAndroidThread([=]() {
+		QAndroidJniObject javaString = QAndroidJniObject::fromString(path);
+		QAndroidJniObject javaString2 = QAndroidJniObject::fromString(type);
+		QtAndroid::androidActivity().callMethod<void>("viewFile", 
+													  "(Ljava/lang/String;Ljava/lang/String;)V", 
+													  javaString.object(), javaString2.object());
+	});
+#endif
+}
 
 }

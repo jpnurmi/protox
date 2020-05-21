@@ -712,6 +712,11 @@ QString QmlCBridge::checkFileImage(const QString &path)
 	return Tools::checkFileImage(path);
 }
 
+void QmlCBridge::viewFile(const QString &path, const QString &type)
+{
+	Native::viewFile(path, type);
+}
+
 QmlTranslator::QmlTranslator(QObject *parent) : QObject(parent) {}
 
 void QmlTranslator::setTranslation(const QString &translation)

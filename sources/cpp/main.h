@@ -93,6 +93,7 @@ public slots:
 	Q_INVOKABLE bool controlFile(quint32 friend_number, quint32 file_number, quint64 unique_id, quint32 control);
 	Q_INVOKABLE QString getDefaultDownloadsDirectory();
 	Q_INVOKABLE QString checkFileImage(const QString &path);
+	Q_INVOKABLE void viewFile(const QString &path, const QString &type);
 
 public:
 	ToxFriendsConnStatus friends_conn_status;
