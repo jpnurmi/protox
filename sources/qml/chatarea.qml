@@ -91,7 +91,7 @@ ColumnLayout {
                 NumberAnimation { id: messageRemovalLineIn; target: messageRemovalLine; property: "x"; 
                     from: -messageRemovalLine.width; to: 0; easing.type: Easing.OutCubic }
                 NumberAnimation { id: messageRemovalLineOut; target: messageRemovalLine; property: "x"; 
-                    from: 0; to: -messageRemovalLine.width; easing.type: Easing.OutCubic }
+                    from: 0; to: -messageRemovalLine.width; easing.type: Easing.OutCubic; }
                 LinearGradient {
                     anchors.fill: parent
                     start: Qt.point(parent.width, 0)
@@ -180,21 +180,18 @@ ColumnLayout {
                         }
                         messageRemovalLine.visible = true
                         removeAnchors()
-                        messageRemovalLineOut.stop()
                         messageRemovalLineIn.start()
                     } else {
                         if (x < getAdditionalWidth()) {
                             var friend_number = bridge.getCurrentFriendNumber()
                             bridge.removeMessageFromPendingList(friend_number, msgUniqueId)
                             bridge.removeMessageFromDB(friend_number, msgUniqueId)
-                            messageRemovalLineIn.stop()
                             messageRemovalLineOut.start()
                             messageRemovalLine.colision = false
                             cloudRemoveAnimation.start() 
                         } else {
                             setDefaultAnchors()
-                            if (messageRemovalLine.x === 0) {
-                                messageRemovalLineIn.stop()
+                            if (messageRemovalLine.x > -messageRemovalLine.width) {
                                 messageRemovalLineOut.start()
                             }
                             messageRemovalLine.colision = false
