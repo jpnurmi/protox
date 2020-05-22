@@ -12,6 +12,7 @@ namespace Tools {
 	const QString getFilenameFromPath(const QString &path);
 	const QString getDefaultDownloadsDirectory();
 	const QString checkFileImage(const QString &path);
+	bool checkFileExists(const QString &path);
 	class AsyncFileManager : public QThread
 	{
 		Q_OBJECT
@@ -22,7 +23,9 @@ namespace Tools {
 		// setParent already exists
 		void setObjectParent (void *pointer) { m_parent = pointer; }
 	public slots:
-		void onChunkRequest(quint64 position, quint32 length);
+		void onChunkReadRequest(quint64 position, quint32 length);
+		void onChunkWriteRequest(quint64 position, const QByteArray &data);
+		void onFileTransferStarted(bool &result);
 	signals:
 		void fileChunkReady(void *parent, const QByteArray &data, quint64 position);
 		void fileTransferEnded(void *parent);

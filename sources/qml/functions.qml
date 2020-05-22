@@ -34,6 +34,7 @@ function safe_bridge() {
     empty_bridge.getCurrentFriendNumber = function() { return 0 }
     empty_bridge.getSettingsValue = function() { return 0 }
     empty_bridge.checkFileImage = function() { return "" }
+    empty_bridge.checkFileExists = function() { return 0 }
     return empty_bridge
 }
 
@@ -191,13 +192,13 @@ function insertMessage(variantMessage, friend_number, self, time, unique_id, fai
         "msgUniqueId" : unique_id,
         "msgFailed" : failed,
         "msgHistory" : history,
-        "msgType" : variantMessage.type}
-    
+        "msgType" : variantMessage.type,
+        "msgFiletsize" : 0 }
+
     if (!variantMessage.type) {
         dict.msgFilepath = ""
         dict.msgFilename = ""
         dict.msgFilesize = 0
-        dict.msgFiletsize = 0
         dict.msgFilestate = 0
         dict.msgFilenumber = 0
         dict.msgText = variantMessage.message
@@ -206,7 +207,6 @@ function insertMessage(variantMessage, friend_number, self, time, unique_id, fai
         dict.msgFilepath = variantMessage.file_path
         dict.msgFilename = variantMessage.name
         dict.msgFilesize = variantMessage.size
-        dict.msgFiletsize = 0
         dict.msgFilestate = variantMessage.state
         dict.msgFilenumber = variantMessage.file_number
     }

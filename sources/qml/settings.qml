@@ -54,7 +54,7 @@ Popup {
     FolderDialog {
         id: downloadsFolderDialog
         onAccepted: {
-            settingsModel.setValueString("downloads_folder", folderUrl.toString())
+            settingsModel.setValueString("downloads_folder", bridge.uriToRealPath(folderUrl.toString()))
         }
     }
     MessageDialog {

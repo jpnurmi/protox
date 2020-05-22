@@ -8,7 +8,7 @@
 #include "deps/tox/tox.h"
 #include "deps/tox/toxencryptsave.h"
 
-typedef QList <quint32> ToxFriends; 
+typedef QVector <quint32> ToxFriends; 
 typedef QByteArray ToxPk;
 typedef QByteArray ToxId;
 typedef QByteArray ToxFileId;
@@ -35,7 +35,7 @@ struct ToxPendingMessage {
 				a.resent == b.resent;
 	}
 };
-typedef QList<ToxPendingMessage> ToxPendingMessages;
+typedef QVector<ToxPendingMessage> ToxPendingMessages;
 
 typedef QMap<QString, QVariant> ToxVariantMessage;
 enum ToxVariantMessageType {
@@ -101,7 +101,7 @@ struct ToxMessage {
 		unique_id = _unique_id;
 	}
 };
-typedef QList <ToxMessage> ToxMessages;
+typedef QVector <ToxMessage> ToxMessages;
 
 namespace Toxcore {
 	Tox *create(ToxProfileLoadingError &error, bool create_new, const QString &password, const QString &profile, const Tox_Pass_Key *pass_key);
@@ -145,6 +145,7 @@ namespace Toxcore {
 	void cancel_all_file_transfers();
 	void cancel_all_file_transfers_for_friend(quint32 friend_number);
 	void iterate(Tox *m);
+	bool acceptFile(quint32 friend_number, quint32 file_number);
 }
 
 namespace ToxConverter {

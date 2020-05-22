@@ -79,7 +79,12 @@ const QString checkFileImage(const QString &path)
 	}
 }
 
-void AsyncFileManager::onChunkRequest(quint64 position, quint32 length)
+bool checkFileExists(const QString &path)
+{
+	return QFile::exists(path);
+}
+
+void AsyncFileManager::onChunkReadRequest(quint64 position, quint32 length)
 {
 	if (!length) {
 		emit fileTransferEnded(m_parent);
@@ -88,7 +93,22 @@ void AsyncFileManager::onChunkRequest(quint64 position, quint32 length)
 	m_file->seek(position);
 	QByteArray data = m_file->read(length);
 	emit fileChunkReady(m_parent, data, position);
-} 
+}
+
+void AsyncFileManager::onChunkWriteRequest(quint64 position, const QByteArray &data)
+{
+	if (!data.length()) {
+		emit fileTransferEnded(m_parent);
+		return;
+	}
+	m_file->seek(position);
+	m_file->write(data);
+}
+
+void AsyncFileManager::onFileTransferStarted(bool &result)
+{
+	result = m_file->open(QIODevice::WriteOnly);
+}
 
 AsyncFileManager::~AsyncFileManager()
 {

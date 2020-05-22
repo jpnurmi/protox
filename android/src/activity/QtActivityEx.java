@@ -132,15 +132,16 @@ public class QtActivityEx extends QtActivity
             if (isExternalStorageDocument(uri)) {
                 final String docId = DocumentsContract.getTreeDocumentId(uri);
                 final String[] split = docId.split(":");
+                String path;
                 if (split[0].equalsIgnoreCase("primary")) {
-                    return Environment.getExternalStorageDirectory() + "/" + split[1];
+                    path = Environment.getExternalStorageDirectory().getAbsolutePath();
                 } else {
-                    String path = "/storage/" + split[0] + "/";
-                    if (split.length > 1) {
-                        path += split[1];
-                    }
-                    return path;
+                    path = "/storage/" + split[0];
                 }
+                if (split.length > 1) {
+                    path += "/" + split[1];
+                }
+                return path;
             }
         }
         if ("content".equalsIgnoreCase(uri.getScheme())) {

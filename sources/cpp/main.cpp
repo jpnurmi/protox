@@ -717,6 +717,18 @@ void QmlCBridge::viewFile(const QString &path, const QString &type)
 	Native::viewFile(path, type);
 }
 
+quint32 QmlCBridge::acceptFile(quint32 friend_number, quint32 file_number, quint64 unique_id)
+{
+	quint32 control = Toxcore::acceptFile(friend_number, file_number);
+	fileControlUpdateMessage(friend_number, unique_id, control);
+	return control;
+}
+
+bool QmlCBridge::checkFileExists(const QString &path)
+{
+	return Tools::checkFileExists(path);
+}
+
 QmlTranslator::QmlTranslator(QObject *parent) : QObject(parent) {}
 
 void QmlTranslator::setTranslation(const QString &translation)

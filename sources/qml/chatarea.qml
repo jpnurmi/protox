@@ -175,7 +175,8 @@ ColumnLayout {
                 }
                 onDragActiveChanged: {
                     if (dragActive) {
-                        if (msgSelf && !msgReceived && bridge.getFriendConnStatus(bridge.getCurrentFriendNumber()) > 0) {
+                        var self = msgType === msgtype_file ? true : msgSelf
+                        if (self && !msgReceived && bridge.getFriendConnStatus(bridge.getCurrentFriendNumber()) > 0) {
                             return
                         }
                         messageRemovalLine.visible = true
@@ -494,6 +495,13 @@ ColumnLayout {
                                 }
                             }
                             Rectangle { opacity: 0; visible: fileButtonsLayout.visible; width: parent.width; height: 8 }
+                            readonly property bool received: msgReceived
+                            onReceivedChanged: {
+                                if (!msgSelf && received) {
+                                    filePreviewImage.source = bridge.checkFileImage(msgFilepath)
+                                    fileNotExistsText.visible = !bridge.checkFileExists(msgFilepath)
+                                }
+                            }
                             Rectangle {
                                 readonly property int margins: 2
                                 width: filePreviewImage.width + margins * 2
@@ -581,10 +589,30 @@ ColumnLayout {
                                         }
                                     }
                                 }
+                                ToolButton {
+                                    id: fileAcceptButton
+                                    Layout.fillWidth: true
+                                    Layout.fillHeight: true
+                                    visible: !msgSelf && msgFilestate === fstate_request
+                                    onClicked: {
+                                        var control = bridge.acceptFile(bridge.getCurrentFriendNumber(), 
+                                                                        msgFilenumber, msgUniqueId)
+                                        if (control === fcontrol_pause) {
+                                            toast.show({ message : qsTr("Failed to open a file."), duration : Toast.Long })
+                                        }
+                                    }
+                                    Text {
+                                        anchors.centerIn: parent
+                                        font.family: themify.name
+                                        font.pointSize: 24
+                                        text: "\uE64C"
+                                        color: "green"
+                                    }
+                                }
                                 Rectangle {
                                     width: 1
                                     Layout.fillHeight: true
-                                    visible: filePauseButton.visible
+                                    visible: filePauseButton.visible || fileAcceptButton.visible
                                     gradient: Gradient {
                                         orientation: Gradient.Vertical
                                         GradientStop { position: 0.0; color: "white" }
@@ -604,14 +632,16 @@ ColumnLayout {
                                         anchors.centerIn: parent
                                         font.family: themify.name
                                         font.pointSize: 24
-                                        text: "\uE760"
+                                        text: (!msgSelf && msgFilestate === fstate_request) ? "\uE646" : "\uE760"
                                         color: "red"
                                     }
                                 }
                             }
                             ToolButton {
                                 id: viewFileButtons
-                                visible: msgFilestate === fstate_finished && !safe_bridge().checkFileImage(msgFilepath).length
+                                visible: msgFilestate === fstate_finished 
+                                         && safe_bridge().checkFileExists(msgFilepath) 
+                                         && !safe_bridge().checkFileImage(msgFilepath).length
                                 onClicked: {
                                     bridge.viewFile(msgFilepath, "*")
                                 }
@@ -622,6 +652,15 @@ ColumnLayout {
                                     text: "\uE6A4"
                                     color: "black"
                                 }
+                            }
+                            Text {
+                                id: fileNotExistsText
+                                visible: msgFilestate === fstate_finished && !safe_bridge().checkFileExists(msgFilepath)
+                                text: qsTr("File not found.")
+                                color: "red"
+                                font.pointSize: fontMetrics.normalize(standardFontPointSize)
+                                wrapMode: Text.Wrap
+                                width: parent.width
                             }
                             Rectangle { opacity: 0; width: parent.width; height: fileLayout.verticalMargins }
                             property real lastImplicitHeight
