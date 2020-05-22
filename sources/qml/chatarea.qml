@@ -61,11 +61,12 @@ ColumnLayout {
                 }
                 visible: false
                 onVisibleChanged: {
-                    if (messages.atYEnd) {
-                        messages.scrollToEnd()
-                    }
+                    var atYEnd = messages.atYEnd
                     if (visible) {
                         messages.bottomMargin += height + margin
+                        if (atYEnd) {
+                            messages.contentY += height + margin
+                        }
                     } else {
                         messages.bottomMargin -= height + margin
                     }

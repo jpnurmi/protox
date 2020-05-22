@@ -257,7 +257,7 @@ function setMessageReceived(friend_number, unique_id) {
     }
     for (var i = 0; i < messagesModel.count; i++) {
         var message = messagesModel.get(i)
-        if (!message.msgSelf)
+        if (!message.msgSelf && message.msgType === msgtype_text)
             continue;
         if (message.msgUniqueId === unique_id) {
             message.msgReceived = true
