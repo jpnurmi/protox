@@ -15,7 +15,7 @@ public:
 	bool updateFileMessageState(quint64 unique_id, const ToxPk &public_key, ToxFileState state);
 	void removeMessage(quint64 unique_id, const ToxPk &public_key);
 	quint64 getMessagesCountFriend(const ToxPk &public_key);
-	void clearFriendChatHistory(const ToxPk &public_key);
+	void clearFriendChatHistory(const ToxPk &public_key, bool keep_active_file_transfers = false);
 	void updatePassword(const QString &password);
 	bool checkEncrypted();
 	static void registerSQLDriver();

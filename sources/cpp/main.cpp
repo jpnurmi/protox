@@ -157,7 +157,14 @@ void QmlCBridge::retrieveChatLog(quint32 start, bool from, bool reverse)
 	}
 	for (auto &msg : messages) {
 		if (msg.variantMessage["type"].toUInt() == TOXMSG_FILE) {
-			msg.variantMessage.insert("file_number", 0); // fake
+			quint32 file_number = 0;
+			for (const auto transfer : transfers) {
+				if (file_messages[transfer] == msg.unique_id) {
+					file_number = transfer->file_number;
+					break;
+				}
+			}
+			msg.variantMessage.insert("file_number", file_number);
 			msg.variantMessage.insert("name", Tools::getFilenameFromPath(msg.variantMessage["file_path"].toString()));
 			if (msg.variantMessage["state"] > TOX_FILE_PAUSED) {
 				msg.received = true;
@@ -185,12 +192,14 @@ void QmlCBridge::makeFriendRequest(const QString &toxId, const QString &friendMe
 
 void QmlCBridge::deleteFriend(quint32 friend_number)
 {
+	Toxcore::cancel_all_file_transfers_for_friend(friend_number);
+	Toxcore::iterate(tox);
 	Toxcore::delete_friend(tox, friend_number);
 }
 
-void QmlCBridge::clearFriendChatHistory(quint32 friend_number)
+void QmlCBridge::clearFriendChatHistory(quint32 friend_number, bool keep_active_file_transfers)
 {
-	chat_db->clearFriendChatHistory(Toxcore::get_friend_public_key(tox, friend_number));
+	chat_db->clearFriendChatHistory(Toxcore::get_friend_public_key(tox, friend_number), keep_active_file_transfers);
 }
 
 void QmlCBridge::updateFriendNickName(quint32 friend_number, const QString &nickname)

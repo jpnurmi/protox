@@ -261,17 +261,36 @@ void ChatDataBase::removeMessage(quint64 unique_id, const ToxPk &public_key)
 	db.commit();
 }
 
-void ChatDataBase::clearFriendChatHistory(const ToxPk &public_key)
+void ChatDataBase::clearFriendChatHistory(const ToxPk &public_key, bool keep_active_file_transfers)
 {
 	execQuery("DROP TABLE IF EXISTS MessagesToDelete");
 	execQuery("CREATE TEMPORARY TABLE MessagesToDelete (\n"
 			"	reference_id INTEGER PRIMARY KEY\n"
 			");");
 	QSqlQuery pre_query(db);
-	pre_query.prepare("INSERT INTO MessagesToDelete (reference_id) "
-					  "SELECT reference_id FROM Messages WHERE public_key = :public_key");
-	pre_query.bindValue(":public_key", public_key);
-	execQuery(pre_query);
+	if (keep_active_file_transfers) {
+		pre_query.prepare("INSERT INTO MessagesToDelete (reference_id) "
+						  "SELECT reference_id FROM Messages WHERE public_key=:public_key AND type != :type");
+		pre_query.bindValue(":public_key", public_key);
+		pre_query.bindValue(":type", ToxVariantMessageType::TOXMSG_FILE);
+		execQuery(pre_query);
+		pre_query.prepare("INSERT INTO MessagesToDelete (reference_id) "
+						  "SELECT m.reference_id FROM Messages m "
+						  "INNER JOIN FileMessages fm "
+						  "ON type = :type "
+						  "AND public_key = :public_key "
+						  "AND m.reference_id = fm.reference_id "
+						  "AND fm.state > :state;");
+		pre_query.bindValue(":public_key", public_key);
+		pre_query.bindValue(":type", ToxVariantMessageType::TOXMSG_FILE);
+		pre_query.bindValue(":state", ToxFileState::TOX_FILE_PAUSED);
+		execQuery(pre_query);
+	} else {
+		pre_query.prepare("INSERT INTO MessagesToDelete (reference_id) "
+						  "SELECT reference_id FROM Messages WHERE public_key = :public_key");
+		pre_query.bindValue(":public_key", public_key);
+		execQuery(pre_query);
+	}
 	execQuery("DELETE FROM TextMessages WHERE reference_id IN MessagesToDelete");
 	execQuery("DELETE FROM FileMessages WHERE reference_id IN MessagesToDelete");
 	execQuery("DELETE FROM Messages WHERE reference_id IN MessagesToDelete");

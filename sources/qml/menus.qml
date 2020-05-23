@@ -179,10 +179,17 @@ MessageDialog {
     standardButtons: StandardButton.Yes | StandardButton.No
     visible: false
     property int currentFriendNumber: -1
+    property bool keepActiveFileTransfers: false
     onYes: {
-        bridge.clearFriendChatHistory(currentFriendNumber)
+        bridge.clearFriendChatHistory(currentFriendNumber, keepActiveFileTransfers)
         if (bridge.getCurrentFriendNumber() === currentFriendNumber) {
             messagesModel.clear()
+            if (keepActiveFileTransfers) {
+                messages.addTransitionEnabled = false
+                bridge.retrieveChatLog()
+                chatScrollToEnd()
+                messages.addTransitionEnabled = true
+            }
         }
         toast.show({ message : qsTr("Chat history deleted!"), duration : Toast.Short });
     }
@@ -199,6 +206,7 @@ MessageDialog {
         var friend_number = bridge.getCurrentFriendNumber()
         if (bridge.checkFriendHistoryExists(friend_number)) {
             clearFriendHistoryDialog.currentFriendNumber = friend_number
+            clearFriendHistoryDialog.keepActiveFileTransfers = false
             clearFriendHistoryDialog.open()
         }
         bridge.deleteFriend(friend_number)
@@ -273,6 +281,7 @@ Menu {
                 return
             }
             clearFriendHistoryDialog.currentFriendNumber = friend_number
+            clearFriendHistoryDialog.keepActiveFileTransfers = true
             clearFriendHistoryDialog.open()
         }
     }

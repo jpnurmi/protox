@@ -227,6 +227,7 @@ static void cb_file_recv(Tox *m, quint32 friend_number, quint32 file_number, qui
 	const QString file_path = downloadsFolder + QDir::separator() + fileName;
 	QFile *file = new QFile(file_path);
 	Tools::AsyncFileManager *manager = new Tools::AsyncFileManager(file);
+	manager->start();
 	QObject::connect(manager, &Tools::AsyncFileManager::fileTransferEnded, [] (void *parent) {
 		ToxFileTransfer *parent_transfer = (ToxFileTransfer*)parent;
 		file_transfer_end(parent_transfer->tox, parent_transfer->friend_number, parent_transfer->file_number);
@@ -793,8 +794,8 @@ quint32 send_file(Tox *m, quint32 friend_number, const QString &path, ToxFileTra
 	quint32 file_number = tox_file_send(m, friend_number, TOX_FILE_KIND_DATA, filesize, (quint8*)file_id.data(), 
 				  (quint8*)encodedFilename.data(), encodedFilename.length(), &err);
 	Tools::AsyncFileManager *manager = new Tools::AsyncFileManager(file);
-	QObject::connect(manager, &Tools::AsyncFileManager::fileChunkReady, [manager] (void *parent, const QByteArray &data, quint64 position) {
-		manager->start();
+	manager->start();
+	QObject::connect(manager, &Tools::AsyncFileManager::fileChunkReady, [] (void *parent, const QByteArray &data, quint64 position) {
 		ToxFileTransfer *parent_transfer = (ToxFileTransfer*)parent;
 		send_file_chunk(parent_transfer->tox, parent_transfer->friend_number, parent_transfer->file_number,
 						position, data);
