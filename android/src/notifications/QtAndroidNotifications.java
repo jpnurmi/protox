@@ -20,7 +20,7 @@ import org.protox.R;
 
 class QtAndroidNotifications {
 
-    public static void show(String title, String caption, int id) {
+    public static void show(String title, String caption, int id, int type) {
         Context context = QtNative.activity();
         NotificationManager notificationManager = getManager();
         Notification.Builder builder =
@@ -43,15 +43,23 @@ class QtAndroidNotifications {
             resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         builder.setContentIntent(resultPendingIntent);
-        notificationManager.notify(id, builder.build());
+        notificationManager.notify(getTagByType(type), id, builder.build());
     }
 
-    public static void cancel(int id) {
-        getManager().cancel(id);
+    public static void cancel(int type, int id) {
+        getManager().cancel(getTagByType(type), id);
     }
 
     public static void cancelAll() {
         getManager().cancelAll();
+    }
+
+    private static String getTagByType(int type) {
+        switch (type) {
+            case 0: return "Text";
+            case 1: return "File";
+        }
+        return "";
     }
 
     private static NotificationManager getManager() {

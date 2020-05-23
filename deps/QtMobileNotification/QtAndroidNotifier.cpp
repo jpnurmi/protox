@@ -10,24 +10,28 @@ bool QtAndroidNotifier::show(const QVariant &notificationParameters)
 	QString caption = parameters.value("caption", "").toString();
 	QString title = parameters.value("title", "").toString();
 	int id = parameters.value("id", 0).toInt();
+	int type = parameters.value("type",0).toInt();
+	QVariantMap additionalParameters = parameters.value("parameters", QVariantMap()).toMap();
 
 	QAndroidJniObject jni_caption = QAndroidJniObject::fromString(caption);
 	QAndroidJniObject jni_title = QAndroidJniObject::fromString(title);
 
 	QAndroidJniObject::callStaticMethod<void>("notifications/QtAndroidNotifications",
 											  "show",
-											  "(Ljava/lang/String;Ljava/lang/String;I)V",
+											  "(Ljava/lang/String;Ljava/lang/String;II)V",
 											  jni_title.object<jstring>(),
 											  jni_caption.object<jstring>(),
-											  static_cast<jint>(id));
+											  static_cast<jint>(id),
+											  static_cast<jint>(type));
 	return true;
 }
 
-bool QtAndroidNotifier::cancel(int id)
+bool QtAndroidNotifier::cancel(int type, int id)
 {
 	QAndroidJniObject::callStaticMethod<void>("notifications/QtAndroidNotifications",
 											  "cancel",
-											  "(I)V",
+											  "(II)V",
+											  static_cast<jint>(type),
 											  static_cast<jint>(id));
 
 	return true;

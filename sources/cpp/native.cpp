@@ -79,5 +79,21 @@ void viewFile(const QString &path, const QString &type)
 	});
 #endif
 }
-
+/*
+jobject qVariantMapsToJObject(QVariantMap &map) 
+{
+	QAndroidJniEnvironment env;
+	jclass mapClass = env.findClass("java/util/Map");
+	jclass stringClass = env.findClass("java/lang/String");
+	jmethodID putMethodID = env->GetMethodID(mapClass, "put", 
+											 "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+	jmethodID stringConstructorID = env->GetMethodID(stringClass, "<init>", "(Ljava/lang/String;)V");
+	
+	for (const auto &pair : map) {
+		jobject key = env->NewObject(stringClass, stringConstructorID, map.c);
+		jobject value = env->NewObject(stringClass, stringConstructorID, map.);
+	}
+	
+}
+*/
 }

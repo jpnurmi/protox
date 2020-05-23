@@ -12,7 +12,7 @@ public:
 
 public:
 	bool show(const QVariant &notificationParameters);
-	bool cancel(int id);
+	bool cancel(int type, int id);
 	bool cancelAll();
 	int getNotificationId(bool cancel = false);
 };

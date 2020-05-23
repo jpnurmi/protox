@@ -22,11 +22,11 @@ bool QtNotification::show(const QVariant &notificationParameters)
 			: _Notifier->show(notificationParameters);
 }
 
-bool QtNotification::cancel(int id)
+bool QtNotification::cancel(int type, int id)
 {
 	return _Notifier == nullptr
 			? false
-			: _Notifier->cancel(id);
+			: _Notifier->cancel(type, id);
 }
 
 bool QtNotification::cancelAll()

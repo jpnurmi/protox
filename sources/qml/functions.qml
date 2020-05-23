@@ -148,7 +148,7 @@ function selectFriend(friend_number) {
     if (bridge.getCurrentFriendNumber() === friend_number) {
         return
     }
-    notification.cancel(friend_number)
+    notification.cancel(Notification.Text, friend_number)
     dropTypingTimer.stop()
     typingText.visible = false
     each_friend_text[bridge.getCurrentFriendNumber()] = chatMessage.text
@@ -178,6 +178,7 @@ function insertMessage(variantMessage, friend_number, self, time, unique_id, fai
             notification.show({
                               caption : variantMessage.message,
                               title : qsTr("New message from %1").arg(bridge.getFriendNickname(friend_number)),
+                              type : Notification.Text,
                               id : friend_number
                             });
         }
@@ -241,6 +242,7 @@ function insertFriend(friend_number, nickName, request, request_message, friendP
         notification.show({
                           caption : request_message,
                           title : qsTr("A new friend request from %1").arg(nickName),
+                          type : Notification.Text,
                           id : -1
                         });
         leftOverlayButtonTextAnimation.start()

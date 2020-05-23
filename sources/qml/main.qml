@@ -52,6 +52,9 @@ ApplicationWindow {
                 lastStatus = -1
             }
         }
+        if (!appInactive) {
+            notification.cancel(Notification.Text, bridge.getCurrentFriendNumber())
+        }
     }
 
     Connections {

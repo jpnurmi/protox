@@ -28,7 +28,7 @@ Drawer {
 
     onOpened: {
         chatMessage.focus = false
-        notification.cancel(-1)
+        notification.cancel(Notification.Text, -1)
     }
     onClosed: {
         leftOverlayButton.highlighted = false

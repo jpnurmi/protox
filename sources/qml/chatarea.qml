@@ -120,7 +120,7 @@ ColumnLayout {
                 defaultHeight = height
             }
             onHeightChanged: {
-                if (height < defaultHeight) {
+                if (height === defaultHeight - keyboardHeight && keyboardActive) {
                     scrollToEnd()
                 }
             }
@@ -962,7 +962,6 @@ ColumnLayout {
                     }
                 }
                 onContentHeightChanged: {
-                    messages.scrollToEnd()
                     updateTyping()
                     updateHeight()
                 }
