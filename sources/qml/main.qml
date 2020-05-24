@@ -53,7 +53,7 @@ ApplicationWindow {
             }
         }
         if (!appInactive) {
-            notification.cancel(Notification.Text, bridge.getCurrentFriendNumber())
+            notification.cancel({ type : Notification.Text, id : bridge.getCurrentFriendNumber() })
         }
     }
 

@@ -90,11 +90,11 @@ public slots:
 	Q_INVOKABLE void removeMessageFromDB(quint32 friend_number, quint64 unique_id);
 	Q_INVOKABLE QString uriToRealPath(const QString &uriString);
 	Q_INVOKABLE quint32 sendFile(quint32 friend_number, const QString &filepath);
-	Q_INVOKABLE bool controlFile(quint32 friend_number, quint32 file_number, quint64 unique_id, quint32 control);
+	Q_INVOKABLE bool controlFile(quint32 friend_number, quint32 file_number, quint32 control);
 	Q_INVOKABLE QString getDefaultDownloadsDirectory();
 	Q_INVOKABLE QString checkFileImage(const QString &path);
 	Q_INVOKABLE void viewFile(const QString &path, const QString &type);
-	Q_INVOKABLE quint32 acceptFile(quint32 friend_number, quint32 file_number, quint64 unique_id);
+	Q_INVOKABLE quint32 acceptFile(quint32 friend_number, quint32 file_number);
 	Q_INVOKABLE bool checkFileExists(const QString &path);
 
 public:

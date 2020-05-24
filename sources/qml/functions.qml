@@ -148,7 +148,7 @@ function selectFriend(friend_number) {
     if (bridge.getCurrentFriendNumber() === friend_number) {
         return
     }
-    notification.cancel(Notification.Text, friend_number)
+    notification.cancel({ type : Notification.Text, id : friend_number })
     dropTypingTimer.stop()
     typingText.visible = false
     each_friend_text[bridge.getCurrentFriendNumber()] = chatMessage.text
@@ -180,6 +180,18 @@ function insertMessage(variantMessage, friend_number, self, time, unique_id, fai
                               title : qsTr("New message from %1").arg(bridge.getFriendNickname(friend_number)),
                               type : Notification.Text,
                               id : friend_number
+                            });
+        } else {
+            notification.show({
+                              caption : variantMessage.name + " (" + formatBytes(variantMessage.size) + ")",
+                              title : qsTr("File transfer request from %1").arg(bridge.getFriendNickname(friend_number)),
+                              type : Notification.FileRequest,
+                              id : friend_number,
+                              parameters : {
+                                      "fileNumber" : variantMessage.file_number,
+                                      "acceptButtonText" : qsTr("Accept"),
+                                      "cancelButtonText" : qsTr("Cancel")
+                                  }
                             });
         }
     }

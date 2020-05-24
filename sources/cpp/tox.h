@@ -141,11 +141,11 @@ namespace Toxcore {
 	quint32 get_status_message_max_length();
 	quint32 get_tox_address_size();
 	quint32 send_file(Tox *m, quint32 friend_number, const QString &path, ToxFileTransfer **transfer, quint64 &filesize, ToxFileId &file_id, quint32 &error);
-	bool file_control(Tox *m, quint32 friend_number, quint32 file_number, quint32 control);
+	bool file_control(Tox *m, quint32 friend_number, quint32 file_number, quint32 control, quint64 &unique_id);
 	void cancel_all_file_transfers();
 	void cancel_all_file_transfers_for_friend(quint32 friend_number);
 	void iterate(Tox *m);
-	bool acceptFile(quint32 friend_number, quint32 file_number);
+	bool acceptFile(quint32 friend_number, quint32 file_number, quint64 &unique_id);
 }
 
 namespace ToxConverter {

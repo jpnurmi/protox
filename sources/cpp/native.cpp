@@ -1,7 +1,22 @@
 #include "native.h"
 #include "main.h"
 
+#ifdef Q_OS_ANDROID
+#include "deps/QtMobileNotification/QtNotification.h"
+#endif
+
 extern QmlCBridge *qmlbridge;
+
+void cancelFileNotification(quint32 friend_number, quint32 file_number) {
+	QVariantMap parameters;
+	parameters["fileNumber"] = file_number;
+	QVariantMap notificationParameters;
+	notificationParameters["type"] = QtNotification::FileRequest;
+	notificationParameters["id"] = friend_number;
+	notificationParameters["parameters"] = parameters;
+	QtNotification notification;
+	notification.cancel(notificationParameters);
+}
 
 #ifdef Q_OS_ANDROID
 extern "C" 
@@ -11,6 +26,20 @@ extern "C"
 		if (qmlbridge && !qmlbridge->getAppInactive()) {
 			qmlbridge->setKeyboardHeight(height);
 		}
+	}
+	JNIEXPORT void JNICALL Java_org_protox_activity_QtActivityEx_transferAccepted(JNIEnv *, jobject, 
+																				  jint friend_number,
+																				  jint file_number)
+	{
+		qmlbridge->acceptFile(friend_number, file_number);
+		cancelFileNotification(friend_number, file_number);
+	}
+	JNIEXPORT void JNICALL Java_org_protox_activity_QtActivityEx_transferCanceled(JNIEnv *, jobject, 
+																				  jint friend_number,
+																				  jint file_number)
+	{
+		qmlbridge->controlFile(friend_number, file_number, TOX_FILE_CONTROL_CANCEL);
+		cancelFileNotification(friend_number, file_number);
 	}
 }
 #endif
@@ -79,21 +108,5 @@ void viewFile(const QString &path, const QString &type)
 	});
 #endif
 }
-/*
-jobject qVariantMapsToJObject(QVariantMap &map) 
-{
-	QAndroidJniEnvironment env;
-	jclass mapClass = env.findClass("java/util/Map");
-	jclass stringClass = env.findClass("java/lang/String");
-	jmethodID putMethodID = env->GetMethodID(mapClass, "put", 
-											 "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
-	jmethodID stringConstructorID = env->GetMethodID(stringClass, "<init>", "(Ljava/lang/String;)V");
-	
-	for (const auto &pair : map) {
-		jobject key = env->NewObject(stringClass, stringConstructorID, map.c);
-		jobject value = env->NewObject(stringClass, stringConstructorID, map.);
-	}
-	
-}
-*/
+
 }

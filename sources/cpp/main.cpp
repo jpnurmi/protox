@@ -686,9 +686,10 @@ void QmlCBridge::fileControlUpdateMessage(quint32 friend_number, quint64 unique_
 							  Q_ARG(QVariant, control));
 }
 
-bool QmlCBridge::controlFile(quint32 friend_number, quint32 file_number, quint64 unique_id, quint32 control)
+bool QmlCBridge::controlFile(quint32 friend_number, quint32 file_number, quint32 control)
 {
-	bool success = Toxcore::file_control(tox, friend_number, file_number, control);
+	quint64 unique_id = 0;
+	bool success = Toxcore::file_control(tox, friend_number, file_number, control, unique_id);
 	if (success) {
 		fileControlUpdateMessage(friend_number, unique_id, control);
 	}
@@ -726,9 +727,10 @@ void QmlCBridge::viewFile(const QString &path, const QString &type)
 	Native::viewFile(path, type);
 }
 
-quint32 QmlCBridge::acceptFile(quint32 friend_number, quint32 file_number, quint64 unique_id)
+quint32 QmlCBridge::acceptFile(quint32 friend_number, quint32 file_number)
 {
-	quint32 control = Toxcore::acceptFile(friend_number, file_number);
+	quint64 unique_id = 0;
+	quint32 control = Toxcore::acceptFile(friend_number, file_number, unique_id);
 	fileControlUpdateMessage(friend_number, unique_id, control);
 	return control;
 }

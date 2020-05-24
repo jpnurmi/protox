@@ -580,7 +580,7 @@ ColumnLayout {
                                             control = fcontrol_resume
                                         }
                                         var success = bridge.controlFile(bridge.getCurrentFriendNumber(), 
-                                                           msgFilenumber, msgUniqueId, control)
+                                                           msgFilenumber, control)
                                         if (success) {
                                             if (msgFilestate === fstate_inprogress) {
                                                 filePauseButtonText.text = "\uE762"
@@ -597,7 +597,7 @@ ColumnLayout {
                                     visible: !msgSelf && msgFilestate === fstate_request
                                     onClicked: {
                                         var control = bridge.acceptFile(bridge.getCurrentFriendNumber(), 
-                                                                        msgFilenumber, msgUniqueId)
+                                                                        msgFilenumber)
                                         if (control === fcontrol_pause) {
                                             toast.show({ message : qsTr("Failed to open a file."), duration : Toast.Long })
                                         }
@@ -627,7 +627,7 @@ ColumnLayout {
                                     visible: msgFilestate !== fstate_canceled && msgFilestate !== fstate_finished
                                     onClicked: {
                                         bridge.controlFile(bridge.getCurrentFriendNumber(), 
-                                                           msgFilenumber, msgUniqueId, fcontrol_cancel)
+                                                           msgFilenumber, fcontrol_cancel)
                                     }
                                     Text {
                                         anchors.centerIn: parent

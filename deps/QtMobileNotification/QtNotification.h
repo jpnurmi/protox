@@ -17,7 +17,7 @@ class QtNotification : public QObject
 
 	/// @see QtAbstractNotifier
 	Q_INVOKABLE bool show(const QVariant &notificationParameters);
-	Q_INVOKABLE bool cancel(int type, int id);
+	Q_INVOKABLE bool cancel(const QVariant &notificationParameters);
 	Q_INVOKABLE bool cancelAll();
 	Q_INVOKABLE int getNotificationId(bool cancel = false);
 
@@ -26,7 +26,7 @@ class QtNotification : public QObject
 
 	enum Type {
 		Text = 0,
-		File = 1
+		FileRequest = 1
 	};
 	Q_ENUM(Type)
 

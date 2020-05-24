@@ -849,7 +849,7 @@ void cancel_all_file_transfers()
 	}
 }
 
-bool file_control(Tox *m, quint32 friend_number, quint32 file_number, quint32 control)
+bool file_control(Tox *m, quint32 friend_number, quint32 file_number, quint32 control, quint64 &unique_id)
 {
 	TOX_ERR_FILE_CONTROL err;
 	tox_file_control(m, friend_number, file_number, (TOX_FILE_CONTROL)control, &err);
@@ -858,9 +858,10 @@ bool file_control(Tox *m, quint32 friend_number, quint32 file_number, quint32 co
 	} else {
 		for (const auto transfer : qmlbridge->transfers) {
 			if (transfer->friend_number == friend_number && transfer->file_number == file_number) {
+				unique_id = qmlbridge->file_messages[transfer];
 				switch (control) {
 					case TOX_FILE_CONTROL_CANCEL:
-						chat_db->updateFileMessageState(qmlbridge->file_messages[transfer], 
+						chat_db->updateFileMessageState(unique_id, 
 														get_friend_public_key(m, friend_number), 
 														ToxFileState::TOX_FILE_CANCELED);
 						qmlbridge->file_messages.remove(transfer);
@@ -868,12 +869,12 @@ bool file_control(Tox *m, quint32 friend_number, quint32 file_number, quint32 co
 						delete transfer;
 						break;
 					case TOX_FILE_CONTROL_PAUSE:
-						chat_db->updateFileMessageState(qmlbridge->file_messages[transfer], 
+						chat_db->updateFileMessageState(unique_id, 
 														get_friend_public_key(m, friend_number), 
 														ToxFileState::TOX_FILE_PAUSED);
 						break;
 					case TOX_FILE_CONTROL_RESUME:
-						chat_db->updateFileMessageState(qmlbridge->file_messages[transfer], 
+						chat_db->updateFileMessageState(unique_id, 
 														get_friend_public_key(m, friend_number), 
 														ToxFileState::TOX_FILE_INPROGRESS);
 						break;
@@ -889,7 +890,7 @@ void iterate(Tox *m)
 	tox_iterate(m, nullptr);
 }
 
-bool acceptFile(quint32 friend_number, quint32 file_number)
+bool acceptFile(quint32 friend_number, quint32 file_number, quint64 &unique_id)
 {
 	for (const auto transfer : qmlbridge->transfers) {
 		if (transfer->friend_number == friend_number && transfer->file_number == file_number) {
@@ -897,17 +898,18 @@ bool acceptFile(quint32 friend_number, quint32 file_number)
 			emit transfer->manager->onFileTransferStarted(result);
 			if (result) {
 				result = file_control(transfer->tox, transfer->friend_number, transfer->file_number, 
-									  TOX_FILE_CONTROL_RESUME);
+									  TOX_FILE_CONTROL_RESUME, unique_id);
 				if (result) {
 					return TOX_FILE_CONTROL_RESUME;
 				} else {
 					return TOX_FILE_CONTROL_PAUSE;
 				}
 			} else {
+				unique_id = qmlbridge->file_messages[transfer];
 				TOX_ERR_FILE_CONTROL err;
 				tox_file_control(transfer->tox, transfer->friend_number, transfer->file_number, 
 								 TOX_FILE_CONTROL_CANCEL, &err);
-				chat_db->updateFileMessageState(qmlbridge->file_messages[transfer], 
+				chat_db->updateFileMessageState(unique_id, 
 												get_friend_public_key(transfer->tox, friend_number), 
 												ToxFileState::TOX_FILE_CANCELED);
 				qmlbridge->file_messages.remove(transfer);

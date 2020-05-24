@@ -4,6 +4,31 @@
 #include <QtAndroidExtras/QAndroidJniEnvironment>
 #include <QDebug>
 
+jobject QtAndroidNotifier::qVariantMapToJObject(const QVariantMap &map) 
+{
+	QAndroidJniEnvironment env;
+	jclass mapClass = env.findClass("java/util/HashMap");
+	jclass integerClass = env.findClass("java/lang/Integer");
+	jmethodID mapConstructorID = env->GetMethodID(mapClass, "<init>", "()V");
+	jmethodID putMethodID = env->GetMethodID(mapClass, "put", 
+											 "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+	jmethodID intConstructorID = env->GetMethodID(integerClass, "<init>", "(I)V");
+	jobject javaMap = env->NewObject(mapClass, mapConstructorID);
+
+	for (auto it = map.begin(); it != map.end(); ++it) {
+		QAndroidJniObject key = QAndroidJniObject::fromString(it.key()).object();
+		QAndroidJniObject value;
+		switch (it.value().type()) {
+			case QVariant::UInt: value = env->NewObject(integerClass, intConstructorID, it.value().toUInt()); break;
+			case QVariant::Int: value = env->NewObject(integerClass, intConstructorID, it.value().toInt()); break;
+			default: value = QAndroidJniObject::fromString(it.value().toString()); break;
+		}
+		env->CallObjectMethod(javaMap, putMethodID, key.object(), value.object());
+	}
+
+	return javaMap;
+}
+
 bool QtAndroidNotifier::show(const QVariant &notificationParameters)
 {
 	QVariantMap parameters = notificationParameters.toMap();
@@ -15,24 +40,32 @@ bool QtAndroidNotifier::show(const QVariant &notificationParameters)
 
 	QAndroidJniObject jni_caption = QAndroidJniObject::fromString(caption);
 	QAndroidJniObject jni_title = QAndroidJniObject::fromString(title);
+	QAndroidJniObject jni_parameters = qVariantMapToJObject(additionalParameters);
 
 	QAndroidJniObject::callStaticMethod<void>("notifications/QtAndroidNotifications",
 											  "show",
-											  "(Ljava/lang/String;Ljava/lang/String;II)V",
+											  "(Ljava/lang/String;Ljava/lang/String;IILjava/util/HashMap;)V",
 											  jni_title.object<jstring>(),
 											  jni_caption.object<jstring>(),
 											  static_cast<jint>(id),
-											  static_cast<jint>(type));
+											  static_cast<jint>(type),
+											  jni_parameters.object());
 	return true;
 }
 
-bool QtAndroidNotifier::cancel(int type, int id)
+bool QtAndroidNotifier::cancel(const QVariant &notificationParameters)
 {
+	QVariantMap parameters = notificationParameters.toMap();
+	int id = parameters.value("id", 0).toInt();
+	int type = parameters.value("type",0).toInt();
+	QVariantMap additionalParameters = parameters.value("parameters", QVariantMap()).toMap();
+	QAndroidJniObject jni_parameters = qVariantMapToJObject(additionalParameters);
 	QAndroidJniObject::callStaticMethod<void>("notifications/QtAndroidNotifications",
 											  "cancel",
-											  "(II)V",
+											  "(IILjava/util/HashMap;)V",
 											  static_cast<jint>(type),
-											  static_cast<jint>(id));
+											  static_cast<jint>(id),
+											  jni_parameters.object());
 
 	return true;
 }

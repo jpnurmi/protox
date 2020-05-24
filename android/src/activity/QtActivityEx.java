@@ -51,20 +51,28 @@ public class QtActivityEx extends QtActivity
     }
 
     private static native void keyboardHeightChanged(int height);
+    private static native void transferAccepted(int friend_number, int file_number);
+    private static native void transferCanceled(int friend_number, int file_number);
 
     @Override
     protected void onNewIntent(Intent intent) {
-        Bundle bundle = intent.getExtras();
-        if (bundle != null && bundle.containsKey("notificationId")) {
-            notificationId = bundle.getInt("notificationId");
-        }
+        processIntent(intent);
         super.onNewIntent(intent);
     };
 
-    private void processIntent(Intent intent){
+    private void processIntent(Intent intent) {
         Bundle bundle = intent.getExtras();
-        if (bundle != null && bundle.containsKey("notificationId")) {
-            notificationId = bundle.getInt("notificationId");
+        if (bundle != null) {
+            if (bundle.containsKey("notificationId")) {
+                notificationId = bundle.getInt("notificationId");
+            }
+            if (bundle.containsKey("transferAccepted")) {
+                if (bundle.getBoolean("transferAccepted")) {
+                    transferAccepted(bundle.getInt("friendNumber"), bundle.getInt("fileNumber"));
+                } else {
+                    transferCanceled(bundle.getInt("friendNumber"), bundle.getInt("fileNumber"));
+                }
+            }
         }
     }
 
