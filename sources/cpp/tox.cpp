@@ -306,11 +306,16 @@ const QString get_friend_status_message(Tox *m, quint32 friend_number)
 	return QString::fromUtf8(message, length).replace("\n", " ");
 }
 
-const QString get_friend_name(Tox *m, quint32 friend_number)
+const QString get_friend_name(Tox *m, quint32 friend_number, bool publicKey)
 {
 	size_t length = tox_friend_get_name_size(m, friend_number, nullptr);
-	if (!length)
-		return ToxConverter::toString(get_friend_public_key(m, friend_number));
+	if (!length) {
+		if (publicKey) {
+			return ToxConverter::toString(get_friend_public_key(m, friend_number));
+		} else {
+			return QString();
+		}
+	}
 	char name[length];
 	if (tox_friend_get_name(m, friend_number, (quint8*)name, nullptr)) {
 		// I replace newlines with spaces to not make a mess in UI

@@ -43,7 +43,7 @@ public slots:
 	Q_INVOKABLE void sendMessage(const QString &message);
 	Q_INVOKABLE quint32 getCurrentFriendNumber();
 	Q_INVOKABLE int getFriendConnStatus(quint32 friend_number);
-	Q_INVOKABLE const QString getFriendNickname(quint32 friend_number);
+	Q_INVOKABLE const QString getFriendNickname(quint32 friend_number, bool publicKey = true);
 	Q_INVOKABLE void setCurrentFriend(quint32 newFriend);
 	Q_INVOKABLE void retrieveChatLog(quint32 start = 0, bool from = true, bool reverse = false);
 	Q_INVOKABLE QString getToxId();
@@ -99,6 +99,7 @@ public slots:
 	Q_INVOKABLE void viewFile(const QString &path, const QString &type);
 	Q_INVOKABLE quint32 acceptFile(quint32 friend_number, quint32 file_number);
 	Q_INVOKABLE bool checkFileExists(const QString &path);
+	Q_INVOKABLE QString getFriendPublicKeyHex(quint32 friend_number);
 
 public:
 	ToxFriendsConnStatus friends_conn_status;

@@ -120,7 +120,7 @@ ColumnLayout {
                 defaultHeight = height
             }
             onHeightChanged: {
-                if (height === defaultHeight - keyboardHeight && keyboardActive) {
+                if (height === defaultHeight - keyboardHeight && keyboardActive && !chatFlickable.backToDefaultHeight) {
                     scrollToEnd()
                 }
             }
@@ -504,6 +504,7 @@ ColumnLayout {
                                 }
                             }
                             Rectangle {
+                                id: filePreviewImageRectangle
                                 readonly property int margins: 2
                                 width: filePreviewImage.width + margins * 2
                                 height: filePreviewImage.height + margins * 2
@@ -634,7 +635,6 @@ ColumnLayout {
                                         font.family: themify.name
                                         font.pointSize: 24
                                         text: (!msgSelf && msgFilestate === fstate_request) ? "\uE646" : "\uE760"
-                                        color: "red"
                                     }
                                 }
                             }
@@ -918,6 +918,24 @@ ColumnLayout {
                 policy: ScrollBar.AlwaysOn
                 visible: false
                 interactive: false
+            }
+            property bool backToDefaultHeight: false
+            property real lastHeight
+            Connections {
+                target: window
+                onKeyboardActiveChanged: {
+                    if (!keyboardActive) {
+                        chatFlickable.backToDefaultHeight = false
+                    }
+                }
+            }
+            onHeightChanged: {
+                if (lastHeight > height && height === defaultHeight) {
+                    backToDefaultHeight = true
+                } else {
+                    backToDefaultHeight = false
+                }
+                lastHeight = height
             }
             Component.onCompleted: returnToBounds()
             TextArea.flickable: TextArea {

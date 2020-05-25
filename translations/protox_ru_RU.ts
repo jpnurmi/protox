@@ -533,6 +533,10 @@ Click on the left button to open the friend list, then on «+» to add a new fri
         <source>Downloads folder</source>
         <translation>Каталог &quot;Загрузки&quot;</translation>
     </message>
+    <message>
+        <source>Public key</source>
+        <translation>Публичный ключ</translation>
+    </message>
 </context>
 <context>
     <name>QAndroidPlatformTheme</name>

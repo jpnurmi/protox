@@ -125,9 +125,9 @@ int QmlCBridge::getFriendConnStatus(quint32 friend_number)
 	return friends_conn_status[friend_number];
 }
 
-const QString QmlCBridge::getFriendNickname(quint32 friend_number)
+const QString QmlCBridge::getFriendNickname(quint32 friend_number, bool publicKey)
 {
-	return Toxcore::get_friend_name(tox, friend_number);
+	return Toxcore::get_friend_name(tox, friend_number, publicKey);
 }
 
 void QmlCBridge::setCurrentFriend(quint32 newFriend)
@@ -787,6 +787,11 @@ void QmlCBridge::createFileProgressNotification(quint32 friend_number, quint32 f
 			break;
 		}
 	}
+}
+
+QString QmlCBridge::getFriendPublicKeyHex(quint32 friend_number)
+{
+	return ToxConverter::toString(Toxcore::get_friend_public_key(tox, friend_number));
 }
 
 QmlTranslator::QmlTranslator(QObject *parent) : QObject(parent) {}

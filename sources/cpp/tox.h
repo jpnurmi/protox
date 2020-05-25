@@ -111,7 +111,7 @@ namespace Toxcore {
 	ToxId get_address(Tox *m);
 	quint32 send_message(Tox *m, quint32 friend_number, const QString &message, bool &failed);
 	ToxPk get_friend_public_key(Tox *m, quint32 friend_number);
-	const QString get_friend_name(Tox *m, quint32 friend_number);
+	const QString get_friend_name(Tox *m, quint32 friend_number, bool publicKey = true);
 	size_t get_friends_count(Tox *m);
 	ToxFriends get_friends(Tox *m);
 	int make_friend_request(Tox *m, ToxId id, const QString &friendMessage);

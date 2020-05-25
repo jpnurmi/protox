@@ -49,7 +49,8 @@ QZXing {
 */
 Menu {
     id: addFriendMenu
-    width: 300
+    readonly property int margin: 25
+    width: parent.width - margin * 2
     title: qsTr("Add a new friend")
     readonly property bool haveYSpace: keyboardHeight + height <= window.height
     x: (window.width - width) * 0.5
@@ -230,7 +231,8 @@ MessageDialog {
 }
 Menu {
     id: friendInfoMenu
-    width: 300
+    readonly property int margin: 25
+    width: parent.width - margin * 2
     title: "My profile"
     x: (window.width - width) * 0.5
     y: (window.height - height) * 0.5
@@ -249,6 +251,12 @@ Menu {
         width: parent.width
         horizontalAlignment: Qt.AlignHCenter
         wrapMode: Text.Wrap
+        Text {
+            anchors.centerIn: parent
+            visible: parent.text.length === 0
+            text: qsTr("<empty>")
+            font.italic: true
+        }
     }
     Text {
         padding: 10
@@ -269,6 +277,20 @@ Menu {
             text: qsTr("<empty>")
             font.italic: true
         }
+    }
+    Text {
+        padding: 10
+        font.bold: true
+        width: parent.width
+        horizontalAlignment: Qt.AlignHCenter
+        text: qsTr("Public key")
+    }
+    Text {
+        id: infoPublicKey
+        padding: 10
+        width: parent.width
+        horizontalAlignment: Qt.AlignHCenter
+        wrapMode: Text.Wrap
     }
     Button {
         text: qsTr("Delete chat history")
@@ -307,7 +329,8 @@ Menu {
 */
 Menu {
     id: profileMenu
-    width: 300
+    readonly property int margin: 25
+    width: parent.width - margin * 2
     title: "My profile"
     readonly property bool haveYSpace: keyboardHeight + height <= window.height
     x: (window.width - width) * 0.5
@@ -407,7 +430,8 @@ Menu {
 
 Menu {
     id: profileInfoMenu
-    width: 260
+    readonly property int margin: 30
+    width: parent.width - margin * 2
     title: qsTr("My profile info")
     x: (window.width - width) * 0.5
     y: (window.height - height) * 0.5

@@ -143,6 +143,16 @@ function chatScrollToEnd() {
     messages.scrollToEnd()
 }
 
+// This timer is a temporary solution.
+Timer {
+    id: scrollToEndAgainTimer
+    interval: 100
+    repeat: false
+    onTriggered: {
+        chatScrollToEnd()
+    }
+}
+
 property variant each_friend_text: []
 function selectFriend(friend_number) {
     if (bridge.getCurrentFriendNumber() === friend_number) {
@@ -168,7 +178,8 @@ function selectFriend(friend_number) {
     chatMessage.clear()
     if (each_friend_text[friend_number] !== undefined) {
         chatMessage.append(each_friend_text[friend_number])
-    } 
+    }
+    scrollToEndAgainTimer.start()
 }
 
 property int new_messages: 0
