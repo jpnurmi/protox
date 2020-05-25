@@ -78,7 +78,7 @@ v1.5beta_pre
 
 - Added file transfers in both directions.
 - Added buttons to chat typing area for file transfers.
-- Added notification for file transfers.
+- Added notifications for file transfers.
 - Added "Change downloads folder" button to settings menu. (the default folder is Android downloads folder).
 - Main window and message list were reworked which fixed many bugs.
 - Added "Public Key" entry to friend information dialog.
