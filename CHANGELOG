@@ -86,3 +86,4 @@ v1.5beta_pre
 - Fixed bug: flickering issues when using auto-login.
 - Added logging feature (protox.log file to application directory).
 - Updated russian translation.
+- Updated toxcore version to v0.2.12.
