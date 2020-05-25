@@ -415,7 +415,10 @@ function changeFileProgress(friend_number, file_number, bytesTransfered) {
     }
     for (var i = 0; i < messagesModel.count; i++) {
         var message = messagesModel.get(i)
-        if (message.msgType !== msgtype_file || message.msgFilestate === fstate_canceled || message.msgFilestate === fstate_finished) {
+        if (message.msgType !== msgtype_file 
+                || message.msgFilestate === fstate_canceled 
+                || message.msgFilestate === fstate_finished
+                || message.msgFilestate === fstate_paused) {
             continue
         }
         if (message.msgFilenumber === file_number) {

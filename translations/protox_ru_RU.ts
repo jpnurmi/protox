@@ -575,16 +575,16 @@ Click on the left button to open the friend list, then on «+» to add a new fri
         <translation>/с</translation>
     </message>
     <message>
-        <source>Transfer from %1 is finished.</source>
-        <translation>Передача от %1 завершилась.</translation>
-    </message>
-    <message>
         <source>Transfering file from %1</source>
         <translation>Передача файла от %1</translation>
     </message>
     <message>
-        <source>Transfer from %1 is canceled.</source>
-        <translation>Передача от %1 отменена.</translation>
+        <source>Transfer from %1 is finished</source>
+        <translation>Передача от %1 завершилась</translation>
+    </message>
+    <message>
+        <source>Transfer from %1 is canceled</source>
+        <translation>Передача от %1 отменена</translation>
     </message>
 </context>
 <context>

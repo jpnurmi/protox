@@ -91,6 +91,12 @@ bool checkFileExists(const QString &path)
 	return QFile::exists(path);
 }
 
+AsyncFileManager::AsyncFileManager(QFile *file)
+{
+	m_file = file;
+	m_file->moveToThread(this);
+}
+
 void AsyncFileManager::onChunkReadRequest(quint64 position, quint32 length)
 {
 	if (!length) {

@@ -500,8 +500,12 @@ ColumnLayout {
                             onReceivedChanged: {
                                 if (!msgSelf && received) {
                                     filePreviewImage.source = bridge.checkFileImage(msgFilepath)
-                                    fileNotExistsText.visible = !bridge.checkFileExists(msgFilepath)
-                                    viewFileButton.visible = !fileNotExistsText.visible
+                                    var fileExists = bridge.checkFileExists(msgFilepath)
+                                    fileNotExistsText.visible = !fileExists
+                                    // msgFilestate is not yet updated
+                                    if (msgFilesize === msgFiletsize) {
+                                        viewFileButton.visible = fileExists
+                                    }
                                 }
                             }
                             Rectangle {
@@ -571,7 +575,7 @@ ColumnLayout {
                                         anchors.centerIn: parent
                                         font.family: themify.name
                                         font.pointSize: 24
-                                        text: "\uE762"
+                                        text:  msgFilestate === fstate_paused ? "\uE761" : "\uE762"
                                         color: "black"
                                     }
                                     onClicked: {
@@ -581,15 +585,8 @@ ColumnLayout {
                                         } else if (msgFilestate === fstate_paused) {
                                             control = fcontrol_resume
                                         }
-                                        var success = bridge.controlFile(bridge.getCurrentFriendNumber(), 
+                                        bridge.controlFile(bridge.getCurrentFriendNumber(), 
                                                            msgFilenumber, control)
-                                        if (success) {
-                                            if (msgFilestate === fstate_inprogress) {
-                                                filePauseButtonText.text = "\uE762"
-                                            } else if (msgFilestate === fstate_paused) {
-                                                filePauseButtonText.text = "\uE761"
-                                            }
-                                        }
                                     }
                                 }
                                 ToolButton {

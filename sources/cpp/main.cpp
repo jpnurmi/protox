@@ -774,8 +774,8 @@ void QmlCBridge::createFileProgressNotification(quint32 friend_number, quint32 f
 			parameters["filePath"] = file_path;
 			parameters["fileSize"] = file_size;
 			parameters["speedPrefix"] = tr("/s");
-			parameters["transferFinishedText"] = QString(tr("Transfer from %1 is finished.")).arg(Toxcore::get_friend_name(tox, friend_number));
-			parameters["transferCanceledText"] = QString(tr("Transfer from %1 is canceled.")).arg(Toxcore::get_friend_name(tox, friend_number));
+			parameters["transferFinishedText"] = QString(tr("Transfer from %1 is finished")).arg(Toxcore::get_friend_name(tox, friend_number));
+			parameters["transferCanceledText"] = QString(tr("Transfer from %1 is canceled")).arg(Toxcore::get_friend_name(tox, friend_number));
 			QVariantMap notificationParameters;
 			notificationParameters["type"] = QtNotification::FileProgress;
 			notificationParameters["id"] = friend_number;

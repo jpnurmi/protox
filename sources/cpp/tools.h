@@ -17,7 +17,7 @@ namespace Tools {
 	{
 		Q_OBJECT
 	public:
-		AsyncFileManager(QFile *file): m_file(file) {}
+		AsyncFileManager(QFile *file);
 		~AsyncFileManager();
 		QFile *getFile() { return m_file; }
 		// setParent already exists

@@ -187,24 +187,27 @@ static void cb_file_recv_control_cb(Tox *m, uint32_t friend_number, uint32_t fil
 		if (transfer->friend_number == friend_number && transfer->file_number == file_number) {
 			qmlbridge->fileControlUpdateMessage(friend_number, qmlbridge->file_messages[transfer], control);
 			switch (control) {
-				case TOX_FILE_CONTROL_RESUME:
+				case TOX_FILE_CONTROL_RESUME: {
 					chat_db->updateFileMessageState(qmlbridge->file_messages[transfer], 
 													get_friend_public_key(m, friend_number), 
 													ToxFileState::TOX_FILE_INPROGRESS);
-					break;
-				case TOX_FILE_CONTROL_CANCEL:
+					return;
+				}
+				case TOX_FILE_CONTROL_CANCEL: {
 					chat_db->updateFileMessageState(qmlbridge->file_messages[transfer], 
 													get_friend_public_key(m, friend_number), 
 													ToxFileState::TOX_FILE_CANCELED);
 					qmlbridge->file_messages.remove(transfer);
 					qmlbridge->transfers.removeOne(transfer);
 					delete transfer;
-					break;
-				case TOX_FILE_CONTROL_PAUSE:
+					return;
+				}
+				case TOX_FILE_CONTROL_PAUSE: {
 					chat_db->updateFileMessageState(qmlbridge->file_messages[transfer], 
 													get_friend_public_key(m, friend_number), 
 													ToxFileState::TOX_FILE_PAUSED);
-					break;
+					return;
+				}
 			}
 		}
 	}
@@ -859,30 +862,33 @@ bool file_control(Tox *m, quint32 friend_number, quint32 file_number, quint32 co
 	TOX_ERR_FILE_CONTROL err;
 	tox_file_control(m, friend_number, file_number, (TOX_FILE_CONTROL)control, &err);
 	if (err > 0) {
-		Tools::debug("tox_file_send file failed with error number: " + QString::number(err));
+		Tools::debug("tox_file_control failed with error number: " + QString::number(err));
 	} else {
 		for (const auto transfer : qmlbridge->transfers) {
 			if (transfer->friend_number == friend_number && transfer->file_number == file_number) {
 				unique_id = qmlbridge->file_messages[transfer];
 				switch (control) {
-					case TOX_FILE_CONTROL_CANCEL:
+					case TOX_FILE_CONTROL_CANCEL: {
 						chat_db->updateFileMessageState(unique_id, 
 														get_friend_public_key(m, friend_number), 
 														ToxFileState::TOX_FILE_CANCELED);
 						qmlbridge->file_messages.remove(transfer);
 						qmlbridge->transfers.removeOne(transfer);
 						delete transfer;
-						break;
-					case TOX_FILE_CONTROL_PAUSE:
+						return err == 0;
+					}
+					case TOX_FILE_CONTROL_PAUSE: {
 						chat_db->updateFileMessageState(unique_id, 
 														get_friend_public_key(m, friend_number), 
 														ToxFileState::TOX_FILE_PAUSED);
-						break;
-					case TOX_FILE_CONTROL_RESUME:
+						return err == 0;
+					}
+					case TOX_FILE_CONTROL_RESUME: {
 						chat_db->updateFileMessageState(unique_id, 
 														get_friend_public_key(m, friend_number), 
 														ToxFileState::TOX_FILE_INPROGRESS);
-						break;
+						return err == 0;
+					}
 				}
 			}
 		}
