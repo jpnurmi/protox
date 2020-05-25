@@ -1,17 +1,31 @@
 #include "tools.h"
 
+extern QFile *logfile;
+
 namespace Tools {
 
 void debug(const QString &msg)
 {
+	if (logfile && logfile->isOpen()) {
+		QString dt_str = QDateTime::currentDateTime().toString("[dd.MM.yyyy - hh:mm:ss] ") + msg + "\n";
+		logfile->write(dt_str.toUtf8());
+		logfile->flush();
+	}
 	qDebug() << msg;
 }
 
-const QString getProgDir(bool create)
+const QString getInternalStoragePath() 
 {
-	QString path = QDir::separator() + QString("sdcard") + QDir::separator() + QString(".protox") + QDir::separator();
+#if defined (Q_OS_ANDROID)
+	return QDir::separator() + QString("storage") + QDir::separator() + QString("emulated") + QDir::separator() + QString("0") + QDir::separator();
+#endif
+}
+
+const QString getProgDir()
+{
+	QString path = getInternalStoragePath() + QString(".protox") + QDir::separator();
 	QDir dir;
-	if (create && !dir.exists(path))
+	if (!dir.exists(path))
 		dir.mkdir(path);
 	return path;
 }
@@ -46,6 +60,78 @@ const QStringList qstringSplitUnicode(const QString &str, int limit_bytes)
 		result.push_back(QString::fromUtf8(split_bytes));
 	}
 	return result;
+}
+
+const QString getFilenameFromPath(const QString &path)
+{
+	return path.split(QDir::separator()).last();
+}
+
+const QString getDefaultDownloadsDirectory()
+{
+	QString path = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation) + QDir::separator() + "Protox";
+	QDir dir;
+	if (!dir.exists(path))
+		dir.mkdir(path);
+	return path;
+}
+
+const QString checkFileImage(const QString &path)
+{
+	QImageReader reader(path);
+	if (reader.canRead()) {
+		return "file://" + path;
+	} else {
+		return QString();
+	}
+}
+
+bool checkFileExists(const QString &path)
+{
+	return QFile::exists(path);
+}
+
+AsyncFileManager::AsyncFileManager(QFile *file)
+{
+	m_file = file;
+	m_file->moveToThread(this);
+}
+
+void AsyncFileManager::onChunkReadRequest(quint64 position, quint32 length)
+{
+	if (!length) {
+		emit fileTransferEnded(m_parent);
+		return;
+	}
+	m_file->seek(position);
+	QByteArray data = m_file->read(length);
+	emit fileChunkReady(m_parent, data, position);
+}
+
+void AsyncFileManager::onChunkWriteRequest(quint64 position, const QByteArray &data)
+{
+	if (!data.length()) {
+		emit fileTransferEnded(m_parent);
+		return;
+	}
+	m_file->seek(position);
+	m_file->write(data);
+}
+
+void AsyncFileManager::onFileTransferStarted(bool &result)
+{
+	result = m_file->open(QIODevice::WriteOnly);
+}
+
+AsyncFileManager::~AsyncFileManager()
+{
+	m_file->close();
+	delete m_file;
+	quit();
+	if (!wait(1000)) {
+		terminate();
+		wait();
+	}
 }
 
 }

@@ -49,7 +49,8 @@ QZXing {
 */
 Menu {
     id: addFriendMenu
-    width: 300
+    readonly property int margin: 25
+    width: parent.width - margin * 2
     title: qsTr("Add a new friend")
     readonly property bool haveYSpace: keyboardHeight + height <= window.height
     x: (window.width - width) * 0.5
@@ -179,10 +180,17 @@ MessageDialog {
     standardButtons: StandardButton.Yes | StandardButton.No
     visible: false
     property int currentFriendNumber: -1
+    property bool keepActiveFileTransfers: false
     onYes: {
-        bridge.clearFriendChatHistory(currentFriendNumber)
+        bridge.clearFriendChatHistory(currentFriendNumber, keepActiveFileTransfers)
         if (bridge.getCurrentFriendNumber() === currentFriendNumber) {
             messagesModel.clear()
+            if (keepActiveFileTransfers) {
+                messages.addTransitionEnabled = false
+                bridge.retrieveChatLog()
+                chatScrollToEnd()
+                messages.addTransitionEnabled = true
+            }
         }
         toast.show({ message : qsTr("Chat history deleted!"), duration : Toast.Short });
     }
@@ -199,6 +207,7 @@ MessageDialog {
         var friend_number = bridge.getCurrentFriendNumber()
         if (bridge.checkFriendHistoryExists(friend_number)) {
             clearFriendHistoryDialog.currentFriendNumber = friend_number
+            clearFriendHistoryDialog.keepActiveFileTransfers = false
             clearFriendHistoryDialog.open()
         }
         bridge.deleteFriend(friend_number)
@@ -222,7 +231,8 @@ MessageDialog {
 }
 Menu {
     id: friendInfoMenu
-    width: 300
+    readonly property int margin: 25
+    width: parent.width - margin * 2
     title: "My profile"
     x: (window.width - width) * 0.5
     y: (window.height - height) * 0.5
@@ -241,6 +251,12 @@ Menu {
         width: parent.width
         horizontalAlignment: Qt.AlignHCenter
         wrapMode: Text.Wrap
+        Text {
+            anchors.centerIn: parent
+            visible: parent.text.length === 0
+            text: qsTr("<empty>")
+            font.italic: true
+        }
     }
     Text {
         padding: 10
@@ -262,6 +278,20 @@ Menu {
             font.italic: true
         }
     }
+    Text {
+        padding: 10
+        font.bold: true
+        width: parent.width
+        horizontalAlignment: Qt.AlignHCenter
+        text: qsTr("Public key")
+    }
+    Text {
+        id: infoPublicKey
+        padding: 10
+        width: parent.width
+        horizontalAlignment: Qt.AlignHCenter
+        wrapMode: Text.Wrap
+    }
     Button {
         text: qsTr("Delete chat history")
         leftInset: 10
@@ -273,6 +303,7 @@ Menu {
                 return
             }
             clearFriendHistoryDialog.currentFriendNumber = friend_number
+            clearFriendHistoryDialog.keepActiveFileTransfers = true
             clearFriendHistoryDialog.open()
         }
     }
@@ -298,7 +329,8 @@ Menu {
 */
 Menu {
     id: profileMenu
-    width: 300
+    readonly property int margin: 25
+    width: parent.width - margin * 2
     title: "My profile"
     readonly property bool haveYSpace: keyboardHeight + height <= window.height
     x: (window.width - width) * 0.5

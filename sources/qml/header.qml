@@ -63,6 +63,14 @@ ToolBar {
             rightOverlayButton.highlighted = false
         }
 
+        /*
+        MenuItem {
+            text: qsTr("test")
+            onClicked: {
+                bridge.test()
+            }
+        }
+        */
         MenuItem {
             text: qsTr("Clear chat")
             onClicked: {
@@ -141,8 +149,10 @@ ToolBar {
             anchors.fill: parent
             onClicked: {
                 if (!cleanProfile) {
-                    infoNickname.text = bridge.getFriendNickname(bridge.getCurrentFriendNumber())
-                    infoStatus.text = bridge.getFriendStatusMessage(bridge.getCurrentFriendNumber())
+                    var friend_number = bridge.getCurrentFriendNumber()
+                    infoNickname.text = bridge.getFriendNickname(friend_number, false)
+                    infoStatus.text = bridge.getFriendStatusMessage(friend_number)
+                    infoPublicKey.text = bridge.getFriendPublicKeyHex(friend_number)
                     friendInfoMenu.popup()
                 }
             }

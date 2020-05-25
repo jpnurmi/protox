@@ -5,6 +5,8 @@ import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.2
 import QtQuick.Window 2.12
 
+import QtFolderDialog 1.0
+
 Popup {
     id: settingsWindow
     width: window.width
@@ -49,6 +51,12 @@ Popup {
     readonly property int sf_password: 1 << 9
     readonly property int sf_button: 1 << 10
     readonly property int sf_acceptAction: 1 << 11
+    FolderDialog {
+        id: downloadsFolderDialog
+        onAccepted: {
+            settingsModel.setValueString("downloads_folder", bridge.uriToRealPath(folderUrl.toString()))
+        }
+    }
     MessageDialog {
         id: settingsAlertDialog
         visible: false
@@ -134,6 +142,9 @@ Popup {
                 settingsWindow.close()
                 bridge.signOutProfile(true)
                 loginWindow.reopen(true, false)
+            },
+            "change_downloads_directory" : function () {
+                downloadsFolderDialog.open()
             }
         }
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Tox options") })
@@ -161,6 +172,10 @@ Popup {
                     acceptAction : "reload_chat", fieldValidator: last_messages_limit_validator, itemWidth: 96, 
                     name: qsTr("Recent messages limit"), prop: "last_messages_limit", helperText: "128",
                     svalue: bridge.getSettingsValue("Client", "last_messages_limit", ptype_string, 128) })
+        settingsModel.append({ flags: sf_text | sf_button, prop: "downloads_folder", 
+                                 svalue: bridge.getSettingsValue("Client", "downloads_folder", ptype_string, bridge.getDefaultDownloadsDirectory()), 
+                                 name: qsTr("Downloads folder"), buttonText: qsTr("Select"), 
+                                 clickAction: "change_downloads_directory"})
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Privacy") })
         settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Keep chat history"), itemEnabled: true, prop: "keep_chat_history", 
                     nvalue: bridge.getSettingsValue("Privacy", "keep_chat_history", ptype_bool, Boolean(true)) })
@@ -209,6 +224,7 @@ Popup {
         bridge.setSettingsValue("Client", "absent_timer_interval", String(settingsModel.getValueString("absent_timer_interval")))
         absentTimer.interval = parseInt(settingsModel.getValueString("absent_timer_interval")) * 60 * 1000
         bridge.setSettingsValue("Client", "last_messages_limit", settingsModel.getValueString("last_messages_limit"))
+        bridge.setSettingsValue("Client", "downloads_folder", String(settingsModel.getValueString("downloads_folder")))
         bridge.setSettingsValue("Privacy", "keep_chat_history", Boolean(settingsModel.getValueNumber("keep_chat_history")))
         bridge.setSettingsValue("Profile", "auto_login_profile", settingsModel.getValueNumber("auto_login_enabled") ? bridge.getCurrentProfile() : "")
         bridge.setNospamValue(settingsModel.getValueString("no_spam_value"))

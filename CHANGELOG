@@ -62,12 +62,27 @@ v1.4alpha
 - Improved the look of the message cloud
 
 v1.4.1alpha
+
 - Fixed issues with bootstrapping
 
 v1.4.2alpha
+
 - Improved the quality of small UI items
 - Redesigned message typing area
 - Many UI improvements: main window, login menu, settings menu
 - Message cloud width will now be correct on screen orientation change
 - Improved validator on Tox ID field
 - Updated Russian translation
+
+v1.5beta_pre
+
+- Added file transfers in both directions.
+- Added buttons to chat typing area for file transfers.
+- Added notification for file transfers.
+- Added "Change downloads folder" button to settings menu. (the default folder is Android downloads folder).
+- Main window and message list were reworked which fixed many bugs.
+- Added "Public Key" entry to friend information dialog.
+- Fixed bug: message timestamp disappears immediately when the message. cloud becomes invisible while scrolling.
+- Fixed bug: flickering issues when using auto-login.
+- Added logging feature (protox.log file to application directory).
+- Updated russian translation.

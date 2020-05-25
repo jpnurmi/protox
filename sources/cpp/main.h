@@ -34,18 +34,23 @@ public:
 	void tryReconnect();
 	void sendPendingMessages(quint32 friend_number);
 	void removeNonFailedPendingMessages(quint32 friend_number);
+	void changeFileProgress(quint32 friend_number, quint32 file_number, quint32 bytesTransfered, bool finished);
+	void fileControlUpdateMessage(quint32 friend_number, quint64 unique_id, quint32 control);
+	void cancelFileNotification(quint32 friend_number, quint32 file_number);
+	void createFileProgressNotification(quint32 friend_number, quint32 file_number);
+	const QString formatBytes(quint64 bytes);
 public slots:
 	Q_INVOKABLE void sendMessage(const QString &message);
 	Q_INVOKABLE quint32 getCurrentFriendNumber();
 	Q_INVOKABLE int getFriendConnStatus(quint32 friend_number);
-	Q_INVOKABLE const QString getFriendNickname(quint32 friend_number);
+	Q_INVOKABLE const QString getFriendNickname(quint32 friend_number, bool publicKey = true);
 	Q_INVOKABLE void setCurrentFriend(quint32 newFriend);
 	Q_INVOKABLE void retrieveChatLog(quint32 start = 0, bool from = true, bool reverse = false);
 	Q_INVOKABLE QString getToxId();
 	Q_INVOKABLE void copyTextToClipboard(QString text);
 	Q_INVOKABLE void makeFriendRequest(const QString &toxId, const QString &friendMessage);
 	Q_INVOKABLE void deleteFriend(quint32 friend_number);
-	Q_INVOKABLE void clearFriendChatHistory(quint32 friend_number);
+	Q_INVOKABLE void clearFriendChatHistory(quint32 friend_number, bool keep_active_file_transfers);
 	Q_INVOKABLE void setTypingFriend(quint32 friend_number, bool typing);
 	Q_INVOKABLE const QString getFriendStatusMessage(quint32 friend_number);
 	Q_INVOKABLE const QString getNickname(bool toxId = false);
@@ -86,10 +91,21 @@ public slots:
 	Q_INVOKABLE void resendMessage(quint32 friend_number, quint64 unique_id);
 	Q_INVOKABLE void removeMessageFromPendingList(quint32 friend_number, quint64 unique_id);
 	Q_INVOKABLE void removeMessageFromDB(quint32 friend_number, quint64 unique_id);
+	Q_INVOKABLE QString uriToRealPath(const QString &uriString);
+	Q_INVOKABLE quint32 sendFile(quint32 friend_number, const QString &filepath);
+	Q_INVOKABLE bool controlFile(quint32 friend_number, quint32 file_number, quint32 control);
+	Q_INVOKABLE QString getDefaultDownloadsDirectory();
+	Q_INVOKABLE QString checkFileImage(const QString &path);
+	Q_INVOKABLE void viewFile(const QString &path, const QString &type);
+	Q_INVOKABLE quint32 acceptFile(quint32 friend_number, quint32 file_number);
+	Q_INVOKABLE bool checkFileExists(const QString &path);
+	Q_INVOKABLE QString getFriendPublicKeyHex(quint32 friend_number);
 
 public:
 	ToxFriendsConnStatus friends_conn_status;
 	ToxPendingMessages pending_messages;
+	ToxFileTransfers transfers;
+	ToxFileMessages file_messages;
 private:
 	quint32 current_friend_number;
 	QString current_profile;
@@ -100,6 +116,7 @@ private:
 private:
 	QTimer *toxcore_timer;
 	QTimer *reconnection_timer;
+	QTimer *transfer_update_timer;
 private:
 	// fixme: move to tox.cpp, may be?
 	Tox *tox;

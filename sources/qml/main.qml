@@ -13,12 +13,14 @@ import QtNotification 1.0
 import QtStatusBar 1.0
 import QtUtf8ByteLimitValidator 1.0
 import QtToast 1.0
+import QtPhotoDialog 1.0
+import QtFolderDialog 1.0
 import QZXing 2.3
 
 ApplicationWindow {
     id: window
     visible: true
-    readonly property string applicationVersion: "1.4.2alpha"
+    readonly property string applicationVersion: "1.5beta_pre"
 
     /*
       Window events
@@ -29,11 +31,9 @@ ApplicationWindow {
         chatMessage.updateHeight()
     }
 
-    onHeightChanged: {
-        chatScrollToEnd()
-    }
-
     onClosing: {
+        // Keys.onBackPressed doesn't work
+        attachFileButton.hideButtons()
         close.accepted = false
     }
 
@@ -51,6 +51,9 @@ ApplicationWindow {
                 statusIndicator.setStatus(lastStatus)
                 lastStatus = -1
             }
+        }
+        if (!appInactive) {
+            notification.cancel({ type : Notification.Text, id : bridge.getCurrentFriendNumber() })
         }
     }
 
@@ -71,7 +74,7 @@ ApplicationWindow {
     Timer {
         id: absentTimer
         repeat: false
-        interval: parseInt(bridge.getSettingsValue("Client", "absent_timer_interval", 
+        interval: parseInt(safe_bridge().getSettingsValue("Client", "absent_timer_interval", 
                                           ptype_string, String("10"))) * 60 * 1000
         onTriggered: {
            lastStatus = bridge.getStatus()
@@ -96,7 +99,6 @@ ApplicationWindow {
     Component.onCompleted: {
         statusBar.theme = getTheme().Dark
         statusBar.color = getTheme().toolBarColor
-        delayTimer.start()
     }
 
     Flickable {
@@ -203,6 +205,16 @@ ApplicationWindow {
     readonly property real standardFontPointSize: 17.5
     readonly property int ptype_bool: 1
     readonly property int ptype_string: 10
+    readonly property int fstate_request: 0
+    readonly property int fstate_inprogress: 1
+    readonly property int fstate_paused: 2
+    readonly property int fstate_canceled: 3
+    readonly property int fstate_finished: 4
+    readonly property int fcontrol_resume: 0
+    readonly property int fcontrol_pause: 1
+    readonly property int fcontrol_cancel: 2
+    readonly property int msgtype_text: 0
+    readonly property int msgtype_file: 1
 
     /*
         Image buffers

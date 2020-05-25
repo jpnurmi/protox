@@ -6,12 +6,13 @@
 #include "QtNotification.h"
 #include "QtStatusBar.h"
 #include "QZXing.h"
-#include "toasts.h"
+#include "native.h"
 #include "qtutf8bytelimitvalidator.h"
 
 QmlCBridge *qmlbridge = nullptr;
 ChatDataBase *chat_db = nullptr;
 QSettings *settings = nullptr;
+QFile *logfile = nullptr;
 
 QmlCBridge::QmlCBridge()
 {
@@ -40,11 +41,14 @@ QmlCBridge::QmlCBridge()
 		QMetaObject::invokeMethod(component, "resetConnectionStatus");
 		Toxcore::bootstrap_DHT(tox);
 	});
+	transfer_update_timer = new QTimer;
+	transfer_update_timer->setInterval(16);
+	transfer_update_timer->setSingleShot(true);
 }
 
 void QmlCBridge::test()
 {
-	// for testing
+
 }
 
 void QmlCBridge::setComponent(QObject *_component)
@@ -122,9 +126,9 @@ int QmlCBridge::getFriendConnStatus(quint32 friend_number)
 	return friends_conn_status[friend_number];
 }
 
-const QString QmlCBridge::getFriendNickname(quint32 friend_number)
+const QString QmlCBridge::getFriendNickname(quint32 friend_number, bool publicKey)
 {
-	return Toxcore::get_friend_name(tox, friend_number);
+	return Toxcore::get_friend_name(tox, friend_number, publicKey);
 }
 
 void QmlCBridge::setCurrentFriend(quint32 newFriend)
@@ -147,12 +151,26 @@ void QmlCBridge::retrieveChatLog(quint32 start, bool from, bool reverse)
 	settings->beginGroup("Client");
 	quint32 limit = settings->value("last_messages_limit", 128).toUInt();
 	settings->endGroup();
-	const ToxMessages messages = chat_db->getFriendMessages(Toxcore::get_friend_public_key(tox, current_friend_number), limit, start, from, reverse);
+	ToxMessages messages = chat_db->getFriendMessages(Toxcore::get_friend_public_key(tox, current_friend_number), limit, start, from, reverse);
 	QMetaObject::invokeMethod(component, "clearChatContent");
 	if (messages.isEmpty()) {
 		return;
 	}
-	for (const auto &msg : messages) {
+	for (auto &msg : messages) {
+		if (msg.variantMessage["type"].toUInt() == TOXMSG_FILE) {
+			quint32 file_number = 0;
+			for (const auto transfer : transfers) {
+				if (file_messages[transfer] == msg.unique_id) {
+					file_number = transfer->file_number;
+					break;
+				}
+			}
+			msg.variantMessage.insert("file_number", file_number);
+			msg.variantMessage.insert("name", Tools::getFilenameFromPath(msg.variantMessage["file_path"].toString()));
+			if (msg.variantMessage["state"] > TOX_FILE_PAUSED) {
+				msg.received = true;
+			}
+		}
 		insertMessage(msg.variantMessage, current_friend_number, msg.dt, msg.self, msg.unique_id, true, false);
 		if (!msg.self || msg.received)
 			setMessageReceived(current_friend_number, msg.unique_id);
@@ -175,12 +193,14 @@ void QmlCBridge::makeFriendRequest(const QString &toxId, const QString &friendMe
 
 void QmlCBridge::deleteFriend(quint32 friend_number)
 {
+	Toxcore::cancel_all_file_transfers_for_friend(friend_number);
+	Toxcore::iterate(tox);
 	Toxcore::delete_friend(tox, friend_number);
 }
 
-void QmlCBridge::clearFriendChatHistory(quint32 friend_number)
+void QmlCBridge::clearFriendChatHistory(quint32 friend_number, bool keep_active_file_transfers)
 {
-	chat_db->clearFriendChatHistory(Toxcore::get_friend_public_key(tox, friend_number));
+	chat_db->clearFriendChatHistory(Toxcore::get_friend_public_key(tox, friend_number), keep_active_file_transfers);
 }
 
 void QmlCBridge::updateFriendNickName(quint32 friend_number, const QString &nickname)
@@ -316,11 +336,7 @@ void QmlCBridge::setSettingsValue(const QString &group, const QString &key, cons
 
 void QmlCBridge::setKeyboardAdjustMode(bool adjustNothing)
 {
-#if defined (Q_OS_ANDROID)
-	QtAndroid::runOnAndroidThread([=]() {
-		QtAndroid::androidActivity().callMethod<void>("setKeyboardAdjustMode", "(Z)V", adjustNothing);
-	});
-#endif
+	Native::setKeyboardAdjustMode(adjustNothing);
 }
 
 bool QmlCBridge::checkProfileEncrypted(const QString &profile)
@@ -404,18 +420,6 @@ void customMessageHandler(QtMsgType type, const QMessageLogContext &context, con
 	}
 }
 
-#ifdef Q_OS_ANDROID
-extern "C" 
-{
-	JNIEXPORT void JNICALL Java_org_protox_activity_QtActivityEx_keyboardHeightChanged(JNIEnv *, jobject, jint height)
-	{
-		if (qmlbridge && !qmlbridge->getAppInactive()) {
-			qmlbridge->setKeyboardHeight(height);
-		}
-	}
-}
-#endif
-
 int QmlCBridge::signInProfile(const QString &profile, bool create_new, const QString &password, bool autoLogin)
 {
 	current_profile = profile;
@@ -434,7 +438,7 @@ int QmlCBridge::signInProfile(const QString &profile, bool create_new, const QSt
 		settings->setValue("auto_login_profile", "");
 	}
 	settings->endGroup();
-	Tools::debug("My address: " + ToxConverter::toString(Toxcore::get_address(tox)));
+	//Tools::debug("My address: " + ToxConverter::toString(Toxcore::get_address(tox)));
 	chat_db = new ChatDataBase("chat_" + Tools::replaceFileExtension(current_profile, ".db"), password);
 
 	// load config
@@ -483,6 +487,7 @@ QmlCBridge::~QmlCBridge()
 	}
 	signOutProfile();
 	delete reconnection_timer;
+	delete transfer_update_timer;
 }
 
 QVariant QmlCBridge::getProfileList()
@@ -512,6 +517,9 @@ void QmlCBridge::signOutProfile(bool remove)
 	}
 	settings->sync();
 
+	Toxcore::cancel_all_file_transfers();
+	Toxcore::iterate(tox);
+
 	reconnection_timer->stop();
 	toxcore_timer->stop();
 	delete toxcore_timer;
@@ -531,6 +539,8 @@ void QmlCBridge::signOutProfile(bool remove)
 	}
 	current_profile.clear();
 	pending_messages.clear();
+	transfers.clear();
+	file_messages.clear();
 }
 
 quint32 QmlCBridge::getToxNodesCount()
@@ -565,9 +575,7 @@ QString QmlCBridge::getSystemLocale()
 
 void QmlCBridge::hideSplashScreen()
 {
-#ifdef Q_OS_ANDROID
-	QtAndroid::hideSplashScreen();
-#endif
+	Native::hideSplashScreen();
 }
 
 void QmlCBridge::sendPendingMessages(quint32 friend_number)
@@ -639,6 +647,154 @@ void QmlCBridge::removeMessageFromDB(quint32 friend_number, quint64 unique_id)
 	chat_db->removeMessage(unique_id, Toxcore::get_friend_public_key(tox, friend_number));
 }
 
+QString QmlCBridge::uriToRealPath(const QString &uriString)
+{
+	return Native::uriToRealPath(uriString);
+}
+
+quint32 QmlCBridge::sendFile(quint32 friend_number, const QString &filepath)
+{
+	quint64 filesize;
+	ToxFileId file_id;
+	quint32 error;
+	ToxFileTransfer *transfer = nullptr;
+	quint32 file_number = Toxcore::send_file(tox, friend_number, filepath, &transfer, filesize, file_id, error);
+	if (error > 0) {
+		return error;
+	}
+	QDateTime dt = QDateTime::currentDateTime();
+	ToxVariantMessage variantMessage;
+	variantMessage.insert("type", ToxVariantMessageType::TOXMSG_FILE);
+	variantMessage.insert("size", filesize);
+	variantMessage.insert("state", ToxFileState::TOX_FILE_REQUEST);
+	variantMessage.insert("file_id", file_id);
+	variantMessage.insert("file_path", filepath);
+	variantMessage.insert("file_number", file_number);
+	// ui only
+	variantMessage.insert("name", Tools::getFilenameFromPath(filepath));
+	quint64 unique_id = chat_db->insertMessage(variantMessage, dt, Toxcore::get_friend_public_key(tox, friend_number), false, true);
+	file_messages[transfer] = unique_id;
+	insertMessage(variantMessage, friend_number, dt, true, unique_id);
+	return 0;
+}
+
+void QmlCBridge::fileControlUpdateMessage(quint32 friend_number, quint64 unique_id, quint32 control)
+{
+	QVariant returnedValue;
+	QMetaObject::invokeMethod(component, "fileControlUpdateMessage",
+		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, friend_number), 
+							  Q_ARG(QVariant, unique_id),
+							  Q_ARG(QVariant, control));
+}
+
+bool QmlCBridge::controlFile(quint32 friend_number, quint32 file_number, quint32 control)
+{
+	quint64 unique_id = 0;
+	bool success = Toxcore::file_control(tox, friend_number, file_number, control, unique_id);
+	if (success) {
+		fileControlUpdateMessage(friend_number, unique_id, control);
+	}
+	return success;
+}
+
+void QmlCBridge::changeFileProgress(quint32 friend_number, quint32 file_number, quint32 bytesTransfered, bool finished)
+{
+	if (!finished) {
+		if (transfer_update_timer->isActive()) {
+			return;
+		} else {
+			transfer_update_timer->start();
+		}
+	}
+	QVariant returnedValue;
+	QMetaObject::invokeMethod(component, "changeFileProgress",
+		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, friend_number), 
+							  Q_ARG(QVariant, file_number),
+							  Q_ARG(QVariant, bytesTransfered));
+}
+
+QString QmlCBridge::getDefaultDownloadsDirectory()
+{
+	return Tools::getDefaultDownloadsDirectory();
+}
+
+QString QmlCBridge::checkFileImage(const QString &path)
+{
+	return Tools::checkFileImage(path);
+}
+
+void QmlCBridge::viewFile(const QString &path, const QString &type)
+{
+	Native::viewFile(path, type);
+}
+
+quint32 QmlCBridge::acceptFile(quint32 friend_number, quint32 file_number)
+{
+	quint64 unique_id = 0;
+	quint32 control = Toxcore::acceptFile(friend_number, file_number, unique_id);
+	fileControlUpdateMessage(friend_number, unique_id, control);
+	createFileProgressNotification(friend_number, file_number);
+	return control;
+}
+
+bool QmlCBridge::checkFileExists(const QString &path)
+{
+	return Tools::checkFileExists(path);
+}
+
+void QmlCBridge::cancelFileNotification(quint32 friend_number, quint32 file_number)
+{
+	QVariantMap parameters;
+	parameters["fileNumber"] = file_number;
+	QVariantMap notificationParameters;
+	notificationParameters["type"] = QtNotification::FileRequest;
+	notificationParameters["id"] = friend_number;
+	notificationParameters["parameters"] = parameters;
+	QtNotification notification;
+	notification.cancel(notificationParameters);
+}
+
+const QString QmlCBridge::formatBytes(quint64 bytes)
+{
+	QVariant formattedBytes;
+	QMetaObject::invokeMethod(component, "formatBytes", Qt::DirectConnection, Q_RETURN_ARG(QVariant, formattedBytes), 
+							  Q_ARG(QVariant, bytes), Q_ARG(QVariant, 2));
+	return formattedBytes.toString();
+}
+
+void QmlCBridge::createFileProgressNotification(quint32 friend_number, quint32 file_number)
+{
+	for (const auto transfer : transfers) {
+		if (transfer->friend_number == friend_number && transfer->file_number == file_number) {
+			QVariantMap parameters;
+			parameters["fileNumber"] = file_number;
+			const QString file_path = transfer->manager->getFile()->fileName();
+			quint64 file_size = chat_db->getFileSize(file_messages[transfer], 
+													 Toxcore::get_friend_public_key(tox, friend_number));
+			parameters["filePath"] = file_path;
+			parameters["fileSize"] = file_size;
+			parameters["speedPrefix"] = tr("/s");
+			parameters["transferFinishedText"] = QString(tr("Transfer from %1 is finished")).arg(Toxcore::get_friend_name(tox, friend_number));
+			parameters["transferCanceledText"] = QString(tr("Transfer from %1 is canceled")).arg(Toxcore::get_friend_name(tox, friend_number));
+			QVariantMap notificationParameters;
+			notificationParameters["type"] = QtNotification::FileProgress;
+			notificationParameters["id"] = friend_number;
+			notificationParameters["parameters"] = parameters;
+			notificationParameters["caption"] = Tools::getFilenameFromPath(file_path) +
+					" (" + formatBytes(file_size) + ")";
+			notificationParameters["title"] = QString(tr("Transfering file from %1")).arg(Toxcore::get_friend_name(tox, friend_number));
+			QtNotification notification;
+			notification.show(notificationParameters);
+			break;
+		}
+	}
+}
+
+QString QmlCBridge::getFriendPublicKeyHex(quint32 friend_number)
+{
+	return ToxConverter::toString(Toxcore::get_friend_public_key(tox, friend_number));
+}
+
 QmlTranslator::QmlTranslator(QObject *parent) : QObject(parent) {}
 
 void QmlTranslator::setTranslation(const QString &translation)
@@ -651,21 +807,15 @@ void QmlTranslator::setTranslation(const QString &translation)
 	emit languageChanged();
 }
 
-
 int main(int argc, char *argv[])
 {
-#if defined (Q_OS_ANDROID)
-	const QStringList permission_list = { "android.permission.WRITE_EXTERNAL_STORAGE" };
-	for (auto permission : permission_list) {
-		auto permission_result = QtAndroid::checkPermission(permission);
-		if(permission_result == QtAndroid::PermissionResult::Denied){
-			QtAndroid::PermissionResultMap resultHash = QtAndroid::requestPermissionsSync(QStringList({permission}));
-			if(resultHash[permission] == QtAndroid::PermissionResult::Denied) {
-				return 1;
-			}
-		}
+	if (!Native::requestApplicationPermissions()) {
+		return 1;
 	}
-#endif
+	logfile = new QFile(Tools::getProgDir() + "protox.log");
+	if (!logfile->open(QIODevice::WriteOnly | QIODevice::Append)) {
+		Tools::debug("Failed to open a log file.");
+	}
 	ChatDataBase::registerSQLDriver();
 	settings = new QSettings(Tools::getProgDir() + "settings.ini", QSettings::IniFormat);
 
@@ -673,6 +823,9 @@ int main(int argc, char *argv[])
 	QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
 	QGuiApplication app(argc, argv);
+	// eleminate QML warnings
+	app.setOrganizationName("protox");
+	app.setOrganizationDomain("org");
 
 	qInstallMessageHandler(customMessageHandler);
 
@@ -692,6 +845,8 @@ int main(int argc, char *argv[])
 	QtNotification::declareQML();
 	QtStatusBar::declareQML();
 	QtToast::declareQML();
+	QtPhotoDialog::declareQML();
+	QtFolderDialog::declareQML();
 	QUtf8ByteLimitValidator::declareQML();
 	QZXing::registerQMLTypes();
 	QZXing::registerQMLImageProvider(engine);
@@ -704,6 +859,8 @@ int main(int argc, char *argv[])
 	delete qmlbridge;
 	delete settings;
 	Tools::debug("Program exited successfully.");
+	logfile->close();
+	delete logfile;
 
 	return result;
 }

@@ -15,7 +15,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
 	sources/cpp/db.cpp \
 	sources/cpp/main.cpp \
-	sources/cpp/toasts.cpp \
+	sources/cpp/native.cpp \
 	sources/cpp/tools.cpp \
 	sources/cpp/tox.cpp
 
@@ -23,10 +23,19 @@ HEADERS += \
 	sources/cpp/common.h \
 	sources/cpp/db.h \
 	sources/cpp/main.h \
+	sources/cpp/native.h \
 	sources/cpp/qtutf8bytelimitvalidator.h \
-	sources/cpp/toasts.h \
 	sources/cpp/tools.h \
 	sources/cpp/tox.h
+
+android {
+SOURCES += sources/cpp/native/android/photodialog.cpp \
+	sources/cpp/native/android/folderdialog.cpp \
+	sources/cpp/native/android/toasts.cpp
+HEADERS += sources/cpp/native/android/photodialog.h \
+	sources/cpp/native/android/folderdialog.h \
+	sources/cpp/native/android/toasts.h
+}
 
 LIBS += -ltoxcore -ltoxencryptsave
 

@@ -21,6 +21,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QTextBoundaryFinder>
+#include <QImageReader>
 
 #if defined (Q_OS_ANDROID)
 #include <QAndroidService>
@@ -28,6 +29,7 @@
 #include <QAndroidJniObject>
 #include <QAndroidJniEnvironment>
 #include <QAndroidIntent>
+#include <QAndroidActivityResultReceiver>
 #endif
 
 #endif // COMMON_H

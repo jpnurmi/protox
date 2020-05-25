@@ -2,14 +2,16 @@
 #define TOX_H
 
 #include "common.h"
+#include "tools.h"
 
 // Toxcore
 #include "deps/tox/tox.h"
 #include "deps/tox/toxencryptsave.h"
 
-typedef QList <quint32> ToxFriends; 
+typedef QVector <quint32> ToxFriends; 
 typedef QByteArray ToxPk;
 typedef QByteArray ToxId;
+typedef QByteArray ToxFileId;
 
 typedef QMap <quint32, TOX_CONNECTION> ToxFriendsConnStatus;
 struct ToxPendingMessage {
@@ -33,7 +35,7 @@ struct ToxPendingMessage {
 				a.resent == b.resent;
 	}
 };
-typedef QList<ToxPendingMessage> ToxPendingMessages;
+typedef QVector<ToxPendingMessage> ToxPendingMessages;
 
 typedef QMap<QString, QVariant> ToxVariantMessage;
 enum ToxVariantMessageType {
@@ -48,6 +50,42 @@ enum ToxProfileLoadingError {
 	TOX_ERR_LOADING_ALREADY_EXISTS,
 	TOX_ERR_LOADING_EMPTY_PASSWORD
 };
+enum ToxFileSendingError {
+	TOX_ERR_SENDING_OK,
+	TOX_ERR_SENDING_OPEN_FAILED,
+	TOX_ERR_SENDING_TOO_MANY_REQUESTS,
+	TOX_ERR_SENDING_LONG_FILENAME,
+	TOX_ERR_SENDING_FRIEND_OFFLINE,
+	TOX_ERR_SENDING_OTHER
+};
+enum ToxFileState {
+	TOX_FILE_REQUEST,
+	TOX_FILE_INPROGRESS,
+	TOX_FILE_PAUSED,
+	TOX_FILE_CANCELED,
+	TOX_FILE_FINISHED
+};
+
+struct ToxFileTransfer {
+	Tox *tox;
+	quint32 friend_number;
+	quint32 file_number;
+	Tools::AsyncFileManager *manager;
+	quint32 bytesTransfered;
+	ToxFileTransfer (Tox *_tox, quint32 _friend_number, quint32 _file_number, Tools::AsyncFileManager *_manager) {
+		tox = _tox;
+		friend_number = _friend_number;
+		file_number = _file_number;
+		manager = _manager;
+		manager->setObjectParent(this);
+		bytesTransfered = 0;
+	}
+	~ToxFileTransfer() {
+		delete manager;
+	}
+};
+typedef QVector <ToxFileTransfer*> ToxFileTransfers;
+typedef QMap <ToxFileTransfer*, quint64> ToxFileMessages;
 
 struct ToxMessage {
 	ToxVariantMessage variantMessage;
@@ -63,7 +101,7 @@ struct ToxMessage {
 		unique_id = _unique_id;
 	}
 };
-typedef QList <ToxMessage> ToxMessages;
+typedef QVector <ToxMessage> ToxMessages;
 
 namespace Toxcore {
 	Tox *create(ToxProfileLoadingError &error, bool create_new, const QString &password, const QString &profile, const Tox_Pass_Key *pass_key);
@@ -73,7 +111,7 @@ namespace Toxcore {
 	ToxId get_address(Tox *m);
 	quint32 send_message(Tox *m, quint32 friend_number, const QString &message, bool &failed);
 	ToxPk get_friend_public_key(Tox *m, quint32 friend_number);
-	const QString get_friend_name(Tox *m, quint32 friend_number);
+	const QString get_friend_name(Tox *m, quint32 friend_number, bool publicKey = true);
 	size_t get_friends_count(Tox *m);
 	ToxFriends get_friends(Tox *m);
 	int make_friend_request(Tox *m, ToxId id, const QString &friendMessage);
@@ -102,6 +140,12 @@ namespace Toxcore {
 	quint32 get_nickname_max_length();
 	quint32 get_status_message_max_length();
 	quint32 get_tox_address_size();
+	quint32 send_file(Tox *m, quint32 friend_number, const QString &path, ToxFileTransfer **transfer, quint64 &filesize, ToxFileId &file_id, quint32 &error);
+	bool file_control(Tox *m, quint32 friend_number, quint32 file_number, quint32 control, quint64 &unique_id);
+	void cancel_all_file_transfers();
+	void cancel_all_file_transfers_for_friend(quint32 friend_number);
+	void iterate(Tox *m);
+	bool acceptFile(quint32 friend_number, quint32 file_number, quint64 &unique_id);
 }
 
 namespace ToxConverter {
