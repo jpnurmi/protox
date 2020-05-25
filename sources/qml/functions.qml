@@ -7,7 +7,7 @@ import QtQuick 2.12
 /*[remove]*/ Item {
 
 function formatBytes(bytes, decimals = 2) {
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+    const sizes = [qsTr("Bytes"), qsTr("KB"), qsTr("MB"), qsTr("GB"), qsTr("TB"), qsTr("PB"), qsTr("EB"), qsTr("ZB"), qsTr("YB")]
     if (bytes === 0) {
         return "0 " + sizes[0];
     }
@@ -426,7 +426,7 @@ function sendFile(fileUrl) {
     switch (result) {
     case 0: msg = qsTr("File sent!"); break;
     case 1: msg = qsTr("Failed to open a file."); break;
-    case 2: msg = qsTr("Failed. Too many file requests."); break;
+    case 2: msg = qsTr("Failed. Too many file transfer requests."); break;
     case 3: msg = qsTr("Failed. Filename is too long."); break;
     case 4: msg = qsTr("A friend is not online."); break;
     case 5: msg = qsTr("Unexpected error."); break;

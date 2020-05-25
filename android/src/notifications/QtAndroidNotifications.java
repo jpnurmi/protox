@@ -13,20 +13,23 @@ import android.app.NotificationChannel;
 import android.os.Bundle;
 import android.os.Build;
 import android.util.Log;
+import android.text.format.Formatter;
+import android.net.Uri;
 
 // java
 import java.lang.String;
 import java.util.HashMap;
+import java.io.File;
 
 import org.protox.R;
 import org.protox.activity.QtActivityEx;
 
 class QtAndroidNotifications {
 
-    public static void show(String title, String caption, int id, int type, HashMap <String, Object> parameters) {
-        Context context = QtNative.activity();
-        NotificationManager notificationManager = getManager();
-        Notification.Builder builder =
+    public static void show(final String title, final String caption, final int id, final int type, final HashMap <String, Object> parameters) {
+        final Context context = QtNative.activity();
+        final NotificationManager notificationManager = getManager();
+        final Notification.Builder builder =
                 new Notification.Builder(context)
                 .setSmallIcon(org.protox.R.drawable.icon)
                 .setContentTitle(title)
@@ -72,6 +75,43 @@ class QtAndroidNotifications {
                 notificationManager.notify(getTagByType(type) + "_" + id, file_number, builder.build());
                 break;
             }
+            case 2:
+                final int file_number = (int)parameters.get("fileNumber");
+                final long file_size = (long)parameters.get("fileSize");
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        long lastBytesTransfered = 0;
+                        while (QtActivityEx.checkFileTransferInProgress(id, file_number)) {
+                            long bytesTransfered = QtActivityEx.getBytesTransfered(id, file_number);
+                            long speedInBytes = bytesTransfered - lastBytesTransfered;
+                            lastBytesTransfered = bytesTransfered;
+                            builder.setContentText(caption + " " + Formatter.formatFileSize(context, speedInBytes) + (String)parameters.get("speedPrefix"));
+                            int current = (int)((float)bytesTransfered / file_size * Short.MAX_VALUE);
+                            builder.setProgress(Short.MAX_VALUE, current, false);
+                            builder.setOngoing(true);
+                            notificationManager.notify(getTagByType(type) + "_" + id, file_number, builder.build());
+                            if (file_size == bytesTransfered) {
+                                break;
+                            }
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException e) {
+                                Log.d("Notifications", "Sleep failure!");
+                            }
+                        }
+                        builder.setProgress(0, 0, false);
+                        builder.setOngoing(false);
+                        builder.setContentText(caption);
+                        if (new File(Uri.parse((String)parameters.get("filePath")).getPath()).length() == file_size) {
+                            builder.setContentTitle((String)parameters.get("transferFinishedText"));
+                        } else {
+                            builder.setContentTitle((String)parameters.get("transferCanceledText"));
+                        }
+                        notificationManager.notify(getTagByType(type) + "_" + id, file_number, builder.build());
+                    }
+                }).start();
+                break;
         }
     }
 
@@ -91,6 +131,7 @@ class QtAndroidNotifications {
         switch (type) {
             case 0: return "Text";
             case 1: return "FileRequest";
+            case 2: return "FileProgress";
         }
         return "";
     }

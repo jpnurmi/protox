@@ -11,6 +11,7 @@ public:
 	quint64 insertMessage(const ToxVariantMessage &variantMessage, const QDateTime &dt, const ToxPk &public_key, bool temporary, bool self);
 	void setMessageReceived(quint64 unique_id, const ToxPk &public_key);
 	const ToxMessages getFriendMessages(const ToxPk &public_key, quint32 limit, quint32 start, bool from, bool reverse);
+	quint64 getFileSize(quint64 unique_id, const ToxPk &public_key);
 	const QString getTextMessage(quint64 unique_id, const ToxPk &public_key);
 	bool updateFileMessageState(quint64 unique_id, const ToxPk &public_key, ToxFileState state);
 	void removeMessage(quint64 unique_id, const ToxPk &public_key);

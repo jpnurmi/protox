@@ -196,6 +196,26 @@ const ToxMessages ChatDataBase::getFriendMessages(const ToxPk &public_key, quint
 	return messages;
 }
 
+quint64 ChatDataBase::getFileSize(quint64 unique_id, const ToxPk &public_key)
+{
+	QSqlQuery query(db);
+	query.prepare("SELECT type,reference_id FROM Messages WHERE unique_id = :unique_id AND public_key = :public_key");
+	query.bindValue(":unique_id", unique_id);
+	query.bindValue(":public_key", public_key);
+	execQuery(query);
+	query.next();
+	if (query.value(0).toInt() == ToxVariantMessageType::TOXMSG_FILE) {
+		QSqlQuery msg_query(db);
+		msg_query.prepare("SELECT size FROM FileMessages WHERE reference_id = :reference_id");
+		msg_query.bindValue(":reference_id", query.value(1).toUInt());
+		execQuery(msg_query);
+		msg_query.next();
+		return msg_query.value(0).toULongLong();
+	} else {
+		return 0;
+	}
+}
+
 const QString ChatDataBase::getTextMessage(quint64 unique_id, const ToxPk &public_key)
 {
 	QSqlQuery query(db);

@@ -25,8 +25,9 @@ class QtNotification : public QObject
 	static void declareQML() ;
 
 	enum Type {
-		Text = 0,
-		FileRequest = 1
+		Text,
+		FileRequest,
+		FileProgress
 	};
 	Q_ENUM(Type)
 

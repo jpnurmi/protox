@@ -732,12 +732,61 @@ quint32 QmlCBridge::acceptFile(quint32 friend_number, quint32 file_number)
 	quint64 unique_id = 0;
 	quint32 control = Toxcore::acceptFile(friend_number, file_number, unique_id);
 	fileControlUpdateMessage(friend_number, unique_id, control);
+	createFileProgressNotification(friend_number, file_number);
 	return control;
 }
 
 bool QmlCBridge::checkFileExists(const QString &path)
 {
 	return Tools::checkFileExists(path);
+}
+
+void QmlCBridge::cancelFileNotification(quint32 friend_number, quint32 file_number)
+{
+	QVariantMap parameters;
+	parameters["fileNumber"] = file_number;
+	QVariantMap notificationParameters;
+	notificationParameters["type"] = QtNotification::FileRequest;
+	notificationParameters["id"] = friend_number;
+	notificationParameters["parameters"] = parameters;
+	QtNotification notification;
+	notification.cancel(notificationParameters);
+}
+
+const QString QmlCBridge::formatBytes(quint64 bytes)
+{
+	QVariant formattedBytes;
+	QMetaObject::invokeMethod(component, "formatBytes", Qt::DirectConnection, Q_RETURN_ARG(QVariant, formattedBytes), 
+							  Q_ARG(QVariant, bytes), Q_ARG(QVariant, 2));
+	return formattedBytes.toString();
+}
+
+void QmlCBridge::createFileProgressNotification(quint32 friend_number, quint32 file_number)
+{
+	for (const auto transfer : transfers) {
+		if (transfer->friend_number == friend_number && transfer->file_number == file_number) {
+			QVariantMap parameters;
+			parameters["fileNumber"] = file_number;
+			const QString file_path = transfer->manager->getFile()->fileName();
+			quint64 file_size = chat_db->getFileSize(file_messages[transfer], 
+													 Toxcore::get_friend_public_key(tox, friend_number));
+			parameters["filePath"] = file_path;
+			parameters["fileSize"] = file_size;
+			parameters["speedPrefix"] = tr("/s");
+			parameters["transferFinishedText"] = QString(tr("Transfer from %1 is finished.")).arg(Toxcore::get_friend_name(tox, friend_number));
+			parameters["transferCanceledText"] = QString(tr("Transfer from %1 is canceled.")).arg(Toxcore::get_friend_name(tox, friend_number));
+			QVariantMap notificationParameters;
+			notificationParameters["type"] = QtNotification::FileProgress;
+			notificationParameters["id"] = friend_number;
+			notificationParameters["parameters"] = parameters;
+			notificationParameters["caption"] = Tools::getFilenameFromPath(file_path) +
+					" (" + formatBytes(file_size) + ")";
+			notificationParameters["title"] = QString(tr("Transfering file from %1")).arg(Toxcore::get_friend_name(tox, friend_number));
+			QtNotification notification;
+			notification.show(notificationParameters);
+			break;
+		}
+	}
 }
 
 QmlTranslator::QmlTranslator(QObject *parent) : QObject(parent) {}

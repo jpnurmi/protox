@@ -174,7 +174,7 @@ Popup {
                     svalue: bridge.getSettingsValue("Client", "last_messages_limit", ptype_string, 128) })
         settingsModel.append({ flags: sf_text | sf_button, prop: "downloads_folder", 
                                  svalue: bridge.getSettingsValue("Client", "downloads_folder", ptype_string, bridge.getDefaultDownloadsDirectory()), 
-                                 name: qsTr("Downloads directory"), buttonText: qsTr("Select"), 
+                                 name: qsTr("Downloads folder"), buttonText: qsTr("Select"), 
                                  clickAction: "change_downloads_directory"})
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Privacy") })
         settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Keep chat history"), itemEnabled: true, prop: "keep_chat_history", 

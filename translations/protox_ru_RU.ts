@@ -425,6 +425,114 @@ Click on the left button to open the friend list, then on «+» to add a new fri
         <source>Auto-away after</source>
         <translation>Авто-смена статуса на &quot;отошел&quot; через</translation>
     </message>
+    <message>
+        <source>File transfer request from %1</source>
+        <translation>Запрос на передачу файла от %1</translation>
+    </message>
+    <message>
+        <source>Accept</source>
+        <translation>Принять</translation>
+    </message>
+    <message>
+        <source>File sent!</source>
+        <translation>Файл отправлен!</translation>
+    </message>
+    <message>
+        <source>Failed to open a file.</source>
+        <translation>Не удалось открыть файл.</translation>
+    </message>
+    <message>
+        <source>Failed. Filename is too long.</source>
+        <translation>Неудача. Имя файла слишком длинное.</translation>
+    </message>
+    <message>
+        <source>A friend is not online.</source>
+        <translation>Друг не в сети.</translation>
+    </message>
+    <message>
+        <source>Unexpected error.</source>
+        <translation>Непредвиденная ошибка.</translation>
+    </message>
+    <message>
+        <source>Select</source>
+        <translation>Выбрать</translation>
+    </message>
+    <message>
+        <source>Transferring...</source>
+        <translation>Передача...</translation>
+    </message>
+    <message>
+        <source>/s</source>
+        <translation>/с</translation>
+    </message>
+    <message>
+        <source>File transfer canceled.</source>
+        <translation>Передача файла отменена.</translation>
+    </message>
+    <message>
+        <source>Transfer succeeded.</source>
+        <translation>Передача успешна.</translation>
+    </message>
+    <message>
+        <source>File transfer failed.</source>
+        <translation>Передача не удалась.</translation>
+    </message>
+    <message>
+        <source>File not found.</source>
+        <translation>Файл не найден.</translation>
+    </message>
+    <message>
+        <source>Select a file</source>
+        <translation>Выберите файл</translation>
+    </message>
+    <message>
+        <source>Select an image</source>
+        <translation>Выберите изображение</translation>
+    </message>
+    <message>
+        <source>Bytes</source>
+        <translation>Байт</translation>
+    </message>
+    <message>
+        <source>KB</source>
+        <translation>КБ</translation>
+    </message>
+    <message>
+        <source>MB</source>
+        <translation>МБ</translation>
+    </message>
+    <message>
+        <source>GB</source>
+        <translation>ГБ</translation>
+    </message>
+    <message>
+        <source>TB</source>
+        <translation>ТБ</translation>
+    </message>
+    <message>
+        <source>PB</source>
+        <translation>ПБ</translation>
+    </message>
+    <message>
+        <source>EB</source>
+        <translation>ЭБ</translation>
+    </message>
+    <message>
+        <source>ZB</source>
+        <translation>ЗБ</translation>
+    </message>
+    <message>
+        <source>YB</source>
+        <translation>ИБ</translation>
+    </message>
+    <message>
+        <source>Failed. Too many file transfer requests.</source>
+        <translation>Неудача. Слишком много запросов на передачу файлов.</translation>
+    </message>
+    <message>
+        <source>Downloads folder</source>
+        <translation>Каталог &quot;Загрузки&quot;</translation>
+    </message>
 </context>
 <context>
     <name>QAndroidPlatformTheme</name>
@@ -454,6 +562,25 @@ Click on the left button to open the friend list, then on «+» to add a new fri
     <message>
         <source>Close</source>
         <translation>Закрыть</translation>
+    </message>
+</context>
+<context>
+    <name>QmlCBridge</name>
+    <message>
+        <source>/s</source>
+        <translation>/с</translation>
+    </message>
+    <message>
+        <source>Transfer from %1 is finished.</source>
+        <translation>Передача от %1 завершилась.</translation>
+    </message>
+    <message>
+        <source>Transfering file from %1</source>
+        <translation>Передача файла от %1</translation>
+    </message>
+    <message>
+        <source>Transfer from %1 is canceled.</source>
+        <translation>Передача от %1 отменена.</translation>
     </message>
 </context>
 <context>

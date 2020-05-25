@@ -28,6 +28,9 @@ import android.webkit.MimeTypeMap;
 
 import KeyboardProvider.KeyboardProvider;
 
+// java
+import java.lang.String;
+
 public class QtActivityEx extends QtActivity
 {
     @Override
@@ -53,6 +56,8 @@ public class QtActivityEx extends QtActivity
     private static native void keyboardHeightChanged(int height);
     private static native void transferAccepted(int friend_number, int file_number);
     private static native void transferCanceled(int friend_number, int file_number);
+    public static native long getBytesTransfered(int friend_number, int file_number);
+    public static native boolean checkFileTransferInProgress(int friend_number, int file_number);
 
     @Override
     protected void onNewIntent(Intent intent) {

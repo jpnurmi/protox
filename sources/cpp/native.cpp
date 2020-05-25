@@ -7,17 +7,6 @@
 
 extern QmlCBridge *qmlbridge;
 
-void cancelFileNotification(quint32 friend_number, quint32 file_number) {
-	QVariantMap parameters;
-	parameters["fileNumber"] = file_number;
-	QVariantMap notificationParameters;
-	notificationParameters["type"] = QtNotification::FileRequest;
-	notificationParameters["id"] = friend_number;
-	notificationParameters["parameters"] = parameters;
-	QtNotification notification;
-	notification.cancel(notificationParameters);
-}
-
 #ifdef Q_OS_ANDROID
 extern "C" 
 {
@@ -32,14 +21,36 @@ extern "C"
 																				  jint file_number)
 	{
 		qmlbridge->acceptFile(friend_number, file_number);
-		cancelFileNotification(friend_number, file_number);
+		qmlbridge->cancelFileNotification(friend_number, file_number);
 	}
 	JNIEXPORT void JNICALL Java_org_protox_activity_QtActivityEx_transferCanceled(JNIEnv *, jobject, 
 																				  jint friend_number,
 																				  jint file_number)
 	{
 		qmlbridge->controlFile(friend_number, file_number, TOX_FILE_CONTROL_CANCEL);
-		cancelFileNotification(friend_number, file_number);
+		qmlbridge->cancelFileNotification(friend_number, file_number);
+	}
+	JNIEXPORT jlong JNICALL Java_org_protox_activity_QtActivityEx_getBytesTransfered(JNIEnv *, jobject, 
+																				  jint friend_number,
+																				  jint file_number)
+	{
+		for (const auto transfer : qmlbridge->transfers) {
+			if (transfer->friend_number == (quint32)friend_number && transfer->file_number == (quint32)file_number) {
+				return transfer->bytesTransfered;
+			}
+		}
+		return 0;
+	}
+	JNIEXPORT jboolean JNICALL Java_org_protox_activity_QtActivityEx_checkFileTransferInProgress(JNIEnv *, jobject, 
+																				  jint friend_number,
+																				  jint file_number)
+	{
+		for (const auto transfer : qmlbridge->transfers) {
+			if (transfer->friend_number == (quint32)friend_number && transfer->file_number == (quint32)file_number) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
 #endif
