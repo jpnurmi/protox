@@ -430,8 +430,7 @@ Menu {
 
 Menu {
     id: profileInfoMenu
-    readonly property int margin: 30
-    width: parent.width - margin * 2
+    width: 260
     title: qsTr("My profile info")
     x: (window.width - width) * 0.5
     y: (window.height - height) * 0.5

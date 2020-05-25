@@ -368,6 +368,7 @@ function signInProfile(profile, create, password, autoLogin) {
     settingsModel.setEnabled("auto_login_enabled", password.length === 0)
     settingsWindow.setProfileEncrypted(bridge.checkProfileEncrypted(profile))
     settingsWindow.setAvailableNodes(bridge.getToxNodesCount())
+    scrollToEndAgainTimer.start()
     return 0
 }
 

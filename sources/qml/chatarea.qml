@@ -501,6 +501,7 @@ ColumnLayout {
                                 if (!msgSelf && received) {
                                     filePreviewImage.source = bridge.checkFileImage(msgFilepath)
                                     fileNotExistsText.visible = !bridge.checkFileExists(msgFilepath)
+                                    viewFileButton.visible = !fileNotExistsText.visible
                                 }
                             }
                             Rectangle {
@@ -635,11 +636,12 @@ ColumnLayout {
                                         font.family: themify.name
                                         font.pointSize: 24
                                         text: (!msgSelf && msgFilestate === fstate_request) ? "\uE646" : "\uE760"
+                                        color: "red"
                                     }
                                 }
                             }
                             ToolButton {
-                                id: viewFileButtons
+                                id: viewFileButton
                                 visible: msgFilestate === fstate_finished 
                                          && safe_bridge().checkFileExists(msgFilepath) 
                                          && !safe_bridge().checkFileImage(msgFilepath).length
@@ -658,7 +660,6 @@ ColumnLayout {
                                 id: fileNotExistsText
                                 visible: msgFilestate === fstate_finished && !safe_bridge().checkFileExists(msgFilepath)
                                 text: qsTr("File not found.")
-                                color: "red"
                                 font.pointSize: fontMetrics.normalize(standardFontPointSize)
                                 wrapMode: Text.Wrap
                                 width: parent.width
