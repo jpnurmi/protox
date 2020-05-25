@@ -20,7 +20,7 @@ import QZXing 2.3
 ApplicationWindow {
     id: window
     visible: true
-    readonly property string applicationVersion: "1.4.2alpha"
+    readonly property string applicationVersion: "1.5beta_pre"
 
     /*
       Window events
