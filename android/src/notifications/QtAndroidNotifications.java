@@ -78,6 +78,7 @@ class QtAndroidNotifications {
             case 2:
                 final int file_number = (int)parameters.get("fileNumber");
                 final long file_size = (long)parameters.get("fileSize");
+                builder.setDefaults(Notification.DEFAULT_LIGHTS);
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
