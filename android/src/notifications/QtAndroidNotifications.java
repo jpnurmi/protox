@@ -78,7 +78,6 @@ class QtAndroidNotifications {
             case 2:
                 final int file_number = (int)parameters.get("fileNumber");
                 final long file_size = (long)parameters.get("fileSize");
-                builder.setDefaults(Notification.DEFAULT_LIGHTS);
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -91,6 +90,7 @@ class QtAndroidNotifications {
                             int current = (int)((float)bytesTransfered / file_size * Short.MAX_VALUE);
                             builder.setProgress(Short.MAX_VALUE, current, false);
                             builder.setOngoing(true);
+                            builder.setDefaults(Notification.DEFAULT_LIGHTS);
                             notificationManager.notify(getTagByType(type) + "_" + id, file_number, builder.build());
                             if (file_size == bytesTransfered) {
                                 break;
@@ -103,6 +103,7 @@ class QtAndroidNotifications {
                         }
                         builder.setProgress(0, 0, false);
                         builder.setOngoing(false);
+                        builder.setDefaults(Notification.DEFAULT_ALL);
                         builder.setContentText(caption);
                         if (new File(Uri.parse((String)parameters.get("filePath")).getPath()).length() == file_size) {
                             builder.setContentTitle((String)parameters.get("transferFinishedText"));
