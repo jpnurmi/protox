@@ -901,7 +901,7 @@ void iterate(Tox *m)
 	tox_iterate(m, nullptr);
 }
 
-bool acceptFile(quint32 friend_number, quint32 file_number, quint64 &unique_id)
+quint32 acceptFile(quint32 friend_number, quint32 file_number, quint64 &unique_id)
 {
 	for (const auto transfer : qmlbridge->transfers) {
 		if (transfer->friend_number == friend_number && transfer->file_number == file_number) {

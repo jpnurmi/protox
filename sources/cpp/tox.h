@@ -145,7 +145,7 @@ namespace Toxcore {
 	void cancel_all_file_transfers();
 	void cancel_all_file_transfers_for_friend(quint32 friend_number);
 	void iterate(Tox *m);
-	bool acceptFile(quint32 friend_number, quint32 file_number, quint64 &unique_id);
+	quint32 acceptFile(quint32 friend_number, quint32 file_number, quint64 &unique_id);
 }
 
 namespace ToxConverter {
