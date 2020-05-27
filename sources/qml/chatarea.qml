@@ -130,7 +130,13 @@ ColumnLayout {
                         && (!chatFlickable.backToDefaultHeight)) {
                     scrollToEnd()
                 } else if (height < defaultHeight - keyboardHeight && wasAtYEnd) {
-                    scrollToEnd()
+                    if (typingText.visible) {
+                        typingText.visible = false
+                    }
+                    messages.scrollToEnd()
+                    if (!typingText.visible && typingText.text.length > 0) {
+                        typingText.visible = true
+                    }
                 }
             }
             property bool addTransitionEnabled: true

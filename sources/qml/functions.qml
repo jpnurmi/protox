@@ -243,7 +243,7 @@ function insertMessage(variantMessage, friend_number, self, time, unique_id, fai
                 typingText.visible = false
             }
             messages.scrollToEnd()
-            if (!typingText.visible) {
+            if (!typingText.visible && typingText.text.length > 0) {
                 typingText.visible = true
             }
         } else if (messages.atYEnd && !self) {
