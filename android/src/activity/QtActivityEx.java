@@ -107,6 +107,26 @@ public class QtActivityEx extends QtActivity
         return Intent.createChooser(intent, "");
     }
 
+    private static String getDataColumn(Context context, Uri uri, String selection, String[] selectionArgs) {
+        Cursor cursor = null;
+        final String column = "_data";
+        final String[] projection = {
+                column
+        };
+        try {
+            cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs,
+                    null);
+            if (cursor != null && cursor.moveToFirst()) {
+                final int index = cursor.getColumnIndexOrThrow(column);
+                return cursor.getString(index);
+            }
+        } finally {
+            if (cursor != null)
+                cursor.close();
+        }
+        return null;
+    }
+
     public static String convertMediaUriToPath(String uriString) {
         Uri uri = Uri.parse(uriString);
         Context context = (Context)QtNative.activity();
@@ -122,11 +142,27 @@ public class QtActivityEx extends QtActivity
                     return "/storage/" + split[0] + "/" + split[1];
                 }
             } else if (isDownloadsDocument(uri)) {
-                final String id = DocumentsContract.getDocumentId(uri);
+                String id = DocumentsContract.getDocumentId(uri);
                 if (id.substring(0, 4).equalsIgnoreCase("raw:")) {
                     return id.substring(4);
                 }
-                uri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
+                if (id.substring(0, 4).equalsIgnoreCase("msf:")) {
+                    id = id.substring(4);
+                }
+                String[] contentUriPrefixesToTry = new String[]{
+                        "content://downloads/public_downloads",
+                        "content://downloads/my_downloads",
+                        "content://downloads/all_downloads"
+                };
+                for (String contentUriPrefix : contentUriPrefixesToTry) {
+                    Uri contentUri = ContentUris.withAppendedId(Uri.parse(contentUriPrefix), Long.valueOf(id));
+                    try {
+                        String path = getDataColumn(context, contentUri, null, null);
+                        if (path != null) {
+                            return path;
+                        }
+                    } catch (Exception e) {}
+                }
             } else if (isMediaDocument(uri)) {
                 final String docId = DocumentsContract.getDocumentId(uri);
                 final String[] split = docId.split(":");
@@ -143,8 +179,7 @@ public class QtActivityEx extends QtActivity
                         split[1]
                 };
             }
-        }
-        if (DocumentsContract.isTreeUri(uri)) {
+        } else if (DocumentsContract.isTreeUri(uri)) {
             if (isExternalStorageDocument(uri)) {
                 final String docId = DocumentsContract.getTreeDocumentId(uri);
                 final String[] split = docId.split(":");
