@@ -153,8 +153,7 @@ public class QtActivityEx extends QtActivity
                 }
                 String[] contentUriPrefixesToTry = new String[]{
                         "content://downloads/public_downloads",
-                        "content://downloads/my_downloads",
-                        "content://downloads/all_downloads"
+                        "content://downloads/my_downloads"
                 };
                 for (String contentUriPrefix : contentUriPrefixesToTry) {
                     Uri contentUri = ContentUris.withAppendedId(Uri.parse(contentUriPrefix), Long.valueOf(id));
