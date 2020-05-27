@@ -123,6 +123,9 @@ public class QtActivityEx extends QtActivity
                 }
             } else if (isDownloadsDocument(uri)) {
                 final String id = DocumentsContract.getDocumentId(uri);
+                if (id.substring(0, 4).equalsIgnoreCase("raw:")) {
+                    return id.substring(4);
+                }
                 uri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
             } else if (isMediaDocument(uri)) {
                 final String docId = DocumentsContract.getDocumentId(uri);
