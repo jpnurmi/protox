@@ -109,18 +109,27 @@ ColumnLayout {
                     scrollToEndButton.visible = false
                 }
             }
+            property bool wasAtYEnd
             function scrollToEnd() {
                 positionViewAtEnd()
                 contentY += Number.MAX_VALUE
                 positionViewAtEnd()
                 contentY += flickable_margin
+                wasAtYEnd = true
+            }
+            onFlickEnded: {
+                wasAtYEnd = atYEnd
             }
             property int defaultHeight
             Component.onCompleted: {
                 defaultHeight = height
             }
             onHeightChanged: {
-                if (height === defaultHeight - keyboardHeight && keyboardActive && !chatFlickable.backToDefaultHeight) {
+                if (height === defaultHeight - keyboardHeight 
+                        && keyboardActive 
+                        && (!chatFlickable.backToDefaultHeight)) {
+                    scrollToEnd()
+                } else if (height < defaultHeight - keyboardHeight && wasAtYEnd) {
                     scrollToEnd()
                 }
             }
@@ -959,10 +968,11 @@ ColumnLayout {
                     defaultHeight = height
                     defaultContentHeight = contentHeight
                 }
-                onContentWidthChanged: {
+                onTextChanged: {
                     updateTyping()
                 }
                 function updateHeight() {
+                    var atYEnd = messages.atYEnd
                     maxLines = inPortrait ? 4 : 2
                     if (defaultContentHeight !== 0) {
                         var lines = contentHeight / defaultContentHeight
@@ -978,7 +988,6 @@ ColumnLayout {
                     }
                 }
                 onContentHeightChanged: {
-                    updateTyping()
                     updateHeight()
                 }
                 Keys.onBackPressed: {
