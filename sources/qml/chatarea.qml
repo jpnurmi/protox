@@ -120,6 +120,15 @@ ColumnLayout {
                 contentY += flickable_margin
                 wasAtYEnd = true
             }
+            function scrollToEndWithTypingText() {
+                if (typingText.visible) {
+                    typingText.visible = false
+                }
+                scrollToEnd()
+                if (!typingText.visible && typingText.text.length > 0) {
+                    typingText.visible = true
+                }
+            }
             onFlickEnded: {
                 wasAtYEnd = atYEnd
             }
@@ -131,15 +140,9 @@ ColumnLayout {
                 if (height === defaultHeight - keyboardHeight 
                         && keyboardActive 
                         && (!chatFlickable.backToDefaultHeight)) {
-                    scrollToEnd()
+                    scrollToEndWithTypingText()
                 } else if (height < defaultHeight - keyboardHeight && wasAtYEnd) {
-                    if (typingText.visible) {
-                        typingText.visible = false
-                    }
-                    messages.scrollToEnd()
-                    if (!typingText.visible && typingText.text.length > 0) {
-                        typingText.visible = true
-                    }
+                    scrollToEndWithTypingText()
                 }
             }
             property bool addTransitionEnabled: true

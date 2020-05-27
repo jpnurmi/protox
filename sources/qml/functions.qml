@@ -239,13 +239,7 @@ function insertMessage(variantMessage, friend_number, self, time, unique_id, fai
 
     if (!history) {
         if ((keyboardActive || variantMessage.type === msgtype_file) && self) {
-            if (typingText.visible) {
-                typingText.visible = false
-            }
-            messages.scrollToEnd()
-            if (!typingText.visible && typingText.text.length > 0) {
-                typingText.visible = true
-            }
+            messages.scrollToEndWithTypingText()
         } else if (messages.atYEnd && !self) {
             // to make typingText disappear immediately
             typingText.visible = false
