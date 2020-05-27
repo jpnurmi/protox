@@ -109,6 +109,9 @@ ColumnLayout {
                     scrollToEndButton.visible = false
                 }
             }
+            function exceedsHeight() {
+                return contentHeight > height
+            }
             property bool wasAtYEnd
             function scrollToEnd() {
                 positionViewAtEnd()

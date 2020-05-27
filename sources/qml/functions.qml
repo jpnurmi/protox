@@ -238,7 +238,7 @@ function insertMessage(variantMessage, friend_number, self, time, unique_id, fai
     messagesModel.append(dict)
 
     if (!history) {
-        if (keyboardActive && self) {
+        if ((keyboardActive || variantMessage.type === msgtype_file) && self) {
             if (typingText.visible) {
                 typingText.visible = false
             }
@@ -247,10 +247,10 @@ function insertMessage(variantMessage, friend_number, self, time, unique_id, fai
                 typingText.visible = true
             }
         } else if (messages.atYEnd && !self) {
-            messages.scrollToEnd()
             // to make typingText disappear immediately
             typingText.visible = false
-        } else {
+            messages.scrollToEnd()
+        } else if (messages.exceedsHeight()) {
             new_messages += 1
             scrollToEndButton.visible = true
         }
