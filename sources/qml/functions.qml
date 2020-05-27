@@ -238,12 +238,18 @@ function insertMessage(variantMessage, friend_number, self, time, unique_id, fai
     messagesModel.append(dict)
 
     if (!history) {
-        if (messages.atYEnd) {
-            messages.scrollToEnd()
-            // to make typingText disappear immediately
-            if (!self) {
+        if (keyboardActive && self) {
+            if (typingText.visible) {
                 typingText.visible = false
             }
+            messages.scrollToEnd()
+            if (!typingText.visible) {
+                typingText.visible = true
+            }
+        } else if (messages.atYEnd && !self) {
+            messages.scrollToEnd()
+            // to make typingText disappear immediately
+            typingText.visible = false
         } else {
             new_messages += 1
             scrollToEndButton.visible = true
