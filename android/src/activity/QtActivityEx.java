@@ -143,13 +143,11 @@ public class QtActivityEx extends QtActivity
                 }
             } else if (isDownloadsDocument(uri)) {
                 String id = DocumentsContract.getDocumentId(uri);
-                if (id.length() >= 4) {
-                    if (id.substring(0, 4).equalsIgnoreCase("raw:")) {
-                        return id.substring(4);
-                    }
-                    if (id.substring(0, 4).equalsIgnoreCase("msf:")) {
-                        id = id.substring(4);
-                    }
+                if (id.startsWith("raw:")) {
+                    return id.replaceFirst("raw:", "");
+                }
+                if (id.startsWith("msf:")) {
+                    id = id.replaceFirst("msf:", "");
                 }
                 String[] contentUriPrefixesToTry = new String[]{
                         "content://downloads/public_downloads",

@@ -167,7 +167,7 @@ void QmlCBridge::retrieveChatLog(quint32 start, bool from, bool reverse)
 			}
 			msg.variantMessage.insert("file_number", file_number);
 			msg.variantMessage.insert("name", Tools::getFilenameFromPath(msg.variantMessage["file_path"].toString()));
-			if (msg.variantMessage["state"] > TOX_FILE_PAUSED) {
+			if (msg.variantMessage["state"].toInt() > TOX_FILE_PAUSED) {
 				msg.received = true;
 			}
 		}
