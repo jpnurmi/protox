@@ -350,6 +350,7 @@ function signInProfile(profile, create, password, autoLogin) {
     friendNickname.setText(bridge.getFriendNickname(friend_number))
     friendStatusMessage.setText(bridge.getFriendStatusMessage(friend_number))
     // drawer
+    selfIdenticonCanvas.requestPaint()
     accountName.text = bridge.getNickname(true)
     statusIndicator.setStatus(bridge.getStatus())
     // QR code

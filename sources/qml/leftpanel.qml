@@ -15,7 +15,7 @@ Drawer {
     id: drawer
 
     y: 0
-    width: window.width * 0.5 / (inPortrait ? 1 : Screen.width / Screen.height)
+    width: window.width * 0.7 / (inPortrait ? 1 : Screen.width / Screen.height)
     height: window.height
 
     modal: true
@@ -55,6 +55,15 @@ Drawer {
                 id: accountLayout
                 spacing: 0
                 Layout.alignment: Qt.AlignTop
+                Layout.topMargin: 4
+                Image {
+                    id: accountAvatar
+                    Layout.alignment: Qt.AlignLeft
+                    Layout.leftMargin: 4
+                    Layout.maximumHeight: accountName.height
+                    Layout.maximumWidth: accountName.height
+                    mipmap: true
+                }
                 ItemDelegate {
                     id: accountName
                     leftPadding: 4
@@ -62,9 +71,8 @@ Drawer {
                     font.pointSize: fontMetrics.normalize(12)
                     font.bold: true
                     Layout.alignment: Qt.AlignLeft
-                    Layout.leftMargin: 4
                     Layout.fillWidth: true
-                    implicitWidth: drawer.width * 0.6
+                    implicitWidth: drawer.width * 0.5
                     onClicked: {
                         profileMenu.open()
                     }

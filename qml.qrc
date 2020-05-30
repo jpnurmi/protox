@@ -17,5 +17,6 @@
         <file>resources/attach-file-button.png</file>
         <file>resources/send-image-button.png</file>
         <file>resources/send-any-file-button.png</file>
+        <file>deps/jdenticon/jdenticon.js</file>
     </qresource>
 </RCC>

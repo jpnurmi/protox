@@ -17,6 +17,8 @@ import QtPhotoDialog 1.0
 import QtFolderDialog 1.0
 import QZXing 2.3
 
+import "qrc:/deps/jdenticon/jdenticon.js" as Jdenticon
+
 ApplicationWindow {
     id: window
     visible: true
@@ -258,6 +260,31 @@ ApplicationWindow {
                     cxt.fill();
                     grabToImage(function(result) { parent.source = result.url; });
                 }
+            }
+        }
+    }
+
+    Image {
+        id: selfIdenticonImageFrameBuffer
+        visible: false
+        onStatusChanged: {
+            if (status === Image.Ready) {
+                accountAvatar.source = source
+            }
+        }
+        Canvas {
+            id: selfIdenticonCanvas
+            width: 256
+            height: width
+            visible: false
+            onPaint: {
+                if (!loginWindow.profileSelected) {
+                    return
+                }
+                var cxt = getContext("2d");
+                var hash = Jdenticon.sha1(bridge.getToxId())
+                Jdenticon.drawIcon(cxt, hash, width)
+                grabToImage(function(result) { parent.source = result.url; });
             }
         }
     }
