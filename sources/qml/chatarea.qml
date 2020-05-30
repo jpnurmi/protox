@@ -252,8 +252,12 @@ ColumnLayout {
                     }
                 }
                 property real cloudTextWidth
+                readonly property int reservedWidth: resendIndicator.width + resendIndicator.anchors.rightMargin
                 function calculateMaximumWidth() {
-                    var cwidth = window.width - chatContent.cloud_margin * 2 - chatContent.chat_margin * 2
+                    var cwidth = window.width 
+                            - chatContent.cloud_margin * 2 
+                            - chatContent.chat_margin * 2 
+                            - reservedWidth
                     if (cloudTextWidth > cwidth)
                         implicitWidth = cwidth
                 }
@@ -277,7 +281,15 @@ ColumnLayout {
                 }
                 Connections {
                     target: window
-                    onInPortraitChanged: calculateMaximumWidth()
+                    onInPortraitChanged: {
+                        if (msgType === msgtype_file) {
+                            return
+                        }
+                        if (messageCloud.implicitWidth < messageCloud.cloudTextWidth) {
+                            messageCloud.implicitWidth = messageCloud.cloudTextWidth
+                        }
+                        messageCloud.calculateMaximumWidth()
+                    }
                     onUpdatePendingChanged: {
                         if (!msgReceived) {
                             pending = safe_bridge().checkMessageInPendingList(
@@ -294,7 +306,9 @@ ColumnLayout {
                     }
                 }
                 Component.onCompleted: {
-                    calculateMaximumWidth()
+                    if (msgType === msgtype_text) {
+                        calculateMaximumWidth()
+                    }
                     setDefaultAnchors()
                 }
                 property bool pending: safe_bridge().checkMessageInPendingList(
@@ -689,6 +703,12 @@ ColumnLayout {
                                 messageCloud.implicitHeight = implicitHeight
                                 lastImplicitHeight = implicitHeight
                             }
+                            Connections {
+                                target: window
+                                onInPortraitChanged: {
+                                    messageCloud.implicitWidth = fileLayout.maxWidth
+                                }
+                            }
                             onImplicitHeightChanged: {
                                 if (implicitHeight > lastImplicitHeight && messages.atYEnd) {
                                     messages.contentY += implicitHeight - lastImplicitHeight
@@ -1078,6 +1098,7 @@ ColumnLayout {
         onImplicitHeightChanged: {
             if (implicitHeight > 0) {
                 messages.scrollToEnd()
+                scrollToEndAgainTimer.start()
             }
         }
     }
