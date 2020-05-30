@@ -872,6 +872,14 @@ ColumnLayout {
                     anchors.fill: parent
                     onClicked: {
                         attachFileButton.hideButtons()
+                        chatPhotoPickerDialog.title = qsTr("Select an image")
+                        chatPhotoPickerDialog.selectMultiple = false
+                        chatPhotoPickerDialog.open()
+                    }
+                    onPressAndHold: {
+                        attachFileButton.hideButtons()
+                        chatPhotoPickerDialog.title = qsTr("Select images")
+                        chatPhotoPickerDialog.selectMultiple = true
                         chatPhotoPickerDialog.open()
                     }
                 }
@@ -1085,9 +1093,15 @@ FileDialog {
 
 PhotoDialog {
     id: chatPhotoPickerDialog
-    title: qsTr("Select an image")
+    selectMultiple: true
     onAccepted: {
-        sendFile(imageUrl)
+        if (selectMultiple) {
+            for (var i = 0; i < imageUrls.length; i++) {
+                sendFile(imageUrls[i])
+            }
+        } else {
+            sendFile(imageUrl)
+        }
     }
 }
 

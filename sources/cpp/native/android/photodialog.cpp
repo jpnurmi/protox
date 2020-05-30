@@ -17,8 +17,8 @@ bool QtPhotoDialog::open()
 		QAndroidJniObject intent = QAndroidJniObject::callStaticObjectMethod(
 		"org/protox/activity/QtActivityEx",
 		"createChoosePhotoIntent",
-		"(Ljava/lang/String;)Landroid/content/Intent;", 
-		javaString.object());
+		"(Ljava/lang/String;Z)Landroid/content/Intent;", 
+		javaString.object(), jboolean(m_selectMultiple));
 		QtAndroid::startActivity(intent, 12051978, m_activityResultReceiver);
 	});
 
@@ -34,6 +34,23 @@ void QtPhotoDialogActivityResultReceiver::handleActivityResult(int requestCode, 
 {
 		Q_UNUSED(requestCode)
 		if (resultCode == -1) {
+			if (m_photoDialog->getSelectMultiple()) {
+				QAndroidJniObject clipData = data.callObjectMethod("getClipData", "()Landroid/content/ClipData;");
+				jint count = clipData.callMethod<jint>("getItemCount", "()I");
+				QStringList imageUrls;
+				// callObjectMethod is not working
+				for (jint i = 0; i < count; i++) {
+					QAndroidJniObject imageUri = QAndroidJniObject::callStaticObjectMethod(
+					"org/protox/activity/QtActivityEx",
+					"getUriFromClipData",
+					"(Landroid/content/ClipData;I)Landroid/net/Uri;", 
+					clipData.object(), i);
+					imageUrls.push_back(imageUri.toString());
+				}
+				m_photoDialog->setImageUrls(imageUrls);
+				emit m_photoDialog->accepted();
+				return;
+			}
 			QAndroidJniObject imageUri = data.callObjectMethod(
 						"getData",
 						"()Landroid/net/Uri;");

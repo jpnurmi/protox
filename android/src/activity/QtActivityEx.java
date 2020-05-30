@@ -5,6 +5,7 @@ import org.qtproject.qt5.android.bindings.QtActivity;
 import org.qtproject.qt5.android.QtNative;
 
 // android
+import android.content.ClipData;
 import android.content.Intent;
 import android.content.Context;
 import android.content.ContentResolver;
@@ -96,8 +97,15 @@ public class QtActivityEx extends QtActivity
                                                                          WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
     }
 
-    public static Intent createChoosePhotoIntent(String title) {
+    public static Uri getUriFromClipData(ClipData data, int index) {
+        return data.getItemAt(index).getUri();
+    }
+
+    public static Intent createChoosePhotoIntent(String title, boolean selectMultiple) {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        if (selectMultiple) {
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        }
         intent.setType("image/*");
         return Intent.createChooser(intent, title);
     }
