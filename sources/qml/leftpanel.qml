@@ -362,7 +362,7 @@ Drawer {
                                 readonly property bool updateFriendItemAvatar: updateAvatar
                                 onUpdateFriendItemAvatarChanged: {
                                     if (updateFriendItemAvatar) {
-                                        friendItemAvatar.source = bridge.checkFileExists(friendItemAvatar.avatarPath) ? 
+                                        friendItemAvatar.source = bridge.checkFileImage(friendItemAvatar.avatarPath) ? 
                                                     "file://" + friendItemAvatar.avatarPath : friendItemIdenticonImageFrameBuffer.source
                                     } else {
                                         return
@@ -390,7 +390,7 @@ Drawer {
                                     anchors.fill: parent
                                     id: friendItemAvatar
                                     readonly property string avatarPath: safe_bridge().getFriendAvatarPath(friendNumber)
-                                    source: safe_bridge().checkFileExists(avatarPath) ? 
+                                    source: safe_bridge().checkFileImage(avatarPath) ? 
                                                 "file://" + avatarPath : friendItemIdenticonImageFrameBuffer.source
                                     antialiasing: true
                                     onStatusChanged: {

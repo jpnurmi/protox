@@ -4,6 +4,8 @@
 
 import QtQuick 2.12
 
+import "qrc:/deps/jdenticon/jdenticon.js" as Jdenticon
+
 /*[remove]*/ Item {
 
 readonly property variant jdenticon_default_config: {
@@ -20,22 +22,15 @@ readonly property variant jdenticon_default_config: {
 };
 
 function getJdenticonHues(pk) {
-    return [publicKeyToHue(pk, false), publicKeyToHue(pk, true)]
-}
-
-function publicKeyToHue(pk, second) {
-    var hex_symbols = "0123456789ABCDEF"
-    var result = 0
-    var pkSize = bridge.getToxPublicKeySizeHex()
-    var start = second ? pkSize / 2 : 0
-    var end = second ? pkSize : pkSize / 2
-    for (var i = start; i < end; i++) {
-        result += hex_symbols.indexOf(pk.charAt(i)) / hex_symbols.length
+    var hash = Jdenticon.sha1(pk)
+    var result = []
+    for (var i = 0; i < hash.length; i += 8) {
+        result.push(parseInt(hash.substring(i, i + 8), 16) / 4294967295 * 360)
     }
-    result /= pkSize / 2
-    result *= 360
     return result
 }
+
+
 
 function formatBytes(bytes, decimals = 2) {
     const sizes = [qsTr("Bytes"), qsTr("KB"), qsTr("MB"), qsTr("GB"), qsTr("TB"), qsTr("PB"), qsTr("EB"), qsTr("ZB"), qsTr("YB")]

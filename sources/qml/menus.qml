@@ -251,17 +251,17 @@ Menu {
             id: infoAvatar
             Layout.maximumWidth: 128
             Layout.maximumHeight: Layout.maximumWidth
-            property int friendNumber
-            readonly property string avatarPath: loginWindow.profileSelected && friendInfoMenu.visible ? 
-                                                     safe_bridge().getFriendAvatarPath(friendNumber) : ""
-            source: friendInfoMenu.visible ? (safe_bridge().checkFileExists(avatarPath) ? 
-                                                  "file://" + avatarPath : infoIdenticonImageFrameBuffer.source) : ""
             Layout.alignment: Qt.AlignHCenter
             antialiasing: true
         }
         Image {
             id: infoIdenticonImageFrameBuffer
             visible: false
+            onStatusChanged: {
+                if (status === Image.Ready && infoAvatar.status === Image.Null) {
+                    infoAvatar.source = source
+                }
+            }
             Canvas {
                 id: infoIdenticonCanvas
                 width: 256
@@ -272,7 +272,7 @@ Menu {
                         return
                     }
                     var cxt = getContext("2d");
-                    var pk = bridge.getFriendPublicKeyHex(infoAvatar.friendNumber)
+                    var pk = bridge.getFriendPublicKeyHex(bridge.getCurrentFriendNumber())
                     Jdenticon.global.jdenticon_config = jdenticon_default_config
                     Jdenticon.global.jdenticon_config.hues = getJdenticonHues(pk)
                     Jdenticon.drawIcon(cxt, pk, width)
