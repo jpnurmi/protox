@@ -97,10 +97,14 @@ function setFriendTyping(friend_number, typing) {
         } else {
             typingText.text = qsTr("%1 is typing...").arg(nick)
         }
-        typingText.visible = true
+        if (!typingText.visible) {
+            typingText.visible = true
+        }
     } else {
         typingText.text = ""
-        typingText.visible = false
+        if (typingText.visible) {
+            typingText.visible = false
+        }
     }
 }
 
@@ -149,7 +153,9 @@ Timer {
     interval: 100
     repeat: false
     onTriggered: {
-        chatScrollToEnd()
+        if (!messages.atYEnd) {
+            messages.scrollToEndWithTypingText()
+        }
     }
 }
 
