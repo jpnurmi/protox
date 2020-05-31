@@ -19,6 +19,10 @@ readonly property variant jdenticon_default_config: {
     "padding" : 0.08
 };
 
+function getJdenticonHues(pk) {
+    return [publicKeyToHue(pk, false), publicKeyToHue(pk, true)]
+}
+
 function publicKeyToHue(pk, second) {
     var hex_symbols = "0123456789ABCDEF"
     var result = 0
@@ -291,7 +295,8 @@ function insertFriend(friend_number, nickName, request, request_message, friendP
                             "request" : request, 
                             "request_message" : request_message, 
                             "friendPk" : friendPk,
-                            "statusColor" : "gray"})
+                            "statusColor" : "gray", 
+                            "updateAvatar" : false })
     if (!request) {
         cleanProfile = bridge.getFriendsCount() === 0
     } 
@@ -482,6 +487,16 @@ function sendFile(fileUrl) {
     case 5: msg = qsTr("Unexpected error."); break;
     }
     toast.show({ message : msg, duration : Toast.Long })
+}
+
+function updateFriendAvatar(friend_number) {
+    for (var i = 0; i < friendsModel.count; i++) {
+        var friend = friendsModel.get(i)
+        if (friend.friendNumber === friend_number && !friend.request) {
+            friend.updateAvatar = true
+            friendsModel.set(i, friend)
+        }
+    }
 }
 
 /*[remove]*/ }

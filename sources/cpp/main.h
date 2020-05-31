@@ -39,6 +39,7 @@ public:
 	void cancelFileNotification(quint32 friend_number, quint32 file_number);
 	void createFileProgressNotification(quint32 friend_number, quint32 file_number);
 	const QString formatBytes(quint64 bytes);
+	void updateFriendAvatar(quint32 friend_number);
 public slots:
 	Q_INVOKABLE void sendMessage(const QString &message);
 	Q_INVOKABLE quint32 getCurrentFriendNumber();

@@ -68,7 +68,7 @@ Drawer {
                     }
                     Canvas {
                         id: selfIdenticonCanvas
-                        width: 256
+                        width: 128
                         height: width
                         visible: false
                         onPaint: {
@@ -78,7 +78,7 @@ Drawer {
                             var cxt = getContext("2d");
                             var pk = bridge.getToxId().substring(0, bridge.getToxPublicKeySizeHex())
                             Jdenticon.global.jdenticon_config = jdenticon_default_config
-                            Jdenticon.global.jdenticon_config.hues = [publicKeyToHue(pk, false), publicKeyToHue(pk, true)]
+                            Jdenticon.global.jdenticon_config.hues = getJdenticonHues(pk)
                             Jdenticon.drawIcon(cxt, pk, width)
                             grabToImage(function(result) { parent.source = result.url; });
                         }
@@ -359,19 +359,28 @@ Drawer {
                                 height: width
                                 color: (friendLayout.dragEntered && !friendLayout.dragActive) ? "lightgray" : "#00000000"
                                 Layout.alignment: Qt.AlignLeft
+                                readonly property bool updateFriendItemAvatar: updateAvatar
+                                onUpdateFriendItemAvatarChanged: {
+                                    if (updateFriendItemAvatar) {
+                                        friendItemAvatar.source = bridge.checkFileExists(friendItemAvatar.avatarPath) ? 
+                                                    "file://" + friendItemAvatar.avatarPath : friendItemIdenticonImageFrameBuffer.source
+                                    } else {
+                                        return
+                                    }
+                                }
                                 Image {
                                     id: friendItemIdenticonImageFrameBuffer
                                     visible: false
                                     Canvas {
                                         id: friendItemIdenticonCanvas
-                                        width: 256
+                                        width: 128
                                         height: width
                                         visible: false
                                         onPaint: {
                                             var cxt = getContext("2d");
                                             var pk = bridge.getFriendPublicKeyHex(friendNumber)
                                             Jdenticon.global.jdenticon_config = jdenticon_default_config
-                                            Jdenticon.global.jdenticon_config.hues = [publicKeyToHue(pk, false), publicKeyToHue(pk, true)]
+                                            Jdenticon.global.jdenticon_config.hues = getJdenticonHues(pk)
                                             Jdenticon.drawIcon(cxt, pk, width)
                                             grabToImage(function(result) { parent.source = result.url; });
                                         }
@@ -381,9 +390,45 @@ Drawer {
                                     anchors.fill: parent
                                     id: friendItemAvatar
                                     readonly property string avatarPath: safe_bridge().getFriendAvatarPath(friendNumber)
-                                    source: safe_bridge().checkFileImage(avatarPath) ? 
+                                    source: safe_bridge().checkFileExists(avatarPath) ? 
                                                 "file://" + avatarPath : friendItemIdenticonImageFrameBuffer.source
                                     antialiasing: true
+                                    onStatusChanged: {
+                                        if (status === Image.Ready) {
+                                            updateAvatar = false
+                                        }
+                                    }
+                                }
+                                MouseArea {
+                                    id: friendDragAreaAvatar
+                                    anchors.fill: parent
+                                    drag.target: friendLayout
+                                    enabled: friendsModel.count > 1
+                                    readonly property bool dragActive: drag.active
+                                    onDragActiveChanged: {
+                                        friendLayout.dragActive = dragActive
+                                    }
+                                }
+                                DropArea {
+                                    anchors.fill: parent
+                                    enabled: !friendLayout.dragActive
+                                    onEntered: {
+                                        if (!request) {
+                                            friendLayout.dragEntered = true
+                                        }
+                                    }
+                                    onExited: {
+                                        if (!request) {
+                                            friendLayout.dragEntered = false
+                                        }
+                                    }
+                                    onDropped: {
+                                        if (!request) {
+                                            friendLayout.dragEntered = false
+                                            friendsModel.get(leftBarLayout.draggedItem).dragStarted = false
+                                            friendsModel.swap(index, leftBarLayout.draggedItem)
+                                        }
+                                    }
                                 }
                             }
                         }

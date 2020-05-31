@@ -243,6 +243,49 @@ Menu {
         font.bold: true
         width: parent.width
         horizontalAlignment: Qt.AlignHCenter
+        text: qsTr("Avatar")
+    }
+    RowLayout {
+        spacing: 0
+        Image {
+            id: infoAvatar
+            Layout.maximumWidth: 128
+            Layout.maximumHeight: Layout.maximumWidth
+            property int friendNumber
+            readonly property string avatarPath: loginWindow.profileSelected && friendInfoMenu.visible ? 
+                                                     safe_bridge().getFriendAvatarPath(friendNumber) : ""
+            source: friendInfoMenu.visible ? (safe_bridge().checkFileExists(avatarPath) ? 
+                                                  "file://" + avatarPath : infoIdenticonImageFrameBuffer.source) : ""
+            Layout.alignment: Qt.AlignHCenter
+            antialiasing: true
+        }
+        Image {
+            id: infoIdenticonImageFrameBuffer
+            visible: false
+            Canvas {
+                id: infoIdenticonCanvas
+                width: 256
+                height: width
+                visible: false
+                onPaint: {
+                    if (!loginWindow.profileSelected) {
+                        return
+                    }
+                    var cxt = getContext("2d");
+                    var pk = bridge.getFriendPublicKeyHex(infoAvatar.friendNumber)
+                    Jdenticon.global.jdenticon_config = jdenticon_default_config
+                    Jdenticon.global.jdenticon_config.hues = getJdenticonHues(pk)
+                    Jdenticon.drawIcon(cxt, pk, width)
+                    grabToImage(function(result) { parent.source = result.url; });
+                }
+            }
+        }
+    }
+    Text {
+        padding: 10
+        font.bold: true
+        width: parent.width
+        horizontalAlignment: Qt.AlignHCenter
         text: qsTr("Nickname")
     }
     Text {

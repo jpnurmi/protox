@@ -150,6 +150,8 @@ ToolBar {
             onClicked: {
                 if (!cleanProfile) {
                     var friend_number = bridge.getCurrentFriendNumber()
+                    infoAvatar.friendNumber = friend_number
+                    infoIdenticonCanvas.requestPaint()
                     infoNickname.text = bridge.getFriendNickname(friend_number, false)
                     infoStatus.text = bridge.getFriendStatusMessage(friend_number)
                     infoPublicKey.text = bridge.getFriendPublicKeyHex(friend_number)

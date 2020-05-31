@@ -805,6 +805,13 @@ const QString QmlCBridge::getFriendAvatarPath(quint32 friend_number)
 	return Tools::getAvatarsDir() + ToxConverter::toString(Toxcore::get_friend_public_key(tox, friend_number));
 }
 
+void QmlCBridge::updateFriendAvatar(quint32 friend_number)
+{
+	QVariant returnedValue;
+	QMetaObject::invokeMethod(component, "updateFriendAvatar",
+		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, friend_number));
+}
+
 QmlTranslator::QmlTranslator(QObject *parent) : QObject(parent) {}
 
 void QmlTranslator::setTranslation(const QString &translation)
