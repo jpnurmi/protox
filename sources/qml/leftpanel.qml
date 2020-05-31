@@ -147,7 +147,7 @@ Drawer {
                 }
                 Button {
                     id: accountStatus
-                    Layout.alignment: Qt.AlignRight
+                    Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
                     Layout.rightMargin: 10
                     Rectangle {
                         id: statusIndicator
