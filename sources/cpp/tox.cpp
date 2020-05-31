@@ -184,7 +184,7 @@ static void cb_file_recv_control_cb(Tox *m, uint32_t friend_number, uint32_t fil
 	Q_UNUSED(user_data)
 
 	for (const auto transfer : qmlbridge->transfers) {
-		if (transfer->friend_number == friend_number && transfer->file_number == file_number) {
+		if (transfer->friend_number == friend_number && transfer->file_number == file_number && !transfer->avatar) {
 			qmlbridge->fileControlUpdateMessage(friend_number, qmlbridge->file_messages[transfer], control);
 			switch (control) {
 				case TOX_FILE_CONTROL_RESUME: {
@@ -213,43 +213,73 @@ static void cb_file_recv_control_cb(Tox *m, uint32_t friend_number, uint32_t fil
 	}
 }
 
-static void file_transfer_end(Tox *m, quint32 friend_number, quint32 file_number);
+static void file_transfer_end(Tox *m, quint32 friend_number, quint32 file_number, bool avatar);
 static void cb_file_recv(Tox *m, quint32 friend_number, quint32 file_number, quint32 kind, quint64 file_size,
                               const quint8 *filename, size_t filename_length, void *user_data)
 {
 	Q_UNUSED(user_data)
 
-	if (kind == TOX_FILE_KIND_AVATAR) { // later
-		return;
+	switch (kind) {
+		case TOX_FILE_KIND_AVATAR: {
+			const QString file_path = Tools::getAvatarsDir() + 
+					ToxConverter::toString(get_friend_public_key(m, friend_number));
+			qDebug() << file_path << file_number;
+			QFile *file = new QFile(file_path);
+			Tools::AsyncFileManager *manager = new Tools::AsyncFileManager(file);
+			manager->start();
+			QObject::connect(manager, &Tools::AsyncFileManager::fileTransferEnded, [] (void *parent) {
+				ToxFileTransfer *parent_transfer = (ToxFileTransfer*)parent;
+				file_transfer_end(parent_transfer->tox, parent_transfer->friend_number, parent_transfer->file_number, true);
+			});
+			ToxFileTransfer *transfer = new ToxFileTransfer(m, friend_number, file_number, true, manager);
+			qmlbridge->transfers.push_back(transfer);
+			TOX_ERR_FILE_CONTROL err;
+			bool result;
+			emit manager->onFileTransferStarted(result);
+			if (!result) {
+				Tools::debug("Couldn't open file " + file_path + " for saving avatar.");
+				tox_file_control(m, friend_number, file_number, TOX_FILE_CONTROL_CANCEL, &err);
+				qmlbridge->transfers.removeOne(transfer);
+				delete transfer;
+				break;
+			}
+			tox_file_control(m, friend_number, file_number, TOX_FILE_CONTROL_RESUME, &err);
+			if (err > 0) {
+				Tools::debug("Avatar transfer resuming error, error code (tox_file_control): " + QString::number(err));
+			}
+			break;
+		}
+		case TOX_FILE_KIND_DATA: {
+			QString fileName = QString::fromUtf8((char*)filename, filename_length);
+			settings->beginGroup("Client");
+			const QString downloadsFolder = settings->value("downloads_folder", Tools::getDefaultDownloadsDirectory()).toString();
+			settings->endGroup();
+			const QString file_path = downloadsFolder + QDir::separator() + fileName;
+			QFile *file = new QFile(file_path);
+			Tools::AsyncFileManager *manager = new Tools::AsyncFileManager(file);
+			manager->start();
+			QObject::connect(manager, &Tools::AsyncFileManager::fileTransferEnded, [] (void *parent) {
+				ToxFileTransfer *parent_transfer = (ToxFileTransfer*)parent;
+				file_transfer_end(parent_transfer->tox, parent_transfer->friend_number, parent_transfer->file_number, false);
+			});
+			ToxFileTransfer *transfer = new ToxFileTransfer(m, friend_number, file_number, false, manager);
+			qmlbridge->transfers.push_back(transfer);
+			QDateTime dt = QDateTime::currentDateTime();
+			ToxVariantMessage variantMessage;
+			variantMessage.insert("type", ToxVariantMessageType::TOXMSG_FILE);
+			variantMessage.insert("size", file_size);
+			variantMessage.insert("state", ToxFileState::TOX_FILE_REQUEST);
+			variantMessage.insert("file_id", ToxFileId());
+			variantMessage.insert("file_path", file_path);
+			variantMessage.insert("file_number", file_number);
+			// ui only
+			variantMessage.insert("name", fileName);
+			quint64 unique_id = chat_db->insertMessage(variantMessage, dt, Toxcore::get_friend_public_key(m, friend_number), false, false);
+			qmlbridge->file_messages[transfer] = unique_id;
+			qmlbridge->insertMessage(variantMessage, friend_number, dt, false, unique_id);
+			break;
+		}
 	}
-
-	QString fileName = QString::fromUtf8((char*)filename, filename_length);
-	settings->beginGroup("Client");
-	const QString downloadsFolder = settings->value("downloads_folder", Tools::getDefaultDownloadsDirectory()).toString();
-	settings->endGroup();
-	const QString file_path = downloadsFolder + QDir::separator() + fileName;
-	QFile *file = new QFile(file_path);
-	Tools::AsyncFileManager *manager = new Tools::AsyncFileManager(file);
-	manager->start();
-	QObject::connect(manager, &Tools::AsyncFileManager::fileTransferEnded, [] (void *parent) {
-		ToxFileTransfer *parent_transfer = (ToxFileTransfer*)parent;
-		file_transfer_end(parent_transfer->tox, parent_transfer->friend_number, parent_transfer->file_number);
-	});
-	ToxFileTransfer *transfer = new ToxFileTransfer(m, friend_number, file_number, manager);
-	qmlbridge->transfers.push_back(transfer);
-	QDateTime dt = QDateTime::currentDateTime();
-	ToxVariantMessage variantMessage;
-	variantMessage.insert("type", ToxVariantMessageType::TOXMSG_FILE);
-	variantMessage.insert("size", file_size);
-	variantMessage.insert("state", ToxFileState::TOX_FILE_REQUEST);
-	variantMessage.insert("file_id", ToxFileId());
-	variantMessage.insert("file_path", file_path);
-	variantMessage.insert("file_number", file_number);
-	// ui only
-	variantMessage.insert("name", fileName);
-	quint64 unique_id = chat_db->insertMessage(variantMessage, dt, Toxcore::get_friend_public_key(m, friend_number), false, false);
-	qmlbridge->file_messages[transfer] = unique_id;
-	qmlbridge->insertMessage(variantMessage, friend_number, dt, false, unique_id);
 }
 
 void cb_file_recv_chunk(Tox *m, quint32 friend_number, quint32 file_number, quint64 position,
@@ -262,8 +292,10 @@ void cb_file_recv_chunk(Tox *m, quint32 friend_number, quint32 file_number, quin
 		if (transfer->friend_number == friend_number && transfer->file_number == file_number) {
 			emit transfer->manager->onChunkWriteRequest(position, QByteArray((char*)data, length));
 			transfer->bytesTransfered += length;
-			qmlbridge->changeFileProgress(transfer->friend_number, transfer->file_number, 
-										  transfer->bytesTransfered, false);
+			if (!transfer->avatar) {
+				qmlbridge->changeFileProgress(transfer->friend_number, transfer->file_number, 
+											  transfer->bytesTransfered, false);
+			}
 		}
 	}
 }
@@ -757,6 +789,11 @@ quint32 get_tox_address_size()
 	return tox_address_size();
 }
 
+quint32 get_tox_public_key_size()
+{
+	return tox_public_key_size();
+}
+
 static void send_file_chunk(Tox *m, quint32 friend_number, quint32 file_number
 							, quint64 position, const QByteArray &bytesRead)
 {
@@ -772,14 +809,16 @@ static void send_file_chunk(Tox *m, quint32 friend_number, quint32 file_number
 	}
 }
 
-static void file_transfer_end(Tox *m, quint32 friend_number, quint32 file_number)
+static void file_transfer_end(Tox *m, quint32 friend_number, quint32 file_number, bool avatar)
 {
 	for (const auto transfer : qmlbridge->transfers) {
 		if (transfer->friend_number == friend_number && transfer->file_number == file_number) {
-			chat_db->updateFileMessageState(qmlbridge->file_messages[transfer], 
-											get_friend_public_key(m, friend_number), 
-											ToxFileState::TOX_FILE_FINISHED);
-			qmlbridge->changeFileProgress(friend_number, file_number, transfer->bytesTransfered, true);
+			if (!avatar) {
+				chat_db->updateFileMessageState(qmlbridge->file_messages[transfer], 
+												get_friend_public_key(m, friend_number), 
+												ToxFileState::TOX_FILE_FINISHED);
+				qmlbridge->changeFileProgress(friend_number, file_number, transfer->bytesTransfered, true);
+			}
 			qmlbridge->file_messages.remove(transfer);
 			qmlbridge->transfers.removeOne(transfer);
 			delete transfer;
@@ -810,9 +849,9 @@ quint32 send_file(Tox *m, quint32 friend_number, const QString &path, ToxFileTra
 	});
 	QObject::connect(manager, &Tools::AsyncFileManager::fileTransferEnded, [] (void *parent) {
 		ToxFileTransfer *parent_transfer = (ToxFileTransfer*)parent;
-		file_transfer_end(parent_transfer->tox, parent_transfer->friend_number, parent_transfer->file_number);
+		file_transfer_end(parent_transfer->tox, parent_transfer->friend_number, parent_transfer->file_number, false);
 	});
-	*transfer = new ToxFileTransfer(m, friend_number, file_number, manager);
+	*transfer = new ToxFileTransfer(m, friend_number, file_number, false, manager);
 	qmlbridge->transfers.push_back(*transfer);
 	if (err > 0) {
 		Tools::debug("tox_file_send file failed with error number: " + QString::number(err));

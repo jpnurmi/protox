@@ -568,6 +568,11 @@ quint32 QmlCBridge::getToxAddressSizeHex()
 	return Toxcore::get_tox_address_size() * 2;
 }
 
+quint32 QmlCBridge::getToxPublicKeySizeHex()
+{
+	return Toxcore::get_tox_public_key_size() * 2;
+}
+
 QString QmlCBridge::getSystemLocale()
 {
 	return QLocale::system().name();
@@ -793,6 +798,11 @@ void QmlCBridge::createFileProgressNotification(quint32 friend_number, quint32 f
 QString QmlCBridge::getFriendPublicKeyHex(quint32 friend_number)
 {
 	return ToxConverter::toString(Toxcore::get_friend_public_key(tox, friend_number));
+}
+
+const QString QmlCBridge::getFriendAvatarPath(quint32 friend_number)
+{
+	return Tools::getAvatarsDir() + ToxConverter::toString(Toxcore::get_friend_public_key(tox, friend_number));
 }
 
 QmlTranslator::QmlTranslator(QObject *parent) : QObject(parent) {}

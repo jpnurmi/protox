@@ -85,6 +85,7 @@ public slots:
 	Q_INVOKABLE quint32 getNicknameMaxLength();
 	Q_INVOKABLE quint32 getStatusMessageMaxLength();
 	Q_INVOKABLE quint32 getToxAddressSizeHex();
+	Q_INVOKABLE quint32 getToxPublicKeySizeHex();
 	Q_INVOKABLE QString getSystemLocale();
 	Q_INVOKABLE void hideSplashScreen();
 	Q_INVOKABLE bool checkMessageInPendingList(quint32 friend_number, quint64 unique_id);
@@ -100,6 +101,7 @@ public slots:
 	Q_INVOKABLE quint32 acceptFile(quint32 friend_number, quint32 file_number);
 	Q_INVOKABLE bool checkFileExists(const QString &path);
 	Q_INVOKABLE QString getFriendPublicKeyHex(quint32 friend_number);
+	Q_INVOKABLE const QString getFriendAvatarPath(quint32 friend_number);
 
 public:
 	ToxFriendsConnStatus friends_conn_status;

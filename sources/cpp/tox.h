@@ -72,10 +72,12 @@ struct ToxFileTransfer {
 	quint32 file_number;
 	Tools::AsyncFileManager *manager;
 	quint32 bytesTransfered;
-	ToxFileTransfer (Tox *_tox, quint32 _friend_number, quint32 _file_number, Tools::AsyncFileManager *_manager) {
+	bool avatar;
+	ToxFileTransfer (Tox *_tox, quint32 _friend_number, quint32 _file_number,  bool _avatar, Tools::AsyncFileManager *_manager) {
 		tox = _tox;
 		friend_number = _friend_number;
 		file_number = _file_number;
+		avatar = _avatar;
 		manager = _manager;
 		manager->setObjectParent(this);
 		bytesTransfered = 0;
@@ -140,6 +142,7 @@ namespace Toxcore {
 	quint32 get_nickname_max_length();
 	quint32 get_status_message_max_length();
 	quint32 get_tox_address_size();
+	quint32 get_tox_public_key_size();
 	quint32 send_file(Tox *m, quint32 friend_number, const QString &path, ToxFileTransfer **transfer, quint64 &filesize, ToxFileId &file_id, quint32 &error);
 	bool file_control(Tox *m, quint32 friend_number, quint32 file_number, quint32 control, quint64 &unique_id);
 	void cancel_all_file_transfers();

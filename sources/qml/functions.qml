@@ -6,6 +6,33 @@ import QtQuick 2.12
 
 /*[remove]*/ Item {
 
+readonly property variant jdenticon_default_config: {
+    "backColor" : "#00000000",
+    "lightness" : {
+        color: [0.4, 0.8],
+        grayscale: [0.3, 0.9]
+    },
+    "saturation" : {
+        color: 0.75,
+        grayscale: 0
+    },
+    "padding" : 0.08
+};
+
+function publicKeyToHue(pk, second) {
+    var hex_symbols = "0123456789ABCDEF"
+    var result = 0
+    var pkSize = bridge.getToxPublicKeySizeHex()
+    var start = second ? pkSize / 2 : 0
+    var end = second ? pkSize : pkSize / 2
+    for (var i = start; i < end; i++) {
+        result += hex_symbols.indexOf(pk.charAt(i)) / hex_symbols.length
+    }
+    result /= pkSize / 2
+    result *= 360
+    return result
+}
+
 function formatBytes(bytes, decimals = 2) {
     const sizes = [qsTr("Bytes"), qsTr("KB"), qsTr("MB"), qsTr("GB"), qsTr("TB"), qsTr("PB"), qsTr("EB"), qsTr("ZB"), qsTr("YB")]
     if (bytes === 0) {
@@ -35,6 +62,7 @@ function safe_bridge() {
     empty_bridge.getSettingsValue = function() { return 0 }
     empty_bridge.checkFileImage = function() { return "" }
     empty_bridge.checkFileExists = function() { return 0 }
+    empty_bridge.getFriendAvatarPath = function() { return "" }
     return empty_bridge
 }
 

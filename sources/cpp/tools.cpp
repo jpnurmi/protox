@@ -30,6 +30,15 @@ const QString getProgDir()
 	return path;
 }
 
+const QString getAvatarsDir()
+{
+	QString path = getProgDir() + "avatars" + QDir::separator();
+	QDir dir;
+	if (!dir.exists(path))
+		dir.mkdir(path);
+	return path;
+}
+
 const QString replaceFileExtension(const QString &file, const QString &with)
 {
 	return file.split(".").first() + with;
