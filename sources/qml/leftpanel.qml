@@ -5,8 +5,6 @@ import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.2
 import QtQuick.Window 2.12
 
-import "qrc:/deps/jdenticon/jdenticon.js" as Jdenticon
-
 /*
   Left menu (drawer)
  */
@@ -59,38 +57,13 @@ Drawer {
                 Layout.alignment: Qt.AlignTop
                 Layout.topMargin: 4
                 Image {
-                    id: selfIdenticonImageFrameBuffer
-                    visible: false
-                    onStatusChanged: {
-                        if (status === Image.Ready) {
-                            accountAvatar.source = source
-                        }
-                    }
-                    Canvas {
-                        id: selfIdenticonCanvas
-                        width: 128
-                        height: width
-                        visible: false
-                        onPaint: {
-                            if (!loginWindow.profileSelected) {
-                                return
-                            }
-                            var cxt = getContext("2d");
-                            var pk = bridge.getToxId().substring(0, bridge.getToxPublicKeySizeHex())
-                            Jdenticon.global.jdenticon_config = jdenticon_default_config
-                            Jdenticon.global.jdenticon_config.hues = getJdenticonHues(pk)
-                            Jdenticon.drawIcon(cxt, pk, width)
-                            grabToImage(function(result) { parent.source = result.url; });
-                        }
-                    }
-                }
-                Image {
                     id: accountAvatar
                     Layout.alignment: Qt.AlignLeft
                     Layout.leftMargin: 4
                     Layout.maximumHeight: accountName.height
                     Layout.maximumWidth: accountName.height
                     antialiasing: true
+                    source: identiconBuffer.getImageSource(0, true)
                 }
                 ItemDelegate {
                     id: accountName
@@ -363,27 +336,9 @@ Drawer {
                                 onUpdateFriendItemAvatarChanged: {
                                     if (updateFriendItemAvatar) {
                                         friendItemAvatar.source = bridge.checkFileImage(friendItemAvatar.avatarPath) ? 
-                                                    "file://" + friendItemAvatar.avatarPath : friendItemIdenticonImageFrameBuffer.source
+                                                    "file://" + friendItemAvatar.avatarPath : identiconBuffer.getImageSource(friendNumber, false)
                                     } else {
                                         return
-                                    }
-                                }
-                                Image {
-                                    id: friendItemIdenticonImageFrameBuffer
-                                    visible: false
-                                    Canvas {
-                                        id: friendItemIdenticonCanvas
-                                        width: 128
-                                        height: width
-                                        visible: false
-                                        onPaint: {
-                                            var cxt = getContext("2d");
-                                            var pk = bridge.getFriendPublicKeyHex(friendNumber)
-                                            Jdenticon.global.jdenticon_config = jdenticon_default_config
-                                            Jdenticon.global.jdenticon_config.hues = getJdenticonHues(pk)
-                                            Jdenticon.drawIcon(cxt, pk, width)
-                                            grabToImage(function(result) { parent.source = result.url; });
-                                        }
                                     }
                                 }
                                 Image {
@@ -391,7 +346,7 @@ Drawer {
                                     id: friendItemAvatar
                                     readonly property string avatarPath: safe_bridge().getFriendAvatarPath(friendNumber)
                                     source: safe_bridge().checkFileImage(avatarPath) ? 
-                                                "file://" + avatarPath : friendItemIdenticonImageFrameBuffer.source
+                                                "file://" + avatarPath : identiconBuffer.getImageSource(friendNumber, false)
                                     antialiasing: true
                                     onStatusChanged: {
                                         if (status === Image.Ready) {

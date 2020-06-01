@@ -151,8 +151,8 @@ ToolBar {
                 if (!cleanProfile) {
                     var friend_number = bridge.getCurrentFriendNumber()
                     var avatar_path = bridge.getFriendAvatarPath(friend_number)
-                    infoIdenticonCanvas.requestPaint()
-                    infoAvatar.source = bridge.checkFileImage(avatar_path) ? "file://" + avatar_path : ""
+                    infoAvatar.source = bridge.checkFileImage(avatar_path) ? 
+                                "file://" + avatar_path : identiconBuffer.getImageSource(friend_number, false)
                     infoNickname.text = bridge.getFriendNickname(friend_number, false)
                     infoStatus.text = bridge.getFriendStatusMessage(friend_number)
                     infoPublicKey.text = bridge.getFriendPublicKeyHex(friend_number)

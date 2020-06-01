@@ -285,13 +285,14 @@ function insertMessage(variantMessage, friend_number, self, time, unique_id, fai
 }
 
 function insertFriend(friend_number, nickName, request, request_message, friendPk) {
+    identiconModel.appendIfNotExists(friend_number, false)
     friendsModel.append({"friendNumber" : friend_number, 
                             "nickName" : nickName, 
                             "request" : request, 
                             "request_message" : request_message, 
                             "friendPk" : friendPk,
                             "statusColor" : "gray", 
-                            "updateAvatar" : false })
+                            "updateAvatar" : false})
     if (!request) {
         cleanProfile = bridge.getFriendsCount() === 0
     } 
@@ -384,7 +385,7 @@ function signInProfile(profile, create, password, autoLogin) {
     friendNickname.setText(bridge.getFriendNickname(friend_number))
     friendStatusMessage.setText(bridge.getFriendStatusMessage(friend_number))
     // drawer
-    selfIdenticonCanvas.requestPaint()
+    identiconModel.appendIfNotExists(0, true)
     accountName.text = bridge.getNickname(true)
     statusIndicator.setStatus(bridge.getStatus())
     // QR code
@@ -421,6 +422,7 @@ function resetUI() {
     resetConnectionStatus()
     friendStatusIndicator.color = "gray"
     new_messages = 0
+    identiconModel.clear()
 }
 
 function fileControlUpdateMessage(friend_number, unique_id, control) {

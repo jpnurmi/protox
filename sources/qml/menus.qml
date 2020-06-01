@@ -262,23 +262,6 @@ Menu {
                     infoAvatar.source = source
                 }
             }
-            Canvas {
-                id: infoIdenticonCanvas
-                width: 256
-                height: width
-                visible: false
-                onPaint: {
-                    if (!loginWindow.profileSelected) {
-                        return
-                    }
-                    var cxt = getContext("2d");
-                    var pk = bridge.getFriendPublicKeyHex(bridge.getCurrentFriendNumber())
-                    Jdenticon.global.jdenticon_config = jdenticon_default_config
-                    Jdenticon.global.jdenticon_config.hues = getJdenticonHues(pk)
-                    Jdenticon.drawIcon(cxt, pk, width)
-                    grabToImage(function(result) { parent.source = result.url; });
-                }
-            }
         }
     }
     Text {
