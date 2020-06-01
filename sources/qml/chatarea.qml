@@ -29,12 +29,19 @@ ColumnLayout {
             anchors.fill: parent
             readonly property int flickable_margin: 25
             topMargin: flickable_margin
-            bottomMargin: flickable_margin
             spacing: 20
             clip: true
             boundsMovement: Flickable.StopAtBounds
             ScrollIndicator.vertical: ScrollIndicator {}
             displayMarginBeginning: 32
+            bottomMargin: typingText.visible 
+                          ? flickable_margin + typingText.height + typingText.margin 
+                          : flickable_margin
+            onBottomMarginChanged: {
+                if (typingText.visible) {
+                    contentY += typingText.height + typingText.margin 
+                }
+            }
             Rectangle {
                 id: typingText
                 readonly property int margin: 5
@@ -60,17 +67,6 @@ ColumnLayout {
                     visible: parent.visible
                 }
                 visible: false
-                onVisibleChanged: {
-                    var atYEnd = messages.atYEnd
-                    if (visible) {
-                        messages.bottomMargin += height + margin
-                        if (atYEnd) {
-                            messages.contentY += height + margin
-                        }
-                    } else {
-                        messages.bottomMargin -= height + margin
-                    }
-                }
             }
             DropShadow {
                 anchors.fill: typingText
