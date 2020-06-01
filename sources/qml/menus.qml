@@ -4,6 +4,7 @@ import QtQuick.Controls.Material 2.2
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.2
 import QtQuick.Window 2.12
+import QtGraphicalEffects 1.0
 
 import QtUtf8ByteLimitValidator 1.0
 
@@ -253,14 +254,15 @@ Menu {
             Layout.maximumHeight: Layout.maximumWidth
             Layout.alignment: Qt.AlignHCenter
             antialiasing: true
-        }
-        Image {
-            id: infoIdenticonImageFrameBuffer
-            visible: false
-            onStatusChanged: {
-                if (status === Image.Ready && infoAvatar.status === Image.Null) {
-                    infoAvatar.source = source
-                }
+            layer.enabled: true
+            Rectangle {
+                id: infoAvatarMask
+                anchors.fill: parent
+                radius: width * 0.1
+                visible: false
+            }
+            layer.effect: OpacityMask {
+                maskSource: infoAvatarMask
             }
         }
     }

@@ -4,6 +4,7 @@ import QtQuick.Controls.Material 2.2
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.2
 import QtQuick.Window 2.12
+import QtGraphicalEffects 1.0
 
 /*
   Left menu (drawer)
@@ -64,6 +65,16 @@ Drawer {
                     Layout.maximumWidth: accountName.height
                     antialiasing: true
                     source: identiconBuffer.getImageSource(0, true)
+                    layer.enabled: true
+                    Rectangle {
+                        id: accountAvatarMask
+                        anchors.fill: parent
+                        radius: width * 0.1
+                        visible: false
+                    }
+                    layer.effect: OpacityMask {
+                        maskSource: accountAvatarMask
+                    }
                 }
                 ItemDelegate {
                     id: accountName
@@ -352,6 +363,16 @@ Drawer {
                                         if (status === Image.Ready) {
                                             updateAvatar = false
                                         }
+                                    }
+                                    layer.enabled: true
+                                    Rectangle {
+                                        id: friendItemAvatarMask
+                                        anchors.fill: parent
+                                        radius: width * 0.1
+                                        visible: false
+                                    }
+                                    layer.effect: OpacityMask {
+                                        maskSource: friendItemAvatarMask
                                     }
                                 }
                                 MouseArea {
