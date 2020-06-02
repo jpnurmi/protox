@@ -537,6 +537,18 @@ Click on the left button to open the friend list, then on «+» to add a new fri
         <source>Public key</source>
         <translation>Публичный ключ</translation>
     </message>
+    <message>
+        <source>Avatar</source>
+        <translation>Аватар</translation>
+    </message>
+    <message>
+        <source>Click on image to change your avatar.</source>
+        <translation>Нажмите на изображение, чтобы изменить ваш аватар.</translation>
+    </message>
+    <message>
+        <source>Remove avatar</source>
+        <translation>Удалить аватар</translation>
+    </message>
 </context>
 <context>
     <name>QAndroidPlatformTheme</name>
