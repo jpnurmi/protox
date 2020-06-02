@@ -27,7 +27,7 @@ namespace Tools {
 	public slots:
 		void onChunkReadRequest(quint64 position, quint32 length);
 		void onChunkWriteRequest(quint64 position, const QByteArray &data);
-		void onFileTransferStarted(bool &result);
+		bool onFileTransferStarted();
 	signals:
 		void fileChunkReady(void *parent, const QByteArray &data, quint64 position);
 		void fileTransferEnded(void *parent);

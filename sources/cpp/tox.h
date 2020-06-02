@@ -67,24 +67,37 @@ enum ToxFileState {
 	TOX_FILE_FINISHED
 };
 
+class ToxLocalFileManager : public QObject
+{
+	Q_OBJECT
+public:
+	explicit ToxLocalFileManager() {}
+public slots:
+	void onFileChunkReady(void *parent, const QByteArray &data, quint64 position);
+	void onFileTransferEnded(void *parent);
+};
+
 struct ToxFileTransfer {
 	Tox *tox;
 	quint32 friend_number;
 	quint32 file_number;
 	Tools::AsyncFileManager *manager;
+	ToxLocalFileManager *local_manager;
 	quint32 bytesTransfered;
 	bool avatar;
-	ToxFileTransfer (Tox *_tox, quint32 _friend_number, quint32 _file_number,  bool _avatar, Tools::AsyncFileManager *_manager) {
+	ToxFileTransfer (Tox *_tox, quint32 _friend_number, quint32 _file_number,  bool _avatar, Tools::AsyncFileManager *_manager, ToxLocalFileManager *_local_manager) {
 		tox = _tox;
 		friend_number = _friend_number;
 		file_number = _file_number;
 		avatar = _avatar;
 		manager = _manager;
 		manager->setObjectParent(this);
+		local_manager = _local_manager;
 		bytesTransfered = 0;
 	}
 	~ToxFileTransfer() {
 		delete manager;
+		delete local_manager;
 	}
 };
 typedef QVector <ToxFileTransfer*> ToxFileTransfers;

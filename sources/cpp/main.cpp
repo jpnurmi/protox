@@ -41,9 +41,6 @@ QmlCBridge::QmlCBridge()
 		QMetaObject::invokeMethod(component, "resetConnectionStatus");
 		Toxcore::bootstrap_DHT(tox);
 	});
-	transfer_update_timer = new QTimer;
-	transfer_update_timer->setInterval(16);
-	transfer_update_timer->setSingleShot(true);
 }
 
 void QmlCBridge::test()
@@ -58,10 +55,8 @@ void QmlCBridge::setComponent(QObject *_component)
 
 void QmlCBridge::insertMessage(const ToxVariantMessage &message, quint32 friend_number, const QDateTime &dt, bool self, quint64 unique_id, bool history, bool failed)
 {
-	QVariant returnedValue;
-
 	QMetaObject::invokeMethod(component, "insertMessage", 
-		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, message), 
+							  Q_ARG(QVariant, message), 
 							  Q_ARG(QVariant, friend_number), 
 							  Q_ARG(QVariant, self),
 							  Q_ARG(QVariant, dt.toString("d MMMM hh:mm:ss")),
@@ -72,9 +67,8 @@ void QmlCBridge::insertMessage(const ToxVariantMessage &message, quint32 friend_
 
 void QmlCBridge::insertFriend(qint32 friend_number, const QString &nickName, bool request, const QString &request_message, const ToxPk &friendPk)
 {
-	QVariant returnedValue;
 	QMetaObject::invokeMethod(component, "insertFriend",
-		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, friend_number), 
+							  Q_ARG(QVariant, friend_number), 
 							  Q_ARG(QVariant, nickName), 
 							  Q_ARG(QVariant, request),
 							  Q_ARG(QVariant, request_message),
@@ -83,17 +77,16 @@ void QmlCBridge::insertFriend(qint32 friend_number, const QString &nickName, boo
 
 void QmlCBridge::setMessageReceived(quint32 friend_number, quint64 unique_id)
 {
-	QVariant returnedValue;
 	QMetaObject::invokeMethod(component, "setMessageReceived",
-		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, friend_number), 
+							  Q_ARG(QVariant, friend_number), 
 							  Q_ARG(QVariant, unique_id));
 }
 
 void QmlCBridge::setCurrentFriendConnStatus(quint32 friend_number, int conn_status)
 {
-	QVariant returnedValue;
-	QMetaObject::invokeMethod(component, "setCurrentFriendConnStatus",
-		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, friend_number), Q_ARG(QVariant, conn_status));
+	QMetaObject::invokeMethod(component, "setCurrentFriendConnStatus", 
+							  Q_ARG(QVariant, friend_number), 
+							  Q_ARG(QVariant, conn_status));
 }
 
 void QmlCBridge::sendMessage(const QString &message)
@@ -186,9 +179,7 @@ void QmlCBridge::copyTextToClipboard(QString text)
 void QmlCBridge::makeFriendRequest(const QString &toxId, const QString &friendMessage)
 {
 	int error = Toxcore::make_friend_request(tox, ToxConverter::toToxId(toxId), friendMessage);
-	QVariant returnedValue;
-	QMetaObject::invokeMethod(component, "sendFriendRequestStatus",
-		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, error));
+	QMetaObject::invokeMethod(component, "sendFriendRequestStatus", Q_ARG(QVariant, error));
 }
 
 void QmlCBridge::deleteFriend(quint32 friend_number)
@@ -205,16 +196,16 @@ void QmlCBridge::clearFriendChatHistory(quint32 friend_number, bool keep_active_
 
 void QmlCBridge::updateFriendNickName(quint32 friend_number, const QString &nickname)
 {
-	QVariant returnedValue;
-	QMetaObject::invokeMethod(component, "updateFriendNickName",
-		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, friend_number), Q_ARG(QVariant, nickname));
+	QMetaObject::invokeMethod(component, "updateFriendNickName", 
+							  Q_ARG(QVariant, friend_number), 
+							  Q_ARG(QVariant, nickname));
 }
 
 void QmlCBridge::setFriendTyping(quint32 friend_number, bool typing)
 {
-	QVariant returnedValue;
-	QMetaObject::invokeMethod(component, "setFriendTyping",
-		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, friend_number), Q_ARG(QVariant, typing));
+	QMetaObject::invokeMethod(component, "setFriendTyping", 
+							  Q_ARG(QVariant, friend_number), 
+							  Q_ARG(QVariant, typing));
 }
 
 void QmlCBridge::setTypingFriend(quint32 friend_number, bool typing)
@@ -224,16 +215,16 @@ void QmlCBridge::setTypingFriend(quint32 friend_number, bool typing)
 
 void QmlCBridge::setFriendStatusMessage(quint32 friend_number, const QString &message)
 {
-	QVariant returnedValue;
-	QMetaObject::invokeMethod(component, "setFriendStatusMessage",
-		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, friend_number), Q_ARG(QVariant, message));
+	QMetaObject::invokeMethod(component, "setFriendStatusMessage", 
+							  Q_ARG(QVariant, friend_number), 
+							  Q_ARG(QVariant, message));
 }
 
 void QmlCBridge::setFriendStatus(quint32 friend_number, quint32 status)
 {
-	QVariant returnedValue;
-	QMetaObject::invokeMethod(component, "setFriendStatus",
-		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, friend_number), Q_ARG(QVariant, status));
+	QMetaObject::invokeMethod(component, "setFriendStatus", 
+							  Q_ARG(QVariant, friend_number), 
+							  Q_ARG(QVariant, status));
 }
 
 const QString QmlCBridge::getNickname(bool toxId)
@@ -278,9 +269,7 @@ long QmlCBridge::getFriendsCount()
 
 void QmlCBridge::setConnStatus(int conn_status)
 {
-	QVariant returnedValue;
-	QMetaObject::invokeMethod(component, "setConnStatus",
-		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, conn_status));
+	QMetaObject::invokeMethod(component, "setConnStatus", Q_ARG(QVariant, conn_status));
 }
 
 int QmlCBridge::getConnStatus()
@@ -309,9 +298,7 @@ QList<QVariant> QmlCBridge::getFriendsModelOrder()
 
 void QmlCBridge::setKeyboardHeight(int height)
 {
-	QVariant returnedValue;
-	QMetaObject::invokeMethod(component, "setKeyboardHeight", Qt::UniqueConnection,
-		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, height));
+	QMetaObject::invokeMethod(component, "setKeyboardHeight", Qt::UniqueConnection, Q_ARG(QVariant, height));
 }
 
 QVariant QmlCBridge::getSettingsValue(const QString &group, const QString &key, int type, const QVariant &default_value)
@@ -487,7 +474,6 @@ QmlCBridge::~QmlCBridge()
 	}
 	signOutProfile();
 	delete reconnection_timer;
-	delete transfer_update_timer;
 }
 
 QVariant QmlCBridge::getProfileList()
@@ -665,7 +651,6 @@ quint32 QmlCBridge::sendFile(quint32 friend_number, const QString &filepath)
 	ToxFileTransfer *transfer = nullptr;
 	quint32 file_number = Toxcore::send_file(tox, friend_number, filepath, &transfer, filesize, file_id, error);
 	if (error > 0) {
-		delete transfer;
 		return error;
 	}
 	QDateTime dt = QDateTime::currentDateTime();
@@ -686,9 +671,8 @@ quint32 QmlCBridge::sendFile(quint32 friend_number, const QString &filepath)
 
 void QmlCBridge::fileControlUpdateMessage(quint32 friend_number, quint64 unique_id, quint32 control)
 {
-	QVariant returnedValue;
 	QMetaObject::invokeMethod(component, "fileControlUpdateMessage",
-		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, friend_number), 
+							  Q_ARG(QVariant, friend_number), 
 							  Q_ARG(QVariant, unique_id),
 							  Q_ARG(QVariant, control));
 }
@@ -703,19 +687,11 @@ bool QmlCBridge::controlFile(quint32 friend_number, quint32 file_number, quint32
 	return success;
 }
 
-void QmlCBridge::changeFileProgress(quint32 friend_number, quint32 file_number, quint32 bytesTransfered, bool finished)
+void QmlCBridge::changeFileProgress(quint32 friend_number, quint32 file_number, quint32 bytesTransfered)
 {
-	if (!finished) {
-		if (transfer_update_timer->isActive()) {
-			return;
-		} else {
-			transfer_update_timer->start();
-		}
-	}
-	QVariant returnedValue;
-	QMetaObject::invokeMethod(component, "changeFileProgress",
-		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, friend_number), 
-							  Q_ARG(QVariant, file_number),
+	QMetaObject::invokeMethod(component, "changeFileProgress", 
+							  Q_ARG(QVariant, friend_number), 
+							  Q_ARG(QVariant, file_number), 
 							  Q_ARG(QVariant, bytesTransfered));
 }
 
@@ -815,9 +791,7 @@ const QString QmlCBridge::getSelfAvatarPath()
 
 void QmlCBridge::updateFriendAvatar(quint32 friend_number)
 {
-	QVariant returnedValue;
-	QMetaObject::invokeMethod(component, "updateFriendAvatar",
-		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, friend_number));
+	QMetaObject::invokeMethod(component, "updateFriendAvatar", Q_ARG(QVariant, friend_number));
 }
 
 void QmlCBridge::changeSelfAvatar(const QString &path, bool remove)

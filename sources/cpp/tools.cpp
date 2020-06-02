@@ -116,8 +116,10 @@ quint64 getFileSize(const QString &path)
 
 AsyncFileManager::AsyncFileManager(QFile *file)
 {
+	moveToThread(this);
 	m_file = file;
 	m_file->moveToThread(this);
+	start();
 }
 
 void AsyncFileManager::onChunkReadRequest(quint64 position, quint32 length)
@@ -141,20 +143,21 @@ void AsyncFileManager::onChunkWriteRequest(quint64 position, const QByteArray &d
 	m_file->write(data);
 }
 
-void AsyncFileManager::onFileTransferStarted(bool &result)
+bool AsyncFileManager::onFileTransferStarted()
 {
-	result = m_file->open(QIODevice::WriteOnly);
+	return m_file->open(QIODevice::WriteOnly);
 }
 
 AsyncFileManager::~AsyncFileManager()
 {
-	m_file->close();
-	delete m_file;
 	quit();
-	if (!wait(1000)) {
+	if (!wait()) {
 		terminate();
 		wait();
 	}
+	m_file->close();
+	delete m_file;
+
 }
 
 }
