@@ -4,6 +4,7 @@ import QtQuick.Controls.Material 2.2
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.2
 import QtQuick.Window 2.12
+import QtGraphicalEffects 1.0
 
 /*
   Left menu (drawer)
@@ -15,7 +16,7 @@ Drawer {
     id: drawer
 
     y: 0
-    width: window.width * 0.5 / (inPortrait ? 1 : Screen.width / Screen.height)
+    width: window.width * 0.7 / (inPortrait ? 1 : Screen.width / Screen.height)
     height: window.height
 
     modal: true
@@ -55,6 +56,36 @@ Drawer {
                 id: accountLayout
                 spacing: 0
                 Layout.alignment: Qt.AlignTop
+                Layout.topMargin: 4
+                Image {
+                    id: accountAvatar
+                    Layout.alignment: Qt.AlignLeft
+                    Layout.leftMargin: 4
+                    Layout.maximumHeight: accountName.height
+                    Layout.maximumWidth: accountName.height
+                    antialiasing: true
+                    property string avatarPath
+                    source: safe_bridge().checkFileImage(avatarPath) ? 
+                                "file://" + avatarPath : identiconBuffer.getImageSource(0, true)
+                    layer.enabled: true
+                    Rectangle {
+                        id: accountAvatarMask
+                        anchors.fill: parent
+                        radius: width * 0.1
+                        visible: false
+                    }
+                    layer.effect: OpacityMask {
+                        maskSource: accountAvatarMask
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            changeAvatarImage.source = bridge.checkFileImage(parent.avatarPath) ? 
+                                        "file://" + parent.avatarPath : identiconBuffer.getImageSource(0, true)
+                            changeAvatarMenu.open()
+                        }
+                    }
+                }
                 ItemDelegate {
                     id: accountName
                     leftPadding: 4
@@ -62,9 +93,8 @@ Drawer {
                     font.pointSize: fontMetrics.normalize(12)
                     font.bold: true
                     Layout.alignment: Qt.AlignLeft
-                    Layout.leftMargin: 4
                     Layout.fillWidth: true
-                    implicitWidth: drawer.width * 0.6
+                    implicitWidth: drawer.width * 0.5
                     onClicked: {
                         profileMenu.open()
                     }
@@ -111,7 +141,7 @@ Drawer {
                 }
                 Button {
                     id: accountStatus
-                    Layout.alignment: Qt.AlignRight
+                    Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
                     Layout.rightMargin: 10
                     Rectangle {
                         id: statusIndicator
@@ -314,6 +344,85 @@ Drawer {
                         }
                         sourceComponent: request ? undefined : friendItemStatusIndicatorComponent
                     }
+                    Loader {
+                        Component {
+                            id: friendItemAvatarComponent
+                            Rectangle {
+                                id: avatarContent
+                                width: friendItem.height
+                                height: width
+                                color: (friendLayout.dragEntered && !friendLayout.dragActive) ? "lightgray" : "#00000000"
+                                Layout.alignment: Qt.AlignLeft
+                                property bool updateFriendItemAvatar
+                                Binding {
+                                    target: avatarContent
+                                    property: "updateFriendItemAvatar"
+                                    value: updateAvatar
+                                    when: !avatarContent.updateFriendItemAvatar
+                                    delayed: true
+                                }
+                                onUpdateFriendItemAvatarChanged: {
+                                    if (updateFriendItemAvatar) {
+                                        friendItemAvatar.source = bridge.checkFileImage(friendItemAvatar.avatarPath) ? 
+                                                    "file://" + friendItemAvatar.avatarPath : identiconBuffer.getImageSource(friendNumber, false)
+                                        updateAvatar = false
+                                        updateFriendItemAvatar = false
+                                    }
+                                }
+                                Image {
+                                    anchors.fill: parent
+                                    id: friendItemAvatar
+                                    readonly property string avatarPath: safe_bridge().getFriendAvatarPath(friendNumber)
+                                    source: safe_bridge().checkFileImage(avatarPath) ? 
+                                                "file://" + avatarPath : identiconBuffer.getImageSource(friendNumber, false)
+                                    antialiasing: true
+                                    layer.enabled: true
+                                    Rectangle {
+                                        id: friendItemAvatarMask
+                                        anchors.fill: parent
+                                        radius: width * 0.1
+                                        visible: false
+                                    }
+                                    layer.effect: OpacityMask {
+                                        maskSource: friendItemAvatarMask
+                                    }
+                                }
+                                MouseArea {
+                                    id: friendDragAreaAvatar
+                                    anchors.fill: parent
+                                    drag.target: friendLayout
+                                    enabled: friendsModel.count > 1
+                                    readonly property bool dragActive: drag.active
+                                    onDragActiveChanged: {
+                                        friendLayout.dragActive = dragActive
+                                    }
+                                }
+                                DropArea {
+                                    anchors.fill: parent
+                                    enabled: !friendLayout.dragActive
+                                    onEntered: {
+                                        if (!request) {
+                                            friendLayout.dragEntered = true
+                                        }
+                                    }
+                                    onExited: {
+                                        if (!request) {
+                                            friendLayout.dragEntered = false
+                                        }
+                                    }
+                                    onDropped: {
+                                        if (!request) {
+                                            friendLayout.dragEntered = false
+                                            friendsModel.get(leftBarLayout.draggedItem).dragStarted = false
+                                            friendsModel.swap(index, leftBarLayout.draggedItem)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        sourceComponent: request ? undefined : friendItemAvatarComponent
+                    }
+
                     ItemDelegate {
                         id: friendItem
                         background.z: z_friend_item

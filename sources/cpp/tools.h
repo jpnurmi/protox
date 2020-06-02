@@ -7,12 +7,14 @@ namespace Tools {
 	void debug(const QString &msg);
 	const QString getInternalStoragePath();
 	const QString getProgDir();
+	const QString getAvatarsDir();
 	const QString replaceFileExtension(const QString &file, const QString &with);
 	const QStringList qstringSplitUnicode(const QString &str, int limit_bytes);
 	const QString getFilenameFromPath(const QString &path);
 	const QString getDefaultDownloadsDirectory();
 	const QString checkFileImage(const QString &path);
 	bool checkFileExists(const QString &path);
+	quint64 getFileSize(const QString &path);
 	class AsyncFileManager : public QThread
 	{
 		Q_OBJECT

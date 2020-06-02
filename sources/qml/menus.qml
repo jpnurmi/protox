@@ -4,8 +4,10 @@ import QtQuick.Controls.Material 2.2
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.2
 import QtQuick.Window 2.12
+import QtGraphicalEffects 1.0
 
 import QtUtf8ByteLimitValidator 1.0
+import QtPhotoDialog 1.0
 
 /*[remove]*/ Item {
 
@@ -243,6 +245,33 @@ Menu {
         font.bold: true
         width: parent.width
         horizontalAlignment: Qt.AlignHCenter
+        text: qsTr("Avatar")
+    }
+    RowLayout {
+        spacing: 0
+        Image {
+            id: infoAvatar
+            Layout.maximumWidth: 128
+            Layout.maximumHeight: Layout.maximumWidth
+            Layout.alignment: Qt.AlignHCenter
+            antialiasing: true
+            layer.enabled: true
+            Rectangle {
+                id: infoAvatarMask
+                anchors.fill: parent
+                radius: width * 0.1
+                visible: false
+            }
+            layer.effect: OpacityMask {
+                maskSource: infoAvatarMask
+            }
+        }
+    }
+    Text {
+        padding: 10
+        font.bold: true
+        width: parent.width
+        horizontalAlignment: Qt.AlignHCenter
         text: qsTr("Nickname")
     }
     Text {
@@ -457,6 +486,91 @@ Menu {
         text: qsTr("Click on image to copy your ToxID.")
         wrapMode: Text.Wrap
         topPadding: 10
+    }
+}
+
+/*
+  Change avatar menu
+*/
+
+Menu {
+    id: changeAvatarMenu
+    readonly property int margin: 25
+    width: parent.width - margin * 2
+    title: "Change avatar"
+    x: (window.width - width) * 0.5
+    y: (window.height - height) * 0.5
+    z: z_menu
+    modal: true
+    ColumnLayout {
+        spacing: 0
+        Image {
+            id: changeAvatarImage
+            Layout.maximumWidth: 128
+            Layout.maximumHeight: Layout.maximumWidth
+            width: 128
+            height: width
+            Layout.alignment: Qt.AlignHCenter
+            antialiasing: true
+            layer.enabled: true
+            Rectangle {
+                id: changeAvatarImageMask
+                anchors.fill: parent
+                radius: width * 0.1
+                visible: false
+            }
+            layer.effect: OpacityMask {
+                maskSource: changeAvatarImageMask
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    avatarPickerDialog.open()
+                }
+            }
+        }
+    }
+    Text {
+        id: changeAvatarHelperText
+        horizontalAlignment: Qt.AlignHCenter
+        text: qsTr("Click on image to change your avatar.")
+        wrapMode: Text.Wrap
+        topPadding: 15
+    }
+    Button {
+        id: removeAvatarButton
+        enabled: safe_bridge().checkFileImage(accountAvatar.avatarPath)
+        Text {
+            anchors.centerIn: parent
+            text: qsTr("Remove avatar")
+            color: parent.enabled ? "red" : "gray"
+            font.pointSize: parent.font.pointSize
+            font.bold: true
+        }
+        leftInset: 10
+        rightInset: leftInset
+        onClicked: {
+            bridge.changeSelfAvatar("", true)
+            var avatar_path = accountAvatar.avatarPath
+            var file_image = bridge.checkFileImage(avatar_path)
+            accountAvatar.source = changeAvatarImage.source = file_image ? 
+                        "file://" + avatar_path : identiconBuffer.getImageSource(0, true)
+            enabled = file_image
+        }
+    }
+}
+
+PhotoDialog {
+    id: avatarPickerDialog
+    title: qsTr("Select an image")
+    selectMultiple: false
+    onAccepted: {
+        bridge.changeSelfAvatar(bridge.uriToRealPath(imageUrl.toString()))
+        var avatar_path = accountAvatar.avatarPath
+        var file_image = bridge.checkFileImage(avatar_path)
+        accountAvatar.source = changeAvatarImage.source = file_image ? 
+                    "file://" + avatar_path : identiconBuffer.getImageSource(0, true)
+        removeAvatarButton.enabled = file_image
     }
 }
 

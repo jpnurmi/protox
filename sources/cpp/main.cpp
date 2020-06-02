@@ -123,7 +123,7 @@ quint32 QmlCBridge::getCurrentFriendNumber()
 
 int QmlCBridge::getFriendConnStatus(quint32 friend_number)
 {
-	return friends_conn_status[friend_number];
+	return Toxcore::get_friend_connection_status(tox, friend_number);
 }
 
 const QString QmlCBridge::getFriendNickname(quint32 friend_number, bool publicKey)
@@ -568,6 +568,11 @@ quint32 QmlCBridge::getToxAddressSizeHex()
 	return Toxcore::get_tox_address_size() * 2;
 }
 
+quint32 QmlCBridge::getToxPublicKeySizeHex()
+{
+	return Toxcore::get_tox_public_key_size() * 2;
+}
+
 QString QmlCBridge::getSystemLocale()
 {
 	return QLocale::system().name();
@@ -660,6 +665,7 @@ quint32 QmlCBridge::sendFile(quint32 friend_number, const QString &filepath)
 	ToxFileTransfer *transfer = nullptr;
 	quint32 file_number = Toxcore::send_file(tox, friend_number, filepath, &transfer, filesize, file_id, error);
 	if (error > 0) {
+		delete transfer;
 		return error;
 	}
 	QDateTime dt = QDateTime::currentDateTime();
@@ -793,6 +799,41 @@ void QmlCBridge::createFileProgressNotification(quint32 friend_number, quint32 f
 QString QmlCBridge::getFriendPublicKeyHex(quint32 friend_number)
 {
 	return ToxConverter::toString(Toxcore::get_friend_public_key(tox, friend_number));
+}
+
+const QString QmlCBridge::getFriendAvatarPath(quint32 friend_number)
+{
+	return Tools::getAvatarsDir() + ToxConverter::toString(Toxcore::get_friend_public_key(tox, friend_number));
+}
+
+const QString QmlCBridge::getSelfAvatarPath()
+{
+	QString publicKey = ToxConverter::toString(Toxcore::get_address(tox));
+	publicKey.truncate(Toxcore::get_tox_public_key_size() * 2);
+	return Tools::getAvatarsDir() + publicKey;
+}
+
+void QmlCBridge::updateFriendAvatar(quint32 friend_number)
+{
+	QVariant returnedValue;
+	QMetaObject::invokeMethod(component, "updateFriendAvatar",
+		Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, friend_number));
+}
+
+void QmlCBridge::changeSelfAvatar(const QString &path, bool remove)
+{
+	const int scaled_avatar_size = 128;
+	const QString avatarPath = getSelfAvatarPath();
+	if (remove) {
+		QFile::remove(avatarPath);
+	} else {
+		QImage avatar(path);
+		QImage scaledAvatar = avatar.scaled(QSize(scaled_avatar_size, scaled_avatar_size), 
+											Qt::IgnoreAspectRatio, 
+											Qt::SmoothTransformation);
+		scaledAvatar.save(avatarPath, "PNG");
+	}
+	Toxcore::send_avatar_to_all_friends(tox, remove ? QString() : avatarPath, remove);
 }
 
 QmlTranslator::QmlTranslator(QObject *parent) : QObject(parent) {}

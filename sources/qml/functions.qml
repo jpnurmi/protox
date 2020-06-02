@@ -4,7 +4,33 @@
 
 import QtQuick 2.12
 
+import "qrc:/deps/jdenticon/jdenticon.js" as Jdenticon
+
 /*[remove]*/ Item {
+
+readonly property variant jdenticon_default_config: {
+    "backColor" : "#00000000",
+    "lightness" : {
+        color: [0.4, 0.8],
+        grayscale: [0.3, 0.9]
+    },
+    "saturation" : {
+        color: 0.75,
+        grayscale: 0
+    },
+    "padding" : 0.08
+};
+
+function getJdenticonHues(pk) {
+    var hash = Jdenticon.sha1(pk)
+    var result = []
+    for (var i = 0; i < hash.length; i += 8) {
+        result.push(parseInt(hash.substring(i, i + 8), 16) / 4294967295 * 360)
+    }
+    return result
+}
+
+
 
 function formatBytes(bytes, decimals = 2) {
     const sizes = [qsTr("Bytes"), qsTr("KB"), qsTr("MB"), qsTr("GB"), qsTr("TB"), qsTr("PB"), qsTr("EB"), qsTr("ZB"), qsTr("YB")]
@@ -35,6 +61,7 @@ function safe_bridge() {
     empty_bridge.getSettingsValue = function() { return 0 }
     empty_bridge.checkFileImage = function() { return "" }
     empty_bridge.checkFileExists = function() { return 0 }
+    empty_bridge.getFriendAvatarPath = function() { return "" }
     return empty_bridge
 }
 
@@ -258,12 +285,14 @@ function insertMessage(variantMessage, friend_number, self, time, unique_id, fai
 }
 
 function insertFriend(friend_number, nickName, request, request_message, friendPk) {
+    identiconModel.appendIfNotExists(friend_number, false)
     friendsModel.append({"friendNumber" : friend_number, 
                             "nickName" : nickName, 
                             "request" : request, 
                             "request_message" : request_message, 
                             "friendPk" : friendPk,
-                            "statusColor" : "gray"})
+                            "statusColor" : "gray", 
+                            "updateAvatar" : false})
     if (!request) {
         cleanProfile = bridge.getFriendsCount() === 0
     } 
@@ -356,6 +385,8 @@ function signInProfile(profile, create, password, autoLogin) {
     friendNickname.setText(bridge.getFriendNickname(friend_number))
     friendStatusMessage.setText(bridge.getFriendStatusMessage(friend_number))
     // drawer
+    identiconModel.appendIfNotExists(0, true)
+    accountAvatar.avatarPath = bridge.getSelfAvatarPath()
     accountName.text = bridge.getNickname(true)
     statusIndicator.setStatus(bridge.getStatus())
     // QR code
@@ -392,6 +423,7 @@ function resetUI() {
     resetConnectionStatus()
     friendStatusIndicator.color = "gray"
     new_messages = 0
+    identiconModel.clear()
 }
 
 function fileControlUpdateMessage(friend_number, unique_id, control) {
@@ -453,6 +485,16 @@ function sendFile(fileUrl) {
     case 5: msg = qsTr("Unexpected error."); break;
     }
     toast.show({ message : msg, duration : Toast.Long })
+}
+
+function updateFriendAvatar(friend_number) {
+    for (var i = 0; i < friendsModel.count; i++) {
+        var friend = friendsModel.get(i)
+        if (friend.friendNumber === friend_number && !friend.request) {
+            friend.updateAvatar = true
+            friendsModel.set(i, friend)
+        }
+    }
 }
 
 /*[remove]*/ }

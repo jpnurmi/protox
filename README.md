@@ -11,7 +11,6 @@ Minimum requirments: Android 5.0 (API level 21).
 # Features
 
 All toxcore features are implemented except:
-*  Avatars
 *  Conferences
 *  Audio/video calls
 

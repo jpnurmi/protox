@@ -39,6 +39,7 @@ public:
 	void cancelFileNotification(quint32 friend_number, quint32 file_number);
 	void createFileProgressNotification(quint32 friend_number, quint32 file_number);
 	const QString formatBytes(quint64 bytes);
+	void updateFriendAvatar(quint32 friend_number);
 public slots:
 	Q_INVOKABLE void sendMessage(const QString &message);
 	Q_INVOKABLE quint32 getCurrentFriendNumber();
@@ -85,6 +86,7 @@ public slots:
 	Q_INVOKABLE quint32 getNicknameMaxLength();
 	Q_INVOKABLE quint32 getStatusMessageMaxLength();
 	Q_INVOKABLE quint32 getToxAddressSizeHex();
+	Q_INVOKABLE quint32 getToxPublicKeySizeHex();
 	Q_INVOKABLE QString getSystemLocale();
 	Q_INVOKABLE void hideSplashScreen();
 	Q_INVOKABLE bool checkMessageInPendingList(quint32 friend_number, quint64 unique_id);
@@ -100,9 +102,11 @@ public slots:
 	Q_INVOKABLE quint32 acceptFile(quint32 friend_number, quint32 file_number);
 	Q_INVOKABLE bool checkFileExists(const QString &path);
 	Q_INVOKABLE QString getFriendPublicKeyHex(quint32 friend_number);
+	Q_INVOKABLE const QString getFriendAvatarPath(quint32 friend_number);
+	Q_INVOKABLE const QString getSelfAvatarPath();
+	Q_INVOKABLE void changeSelfAvatar(const QString &path, bool remove = false);
 
 public:
-	ToxFriendsConnStatus friends_conn_status;
 	ToxPendingMessages pending_messages;
 	ToxFileTransfers transfers;
 	ToxFileMessages file_messages;

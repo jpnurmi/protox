@@ -17,6 +17,8 @@ import QtPhotoDialog 1.0
 import QtFolderDialog 1.0
 import QZXing 2.3
 
+import "qrc:/deps/jdenticon/jdenticon.js" as Jdenticon
+
 ApplicationWindow {
     id: window
     visible: true
@@ -256,6 +258,52 @@ ApplicationWindow {
                     cxt.closePath();
                     cxt.fillStyle = modelData;
                     cxt.fill();
+                    grabToImage(function(result) { parent.source = result.url; });
+                }
+            }
+        }
+    }
+
+    ListModel {
+        id: identiconModel
+        function appendIfNotExists(friend_number, self) {
+            for (var i = 0; i < count; i++) {
+                var identicon = get(i)
+                if (identicon.friendNumber === friend_number && identicon.self === self) {
+                    return
+                }
+            }
+            append({"friendNumber" : friend_number, "self" : self})
+        }
+    }
+    
+    Repeater {
+        id: identiconBuffer
+        model: identiconModel
+        function getImageSource(friend_number, self) {
+            for (var i = 0; i < identiconModel.count; i++) {
+                var identicon = identiconModel.get(i)
+                if (identicon.friendNumber === friend_number && identicon.self === self) {
+                    return identiconBuffer.itemAt(i).source
+                }
+            }
+            return ""
+        }
+        delegate: Image {
+            id: identiconImageFrameBuffer
+            visible: false
+            Canvas {
+                id: identiconCanvas
+                width: 256
+                height: width
+                visible: false
+                onPaint: {
+                    var cxt = getContext("2d");
+                    var pk = self ? bridge.getToxId().substring(0, bridge.getToxPublicKeySizeHex()) 
+                                  : bridge.getFriendPublicKeyHex(friendNumber)
+                    Jdenticon.global.jdenticon_config = jdenticon_default_config
+                    Jdenticon.global.jdenticon_config.hues = getJdenticonHues(pk)
+                    Jdenticon.drawIcon(cxt, pk, width)
                     grabToImage(function(result) { parent.source = result.url; });
                 }
             }
