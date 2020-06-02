@@ -87,6 +87,9 @@ const QString getDefaultDownloadsDirectory()
 
 const QString checkFileImage(const QString &path)
 {
+	if (path.isEmpty()) {
+		return QString();
+	}
 	QImageReader reader(path);
 	if (reader.canRead()) {
 		return "file://" + path;
@@ -98,6 +101,17 @@ const QString checkFileImage(const QString &path)
 bool checkFileExists(const QString &path)
 {
 	return QFile::exists(path);
+}
+
+quint64 getFileSize(const QString &path)
+{
+	QFile file(path);
+	if (!file.open(QIODevice::ReadOnly)) {
+		return 0;
+	}
+	quint64 size = file.size();
+	file.close();
+	return size;
 }
 
 AsyncFileManager::AsyncFileManager(QFile *file)

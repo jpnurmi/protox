@@ -386,6 +386,7 @@ function signInProfile(profile, create, password, autoLogin) {
     friendStatusMessage.setText(bridge.getFriendStatusMessage(friend_number))
     // drawer
     identiconModel.appendIfNotExists(0, true)
+    accountAvatar.avatarPath = bridge.getSelfAvatarPath()
     accountName.text = bridge.getNickname(true)
     statusIndicator.setStatus(bridge.getStatus())
     // QR code

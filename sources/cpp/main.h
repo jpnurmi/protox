@@ -103,9 +103,10 @@ public slots:
 	Q_INVOKABLE bool checkFileExists(const QString &path);
 	Q_INVOKABLE QString getFriendPublicKeyHex(quint32 friend_number);
 	Q_INVOKABLE const QString getFriendAvatarPath(quint32 friend_number);
+	Q_INVOKABLE const QString getSelfAvatarPath();
+	Q_INVOKABLE void changeSelfAvatar(const QString &path, bool remove = false);
 
 public:
-	ToxFriendsConnStatus friends_conn_status;
 	ToxPendingMessages pending_messages;
 	ToxFileTransfers transfers;
 	ToxFileMessages file_messages;

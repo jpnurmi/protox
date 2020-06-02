@@ -64,7 +64,9 @@ Drawer {
                     Layout.maximumHeight: accountName.height
                     Layout.maximumWidth: accountName.height
                     antialiasing: true
-                    source: identiconBuffer.getImageSource(0, true)
+                    property string avatarPath
+                    source: safe_bridge().checkFileImage(avatarPath) ? 
+                                "file://" + avatarPath : identiconBuffer.getImageSource(0, true)
                     layer.enabled: true
                     Rectangle {
                         id: accountAvatarMask
@@ -74,6 +76,14 @@ Drawer {
                     }
                     layer.effect: OpacityMask {
                         maskSource: accountAvatarMask
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            changeAvatarImage.source = bridge.checkFileImage(parent.avatarPath) ? 
+                                        "file://" + parent.avatarPath : identiconBuffer.getImageSource(0, true)
+                            changeAvatarMenu.open()
+                        }
                     }
                 }
                 ItemDelegate {
@@ -343,13 +353,20 @@ Drawer {
                                 height: width
                                 color: (friendLayout.dragEntered && !friendLayout.dragActive) ? "lightgray" : "#00000000"
                                 Layout.alignment: Qt.AlignLeft
-                                readonly property bool updateFriendItemAvatar: updateAvatar
+                                property bool updateFriendItemAvatar
+                                Binding {
+                                    target: avatarContent
+                                    property: "updateFriendItemAvatar"
+                                    value: updateAvatar
+                                    when: !avatarContent.updateFriendItemAvatar
+                                    delayed: true
+                                }
                                 onUpdateFriendItemAvatarChanged: {
                                     if (updateFriendItemAvatar) {
                                         friendItemAvatar.source = bridge.checkFileImage(friendItemAvatar.avatarPath) ? 
                                                     "file://" + friendItemAvatar.avatarPath : identiconBuffer.getImageSource(friendNumber, false)
-                                    } else {
-                                        return
+                                        updateAvatar = false
+                                        updateFriendItemAvatar = false
                                     }
                                 }
                                 Image {
@@ -359,11 +376,6 @@ Drawer {
                                     source: safe_bridge().checkFileImage(avatarPath) ? 
                                                 "file://" + avatarPath : identiconBuffer.getImageSource(friendNumber, false)
                                     antialiasing: true
-                                    onStatusChanged: {
-                                        if (status === Image.Ready) {
-                                            updateAvatar = false
-                                        }
-                                    }
                                     layer.enabled: true
                                     Rectangle {
                                         id: friendItemAvatarMask

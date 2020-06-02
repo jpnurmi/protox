@@ -14,6 +14,7 @@ namespace Tools {
 	const QString getDefaultDownloadsDirectory();
 	const QString checkFileImage(const QString &path);
 	bool checkFileExists(const QString &path);
+	quint64 getFileSize(const QString &path);
 	class AsyncFileManager : public QThread
 	{
 		Q_OBJECT

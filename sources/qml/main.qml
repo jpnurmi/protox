@@ -301,7 +301,6 @@ ApplicationWindow {
                     var cxt = getContext("2d");
                     var pk = self ? bridge.getToxId().substring(0, bridge.getToxPublicKeySizeHex()) 
                                   : bridge.getFriendPublicKeyHex(friendNumber)
-                    console.log(friendNumber, self)
                     Jdenticon.global.jdenticon_config = jdenticon_default_config
                     Jdenticon.global.jdenticon_config.hues = getJdenticonHues(pk)
                     Jdenticon.drawIcon(cxt, pk, width)
