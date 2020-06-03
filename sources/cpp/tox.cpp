@@ -845,7 +845,10 @@ static void send_file_chunk(Tox *m, quint32 friend_number, quint32 file_number
 	for (const auto transfer : qmlbridge->transfers) {
 		if (transfer->friend_number == friend_number && transfer->file_number == file_number) {
 			transfer->bytesTransfered += bytesRead.length();
-			qmlbridge->changeFileProgress(friend_number, file_number, transfer->bytesTransfered);
+			if (!transfer->avatar && !transfer->progress_update_timer->isActive()) {
+				qmlbridge->changeFileProgress(friend_number, file_number, transfer->bytesTransfered);
+				transfer->progress_update_timer->start();
+			}
 			break;
 		}
 	}

@@ -85,6 +85,7 @@ struct ToxFileTransfer {
 	ToxLocalFileManager *local_manager;
 	quint32 bytesTransfered;
 	bool avatar;
+	QTimer *progress_update_timer; // ui only
 	ToxFileTransfer (Tox *_tox, quint32 _friend_number, quint32 _file_number,  bool _avatar, Tools::AsyncFileManager *_manager, ToxLocalFileManager *_local_manager) {
 		tox = _tox;
 		friend_number = _friend_number;
@@ -94,10 +95,18 @@ struct ToxFileTransfer {
 		manager->setObjectParent(this);
 		local_manager = _local_manager;
 		bytesTransfered = 0;
+		if (_avatar) {
+			progress_update_timer = nullptr;
+		} else {
+			progress_update_timer = new QTimer;
+			progress_update_timer->setSingleShot(true);
+			progress_update_timer->setInterval(16);
+		}
 	}
 	~ToxFileTransfer() {
 		delete manager;
 		delete local_manager;
+		delete progress_update_timer;
 	}
 };
 typedef QVector <ToxFileTransfer*> ToxFileTransfers;
