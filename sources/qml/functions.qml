@@ -30,8 +30,6 @@ function getJdenticonHues(pk) {
     return result
 }
 
-
-
 function formatBytes(bytes, decimals = 2) {
     const sizes = [qsTr("Bytes"), qsTr("KB"), qsTr("MB"), qsTr("GB"), qsTr("TB"), qsTr("PB"), qsTr("EB"), qsTr("ZB"), qsTr("YB")]
     if (bytes === 0) {

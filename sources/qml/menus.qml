@@ -512,6 +512,7 @@ Menu {
             height: width
             Layout.alignment: Qt.AlignHCenter
             antialiasing: true
+            cache: false
             layer.enabled: true
             Rectangle {
                 id: changeAvatarImageMask

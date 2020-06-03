@@ -389,7 +389,7 @@ static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandle
 
 void customMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString & msg)
 {
-	const QStringList skipWarningsList = { "Detected anchors on an item that is managed by a layout.", 
+	const QStringList skipWarningsList = { "QML Connections: Implicitly defined onFoo properties in Connections are deprecated. Use this syntax instead: function onFoo(<arguments>) { ... }", 
 										   "QML Loader: Possible anchor loop detected on fill." };
 	switch (type) {
 	case QtWarningMsg: {

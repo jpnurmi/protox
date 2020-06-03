@@ -147,7 +147,7 @@ ColumnLayout {
                 NumberAnimation { property: "scale"; from: 0; to: 1.0; duration: 300 }
             }
             displaced: Transition {
-                NumberAnimation { properties: "y"; duration: 400; easing.type: Easing.OutCubic }
+                NumberAnimation { properties: "y"; duration: 400; easing.type: Easing.OutCubic; }
             }
             model: messagesModel
             delegate: Rectangle {
@@ -866,7 +866,24 @@ ColumnLayout {
                     anchors.fill: parent
                     onClicked: {
                         attachFileButton.hideButtons()
-                        chatFilePickerDialog.open()
+                        var filePicker = Qt.createQmlObject("import QtQuick.Dialogs 1.2; FileDialog {
+                                                title: qsTr(\"Select a file\")
+                                                selectMultiple: true
+                                                property bool once: false
+                                                onAccepted: {
+                                                    if (once) {
+                                                        return
+                                                    }
+                                                    once = true
+                                                    messages.addTransitionEnabled = fileUrls.length === 1
+                                                    for (var i = 0; i < fileUrls.length; i++) {
+                                                        sendFile(fileUrls[i])
+                                                    }
+                                                    messages.addTransitionEnabled = true
+                                                    destroy()
+                                                }
+                                            }", window, "filePicker");
+                        filePicker.open()
                     }
                 }
             }
@@ -1092,22 +1109,16 @@ ColumnLayout {
     }
 }
 
-FileDialog {
-    id: chatFilePickerDialog
-    title: qsTr("Select a file")
-    onAccepted: {
-        sendFile(fileUrl)
-    }
-}
-
 PhotoDialog {
     id: chatPhotoPickerDialog
     title: qsTr("Select an image")
     selectMultiple: true
     onAccepted: {
+        messages.addTransitionEnabled = imageUrls.length === 1
         for (var i = 0; i < imageUrls.length; i++) {
             sendFile(imageUrls[i])
         }
+        messages.addTransitionEnabled = true
     }
 }
 

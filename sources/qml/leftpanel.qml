@@ -64,6 +64,7 @@ Drawer {
                     Layout.maximumHeight: accountName.height
                     Layout.maximumWidth: accountName.height
                     antialiasing: true
+                    cache: false
                     property string avatarPath
                     source: safe_bridge().checkFileImage(avatarPath) ? 
                                 "file://" + avatarPath : identiconBuffer.getImageSource(0, true)

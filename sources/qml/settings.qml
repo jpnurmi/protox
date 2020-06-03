@@ -316,6 +316,7 @@ Popup {
         }
     }
     ListView {
+        id: settingsList
         anchors.top: settingsOverlayHeader.bottom
         anchors.bottom: parent.bottom
         anchors.left: parent.left
@@ -326,7 +327,7 @@ Popup {
         model: settingsModel
         delegate: ColumnLayout {
             property real originalHeight: 0
-            width: parent.width
+            width: settingsList.width
             height: ((flags & settingsWindow.sf_title) ? (flags & settingsWindow.sf_help 
                                                       ? ((flags & settingsWindow.sf_warning) 
                                                       ? 12 : 14) : 24) : 56) * fontMetrics.getFontScaling()
