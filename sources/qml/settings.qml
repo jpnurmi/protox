@@ -160,8 +160,8 @@ Popup {
                     svalue: bridge.getSettingsValue("Client", "nodes_json_file", ptype_string, String("")) })
         settingsModel.append({ flags: sf_text | sf_title | sf_help, name: "", prop: "available_nodes"})
         settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only | sf_placeholder, fieldValidator: max_bootstrap_nodes_validator, itemWidth: 96, 
-                    name: qsTr("Maximum bootstrap nodes"), prop: "max_bootstrap_nodes", helperText: "6",
-                    svalue: bridge.getSettingsValue("Toxcore", "max_bootstrap_nodes", ptype_string, 6) })
+                    name: qsTr("Maximum bootstrap nodes"), prop: "max_bootstrap_nodes", helperText: "10",
+                    svalue: bridge.getSettingsValue("Toxcore", "max_bootstrap_nodes", ptype_string, 10) })
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Client options") })
         settingsModel.append({ flags: sf_text | sf_title | sf_help, name: qsTr("This value is measured in minutes. Set to 0 to disable.")})
         settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only | sf_placeholder, 

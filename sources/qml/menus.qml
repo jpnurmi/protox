@@ -502,6 +502,11 @@ Menu {
     y: (window.height - height) * 0.5
     z: z_menu
     modal: true
+    Rectangle {
+        width: parent.width
+        height: 15
+        visible: false
+    }
     ColumnLayout {
         spacing: 0
         Image {

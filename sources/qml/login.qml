@@ -274,7 +274,9 @@ Popup {
                 color: "white"
                 placeholderTextColor: "gray"
                 horizontalAlignment: TextInput.AlignHCenter
+                opacity: enabled ? 1.0 : 0.5
                 background: Rectangle {
+                    opacity: loginUsername.opacity
                     color: loginUsername.activeFocus ? getTheme().primaryHighlightedTextColor : "gray"
                     height: 2
                     width: parent.width
@@ -308,9 +310,11 @@ Popup {
                 echoMode: TextInput.Password
                 passwordCharacter: "*"
                 horizontalAlignment: TextInput.AlignHCenter
+                opacity: enabled ? 1.0 : 0.5
                 Layout.fillWidth: true
                 Layout.topMargin: 6
                 background: Rectangle {
+                    opacity: loginPassword.opacity
                     color: loginPassword.activeFocus ? getTheme().primaryHighlightedTextColor : "gray"
                     height: 2
                     width: parent.width
@@ -387,7 +391,9 @@ Popup {
                 Layout.fillWidth: true
                 Layout.topMargin: 42
                 implicitHeight: loginButton.height
+                opacity: enabled ? 1.0 : 0.5
                 background: Rectangle {
+                    opacity: createNewProfileButton.opacity
                     color: createNewProfileButton.pressed ? getTheme().highlightedButtonColor : "#10C410"
                     radius: 2
                 }

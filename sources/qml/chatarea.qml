@@ -38,7 +38,7 @@ ColumnLayout {
                           ? flickable_margin + typingText.height + typingText.margin 
                           : flickable_margin
             onBottomMarginChanged: {
-                if (typingText.visible) {
+                if (typingText.visible && wasAtYEnd) {
                     contentY += typingText.height + typingText.margin 
                 }
             }
@@ -516,6 +516,17 @@ ColumnLayout {
                                 wrapMode: Text.Wrap
                                 width: parent.width
                             }
+                            Text {
+                                id: remotePausedText
+                                visible: msgRemotepaused 
+                                         && msgFilestate !== fstate_finished 
+                                         && msgFilestate !== fstate_canceled
+                                text: qsTr("Remote paused.")
+                                color: "gray"
+                                font.pointSize: fontMetrics.normalize(standardFontPointSize)
+                                wrapMode: Text.Wrap
+                                width: parent.width
+                            }
                             Rectangle { opacity: 0; visible: fileButtonsLayout.visible; width: parent.width; height: 8 }
                             ProgressBar {
                                 id: fileProgress
@@ -606,7 +617,7 @@ ColumnLayout {
                                         anchors.centerIn: parent
                                         font.family: themify.name
                                         font.pointSize: 24
-                                        text:  msgFilestate === fstate_paused ? "\uE761" : "\uE762"
+                                        text: msgFilestate === fstate_paused ? "\uE761" : "\uE762"
                                         color: "black"
                                     }
                                     onClicked: {
@@ -866,7 +877,9 @@ ColumnLayout {
                     anchors.fill: parent
                     onClicked: {
                         attachFileButton.hideButtons()
-                        var filePicker = Qt.createQmlObject("import QtQuick.Dialogs 1.2; FileDialog {
+                        chatFilePickerDialog.open()
+                        /*
+                        var filePicker = Qt.createQmlObject("import QtQuick.Dialogs 1.2;\nFileDialog {
                                                 title: qsTr(\"Select a file\")
                                                 selectMultiple: true
                                                 property bool once: false
@@ -882,8 +895,10 @@ ColumnLayout {
                                                     messages.addTransitionEnabled = true
                                                     destroy()
                                                 }
+                                                onRejected: destroy()
                                             }", window, "filePicker");
                         filePicker.open()
+                        */
                     }
                 }
             }
@@ -1106,6 +1121,15 @@ ColumnLayout {
                 scrollToEndAgainTimer.start()
             }
         }
+    }
+}
+
+FileDialog {
+    id: chatFilePickerDialog
+    title: qsTr("Select a file")
+    selectMultiple: false
+    onAccepted: {
+        sendFile(fileUrl)
     }
 }
 

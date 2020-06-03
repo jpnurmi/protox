@@ -307,7 +307,7 @@ Click on the left button to open the friend list, then on «+» to add a new fri
     </message>
     <message>
         <source>Clear chat</source>
-        <translation>Удалить чат</translation>
+        <translation>Стереть чат</translation>
     </message>
     <message>
         <source>Logout</source>
@@ -483,7 +483,7 @@ Click on the left button to open the friend list, then on «+» to add a new fri
     </message>
     <message>
         <source>Select a file</source>
-        <translation>Выберите файл</translation>
+        <translation type="vanished">Выберите файл</translation>
     </message>
     <message>
         <source>Select an image</source>
@@ -548,6 +548,10 @@ Click on the left button to open the friend list, then on «+» to add a new fri
     <message>
         <source>Remove avatar</source>
         <translation>Удалить аватар</translation>
+    </message>
+    <message>
+        <source>Remote paused.</source>
+        <translation>Пауза на другой стороне.</translation>
     </message>
 </context>
 <context>

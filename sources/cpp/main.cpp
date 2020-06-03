@@ -152,15 +152,20 @@ void QmlCBridge::retrieveChatLog(quint32 start, bool from, bool reverse)
 	for (auto &msg : messages) {
 		if (msg.variantMessage["type"].toUInt() == TOXMSG_FILE) {
 			quint32 file_number = 0;
+			bool transfer_exists = false;
 			for (const auto transfer : transfers) {
 				if (file_messages[transfer] == msg.unique_id) {
 					file_number = transfer->file_number;
+					transfer_exists = true;
 					break;
 				}
 			}
 			msg.variantMessage.insert("file_number", file_number);
 			msg.variantMessage.insert("name", Tools::getFilenameFromPath(msg.variantMessage["file_path"].toString()));
-			if (msg.variantMessage["state"].toInt() > TOX_FILE_PAUSED) {
+			if (!transfer_exists && msg.variantMessage["state"].toInt() <= TOX_FILE_PAUSED) {
+				msg.variantMessage["state"] = TOX_FILE_CANCELED;
+				msg.received = true;
+			} else if (msg.variantMessage["state"].toInt() > TOX_FILE_PAUSED) {
 				msg.received = true;
 			}
 		}
@@ -669,12 +674,13 @@ quint32 QmlCBridge::sendFile(quint32 friend_number, const QString &filepath)
 	return 0;
 }
 
-void QmlCBridge::fileControlUpdateMessage(quint32 friend_number, quint64 unique_id, quint32 control)
+void QmlCBridge::fileControlUpdateMessage(quint32 friend_number, quint64 unique_id, quint32 control, bool remote)
 {
 	QMetaObject::invokeMethod(component, "fileControlUpdateMessage",
 							  Q_ARG(QVariant, friend_number), 
 							  Q_ARG(QVariant, unique_id),
-							  Q_ARG(QVariant, control));
+							  Q_ARG(QVariant, control),
+							  Q_ARG(QVariant, remote));
 }
 
 bool QmlCBridge::controlFile(quint32 friend_number, quint32 file_number, quint32 control)
@@ -682,7 +688,7 @@ bool QmlCBridge::controlFile(quint32 friend_number, quint32 file_number, quint32
 	quint64 unique_id = 0;
 	bool success = Toxcore::file_control(tox, friend_number, file_number, control, unique_id);
 	if (success) {
-		fileControlUpdateMessage(friend_number, unique_id, control);
+		fileControlUpdateMessage(friend_number, unique_id, control, false);
 	}
 	return success;
 }
@@ -714,7 +720,7 @@ quint32 QmlCBridge::acceptFile(quint32 friend_number, quint32 file_number)
 {
 	quint64 unique_id = 0;
 	quint32 control = Toxcore::acceptFile(friend_number, file_number, unique_id);
-	fileControlUpdateMessage(friend_number, unique_id, control);
+	fileControlUpdateMessage(friend_number, unique_id, control, false);
 	createFileProgressNotification(friend_number, file_number);
 	return control;
 }

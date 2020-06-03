@@ -35,7 +35,7 @@ public:
 	void sendPendingMessages(quint32 friend_number);
 	void removeNonFailedPendingMessages(quint32 friend_number);
 	void changeFileProgress(quint32 friend_number, quint32 file_number, quint32 bytesTransfered);
-	void fileControlUpdateMessage(quint32 friend_number, quint64 unique_id, quint32 control);
+	void fileControlUpdateMessage(quint32 friend_number, quint64 unique_id, quint32 control, bool remote);
 	void cancelFileNotification(quint32 friend_number, quint32 file_number);
 	void createFileProgressNotification(quint32 friend_number, quint32 file_number);
 	const QString formatBytes(quint64 bytes);

@@ -248,7 +248,8 @@ function insertMessage(variantMessage, friend_number, self, time, unique_id, fai
         "msgFailed" : failed,
         "msgHistory" : history,
         "msgType" : variantMessage.type,
-        "msgFiletsize" : 0 }
+        "msgFiletsize" : 0,
+        "msgRemotepaused" : false }
 
     if (!variantMessage.type) {
         dict.msgFilepath = ""
@@ -424,7 +425,7 @@ function resetUI() {
     identiconModel.clear()
 }
 
-function fileControlUpdateMessage(friend_number, unique_id, control) {
+function fileControlUpdateMessage(friend_number, unique_id, control, remote) {
     if (bridge.getCurrentFriendNumber() !== friend_number) {
         return
     }
@@ -436,8 +437,23 @@ function fileControlUpdateMessage(friend_number, unique_id, control) {
         if (message.msgUniqueId === unique_id) {
             switch (control) {
             case fcontrol_cancel: message.msgFilestate = fstate_canceled; message.msgReceived = true; break;
-            case fcontrol_pause: message.msgFilestate = fstate_paused; message.msgReceived = false; break;
-            case fcontrol_resume: message.msgFilestate = fstate_inprogress; message.msgReceived = false; break;
+            case fcontrol_pause:
+                if (remote) {
+                    message.msgRemotepaused = true
+                } else {
+                    message.msgFilestate = fstate_paused
+                }
+                message.msgReceived = false
+                break;
+
+            case fcontrol_resume:
+                if (remote) {
+                    message.msgRemotepaused = false
+                } else {
+                    message.msgFilestate = fstate_inprogress
+                }
+                message.msgReceived = false
+                break;
             }
             messagesModel.set(i, message)
             break

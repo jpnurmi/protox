@@ -193,12 +193,9 @@ static void cb_file_recv_control_cb(Tox *m, uint32_t friend_number, uint32_t fil
 
 	for (const auto transfer : qmlbridge->transfers) {
 		if (transfer->friend_number == friend_number && transfer->file_number == file_number && !transfer->avatar) {
-			qmlbridge->fileControlUpdateMessage(friend_number, qmlbridge->file_messages[transfer], control);
+			qmlbridge->fileControlUpdateMessage(friend_number, qmlbridge->file_messages[transfer], control, true);
 			switch (control) {
 				case TOX_FILE_CONTROL_RESUME: {
-					chat_db->updateFileMessageState(qmlbridge->file_messages[transfer], 
-													get_friend_public_key(m, friend_number), 
-													ToxFileState::TOX_FILE_INPROGRESS);
 					return;
 				}
 				case TOX_FILE_CONTROL_CANCEL: {
@@ -211,9 +208,6 @@ static void cb_file_recv_control_cb(Tox *m, uint32_t friend_number, uint32_t fil
 					return;
 				}
 				case TOX_FILE_CONTROL_PAUSE: {
-					chat_db->updateFileMessageState(qmlbridge->file_messages[transfer], 
-													get_friend_public_key(m, friend_number), 
-													ToxFileState::TOX_FILE_PAUSED);
 					return;
 				}
 			}
@@ -637,7 +631,7 @@ void bootstrap_DHT(Tox *m)
 	settings->beginGroup("Toxcore");
 	QString json_file = settings->value("nodes_json_file", "").toString();
 	bool use_ipv6 = settings->value("ipv6_enabled", true).toBool();
-	uint32_t max_bootstrap_nodes = settings->value("max_bootstrap_nodes", 6).toUInt();
+	uint32_t max_bootstrap_nodes = settings->value("max_bootstrap_nodes", 10).toUInt();
 	settings->endGroup();
 	QByteArray json_data;
 	if (!json_file.isEmpty()) {
@@ -976,19 +970,19 @@ bool file_control(Tox *m, quint32 friend_number, quint32 file_number, quint32 co
 						qmlbridge->file_messages.remove(transfer);
 						qmlbridge->transfers.removeOne(transfer);
 						delete transfer;
-						return err == 0;
+						return true;
 					}
 					case TOX_FILE_CONTROL_PAUSE: {
 						chat_db->updateFileMessageState(unique_id, 
 														get_friend_public_key(m, friend_number), 
 														ToxFileState::TOX_FILE_PAUSED);
-						return err == 0;
+						return true;
 					}
 					case TOX_FILE_CONTROL_RESUME: {
 						chat_db->updateFileMessageState(unique_id, 
 														get_friend_public_key(m, friend_number), 
 														ToxFileState::TOX_FILE_INPROGRESS);
-						return err == 0;
+						return true;
 					}
 				}
 			}
