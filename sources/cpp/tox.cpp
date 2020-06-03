@@ -16,6 +16,7 @@ namespace Toxcore {
 int current_connection_status = -1;
 struct Tox_Options *opts = nullptr;
 quint32 available_nodes = 0;
+ToxLocalFileManager local_manager;
 
 void cb_log(Tox *m, TOX_LOG_LEVEL level, const char *file, uint32_t line, const char *func,
                         const char *message, void *userdata)
@@ -263,10 +264,9 @@ static void cb_file_recv(Tox *m, quint32 friend_number, quint32 file_number, qui
 				file->close();
 			}
 			Tools::AsyncFileManager *manager = new Tools::AsyncFileManager(file);
-			ToxLocalFileManager *local_manager = new ToxLocalFileManager;
 			QObject::connect(manager, &Tools::AsyncFileManager::fileTransferEnded, 
-							 local_manager, &ToxLocalFileManager::onFileTransferEnded);
-			ToxFileTransfer *transfer = new ToxFileTransfer(m, friend_number, file_number, true, manager, local_manager);
+							 &local_manager, &ToxLocalFileManager::onFileTransferEnded);
+			ToxFileTransfer *transfer = new ToxFileTransfer(m, friend_number, file_number, true, manager);
 			qmlbridge->transfers.push_back(transfer);
 			TOX_ERR_FILE_CONTROL err;
 			bool result;
@@ -293,10 +293,9 @@ static void cb_file_recv(Tox *m, quint32 friend_number, quint32 file_number, qui
 			const QString file_path = downloadsFolder + QDir::separator() + fileName;
 			QFile *file = new QFile(file_path);
 			Tools::AsyncFileManager *manager = new Tools::AsyncFileManager(file);
-			ToxLocalFileManager *local_manager = new ToxLocalFileManager;
 			QObject::connect(manager, &Tools::AsyncFileManager::fileTransferEnded, 
-							 local_manager, &ToxLocalFileManager::onFileTransferEnded);
-			ToxFileTransfer *transfer = new ToxFileTransfer(m, friend_number, file_number, false, manager, local_manager);
+							 &local_manager, &ToxLocalFileManager::onFileTransferEnded);
+			ToxFileTransfer *transfer = new ToxFileTransfer(m, friend_number, file_number, false, manager);
 			qmlbridge->transfers.push_back(transfer);
 			QDateTime dt = QDateTime::currentDateTime();
 			ToxVariantMessage variantMessage;
@@ -914,12 +913,11 @@ quint32 send_file(Tox *m, quint32 friend_number, const QString &path, ToxFileTra
 		default: error = TOX_ERR_SENDING_OTHER; return 0;
 	}
 	Tools::AsyncFileManager *manager = new Tools::AsyncFileManager(file);
-	ToxLocalFileManager *local_manager = new ToxLocalFileManager;
 	QObject::connect(manager, &Tools::AsyncFileManager::fileChunkReady, 
-					 local_manager, &ToxLocalFileManager::onFileChunkReady);
+					 &local_manager, &ToxLocalFileManager::onFileChunkReady);
 	QObject::connect(manager, &Tools::AsyncFileManager::fileTransferEnded, 
-					 local_manager, &ToxLocalFileManager::onFileTransferEnded);
-	*transfer = new ToxFileTransfer(m, friend_number, file_number, avatar, manager, local_manager);
+					 &local_manager, &ToxLocalFileManager::onFileTransferEnded);
+	*transfer = new ToxFileTransfer(m, friend_number, file_number, avatar, manager);
 	qmlbridge->transfers.push_back(*transfer);
 	return file_number;
 }
