@@ -395,7 +395,7 @@ Drawer {
                                     id: friendDragAreaAvatar
                                     anchors.fill: parent
                                     drag.target: friendLayout
-                                    enabled: friendsModel.count > 1
+                                    drag.axis: friendsModel.count > 1 ? Drag.XAndYAxis : Drag.None
                                     readonly property bool dragActive: drag.active
                                     onDragActiveChanged: {
                                         friendLayout.dragActive = dragActive
