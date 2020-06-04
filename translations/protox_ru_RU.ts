@@ -526,10 +526,6 @@ Click on the left button to open the friend list, then on «+» to add a new fri
         <translation>Аватар</translation>
     </message>
     <message>
-        <source>Click on image to change your avatar.</source>
-        <translation type="vanished">Нажмите на изображение, чтобы изменить ваш аватар.</translation>
-    </message>
-    <message>
         <source>Remove avatar</source>
         <translation>Удалить аватар</translation>
     </message>
@@ -547,7 +543,7 @@ Click on the left button to open the friend list, then on «+» to add a new fri
     </message>
     <message>
         <source>Tap on image to change your avatar.</source>
-        <translation>Нажмите на изображение, чтобы скопировать ваш аватар.</translation>
+        <translation>Нажмите на изображение, чтобы изменить ваш аватар.</translation>
     </message>
     <message>
         <source>Tox ID copied!</source>
