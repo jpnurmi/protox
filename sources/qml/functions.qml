@@ -48,6 +48,14 @@ function formatBytes(bytes, decimals = 2) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i]
 }
 
+function getApplicationTheme() {
+    return {
+        "loginPrimaryColor" : "#12273b",
+        "loginProfileCreationPrimaryColor" : "#000036",
+        "loginProfileCreationPrimaryColorLandscape" : "#432364"
+    }
+}
+
 function getTheme() {
     return Material
 }

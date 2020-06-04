@@ -21,6 +21,17 @@ Popup {
     closePolicy: profileCreation ? Popup.NoAutoClose : Popup.CloseOnEscape
     property bool profileSelected: false
     property bool profileCreation: false
+    onProfileCreationChanged: {
+        if (profileCreation) {
+            if (inPortrait) {
+                statusBar.color = getApplicationTheme().loginProfileCreationPrimaryColor
+            } else {
+                statusBar.color = getApplicationTheme().loginProfileCreationPrimaryColorLandscape
+            }
+        } else {
+            statusBar.color = getApplicationTheme().loginPrimaryColor
+        }
+    }
     property bool instantFadeOut: false
     // enable adjustTop only for this window
     Connections {
@@ -35,6 +46,15 @@ Popup {
                 bridge.setKeyboardAdjustMode(false)
             }
         }
+        onInPortraitChanged: {
+            if (loginWindow.profileCreation) {
+                if (inPortrait) {
+                    statusBar.color = getApplicationTheme().loginProfileCreationPrimaryColor
+                } else {
+                    statusBar.color = getApplicationTheme().loginProfileCreationPrimaryColorLandscape
+                }
+            }
+        }
     }
     enter: Transition {}
     exit: Transition { 
@@ -47,6 +67,7 @@ Popup {
         enabled = true
         notification.cancelAll()
         profileSelected = false
+        statusBar.color = getApplicationTheme().loginPrimaryColor
         open()
         if (instant) {
             opacity = 1.0
@@ -108,6 +129,7 @@ Popup {
         if (doAutoLogin) {
             instantFadeOut = true
         }
+        statusBar.color = getTheme().primaryColor
         loginWindow.close()
         loginPassword.clear()
         loginUsername.clear()
@@ -378,7 +400,7 @@ Popup {
             }
             Button {
                 id: loginButton
-                text: loginWindow.profileCreation ? qsTr("Create profile") : qsTr("Select profile")
+                text: loginWindow.profileCreation ? qsTr("Create profile") : qsTr("Log in")
                 visible: loginWindow.profileCreation || accountMenu.profileName.length > 0
                 Layout.fillWidth: true
                 Layout.topMargin: 24

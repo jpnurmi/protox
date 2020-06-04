@@ -85,6 +85,7 @@ Menu {
         width: parent.width
         horizontalAlignment: Qt.AlignHCenter
         text: qsTr("Tox ID")
+        color: getTheme().primaryTextColor
     }
     TextField {
         id: toxId
@@ -95,7 +96,7 @@ Menu {
         width: parent.width
         text: ""
         validator: Utf8ByteLimitValidator { length: safe_bridge().getToxAddressSizeHex(); prefix: "tox:"; less: false; typemore: true }
-        color: acceptableInput ? "black" : "red"
+        color: acceptableInput ? getTheme().primaryTextColor : "red"
         onAccepted: {
             addFriendMessage.focus = true
         }
@@ -114,9 +115,11 @@ Menu {
         width: parent.width
         horizontalAlignment: Qt.AlignHCenter
         text: qsTr("Messsage")
+        color: getTheme().primaryTextColor
     }
     TextField {
         id: addFriendMessage
+        color: getTheme().primaryTextColor
         font.pointSize: fontMetrics.normalize(standardFontPointSize)
         leftPadding: 10
         rightPadding: leftPadding
@@ -246,6 +249,7 @@ Menu {
         width: parent.width
         horizontalAlignment: Qt.AlignHCenter
         text: qsTr("Avatar")
+        color: getTheme().primaryTextColor
     }
     RowLayout {
         spacing: 0
@@ -273,6 +277,7 @@ Menu {
         width: parent.width
         horizontalAlignment: Qt.AlignHCenter
         text: qsTr("Nickname")
+        color: getTheme().primaryTextColor
     }
     Text {
         id: infoNickname
@@ -280,11 +285,13 @@ Menu {
         width: parent.width
         horizontalAlignment: Qt.AlignHCenter
         wrapMode: Text.Wrap
+        color: getTheme().primaryTextColor
         Text {
             anchors.centerIn: parent
             visible: parent.text.length === 0
             text: qsTr("<empty>")
             font.italic: true
+            color: getTheme().primaryTextColor
         }
     }
     Text {
@@ -293,6 +300,7 @@ Menu {
         width: parent.width
         horizontalAlignment: Qt.AlignHCenter
         text: qsTr("Status message")
+        color: getTheme().primaryTextColor
     }
     Text {
         id: infoStatus
@@ -300,11 +308,13 @@ Menu {
         width: parent.width
         horizontalAlignment: Qt.AlignHCenter
         wrapMode: Text.Wrap
+        color: getTheme().primaryTextColor
         Text {
             anchors.centerIn: parent
             visible: parent.text.length === 0
             text: qsTr("<empty>")
             font.italic: true
+            color: getTheme().primaryTextColor
         }
     }
     Text {
@@ -313,6 +323,7 @@ Menu {
         width: parent.width
         horizontalAlignment: Qt.AlignHCenter
         text: qsTr("Public key")
+        color: getTheme().primaryTextColor
     }
     Text {
         id: infoPublicKey
@@ -320,6 +331,7 @@ Menu {
         width: parent.width
         horizontalAlignment: Qt.AlignHCenter
         wrapMode: Text.Wrap
+        color: getTheme().primaryTextColor
     }
     Button {
         text: qsTr("Delete chat history")
@@ -394,6 +406,7 @@ Menu {
         width: parent.width
         horizontalAlignment: Qt.AlignHCenter
         text: qsTr("Nickname")
+        color: getTheme().primaryTextColor
     }
     TextField {
         id: myNickname
@@ -413,6 +426,7 @@ Menu {
         width: parent.width
         horizontalAlignment: Qt.AlignHCenter
         text: qsTr("Status message")
+        color: getTheme().primaryTextColor
     }
     TextField {
         id: myStatusMessage
@@ -476,16 +490,17 @@ Menu {
             anchors.fill: parent
             onClicked: {
                 bridge.copyTextToClipboard(bridge.getToxId())
-                toast.show({ message : qsTr("ToxID copied!"), duration : Toast.Short });
+                toast.show({ message : qsTr("Tox ID copied!"), duration : Toast.Short });
             }
         }
     }
     Text {
         id: toxIDHelperText
         horizontalAlignment: Qt.AlignHCenter
-        text: qsTr("Click on image to copy your ToxID.")
+        text: qsTr("Tap on image to copy your Tox ID.")
         wrapMode: Text.Wrap
         topPadding: 10
+        color: getTheme().primaryTextColor
     }
 }
 
@@ -539,7 +554,7 @@ Menu {
     Text {
         id: changeAvatarHelperText
         horizontalAlignment: Qt.AlignHCenter
-        text: qsTr("Click on image to change your avatar.")
+        text: qsTr("Tap on image to change your avatar.")
         wrapMode: Text.Wrap
         topPadding: 15
     }

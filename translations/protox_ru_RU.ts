@@ -298,14 +298,6 @@ Click on the left button to open the friend list, then on «+» to add a new fri
         <translation>Моя информация о профиле</translation>
     </message>
     <message>
-        <source>ToxID copied!</source>
-        <translation>ToxID скопирован!</translation>
-    </message>
-    <message>
-        <source>Click on image to copy your ToxID.</source>
-        <translation>Нажмите на изображение, чтобы скопировать ваш ToxID.</translation>
-    </message>
-    <message>
         <source>Clear chat</source>
         <translation>Стереть чат</translation>
     </message>
@@ -393,10 +385,6 @@ Click on the left button to open the friend list, then on «+» to add a new fri
         <source>Create profile</source>
         <translation>Создать профиль</translation>
     </message>
-    <message>
-        <source>Select profile</source>
-        <translation>Выбрать профиль</translation>
-    </message>
     <message numerus="yes">
         <source>You have %n new message(s)</source>
         <translation>
@@ -446,10 +434,6 @@ Click on the left button to open the friend list, then on «+» to add a new fri
         <translation>Неудача. Имя файла слишком длинное.</translation>
     </message>
     <message>
-        <source>A friend is not online.</source>
-        <translation>Друг не в сети.</translation>
-    </message>
-    <message>
         <source>Unexpected error.</source>
         <translation>Непредвиденная ошибка.</translation>
     </message>
@@ -483,7 +467,7 @@ Click on the left button to open the friend list, then on «+» to add a new fri
     </message>
     <message>
         <source>Select a file</source>
-        <translation type="vanished">Выберите файл</translation>
+        <translation>Выберите файл</translation>
     </message>
     <message>
         <source>Select an image</source>
@@ -543,7 +527,7 @@ Click on the left button to open the friend list, then on «+» to add a new fri
     </message>
     <message>
         <source>Click on image to change your avatar.</source>
-        <translation>Нажмите на изображение, чтобы изменить ваш аватар.</translation>
+        <translation type="vanished">Нажмите на изображение, чтобы изменить ваш аватар.</translation>
     </message>
     <message>
         <source>Remove avatar</source>
@@ -552,6 +536,26 @@ Click on the left button to open the friend list, then on «+» to add a new fri
     <message>
         <source>Remote paused.</source>
         <translation>Пауза на другой стороне.</translation>
+    </message>
+    <message>
+        <source>The friend is not online.</source>
+        <translation>Друг не в сети.</translation>
+    </message>
+    <message>
+        <source>Log in</source>
+        <translation>Войти</translation>
+    </message>
+    <message>
+        <source>Tap on image to change your avatar.</source>
+        <translation>Нажмите на изображение, чтобы скопировать ваш аватар.</translation>
+    </message>
+    <message>
+        <source>Tox ID copied!</source>
+        <translation>Tox ID скопирован!</translation>
+    </message>
+    <message>
+        <source>Tap on image to copy your Tox ID.</source>
+        <translation>Нажмите на изображение, чтобы скопировать ваш Tox ID.</translation>
     </message>
 </context>
 <context>

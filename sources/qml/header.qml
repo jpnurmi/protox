@@ -24,8 +24,7 @@ ToolBar {
             font.pointSize: 28
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
-
-            color: parent.highlighted ? getTheme().highlightedButtonColor : "white"
+            color: parent.highlighted ? getTheme().highlightedButtonColor : getTheme().toolTextColor
             SequentialAnimation {
                 id: leftOverlayButtonTextAnimation
                 loops: Animation.Infinite
@@ -38,7 +37,7 @@ ToolBar {
                 PropertyAnimation {
                     target: leftOverlayButtonText
                     property: "color"
-                    to: "white"
+                    to: getTheme().toolTextColor
                     duration: 1000
                 }
             }

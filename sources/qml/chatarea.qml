@@ -366,7 +366,6 @@ ColumnLayout {
                             text: plainText
                             anchors.fill: parent
                             anchors.margins: chatContent.cloud_margin
-                            font.family: "Helvetica"
                             font.pointSize: fontMetrics.normalize(standardFontPointSize)
                             MouseArea {
                                 id: cloudTextArea
@@ -754,6 +753,7 @@ ColumnLayout {
                 }
                 Text {
                     id: timeText
+                    color: getTheme().primaryTextColor
                     anchors.top: messageCloud.bottom
                     text: msgTime
                     font.pointSize: fontMetrics.normalize(10)

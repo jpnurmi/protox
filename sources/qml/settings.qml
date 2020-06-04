@@ -348,7 +348,7 @@ Popup {
                     font.italic: flags & settingsWindow.sf_help
                     color: (flags & settingsWindow.sf_title) ? 
                            ((flags & settingsWindow.sf_help) ? ((flags & settingsWindow.sf_warning) 
-                                                             ? "red" : "black") : "green") : "black"
+                                                             ? "red" : getTheme().primaryTextColor) : "green") : getTheme().primaryTextColor
                     onContentWidthChanged: {
                         if (parent.parent.originalHeight >= contentHeight) {
                             parent.parent.height = parent.parent.originalHeight

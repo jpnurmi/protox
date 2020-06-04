@@ -95,12 +95,12 @@ ApplicationWindow {
             }
             loginWindow.open()
             bridge.hideSplashScreen()
+            statusBar.color = getApplicationTheme().loginPrimaryColor
         }
     }
 
     Component.onCompleted: {
-        statusBar.theme = getTheme().Dark
-        statusBar.color = getTheme().toolBarColor
+
     }
 
     Flickable {

@@ -285,7 +285,8 @@ static void cb_file_recv(Tox *m, quint32 friend_number, quint32 file_number, qui
 			const QString downloadsFolder = settings->value("downloads_folder", Tools::getDefaultDownloadsDirectory()).toString();
 			settings->endGroup();
 			const QString file_path = downloadsFolder + QDir::separator() + fileName;
-			QFile *file = new QFile(file_path);
+			const QString new_path = Tools::getUniqueFilepath(file_path);
+			QFile *file = new QFile(new_path);
 			Tools::AsyncFileManager *manager = new Tools::AsyncFileManager(file);
 			QObject::connect(manager, &Tools::AsyncFileManager::fileTransferEnded, 
 							 &local_manager, &ToxLocalFileManager::onFileTransferEnded);
@@ -297,7 +298,7 @@ static void cb_file_recv(Tox *m, quint32 friend_number, quint32 file_number, qui
 			variantMessage.insert("size", file_size);
 			variantMessage.insert("state", ToxFileState::TOX_FILE_REQUEST);
 			variantMessage.insert("file_id", ToxFileId());
-			variantMessage.insert("file_path", file_path);
+			variantMessage.insert("file_path", new_path);
 			variantMessage.insert("file_number", file_number);
 			// ui only
 			variantMessage.insert("name", fileName);

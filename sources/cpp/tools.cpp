@@ -123,6 +123,21 @@ quint64 getFileSize(const QString &path)
 	return size;
 }
 
+const QString getUniqueFilepath(const QString &path)
+{
+	if (!QFile::exists(path)) {
+		return path;
+	}
+	int number = 1;
+	QDir dir(path);
+	const QString filename = path.split(QDir::separator()).last();
+	QStringList fileStruct = filename.split(".", QString::KeepEmptyParts);
+	QFileInfoList files = dir.entryInfoList(
+				QStringList() << fileStruct.first() + " (*)." + fileStruct.last(), QDir::Files);
+	number += files.length();
+	return QFileInfo(path).absolutePath() + QDir::separator() + fileStruct.first() + " (" + QString::number(number) + ")." + fileStruct.last();
+}
+
 AsyncFileManager::AsyncFileManager(QFile *file)
 {
 	moveToThread(this);

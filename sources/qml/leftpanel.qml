@@ -151,7 +151,7 @@ Drawer {
                         anchors.verticalCenter: parent.verticalCenter
                         width: 15
                         height: width
-                        border.color: "black"
+                        border.color: getTheme().primaryTextColor
                         border.width: 1
                         radius: width * 0.5
                         property int index: -1
@@ -354,6 +354,9 @@ Drawer {
                                 height: width
                                 color: (friendLayout.dragEntered && !friendLayout.dragActive) ? "lightgray" : "#00000000"
                                 Layout.alignment: Qt.AlignLeft
+                                Component.onCompleted: {
+                                    friendLayout.addWidth += width
+                                }
                                 property bool updateFriendItemAvatar
                                 Binding {
                                     target: avatarContent
@@ -494,6 +497,7 @@ Drawer {
                     Layout.alignment: Qt.AlignLeft
                     Text {
                         text: "\uE61A"
+                        color: getTheme().primaryTextColor
                         anchors.centerIn: parent
                         font.family: themify.name
                         font.pointSize: 24
@@ -510,6 +514,7 @@ Drawer {
                     Layout.alignment: Qt.AlignCenter
                     Text {
                         text: "\uE602"
+                        color: getTheme().primaryTextColor
                         anchors.centerIn: parent
                         font.family: themify.name
                         font.pointSize: 24
@@ -526,6 +531,7 @@ Drawer {
                     Layout.alignment: Qt.AlignRight
                     Text {
                         text: "\uE60F"
+                        color: getTheme().primaryTextColor
                         anchors.centerIn: parent
                         font.family: themify.name
                         font.pointSize: 24
