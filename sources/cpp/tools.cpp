@@ -1,16 +1,9 @@
 #include "tools.h"
 
-extern QFile *logfile;
-
 namespace Tools {
 
 void debug(const QString &msg)
 {
-	if (logfile && logfile->isOpen()) {
-		QString dt_str = QDateTime::currentDateTime().toString("[dd.MM.yyyy - hh:mm:ss] ") + msg + "\n";
-		logfile->write(dt_str.toUtf8());
-		logfile->flush();
-	}
 	qDebug() << msg;
 }
 

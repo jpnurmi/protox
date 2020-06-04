@@ -12,7 +12,6 @@
 QmlCBridge *qmlbridge = nullptr;
 ChatDataBase *chat_db = nullptr;
 QSettings *settings = nullptr;
-QFile *logfile = nullptr;
 
 QmlCBridge::QmlCBridge()
 {
@@ -838,10 +837,6 @@ int main(int argc, char *argv[])
 	if (!Native::requestApplicationPermissions()) {
 		return 1;
 	}
-	logfile = new QFile(Tools::getProgDir() + "protox.log");
-	if (!logfile->open(QIODevice::WriteOnly | QIODevice::Append)) {
-		Tools::debug("Failed to open a log file.");
-	}
 	ChatDataBase::registerSQLDriver();
 	settings = new QSettings(Tools::getProgDir() + "settings.ini", QSettings::IniFormat);
 
@@ -885,8 +880,6 @@ int main(int argc, char *argv[])
 	delete qmlbridge;
 	delete settings;
 	Tools::debug("Program exited successfully.");
-	logfile->close();
-	delete logfile;
 
 	return result;
 }
