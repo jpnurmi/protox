@@ -202,9 +202,9 @@ static void cb_file_recv_control_cb(Tox *m, uint32_t friend_number, uint32_t fil
 					chat_db->updateFileMessageState(qmlbridge->file_messages[transfer], 
 													get_friend_public_key(m, friend_number), 
 													ToxFileState::TOX_FILE_CANCELED);
+					delete transfer;
 					qmlbridge->file_messages.remove(transfer);
 					qmlbridge->transfers.removeOne(transfer);
-					delete transfer;
 					return;
 				}
 				case TOX_FILE_CONTROL_PAUSE: {
@@ -269,8 +269,8 @@ static void cb_file_recv(Tox *m, quint32 friend_number, quint32 file_number, qui
 			if (!result) {
 				Tools::debug("Couldn't open file " + file_path + " for saving avatar.");
 				tox_file_control(m, friend_number, file_number, TOX_FILE_CONTROL_CANCEL, &err);
-				qmlbridge->transfers.removeOne(transfer);
 				delete transfer;
+				qmlbridge->transfers.removeOne(transfer);
 				break;
 			}
 			tox_file_control(m, friend_number, file_number, TOX_FILE_CONTROL_RESUME, &err);
@@ -324,7 +324,7 @@ void cb_file_recv_chunk(Tox *m, quint32 friend_number, quint32 file_number, quin
 			transfer->bytesTransfered += length;
 			if (!transfer->avatar) {
 				qmlbridge->changeFileProgress(transfer->friend_number, transfer->file_number, 
-											  transfer->bytesTransfered);
+											  transfer->bytesTransfered, false);
 			}
 		}
 	}
@@ -840,7 +840,7 @@ static void send_file_chunk(Tox *m, quint32 friend_number, quint32 file_number
 		if (transfer->friend_number == friend_number && transfer->file_number == file_number) {
 			transfer->bytesTransfered += bytesRead.length();
 			if (!transfer->avatar && !transfer->progress_update_timer->isActive()) {
-				qmlbridge->changeFileProgress(friend_number, file_number, transfer->bytesTransfered);
+				qmlbridge->changeFileProgress(friend_number, file_number, transfer->bytesTransfered, false);
 				transfer->progress_update_timer->start();
 			}
 			break;
@@ -857,11 +857,11 @@ static void file_transfer_end(Tox *m, quint32 friend_number, quint32 file_number
 				chat_db->updateFileMessageState(qmlbridge->file_messages[transfer], 
 												get_friend_public_key(m, friend_number), 
 												ToxFileState::TOX_FILE_FINISHED);
-				qmlbridge->changeFileProgress(friend_number, file_number, transfer->bytesTransfered);
+				qmlbridge->changeFileProgress(friend_number, file_number, transfer->bytesTransfered, true);
 				qmlbridge->file_messages.remove(transfer);
 			}
-			qmlbridge->transfers.removeOne(transfer);
 			delete transfer;
+			qmlbridge->transfers.removeOne(transfer);
 			if (avatar) {
 				qmlbridge->updateFriendAvatar(friend_number);
 			}
@@ -931,8 +931,8 @@ void cancel_all_file_transfers_for_friend(quint32 friend_number)
 											ToxFileState::TOX_FILE_CANCELED);
 			qmlbridge->file_messages.remove(transfer);
 		}
-		qmlbridge->transfers.removeOne(transfer);
 		delete transfer;
+		qmlbridge->transfers.removeOne(transfer);
 	}
 }
 
@@ -968,9 +968,9 @@ bool file_control(Tox *m, quint32 friend_number, quint32 file_number, quint32 co
 						chat_db->updateFileMessageState(unique_id, 
 														get_friend_public_key(m, friend_number), 
 														ToxFileState::TOX_FILE_CANCELED);
+						delete transfer;
 						qmlbridge->file_messages.remove(transfer);
 						qmlbridge->transfers.removeOne(transfer);
-						delete transfer;
 						return true;
 					}
 					case TOX_FILE_CONTROL_PAUSE: {
@@ -1020,9 +1020,9 @@ quint32 acceptFile(quint32 friend_number, quint32 file_number, quint64 &unique_i
 				chat_db->updateFileMessageState(unique_id, 
 												get_friend_public_key(transfer->tox, friend_number), 
 												ToxFileState::TOX_FILE_CANCELED);
+				delete transfer;
 				qmlbridge->file_messages.remove(transfer);
 				qmlbridge->transfers.removeOne(transfer);
-				delete transfer;
 				return TOX_FILE_CONTROL_CANCEL;
 			}
 		}

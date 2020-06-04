@@ -477,7 +477,7 @@ function fileControlUpdateMessage(friend_number, unique_id, control, remote) {
     }
 }
 
-function changeFileProgress(friend_number, file_number, bytesTransfered) {
+function changeFileProgress(friend_number, file_number, bytesTransfered, finished) {
     if (bridge.getCurrentFriendNumber() !== friend_number) {
         return
     }
@@ -491,7 +491,7 @@ function changeFileProgress(friend_number, file_number, bytesTransfered) {
         }
         if (message.msgFilenumber === file_number) {
             message.msgFiletsize = bytesTransfered
-            if (message.msgFilesize > message.msgFiletsize) {
+            if (!finished) {
                 message.msgFilestate = fstate_inprogress
             } else {
                 message.msgFilestate = fstate_finished

@@ -537,24 +537,6 @@ ColumnLayout {
                                 }
                             }
                             Rectangle { opacity: 0; visible: fileButtonsLayout.visible; width: parent.width; height: 8 }
-                            Timer {
-                                id: imageLoadTimer
-                                repeat: false
-                                interval: 10
-                                onTriggered: {
-                                    reservedImageSpace.imageSize = bridge.getImageSize(msgFilepath)
-                                    filePreviewImage.source = bridge.checkFileImage(msgFilepath)
-                                }
-                            }
-                            readonly property bool received: msgReceived
-                            onReceivedChanged: {
-                                if (!msgSelf && received) {
-                                    filePreviewImage.source = bridge.checkFileImage(msgFilepath)
-                                    var fileExists = bridge.checkFileExists(msgFilepath)
-                                    fileNotExistsText.visible = !fileExists && msgFilestate !== fstate_canceled
-                                    imageLoadTimer.start()
-                                }
-                            }
                             Rectangle {
                                 id: filePreviewImageRectangle
                                 readonly property int margins: 2
@@ -566,7 +548,7 @@ ColumnLayout {
                                 Item {
                                     id: reservedImageSpace
                                     anchors.centerIn: parent
-                                    property variant imageSize: msgReceived 
+                                    property variant imageSize: msgFilestate === fstate_finished 
                                                                 ? safe_bridge().getImageSize(msgFilepath)
                                                                 : Qt.size(0, 0)
                                     readonly property real ratio: imageSize.height / imageSize.width

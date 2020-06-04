@@ -695,12 +695,13 @@ bool QmlCBridge::controlFile(quint32 friend_number, quint32 file_number, quint32
 	return success;
 }
 
-void QmlCBridge::changeFileProgress(quint32 friend_number, quint32 file_number, quint32 bytesTransfered)
+void QmlCBridge::changeFileProgress(quint32 friend_number, quint32 file_number, quint32 bytesTransfered, bool finished)
 {
 	QMetaObject::invokeMethod(component, "changeFileProgress", 
 							  Q_ARG(QVariant, friend_number), 
 							  Q_ARG(QVariant, file_number), 
-							  Q_ARG(QVariant, bytesTransfered));
+							  Q_ARG(QVariant, bytesTransfered),
+							  Q_ARG(QVariant, finished));
 }
 
 QString QmlCBridge::getDefaultDownloadsDirectory()
