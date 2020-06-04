@@ -243,6 +243,15 @@ Menu {
     y: (window.height - height) * 0.5
     z: z_menu
     modal: true
+    function prepareAndOpen(friend_number) {
+        var avatar_path = bridge.getFriendAvatarPath(friend_number)
+        infoAvatar.source = bridge.checkFileImage(avatar_path) ? 
+                    "file://" + avatar_path : identiconBuffer.getImageSource(friend_number, false)
+        infoNickname.text = bridge.getFriendNickname(friend_number, false)
+        infoStatus.text = bridge.getFriendStatusMessage(friend_number)
+        infoPublicKey.text = bridge.getFriendPublicKeyHex(friend_number)
+        friendInfoMenu.popup()
+    }
     Text {
         padding: 10
         font.bold: true

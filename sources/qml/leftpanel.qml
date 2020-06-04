@@ -400,6 +400,9 @@ Drawer {
                                     onDragActiveChanged: {
                                         friendLayout.dragActive = dragActive
                                     }
+                                    onClicked: {
+                                        friendInfoMenu.prepareAndOpen(friendNumber)
+                                    }
                                 }
                                 DropArea {
                                     anchors.fill: parent
