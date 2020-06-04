@@ -145,6 +145,9 @@ AsyncFileManager::AsyncFileManager(QFile *file)
 	m_file = file;
 	m_file->moveToThread(this);
 	start();
+	Tools::debug("File manager thread started 0x" + 
+				 QString::number((quint64)m_file->thread(), 16) + 
+				 ": " + m_file->fileName() + ".");
 }
 
 void AsyncFileManager::onChunkReadRequest(quint64 position, quint32 length)
@@ -175,6 +178,8 @@ bool AsyncFileManager::onFileTransferStarted()
 
 AsyncFileManager::~AsyncFileManager()
 {
+	Tools::debug("Destroying file manager thread 0x" + 
+				 QString::number((quint64)m_file->thread(), 16) + ".");
 	quit();
 	if (!wait()) {
 		terminate();
