@@ -143,7 +143,7 @@ ApplicationWindow {
             id: welcomeText
             width: window.width
             horizontalAlignment: Text.AlignHCenter
-            text: qsTr("This is an alpha version of the Tox client.\nClick on the left button to open the friend list, then on «+» to add a new friend.\n\n Good luck!")
+            text: qsTr("This is a beta version of the Tox client.\nClick on the left button to open the friend list, then on «+» to add a new friend.\n\n Good luck!")
             wrapMode: Text.Wrap
             anchors.top: welcomeTextTitle.bottom
             anchors.topMargin: 20

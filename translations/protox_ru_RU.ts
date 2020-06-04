@@ -8,11 +8,11 @@
         <translation>Добро пожаловать в Protox!</translation>
     </message>
     <message>
-        <source>This is an alpha version of the Tox client.
+        <source>This is a beta version of the Tox client.
 Click on the left button to open the friend list, then on «+» to add a new friend.
 
  Good luck!</source>
-        <translation>Это альфа версия Tox клиента. 
+        <translation>Это бета версия Tox клиента. 
 Нажмите на левую кнопку, чтобы открыть список друзей, затем на «+» для добавления нового друга. 
 
 Удачи!</translation>
