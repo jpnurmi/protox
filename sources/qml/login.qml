@@ -372,7 +372,10 @@ Popup {
                 Layout.alignment: Qt.AlignHCenter
                 Layout.topMargin: 6
                 implicitHeight: loginPassword.height
+                enabled: loginButton.enabled
+                opacity: enabled ? 1.0 : 0.5
                 indicator: Rectangle {
+                    opacity: loginCheckbox.opacity
                     implicitWidth: 20
                     implicitHeight: 20
                     x: loginCheckbox.leftPadding
