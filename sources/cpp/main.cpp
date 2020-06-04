@@ -193,9 +193,12 @@ void QmlCBridge::deleteFriend(quint32 friend_number)
 	Toxcore::delete_friend(tox, friend_number);
 }
 
-void QmlCBridge::clearFriendChatHistory(quint32 friend_number, bool keep_active_file_transfers)
+void QmlCBridge::clearFriendChatHistory(quint32 friend_number, const QString &friendPkHex, bool keep_active_file_transfers)
 {
-	chat_db->clearFriendChatHistory(Toxcore::get_friend_public_key(tox, friend_number), keep_active_file_transfers);
+	ToxPk pk = friendPkHex.isEmpty() 
+			? Toxcore::get_friend_public_key(tox, friend_number) 
+			: ToxConverter::toToxId(friendPkHex);
+	chat_db->clearFriendChatHistory(pk, keep_active_file_transfers);
 }
 
 void QmlCBridge::updateFriendNickName(quint32 friend_number, const QString &nickname)

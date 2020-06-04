@@ -51,7 +51,7 @@ public slots:
 	Q_INVOKABLE void copyTextToClipboard(QString text);
 	Q_INVOKABLE void makeFriendRequest(const QString &toxId, const QString &friendMessage);
 	Q_INVOKABLE void deleteFriend(quint32 friend_number);
-	Q_INVOKABLE void clearFriendChatHistory(quint32 friend_number, bool keep_active_file_transfers);
+	Q_INVOKABLE void clearFriendChatHistory(quint32 friend_number, const QString &friendPkHex, bool keep_active_file_transfers);
 	Q_INVOKABLE void setTypingFriend(quint32 friend_number, bool typing);
 	Q_INVOKABLE const QString getFriendStatusMessage(quint32 friend_number);
 	Q_INVOKABLE const QString getNickname(bool toxId = false);

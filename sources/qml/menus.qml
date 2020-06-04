@@ -186,8 +186,9 @@ MessageDialog {
     visible: false
     property int currentFriendNumber: -1
     property bool keepActiveFileTransfers: false
+    property string friendPkHex: ""
     onYes: {
-        bridge.clearFriendChatHistory(currentFriendNumber, keepActiveFileTransfers)
+        bridge.clearFriendChatHistory(currentFriendNumber, friendPkHex, keepActiveFileTransfers)
         if (bridge.getCurrentFriendNumber() === currentFriendNumber) {
             messagesModel.clear()
             if (keepActiveFileTransfers) {
@@ -210,8 +211,10 @@ MessageDialog {
     standardButtons: StandardButton.Yes | StandardButton.No
     visible: false
     onYes: {
+        var selected_friend_number = bridge.getCurrentFriendNumber()
         if (bridge.checkFriendHistoryExists(currentFriendNumber)) {
-            clearFriendHistoryDialog.currentFriendNumber = currentFriendNumber
+            clearFriendHistoryDialog.currentFriendNumber = -1
+            clearFriendHistoryDialog.friendPkHex = bridge.getFriendPublicKeyHex(currentFriendNumber)
             clearFriendHistoryDialog.keepActiveFileTransfers = false
             clearFriendHistoryDialog.open()
         }
@@ -221,15 +224,18 @@ MessageDialog {
             var friend = friendsModel.get(i)
             if (friend.friendNumber === currentFriendNumber) {
                 friendsModel.remove(i)
+                break
             }
         }
         toast.show({ message : qsTr("Friend removed!"), duration : Toast.Short });
         cleanProfile = bridge.getFriendsCount() < 1
-        if (friendsModel.count > 0) {
-            selectFriend(friendsModel.get(0).friendNumber)
-        } else {
-            friendNickname.setText("")
-            friendStatusMessage.setText("")
+        if (selected_friend_number === currentFriendNumber) {
+            if (friendsModel.count > 0) {
+                selectFriend(friendsModel.get(0).friendNumber)
+            } else {
+                friendNickname.setText("")
+                friendStatusMessage.setText("")
+            }
         }
         friendInfoMenu.close()
     }
@@ -349,11 +355,12 @@ Menu {
         leftInset: 10
         rightInset: leftInset
         onClicked: {
-            if (!bridge.checkFriendHistoryExists(parent.currentFriendNumber)) {
+            if (!bridge.checkFriendHistoryExists(friendInfoMenu.currentFriendNumber)) {
                 toast.show({ message : qsTr("Nothing to delete."), duration : Toast.Short });
                 return
             }
-            clearFriendHistoryDialog.currentFriendNumber = parent.currentFriendNumber
+            clearFriendHistoryDialog.friendPkHex = ""
+            clearFriendHistoryDialog.currentFriendNumber = friendInfoMenu.currentFriendNumber
             clearFriendHistoryDialog.keepActiveFileTransfers = true
             clearFriendHistoryDialog.open()
         }
@@ -369,8 +376,8 @@ Menu {
         leftInset: 10
         rightInset: leftInset
         onClicked: {
-            removeFriendDialog.currentFriendNumber = parent.currentFriendNumber
-            removeFriendDialog.nickName = bridge.getFriendNickname(parent.currentFriendNumber)
+            removeFriendDialog.currentFriendNumber = friendInfoMenu.currentFriendNumber
+            removeFriendDialog.nickName = bridge.getFriendNickname(friendInfoMenu.currentFriendNumber)
             removeFriendDialog.open()
         }
     }
