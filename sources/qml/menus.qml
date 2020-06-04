@@ -203,23 +203,23 @@ MessageDialog {
 MessageDialog {
     id: removeFriendDialog
     title: qsTr("Removing current friend")
+    property int currentFriendNumber
     property string nickName: ""
     text: qsTr("Are you really want to remove ") + nickName + qsTr(" from your contact list?")
     icon: StandardIcon.Question
     standardButtons: StandardButton.Yes | StandardButton.No
     visible: false
     onYes: {
-        var friend_number = bridge.getCurrentFriendNumber()
-        if (bridge.checkFriendHistoryExists(friend_number)) {
-            clearFriendHistoryDialog.currentFriendNumber = friend_number
+        if (bridge.checkFriendHistoryExists(currentFriendNumber)) {
+            clearFriendHistoryDialog.currentFriendNumber = currentFriendNumber
             clearFriendHistoryDialog.keepActiveFileTransfers = false
             clearFriendHistoryDialog.open()
         }
-        bridge.deleteFriend(friend_number)
+        bridge.deleteFriend(currentFriendNumber)
         bridge.saveProfile()
         for (var i = 0; i < friendsModel.count; i++) {
             var friend = friendsModel.get(i)
-            if (friend.friendNumber === friend_number) {
+            if (friend.friendNumber === currentFriendNumber) {
                 friendsModel.remove(i)
             }
         }
@@ -243,7 +243,9 @@ Menu {
     y: (window.height - height) * 0.5
     z: z_menu
     modal: true
+    property int currentFriendNumber
     function prepareAndOpen(friend_number) {
+        currentFriendNumber = friend_number
         var avatar_path = bridge.getFriendAvatarPath(friend_number)
         infoAvatar.source = bridge.checkFileImage(avatar_path) ? 
                     "file://" + avatar_path : identiconBuffer.getImageSource(friend_number, false)
@@ -347,12 +349,11 @@ Menu {
         leftInset: 10
         rightInset: leftInset
         onClicked: {
-            var friend_number = bridge.getCurrentFriendNumber()
-            if (!bridge.checkFriendHistoryExists(friend_number)) {
+            if (!bridge.checkFriendHistoryExists(parent.currentFriendNumber)) {
                 toast.show({ message : qsTr("Nothing to delete."), duration : Toast.Short });
                 return
             }
-            clearFriendHistoryDialog.currentFriendNumber = friend_number
+            clearFriendHistoryDialog.currentFriendNumber = parent.currentFriendNumber
             clearFriendHistoryDialog.keepActiveFileTransfers = true
             clearFriendHistoryDialog.open()
         }
@@ -368,7 +369,8 @@ Menu {
         leftInset: 10
         rightInset: leftInset
         onClicked: {
-            removeFriendDialog.nickName = bridge.getFriendNickname(bridge.getCurrentFriendNumber())
+            removeFriendDialog.currentFriendNumber = parent.currentFriendNumber
+            removeFriendDialog.nickName = bridge.getFriendNickname(parent.currentFriendNumber)
             removeFriendDialog.open()
         }
     }
