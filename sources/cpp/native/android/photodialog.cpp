@@ -36,18 +36,25 @@ void QtPhotoDialogActivityResultReceiver::handleActivityResult(int requestCode, 
 		if (resultCode == -1) {
 			if (m_photoDialog->getSelectMultiple()) {
 				QAndroidJniObject clipData = data.callObjectMethod("getClipData", "()Landroid/content/ClipData;");
-				jint count = clipData.callMethod<jint>("getItemCount", "()I");
-				QStringList imageUrls;
-				// callObjectMethod is not working
-				for (jint i = 0; i < count; i++) {
-					QAndroidJniObject imageUri = QAndroidJniObject::callStaticObjectMethod(
-					"org/protox/activity/QtActivityEx",
-					"getUriFromClipData",
-					"(Landroid/content/ClipData;I)Landroid/net/Uri;", 
-					clipData.object(), i);
-					imageUrls.push_back(imageUri.toString());
+				if (!clipData.object()) {
+					QAndroidJniObject imageUri = data.callObjectMethod(
+								"getData",
+								"()Landroid/net/Uri;");
+					m_photoDialog->setImageUrls(QStringList() << imageUri.toString());
+				} else {
+					jint count = clipData.callMethod<jint>("getItemCount", "()I");
+					QStringList imageUrls;
+					// callObjectMethod is not working
+					for (jint i = 0; i < count; i++) {
+						QAndroidJniObject imageUri = QAndroidJniObject::callStaticObjectMethod(
+						"org/protox/activity/QtActivityEx",
+						"getUriFromClipData",
+						"(Landroid/content/ClipData;I)Landroid/net/Uri;", 
+						clipData.object(), i);
+						imageUrls.push_back(imageUri.toString());
+					}
+					m_photoDialog->setImageUrls(imageUrls);
 				}
-				m_photoDialog->setImageUrls(imageUrls);
 				emit m_photoDialog->accepted();
 				return;
 			}
