@@ -301,7 +301,7 @@ static void cb_file_recv(Tox *m, quint32 friend_number, quint32 file_number, qui
 			variantMessage.insert("file_path", new_path);
 			variantMessage.insert("file_number", file_number);
 			// ui only
-			variantMessage.insert("name", fileName);
+			variantMessage.insert("name", Tools::getFilenameFromPath(new_path));
 			quint64 unique_id = chat_db->insertMessage(variantMessage, dt, Toxcore::get_friend_public_key(m, friend_number), false, false);
 			qmlbridge->file_messages[transfer] = unique_id;
 			qmlbridge->insertMessage(variantMessage, friend_number, dt, false, unique_id);

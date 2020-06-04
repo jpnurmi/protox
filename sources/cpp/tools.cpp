@@ -128,14 +128,15 @@ const QString getUniqueFilepath(const QString &path)
 	if (!QFile::exists(path)) {
 		return path;
 	}
+	QFileInfo info(path);
 	int number = 1;
-	QDir dir(path);
+	QDir dir = info.dir();
 	const QString filename = path.split(QDir::separator()).last();
-	QStringList fileStruct = filename.split(".", QString::KeepEmptyParts);
-	QFileInfoList files = dir.entryInfoList(
-				QStringList() << fileStruct.first() + " (*)." + fileStruct.last(), QDir::Files);
+	QFileInfoList files = dir.entryInfoList(QStringList() << info.baseName() + " (*)." + info.completeSuffix(), QDir::Files);
 	number += files.length();
-	return QFileInfo(path).absolutePath() + QDir::separator() + fileStruct.first() + " (" + QString::number(number) + ")." + fileStruct.last();
+	return info.absolutePath() + QDir::separator() 
+			+ info.baseName() + " (" + QString::number(number) + ")." 
+			+ info.completeSuffix();
 }
 
 AsyncFileManager::AsyncFileManager(QFile *file)

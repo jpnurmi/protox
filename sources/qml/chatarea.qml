@@ -504,7 +504,7 @@ ColumnLayout {
                             }
                             Text {
                                 id: fileStatus
-                                visible: msgFilestate !== fstate_request
+                                visible: msgFilestate !== fstate_request && !msgRemotepaused 
                                 color: msgFilestate === fstate_finished ? "green" : 
                                       (msgFilestate === fstate_inprogress 
                                        || msgFilestate == fstate_paused ? "black" : "red")
@@ -542,7 +542,7 @@ ColumnLayout {
                                 if (!msgSelf && received) {
                                     filePreviewImage.source = bridge.checkFileImage(msgFilepath)
                                     var fileExists = bridge.checkFileExists(msgFilepath)
-                                    fileNotExistsText.visible = !fileExists
+                                    fileNotExistsText.visible = !fileExists && msgFilestate !== fstate_canceled
                                     // msgFilestate is not yet updated
                                     if (msgFilesize === msgFiletsize) {
                                         viewFileButton.visible = fileExists
