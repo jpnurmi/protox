@@ -87,13 +87,45 @@ const QSize getImageSize(const QString &path)
 	return image.size();
 }
 
-const QString checkFileImage(const QString &path)
+const QString checkFileImage(const QString &path) // faster than QImageReader
 {
 	if (path.isEmpty()) {
 		return QString();
 	}
-	QImageReader reader(path);
-	if (reader.canRead()) {
+	QFile file(path);
+	if (!file.open(QIODevice::ReadOnly)) {
+		return QString();
+	}
+	QByteArray header = file.read(16);
+	file.close();
+	bool isImage = false;
+	switch (header[0]) {
+		case (quint8)'\xFF': // jpg
+			isImage = header.left(3) == QByteArray("\xFF\xD8\xFF", 3); 
+			break;
+		case (quint8)'\x89': // png
+			isImage = header.left(8) == QByteArray("\x89\x50\x4E\x47\x0D\x0A\x1A\x0A", 8); 
+			break;
+		case 'I': // tiff
+			isImage = header.left(4) == QByteArray("\x49\x49\x2A\x00", 4); 
+			break;
+		case 'M': // tiff
+			isImage = header.left(4) == QByteArray("\x4D\x4D\x00\x2A", 4); 
+			break;
+		case 'B': // bmp
+			isImage = header[1] == 'M';
+		case '\0': // ico
+			if (header.left(4) == QByteArray("\x00\x00\x01\x00", 4)) {
+				isImage = true;
+				break;
+			}
+			if (header.left(4) == QByteArray("\x00\x00\x02\x00", 4)) {
+				isImage = true;
+				break;
+			}
+			break;
+	}
+	if (isImage) {
 		return "file://" + path;
 	} else {
 		return QString();
@@ -146,6 +178,7 @@ AsyncFileManager::AsyncFileManager(QFile *file)
 void AsyncFileManager::onChunkReadRequest(quint64 position, quint32 length)
 {
 	if (!length) {
+		m_file->close();
 		emit fileTransferEnded(m_parent);
 		return;
 	}
@@ -157,6 +190,7 @@ void AsyncFileManager::onChunkReadRequest(quint64 position, quint32 length)
 void AsyncFileManager::onChunkWriteRequest(quint64 position, const QByteArray &data)
 {
 	if (!data.length()) {
+		m_file->close();
 		emit fileTransferEnded(m_parent);
 		return;
 	}
@@ -178,9 +212,10 @@ AsyncFileManager::~AsyncFileManager()
 		terminate();
 		wait();
 	}
-	m_file->close();
+	if (m_file->isOpen()) {
+		m_file->close();
+	}
 	delete m_file;
-
 }
 
 }

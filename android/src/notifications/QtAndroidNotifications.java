@@ -101,6 +101,11 @@ class QtAndroidNotifications {
                                 Log.d("Notifications", "Sleep failure!");
                             }
                         }
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            Log.d("Notifications", "Sleep failure!");
+                        }
                         builder.setProgress(0, 0, false);
                         builder.setOngoing(false);
                         builder.setDefaults(Notification.DEFAULT_ALL);

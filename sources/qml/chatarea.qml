@@ -537,16 +537,22 @@ ColumnLayout {
                                 }
                             }
                             Rectangle { opacity: 0; visible: fileButtonsLayout.visible; width: parent.width; height: 8 }
+                            Timer {
+                                id: imageLoadTimer
+                                repeat: false
+                                interval: 10
+                                onTriggered: {
+                                    reservedImageSpace.imageSize = bridge.getImageSize(msgFilepath)
+                                    filePreviewImage.source = bridge.checkFileImage(msgFilepath)
+                                }
+                            }
                             readonly property bool received: msgReceived
                             onReceivedChanged: {
                                 if (!msgSelf && received) {
                                     filePreviewImage.source = bridge.checkFileImage(msgFilepath)
                                     var fileExists = bridge.checkFileExists(msgFilepath)
                                     fileNotExistsText.visible = !fileExists && msgFilestate !== fstate_canceled
-                                    // msgFilestate is not yet updated
-                                    if (msgFilesize === msgFiletsize) {
-                                        viewFileButton.visible = fileExists
-                                    }
+                                    imageLoadTimer.start()
                                 }
                             }
                             Rectangle {
@@ -556,11 +562,13 @@ ColumnLayout {
                                 height: reservedImageSpace.height + margins * 2
                                 radius: 2
                                 color: getTheme().highlightedButtonColor
-                                visible: filePreviewImage.status !== Image.Null
+                                visible: filePreviewImage.status !== Image.Null && reservedImageSpace.width > 0
                                 Item {
                                     id: reservedImageSpace
                                     anchors.centerIn: parent
-                                    readonly property variant imageSize: safe_bridge().getImageSize(msgFilepath)
+                                    property variant imageSize: msgReceived 
+                                                                ? safe_bridge().getImageSize(msgFilepath)
+                                                                : Qt.size(0, 0)
                                     readonly property real ratio: imageSize.height / imageSize.width
                                     width: makeMultBy(fileLayout.width, filePreviewImageAlphaLayer.magicSize)
                                     height: makeMultBy(fileLayout.width * ratio, filePreviewImageAlphaLayer.magicSize)
@@ -581,7 +589,8 @@ ColumnLayout {
                                 Image {
                                     id: filePreviewImage
                                     anchors.centerIn: parent
-                                    source: safe_bridge().checkFileImage(msgFilepath)
+                                    source: msgFilestate === fstate_finished 
+                                            ? safe_bridge().checkFileImage(msgFilepath) : ""
                                     readonly property real ratio: sourceSize.height / sourceSize.width
                                     width: makeMultBy(fileLayout.width, filePreviewImageAlphaLayer.magicSize)
                                     height: makeMultBy(fileLayout.width * ratio, filePreviewImageAlphaLayer.magicSize)
@@ -703,7 +712,7 @@ ColumnLayout {
                                 id: viewFileButton
                                 visible: msgFilestate === fstate_finished 
                                          && safe_bridge().checkFileExists(msgFilepath) 
-                                         && !safe_bridge().checkFileImage(msgFilepath).length
+                                         && filePreviewImage.status === Image.Null
                                 onClicked: {
                                     bridge.viewFile(msgFilepath, "*")
                                 }
