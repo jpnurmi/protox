@@ -8,6 +8,13 @@ import "qrc:/deps/jdenticon/jdenticon.js" as Jdenticon
 
 /*[remove]*/ Item {
 
+function makeMultBy(size, value) {
+    if (size <= value / 2) {
+        return Math.ceil(size / value) * value
+    }
+    return Math.round(size / value) * value
+}
+
 readonly property variant jdenticon_default_config: {
     "backColor" : "#00000000",
     "lightness" : {
@@ -60,6 +67,7 @@ function safe_bridge() {
     empty_bridge.checkFileImage = function() { return "" }
     empty_bridge.checkFileExists = function() { return 0 }
     empty_bridge.getFriendAvatarPath = function() { return "" }
+    empty_bridge.getImageSize = function() { return Qt.size(0, 0) }
     return empty_bridge
 }
 
@@ -495,7 +503,7 @@ function sendFile(fileUrl) {
     case 1: msg = qsTr("Failed to open a file."); break;
     case 2: msg = qsTr("Failed. Too many file transfer requests."); break;
     case 3: msg = qsTr("Failed. Filename is too long."); break;
-    case 4: msg = qsTr("A friend is not online."); break;
+    case 4: msg = qsTr("The friend is not online."); break;
     case 5: msg = qsTr("Unexpected error."); break;
     }
     toast.show({ message : msg, duration : Toast.Long })

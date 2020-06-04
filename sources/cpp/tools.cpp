@@ -85,6 +85,15 @@ const QString getDefaultDownloadsDirectory()
 	return path;
 }
 
+const QSize getImageSize(const QString &path)
+{
+	QImage image(path);
+	if (image.isNull()) {
+		return QSize(0, 0);
+	}
+	return image.size();
+}
+
 const QString checkFileImage(const QString &path)
 {
 	if (path.isEmpty()) {

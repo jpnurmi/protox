@@ -55,6 +55,8 @@ ToolBar {
     }
     Menu {
         id: contextMenuRight
+        modal: true
+        dim: false
         onOpened: {
             chatMessage.focus = false
         }

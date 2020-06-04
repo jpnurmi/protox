@@ -553,18 +553,39 @@ ColumnLayout {
                             Rectangle {
                                 id: filePreviewImageRectangle
                                 readonly property int margins: 2
-                                width: filePreviewImage.width + margins * 2
-                                height: filePreviewImage.height + margins * 2
+                                width: reservedImageSpace.width + margins * 2
+                                height: reservedImageSpace.height + margins * 2
                                 radius: 2
                                 color: getTheme().highlightedButtonColor
-                                visible: filePreviewImage.status === Image.Ready
+                                visible: filePreviewImage.status !== Image.Null
+                                Item {
+                                    id: reservedImageSpace
+                                    anchors.centerIn: parent
+                                    readonly property variant imageSize: safe_bridge().getImageSize(msgFilepath)
+                                    readonly property real ratio: imageSize.height / imageSize.width
+                                    width: makeMultBy(fileLayout.width, filePreviewImageAlphaLayer.magicSize)
+                                    height: makeMultBy(fileLayout.width * ratio, filePreviewImageAlphaLayer.magicSize)
+                                    visible: filePreviewImage.status !== Image.Ready
+                                }
+                                Image {
+                                    id: filePreviewImageAlphaLayer
+                                    readonly property int magicSize: 16 // size of this image
+                                    anchors.centerIn: parent
+                                    source: "resources/checkerboard.png"
+                                    width: reservedImageSpace.width
+                                    height: reservedImageSpace.height
+                                    fillMode: Image.Tile
+                                    horizontalAlignment: Image.AlignLeft
+                                    verticalAlignment: Image.AlignTop
+                                    smooth: false
+                                }
                                 Image {
                                     id: filePreviewImage
                                     anchors.centerIn: parent
                                     source: safe_bridge().checkFileImage(msgFilepath)
                                     readonly property real ratio: sourceSize.height / sourceSize.width
-                                    width: fileLayout.width
-                                    height: fileLayout.width * ratio
+                                    width: makeMultBy(fileLayout.width, filePreviewImageAlphaLayer.magicSize)
+                                    height: makeMultBy(fileLayout.width * ratio, filePreviewImageAlphaLayer.magicSize)
                                     asynchronous: true
                                     mipmap: true
                                     MouseArea {

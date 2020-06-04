@@ -18,5 +18,6 @@
         <file>resources/send-image-button.png</file>
         <file>resources/send-any-file-button.png</file>
         <file>deps/jdenticon/jdenticon.js</file>
+        <file>resources/checkerboard.png</file>
     </qresource>
 </RCC>

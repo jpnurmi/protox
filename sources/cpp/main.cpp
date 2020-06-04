@@ -828,6 +828,11 @@ void QmlTranslator::setTranslation(const QString &translation)
 	emit languageChanged();
 }
 
+const QSize QmlCBridge::getImageSize(const QString &path)
+{
+	return Tools::getImageSize(path);
+}
+
 int main(int argc, char *argv[])
 {
 	if (!Native::requestApplicationPermissions()) {
