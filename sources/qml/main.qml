@@ -226,7 +226,8 @@ ApplicationWindow {
     //https://forum.qt.io/topic/109114/qml-artifacts-android/9
     Repeater {
         id: canvasBuffer
-        readonly property variant colors: ["lightgray", "orange", "lightblue"]
+        readonly property variant colors: [getUserTheme().messageCloudPendingColor, 
+            getUserTheme().messageCloudSelfColor, getUserTheme().messageCloudFriendColor]
         model: colors
         property int imagesLoaded: 0
         readonly property bool ready: imagesLoaded === colors.length

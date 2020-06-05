@@ -369,7 +369,7 @@ Menu {
         Text {
             anchors.centerIn: parent
             text: qsTr("Remove this friend")
-            color: "red"
+            color: getUserTheme().importantButtonTextColor
             font.pointSize: parent.font.pointSize
             font.bold: true
         }
@@ -582,7 +582,7 @@ Menu {
         Text {
             anchors.centerIn: parent
             text: qsTr("Remove avatar")
-            color: parent.enabled ? "red" : "gray"
+            color: parent.enabled ? getUserTheme().importantButtonTextColor : getUserTheme().buttonDisabledColor
             font.pointSize: parent.font.pointSize
             font.bold: true
         }

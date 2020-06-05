@@ -26,7 +26,7 @@ Popup {
             if (inPortrait) {
                 statusBar.color = getApplicationTheme().loginProfileCreationPrimaryColor
             } else {
-                statusBar.color = getApplicationTheme().loginProfileCreationPrimaryColorLandscape
+                statusBar.color = getApplicationTheme().loginProfileCreationPrimaryLandscapeColor
             }
         } else {
             statusBar.color = getApplicationTheme().loginPrimaryColor
@@ -51,7 +51,7 @@ Popup {
                 if (inPortrait) {
                     statusBar.color = getApplicationTheme().loginProfileCreationPrimaryColor
                 } else {
-                    statusBar.color = getApplicationTheme().loginProfileCreationPrimaryColorLandscape
+                    statusBar.color = getApplicationTheme().loginProfileCreationPrimaryLandscapeColor
                 }
             }
         }
@@ -419,7 +419,7 @@ Popup {
                 opacity: enabled ? 1.0 : 0.5
                 background: Rectangle {
                     opacity: createNewProfileButton.opacity
-                    color: createNewProfileButton.pressed ? getTheme().highlightedButtonColor : "#10C410"
+                    color: createNewProfileButton.pressed ? getTheme().highlightedButtonColor : getApplicationTheme().profileCreationButtonColor
                     radius: 2
                 }
                 onClicked: {

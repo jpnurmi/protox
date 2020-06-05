@@ -152,7 +152,9 @@ ColumnLayout {
             model: messagesModel
             delegate: Rectangle {
                 id: messageCloud
-                color: !msgSelf ? "lightblue" : ((msgReceived || msgType) ? "orange" : "lightgray")
+                color: !msgSelf ? getUserTheme().messageCloudFriendColor 
+                                : ((msgReceived || msgType) ? getUserTheme().messageCloudSelfColor 
+                                                            : getUserTheme().messageCloudPendingColor)
                 radius: 10
                 property int keptUniqueId
                 NumberAnimation on x {
@@ -447,10 +449,10 @@ ColumnLayout {
                                     if (i < lines.length - 1) { result += "\n" }
                                 }
                                 result = result.replace(/((http|https|ftp|sftp)?:\/\/[^\s]+)/g, function(url) {
-                                    return '<font color="#0645AD"><a href="' + url + '">' + url + '</a></font>'
+                                    return '<font color="' + getUserTheme().linksColor + '"><a href="' + url + '">' + url + '</a></font>'
                                 })
                                 result = result.replace(/^(&gt;(.)*)/gm, function(quote) {
-                                    return '<font color="#0b6623">' + quote + '</font>'
+                                    return '<font color="' + getUserTheme().quotesColor + '">' + quote + '</font>'
                                 })
                                 result = result.replace(/(\n)/gm, '<br>')
         

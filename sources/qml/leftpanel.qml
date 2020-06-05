@@ -106,7 +106,9 @@ Drawer {
                     property real textWidth
                     width: textWidth + 50
                     Repeater {
-                        model: [[qsTr("Online"), "lightgreen"],[qsTr("Away"), "yellow"],[qsTr("Busy"), "red"]]
+                        model: [[qsTr("Online"), getUserTheme().onlineStatusColor],
+                            [qsTr("Away"), getUserTheme().awayStatusColor],
+                            [qsTr("Busy"), getUserTheme().busyStatusColor]]
                         delegate: MenuItem {
                             RowLayout {
                                 anchors.fill: parent
@@ -157,10 +159,10 @@ Drawer {
                         property int index: -1
                         function setStatus(status) {
                             switch (status) {
-                            case 0: color = "lightgreen"; break;
-                            case 1: color = "yellow"; break;
-                            case 2: color = "red"; break;
-                            case 3: color = "gray"; break;
+                            case 0: color = getUserTheme().onlineStatusColor; break;
+                            case 1: color = getUserTheme().awayStatusColor; break;
+                            case 2: color = getUserTheme().busyStatusColor; break;
+                            case 3: color = getUserTheme().offlineStatusColor; break;
                             }
                             index = status
                         }

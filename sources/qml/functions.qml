@@ -52,7 +52,26 @@ function getApplicationTheme() {
     return {
         "loginPrimaryColor" : "#12273b",
         "loginProfileCreationPrimaryColor" : "#000036",
-        "loginProfileCreationPrimaryColorLandscape" : "#432364"
+        "loginProfileCreationPrimaryLandscapeColor" : "#432364",
+        "profileCreationButtonColor" : "#9cdb53"
+    }
+}
+
+function getUserTheme() {
+    return {
+        "messageCloudSelfColor" : "#ffb340",
+        "messageCloudFriendColor" : "lightblue",
+        "messageCloudPendingColor" : "lightgray",
+        "settingsWarningColor" : "#f52b1d",
+        "settingsTitleColor" : "#3ab03e",
+        "importantButtonTextColor" : "#f52b1d",
+        "buttonDisabledColor" : "gray",
+        "onlineStatusColor" : "lightgreen",
+        "awayStatusColor" : "yellow",
+        "busyStatusColor" : "red",
+        "offlineStatusColor" : "gray",
+        "quotesColor" : "green",
+        "linksColor" : "#043b94"
     }
 }
 
@@ -105,9 +124,9 @@ function getFriendsModelOrder() {
 function setFriendStatus(friend_number, status) {
     var color;
     switch (status) {
-    case 0: color = "lightgreen"; break;
-    case 1: color = "yellow"; break;
-    case 2: color = "red"; break;
+    case 0: color = getUserTheme().onlineStatusColor; break;
+    case 1: color = getUserTheme().awayStatusColor; break;
+    case 2: color = getUserTheme().busyStatusColor; break;
     }
     if (bridge.getCurrentFriendNumber() === friend_number) {
         friendStatusIndicator.color = color;
@@ -436,7 +455,7 @@ function resetUI() {
     each_friend_text = []
     friendsModel.clear()
     resetConnectionStatus()
-    friendStatusIndicator.color = "gray"
+    friendStatusIndicator.color = getUserTheme().offlineStatusColor
     new_messages = 0
     identiconModel.clear()
 }
