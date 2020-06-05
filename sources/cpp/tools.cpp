@@ -175,15 +175,15 @@ AsyncFileManager::~AsyncFileManager()
 {
 	Tools::debug("Destroying file manager thread 0x" + 
 				 QString::number((quint64)m_file->thread(), 16) + ".");
+	if (m_file->isOpen()) {
+		m_file->close();
+	}
+	delete m_file;
 	quit();
 	if (!wait()) {
 		terminate();
 		wait();
 	}
-	if (m_file->isOpen()) {
-		m_file->close();
-	}
-	delete m_file;
 }
 
 }

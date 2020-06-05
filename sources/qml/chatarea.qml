@@ -95,7 +95,9 @@ ColumnLayout {
                     end: Qt.point(0, 0)
                     gradient: Gradient {
                         GradientStop { position: 0.0; color: "#00000000" }
-                        GradientStop { position: 1.0; color: messageRemovalLine.colision ? "red" : "#565656" }
+                        GradientStop { position: 1.0; color: messageRemovalLine.colision 
+                                                             ? getUserTheme().messageRemoveLineActiveColor 
+                                                             : getUserTheme().messageRemoveLineColor }
                     }
                 }
             }
@@ -510,9 +512,9 @@ ColumnLayout {
                             Text {
                                 id: fileStatus
                                 visible: msgFilestate !== fstate_request && !msgRemotepaused 
-                                color: msgFilestate === fstate_finished ? "green" : 
+                                color: msgFilestate === fstate_finished ? getUserTheme().transferSuccededTextColor : 
                                       (msgFilestate === fstate_inprogress 
-                                       || msgFilestate == fstate_paused ? "black" : "red")
+                                       || msgFilestate == fstate_paused ? "black" : getUserTheme().transferCanceledTextColor)
                                 font.pointSize: fontMetrics.normalize(standardFontPointSize)
                                 text: msgFilestate === fstate_canceled ? qsTr("File transfer canceled.") : 
                                       (msgFilestate === fstate_finished ? qsTr("Transfer succeeded.") : 
@@ -526,7 +528,7 @@ ColumnLayout {
                                          && msgFilestate !== fstate_finished 
                                          && msgFilestate !== fstate_canceled
                                 text: qsTr("Remote paused.")
-                                color: "gray"
+                                color: getUserTheme().transferRemotePausedTextColor
                                 font.pointSize: fontMetrics.normalize(standardFontPointSize)
                                 wrapMode: Text.Wrap
                                 width: parent.width
@@ -664,7 +666,7 @@ ColumnLayout {
                                         font.family: themify.name
                                         font.pointSize: 24
                                         text: "\uE64C"
-                                        color: "green"
+                                        color: getUserTheme().fileAcceptButtonColor
                                     }
                                 }
                                 Rectangle {
@@ -691,7 +693,7 @@ ColumnLayout {
                                         font.family: themify.name
                                         font.pointSize: 24
                                         text: (!msgSelf && msgFilestate === fstate_request) ? "\uE646" : "\uE760"
-                                        color: "red"
+                                        color: getUserTheme().fileCancelButtonColor
                                     }
                                 }
                             }

@@ -71,7 +71,14 @@ function getUserTheme() {
         "busyStatusColor" : "red",
         "offlineStatusColor" : "gray",
         "quotesColor" : "green",
-        "linksColor" : "#043b94"
+        "linksColor" : "#043b94",
+        "messageRemoveLineActiveColor" : "#f52b1d",
+        "messageRemoveLineColor" : "#565656",
+        "fileAcceptButtonColor" : "#3ab03e",
+        "fileCancelButtonColor" : "#f52b1d",
+        "transferSuccededTextColor" : "green",
+        "transferCanceledTextColor" : "#f52b1d",
+        "transferRemotePausedTextColor" : "#404040"
     }
 }
 
@@ -458,6 +465,10 @@ function resetUI() {
     friendStatusIndicator.color = getUserTheme().offlineStatusColor
     new_messages = 0
     identiconModel.clear()
+    typingText.text = ""
+    if (typingText.visible) {
+        typingText.visible = false
+    }
 }
 
 function fileControlUpdateMessage(friend_number, unique_id, control, remote) {
