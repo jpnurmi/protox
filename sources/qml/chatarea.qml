@@ -125,6 +125,9 @@ ColumnLayout {
                     typingText.visible = true
                 }
             }
+            onFlickStarted: {
+                wasAtYEnd = false
+            }
             onFlickEnded: {
                 wasAtYEnd = atYEnd
             }
