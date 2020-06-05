@@ -80,52 +80,20 @@ const QString getDefaultDownloadsDirectory()
 
 const QSize getImageSize(const QString &path)
 {
-	QImage image(path);
-	if (image.isNull()) {
+	QImageReader image(path);
+	if (!image.canRead()) {
 		return QSize(0, 0);
 	}
 	return image.size();
 }
 
-const QString checkFileImage(const QString &path) // faster than QImageReader
+const QString checkFileImage(const QString &path)
 {
 	if (path.isEmpty()) {
 		return QString();
 	}
-	QFile file(path);
-	if (!file.open(QIODevice::ReadOnly)) {
-		return QString();
-	}
-	QByteArray header = file.read(16);
-	file.close();
-	bool isImage = false;
-	switch (header[0]) {
-		case (quint8)'\xFF': // jpg
-			isImage = header.left(3) == QByteArray("\xFF\xD8\xFF", 3); 
-			break;
-		case (quint8)'\x89': // png
-			isImage = header.left(8) == QByteArray("\x89\x50\x4E\x47\x0D\x0A\x1A\x0A", 8); 
-			break;
-		case 'I': // tiff
-			isImage = header.left(4) == QByteArray("\x49\x49\x2A\x00", 4); 
-			break;
-		case 'M': // tiff
-			isImage = header.left(4) == QByteArray("\x4D\x4D\x00\x2A", 4); 
-			break;
-		case 'B': // bmp
-			isImage = header[1] == 'M';
-		case '\0': // ico
-			if (header.left(4) == QByteArray("\x00\x00\x01\x00", 4)) {
-				isImage = true;
-				break;
-			}
-			if (header.left(4) == QByteArray("\x00\x00\x02\x00", 4)) {
-				isImage = true;
-				break;
-			}
-			break;
-	}
-	if (isImage) {
+	QImageReader image(path);
+	if (image.canRead()) {
 		return "file://" + path;
 	} else {
 		return QString();
