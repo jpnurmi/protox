@@ -235,6 +235,7 @@ MessageDialog {
             } else {
                 friendNickname.setText("")
                 friendStatusMessage.setText("")
+                messagesModel.clear()
             }
         }
         friendInfoMenu.close()
