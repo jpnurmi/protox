@@ -88,3 +88,18 @@ v1.5beta_pre
 - Added logging feature (protox.log file to application directory).
 - Updated Russian translation.
 - Updated toxcore version to v0.2.12.
+
+v1.5beta
+
+- Added avatars.
+- Added threads for file transfers which fixed many bugs in UI and improved performance (ex. progress bar).
+- Reworked login window UI.
+- Fixed bug: notification sound and vibration constantly repeats while file is downloading.
+- Fixed bugs: many regressions with typing text and scrolling to end which weren't present in v1.4.2.
+- Generally improved message scrolling.
+- Fixed bug (partially): can't send files from "Downloads" (Android's native DownloadManager, not downloads folder) and it crashes on Android 10.
+- Reworked image preview UI in file messages.
+- Reworked file transfer states: file transfer status text will appear when transfer is paused remotely, remote pause no longer breaks UI when transfer is paused locally. 
+- Reworked colors in the application.
+- Added multiple image selection (if supported on device).
+- Updated Russian translation.
