@@ -10,29 +10,23 @@ extern QmlCBridge *qmlbridge;
 #ifdef Q_OS_ANDROID
 extern "C" 
 {
-	JNIEXPORT void JNICALL Java_org_protox_activity_QtActivityEx_keyboardHeightChanged(JNIEnv *, jobject, jint height)
+	JFUNC(void, keyboardHeightChanged, jint height)
 	{
 		if (qmlbridge && !qmlbridge->getAppInactive()) {
 			qmlbridge->setKeyboardHeight(height);
 		}
 	}
-	JNIEXPORT void JNICALL Java_org_protox_activity_QtActivityEx_transferAccepted(JNIEnv *, jobject, 
-																				  jint friend_number,
-																				  jint file_number)
+	JFUNC(void, transferAccepted, jint friend_number, jint file_number)
 	{
 		qmlbridge->acceptFile(friend_number, file_number);
 		qmlbridge->cancelFileNotification(friend_number, file_number);
 	}
-	JNIEXPORT void JNICALL Java_org_protox_activity_QtActivityEx_transferCanceled(JNIEnv *, jobject, 
-																				  jint friend_number,
-																				  jint file_number)
+	JFUNC(void, transferCanceled, jint friend_number, jint file_number)
 	{
 		qmlbridge->controlFile(friend_number, file_number, TOX_FILE_CONTROL_CANCEL);
 		qmlbridge->cancelFileNotification(friend_number, file_number);
 	}
-	JNIEXPORT jlong JNICALL Java_org_protox_activity_QtActivityEx_getBytesTransfered(JNIEnv *, jobject, 
-																				  jint friend_number,
-																				  jint file_number)
+	JFUNC(jlong, getBytesTransfered, jint friend_number, jint file_number)
 	{
 		for (const auto transfer : qmlbridge->transfers) {
 			if (transfer->friend_number == (quint32)friend_number && transfer->file_number == (quint32)file_number) {
@@ -41,9 +35,7 @@ extern "C"
 		}
 		return 0;
 	}
-	JNIEXPORT jboolean JNICALL Java_org_protox_activity_QtActivityEx_checkFileTransferInProgress(JNIEnv *, jobject, 
-																				  jint friend_number,
-																				  jint file_number)
+	JFUNC(jboolean, checkFileTransferInProgress, jint friend_number, jint file_number)
 	{
 		for (const auto transfer : qmlbridge->transfers) {
 			if (transfer->friend_number == (quint32)friend_number && transfer->file_number == (quint32)file_number) {
