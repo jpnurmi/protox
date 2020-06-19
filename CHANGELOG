@@ -103,3 +103,8 @@ v1.5beta
 - Reworked colors in the application.
 - Added multiple image selection (if supported on device).
 - Updated Russian translation.
+
+v1.5.1beta
+
+- Fixed bug: user can't accept friend requests because Tox Id is broken on client's side (https://gitlab.com/Monsterovich/protox/-/issues/7)
+- Improved file threads code to resolve potential thread crashes
