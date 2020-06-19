@@ -64,14 +64,14 @@ void QmlCBridge::insertMessage(const ToxVariantMessage &message, quint32 friend_
 							  Q_ARG(QVariant, history));
 }
 
-void QmlCBridge::insertFriend(qint32 friend_number, const QString &nickName, bool request, const QString &request_message, const ToxPk &friendPk)
+void QmlCBridge::insertFriend(qint32 friend_number, const QString &nickName, bool request, const QString &request_message, const ToxPk &friendToxId)
 {
 	QMetaObject::invokeMethod(component, "insertFriend",
 							  Q_ARG(QVariant, friend_number), 
 							  Q_ARG(QVariant, nickName), 
 							  Q_ARG(QVariant, request),
 							  Q_ARG(QVariant, request_message),
-							  Q_ARG(QVariant, QString::fromLatin1(friendPk)));
+							  Q_ARG(QVariant, ToxConverter::toString(friendToxId)));
 }
 
 void QmlCBridge::setMessageReceived(quint32 friend_number, quint64 unique_id)
@@ -284,10 +284,10 @@ int QmlCBridge::getConnStatus()
 	return Toxcore::get_connection_status();
 }
 
-int QmlCBridge::addFriend(const QString &friendPk)
+int QmlCBridge::addFriend(const QString &friendToxIdHex)
 {
 	int error;
-	quint32 friend_number = Toxcore::add_friend(tox, friendPk.toLatin1(), &error);
+	quint32 friend_number = Toxcore::add_friend(tox, ToxConverter::toToxId(friendToxIdHex), &error);
 	if (error > 0) {
 		return error;
 	}

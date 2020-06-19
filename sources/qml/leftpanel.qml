@@ -449,7 +449,7 @@ Drawer {
                                 } else {
                                     addFriendMessage.text = qsTr("(no request message specified)")
                                 }
-                                addFriendDialog.friendPk = friendPk
+                                addFriendDialog.friendToxIdHex = friendToxIdHex
                                 addFriendDialog.item_index = index
                                 addFriendDialog.open()
                                 return
@@ -560,10 +560,10 @@ MessageDialog {
     standardButtons: StandardButton.Yes | StandardButton.No | StandardButton.Close
     visible: false
     property int item_index: -1
-    property variant friendPk: ""
+    property variant friendToxIdHex: ""
     onYes: {
         friendsModel.remove(item_index)
-        var error = bridge.addFriend(friendPk)
+        var error = bridge.addFriend(friendToxIdHex)
         if (error > 0) {
             toast.show({ message : qsTr("addFriend failed, error code: ") + error, duration : Toast.Long });
         } else {

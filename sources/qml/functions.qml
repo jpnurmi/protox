@@ -325,13 +325,13 @@ function insertMessage(variantMessage, friend_number, self, time, unique_id, fai
     }
 }
 
-function insertFriend(friend_number, nickName, request, request_message, friendPk) {
+function insertFriend(friend_number, nickName, request, request_message, friendToxIdHex) {
     identiconModel.appendIfNotExists(friend_number, false)
     friendsModel.append({"friendNumber" : friend_number, 
                             "nickName" : nickName, 
                             "request" : request, 
                             "request_message" : request_message, 
-                            "friendPk" : friendPk,
+                            "friendToxIdHex" : friendToxIdHex,
                             "statusColor" : "gray", 
                             "updateAvatar" : false})
     if (!request) {

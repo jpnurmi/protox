@@ -19,7 +19,7 @@ public:
 	~QmlCBridge();
 	void setComponent(QObject *_component);
 	void insertMessage(const ToxVariantMessage &message, quint32 friend_number, const QDateTime &dt, bool self = false, quint64 unique_id = 0, bool history = false, bool failed = false);
-	void insertFriend(qint32 friend_number, const QString &nickName, bool request = false, const QString &request_message = "", const ToxPk &friendPk = "");
+	void insertFriend(qint32 friend_number, const QString &nickName, bool request = false, const QString &request_message = "", const ToxPk &friendToxId = "");
 	void setMessageReceived(quint32 friend_number, quint64 unique_id = 0);
 	void setCurrentFriendConnStatus(quint32 friend_number, int conn_status);
 	void updateFriendNickName(quint32 friend_number, const QString &nickname);
@@ -62,7 +62,7 @@ public slots:
 	Q_INVOKABLE void setStatus(quint32 status);
 	Q_INVOKABLE long getFriendsCount();
 	Q_INVOKABLE int getConnStatus();
-	Q_INVOKABLE int addFriend(const QString &friendPk);
+	Q_INVOKABLE int addFriend(const QString &friendToxIdHex);
 	Q_INVOKABLE int getFriendStatus(quint32 friend_number);
 	Q_INVOKABLE QString getNospamValue();
 	Q_INVOKABLE void setNospamValue(const QString &nospam);
