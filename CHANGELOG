@@ -106,5 +106,5 @@ v1.5beta
 
 v1.5.1beta
 
-- Fixed bug: user can't accept friend requests because Tox Id is broken on client's side (https://gitlab.com/Monsterovich/protox/-/issues/7)
-- Improved file threads code to resolve potential thread crashes
+- Fixed bug: user can't accept friend requests because Tox Id is broken on client's side (https://gitlab.com/Monsterovich/protox/-/issues/7).
+- Improved file threads code to resolve potential thread crashes.
