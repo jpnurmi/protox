@@ -31,7 +31,7 @@ QmlCBridge::QmlCBridge()
 	reconnection_timer->setInterval(reconnection_interval);
 	reconnection_timer->setSingleShot(false);
 	QObject::connect(reconnection_timer, &QTimer::timeout, [=]() {
-		if (Toxcore::get_connection_status() > 0) {
+		if (Toxcore::get_connection_status(tox) > 0) {
 			reconnection_timer->stop();
 			Tools::debug("Reconnection timer aborted: successfully connected!");
 			return;
@@ -281,7 +281,7 @@ void QmlCBridge::setConnStatus(int conn_status)
 
 int QmlCBridge::getConnStatus()
 {
-	return Toxcore::get_connection_status();
+	return Toxcore::get_connection_status(tox);
 }
 
 int QmlCBridge::addFriend(const QString &friendToxIdHex)

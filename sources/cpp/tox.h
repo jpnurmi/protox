@@ -149,7 +149,7 @@ namespace Toxcore {
 	void set_status_message(Tox *m, const QString &statusMessage);
 	quint32 get_status(Tox *m);
 	void set_status(Tox *m, quint32 status);
-	int get_connection_status();
+	int get_connection_status(Tox *m);
 	quint32 get_nospam(Tox *m);
 	void set_nospam(Tox *m, quint32 nospam);
 	bool check_profile_encrypted(const QString &profile);

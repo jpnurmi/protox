@@ -13,7 +13,6 @@ extern QSettings *settings;
 
 namespace Toxcore {
 
-int current_connection_status = -1;
 struct Tox_Options *opts = nullptr;
 quint32 available_nodes = 0;
 ToxLocalFileManager local_manager;
@@ -39,6 +38,7 @@ static void cb_self_connection_change(Tox *m, TOX_CONNECTION connection_status, 
 {
 	Q_UNUSED(m);
 	Q_UNUSED(userdata);
+	int current_connection_status = -1;
 	switch (connection_status) {
 		case TOX_CONNECTION_NONE:
 			current_connection_status = 0;
@@ -64,7 +64,7 @@ static void cb_friend_request(Tox *m, const quint8 *public_key, const quint8 *da
 	Q_UNUSED(m)
 	Q_UNUSED(userdata);
 
-	ToxPk pk((char*)public_key, TOX_PUBLIC_KEY_SIZE);
+	ToxPk pk((char*)public_key, tox_public_key_size());
 	// hint: friend_number is fake here
 	qmlbridge->insertFriend(0, ToxConverter::toString(pk), 
 							true, QString::fromUtf8((char*)data, length), pk);
@@ -91,9 +91,10 @@ static void cb_friend_message(Tox *m, quint32 friend_number, TOX_MESSAGE_TYPE ty
 	if (type != TOX_MESSAGE_TYPE_NORMAL) {
 		return;
 	}
-	char public_key[TOX_PUBLIC_KEY_SIZE];
+	QByteArray public_key;
+	public_key.resize(tox_public_key_size());
 	TOX_ERR_FRIEND_GET_PUBLIC_KEY err;
-	if (!tox_friend_get_public_key(m, friend_number, (quint8 *)public_key, &err)) {
+	if (!tox_friend_get_public_key(m, friend_number, (quint8*)public_key.data(), &err)) {
 		Tools::debug("tox_friend_get_public_key failed with error number: " + QString::number(err));
 		return;
 	}
@@ -234,10 +235,10 @@ static void cb_file_recv(Tox *m, quint32 friend_number, quint32 file_number, qui
 				}
 				QByteArray data = file->readAll();
 				ToxFileId hash_local;
-				hash_local.reserve(tox_hash_length());
+				hash_local.resize(tox_hash_length());
 				tox_hash((quint8*)hash_local.data(), (quint8*)data.data(), data.length());
 				ToxFileId hash;
-				hash.reserve(tox_file_id_length());
+				hash.resize(tox_file_id_length());
 				TOX_ERR_FILE_GET err;
 				tox_file_get_file_id(m, friend_number, file_number, (quint8*)hash.data(), &err);
 				TOX_ERR_FILE_CONTROL err2;
@@ -365,10 +366,11 @@ const QString get_friend_status_message(Tox *m, quint32 friend_number)
 	if (!length || query_error > 0)
 		return QString();
 
-	char message[length];
-	tox_friend_get_status_message(m, friend_number, (quint8*)message, nullptr);
+	QByteArray message;
+	message.resize(length);
+	tox_friend_get_status_message(m, friend_number, (quint8*)message.data(), nullptr);
 	// I replace newlines with spaces to not make a mess in UI
-	return QString::fromUtf8(message, length).replace("\n", " ");
+	return QString::fromUtf8(message).replace("\n", " ");
 }
 
 const QString get_friend_name(Tox *m, quint32 friend_number, bool publicKey)
@@ -381,10 +383,11 @@ const QString get_friend_name(Tox *m, quint32 friend_number, bool publicKey)
 			return QString();
 		}
 	}
-	char name[length];
-	if (tox_friend_get_name(m, friend_number, (quint8*)name, nullptr)) {
+	QByteArray name;
+	name.resize(length);
+	if (tox_friend_get_name(m, friend_number, (quint8*)name.data(), nullptr)) {
 		// I replace newlines with spaces to not make a mess in UI
-		return QString::fromUtf8(name, length).replace("\n", " ");
+		return QString::fromUtf8(name).replace("\n", " ");
 	} else {
 		return QString();
 	}
@@ -447,9 +450,10 @@ const QString get_nickname(Tox *m, bool toxId)
 	if (!length) {
 		return toxId ? ToxConverter::toString(get_address(m)) : QString();
 	}
-	char name[length];
-	tox_self_get_name(m, (quint8*)name);
-	QString nickname = QString::fromUtf8(name, length);
+	QByteArray name;
+	name.resize(length);
+	tox_self_get_name(m, (quint8*)name.data());
+	QString nickname = QString::fromUtf8(name);
 
 	return nickname;
 }
@@ -481,9 +485,10 @@ const QString get_status_message(Tox *m)
 	size_t length = tox_self_get_status_message_size(m);
 	if (!length)
 		return QString();
-	char name[length];
-	tox_self_get_status_message(m, (quint8*)name);
-	return QString::fromUtf8(name, length);
+	QByteArray name;
+	name.resize(length);
+	tox_self_get_status_message(m, (quint8*)name.data());
+	return QString::fromUtf8(name);
 }
 
 void set_status_message(Tox *m, const QString &statusMessage)
@@ -496,9 +501,9 @@ void set_status_message(Tox *m, const QString &statusMessage)
  * Basic Functions 
 */
 
-int get_connection_status()
+int get_connection_status(Tox *m)
 {
-	return current_connection_status;
+	return tox_self_get_connection_status(m);
 }
 
 bool save_data(Tox *m, const Tox_Pass_Key *pass_key, const QString &path)
@@ -513,22 +518,24 @@ bool save_data(Tox *m, const Tox_Pass_Key *pass_key, const QString &path)
 		return false;
 
 	size_t data_len = tox_get_savedata_size(m);
-	quint8 data[data_len];
-	tox_get_savedata(m, data);
+	QByteArray data;
+	data.resize(data_len);
+	tox_get_savedata(m, (quint8*)data.data());
 
-	quint8 encryptedData[data_len + TOX_PASS_ENCRYPTION_EXTRA_LENGTH];
+	QByteArray encryptedData;
+	encryptedData.resize(data_len + TOX_PASS_ENCRYPTION_EXTRA_LENGTH);
 	if (pass_key) {
-		if(!tox_pass_key_encrypt(pass_key, data, data_len,
-								 encryptedData, nullptr)) {
+		if(!tox_pass_key_encrypt(pass_key, (quint8*)data.data(), data_len,
+								 (quint8*)encryptedData.data(), nullptr)) {
 			return false;
 		}
 	}
 
 	int result;
 	if (pass_key) {
-		result = file.write((char*)encryptedData, data_len + TOX_PASS_ENCRYPTION_EXTRA_LENGTH);
+		result = file.write(encryptedData);
 	} else {
-		result = file.write((char*)data, data_len);
+		result = file.write(data);
 	}
 
 	if (result == -1) {
@@ -568,22 +575,23 @@ static Tox *load_tox(struct Tox_Options *options, const QString &path, const QSt
 		return nullptr;
 	}
 
-	char data[data_len];
-	if (file.read(data, data_len) == -1) {
+	QByteArray data = file.readAll();
+	if (data.isEmpty()) {
 		file.close();
 		error = TOX_ERR_LOADING_NULL;
 		return nullptr;
 	}
 	file.close();
 
-	quint8 decrypted_data[data_len - TOX_PASS_ENCRYPTION_EXTRA_LENGTH];
+	QByteArray decrypted_data;
+	decrypted_data.resize(data_len - TOX_PASS_ENCRYPTION_EXTRA_LENGTH);
 	QByteArray encodedPassword = password.toUtf8();
-	bool encrypted = tox_is_data_encrypted((quint8*)data);
+	bool encrypted = tox_is_data_encrypted((quint8*)data.data());
 	if (encrypted) {
 		if (!encodedPassword.isEmpty()) {
-			if (!tox_pass_decrypt((quint8*)data, data_len, 
+			if (!tox_pass_decrypt((quint8*)data.data(), data_len, 
 								  (quint8*)encodedPassword.data(), encodedPassword.length(), 
-								  decrypted_data, nullptr)) {
+								  (quint8*)decrypted_data.data(), nullptr)) {
 				error = TOX_ERR_LOADING_WRONG_PASSWORD;
 				return nullptr;
 			}
@@ -596,11 +604,11 @@ static Tox *load_tox(struct Tox_Options *options, const QString &path, const QSt
 	TOX_ERR_NEW err;
 	options->savedata_type = TOX_SAVEDATA_TYPE_TOX_SAVE;
 	if (encrypted) {
-		options->savedata_data = decrypted_data;
-		options->savedata_length = data_len - TOX_PASS_ENCRYPTION_EXTRA_LENGTH;
+		options->savedata_data = (quint8*)decrypted_data.data();
+		options->savedata_length = decrypted_data.length();
 	} else {
-		options->savedata_data = (quint8*)data;
-		options->savedata_length = data_len;
+		options->savedata_data = (quint8*)data.data();
+		options->savedata_length = data.length();
 	}
 
 	m = tox_new(options, &err);
@@ -765,9 +773,10 @@ QTimer *create_qtimer(Tox *m)
 
 ToxId get_address(Tox *m)
 {
-	char address[get_tox_address_size()];
-	tox_self_get_address(m, (quint8*)address);
-	return ToxId(address, get_tox_address_size());
+	QByteArray address;
+	address.resize(get_tox_address_size());
+	tox_self_get_address(m, (quint8*)address.data());
+	return address;
 }
 
 void destroy(Tox *m)
@@ -892,7 +901,7 @@ quint32 send_file(Tox *m, quint32 friend_number, const QString &path, ToxFileTra
 		return 0;
 	}
 	QByteArray encodedFilename = Tools::getFilenameFromPath(path).toUtf8();
-	file_id.reserve(tox_file_id_length());
+	file_id.resize(tox_file_id_length());
 	TOX_ERR_FILE_SEND err;
 	quint32 file_number = tox_file_send(m, friend_number, avatar ? TOX_FILE_KIND_AVATAR : TOX_FILE_KIND_DATA, filesize, (quint8*)file_id.data(), 
 				  (quint8*)encodedFilename.data(), encodedFilename.length(), &err);
