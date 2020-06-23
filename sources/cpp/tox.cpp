@@ -352,9 +352,10 @@ ToxFriends get_friends(Tox *m)
 
 ToxPk get_friend_public_key(Tox *m, quint32 friend_number)
 {
-	char public_key[TOX_PUBLIC_KEY_SIZE];
-	if(tox_friend_get_public_key(m, friend_number, (quint8*)public_key, nullptr))
-		return ToxPk(public_key, TOX_PUBLIC_KEY_SIZE);
+	ToxPk public_key;
+	public_key.resize(tox_public_key_size());
+	if(tox_friend_get_public_key(m, friend_number, (quint8*)public_key.data(), nullptr))
+		return public_key;
 
 	return ToxPk();
 }
@@ -773,7 +774,7 @@ QTimer *create_qtimer(Tox *m)
 
 ToxId get_address(Tox *m)
 {
-	QByteArray address;
+	ToxId address;
 	address.resize(get_tox_address_size());
 	tox_self_get_address(m, (quint8*)address.data());
 	return address;
