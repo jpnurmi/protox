@@ -60,7 +60,14 @@ function install_sodium()
 {
     cd libsodium
     printf "${COL}Installing libsodium${NC}\n"
-    ln -s libsodium-android-i686 libsodium-android-x86
+    if [ ! -d "libsodium-android-x86" ] 
+    then
+        ln -s libsodium-android-i686 libsodium-android-x86
+    fi
+    if [ ! -d "libsodium-android-x86_64" ] 
+    then
+        ln -s libsodium-android-westmere libsodium-android-x86_64
+    fi    
     cp -v libsodium-android-${TARGET_ARCH}/lib/libsodium.so ${LIBS_INSTALL_DIR}
     cd ${DEFAULT_DIR}
 }
@@ -89,7 +96,14 @@ function install_toxcore()
 {
     cd libtoxcore
     printf "${COL}Installing libtoxcore${NC}\n"
-    ln -s libtoxcore-android-i686 libtoxcore-android-x86
+    if [ ! -d "libtoxcore-android-x86" ] 
+    then
+        ln -s libtoxcore-android-i686 libtoxcore-android-x86
+    fi
+    if [ ! -d "libtoxcore-android-x86_64" ] 
+    then
+        ln -s libtoxcore-android-westmere libtoxcore-android-x86_64
+    fi  
     cp -v libtoxcore-android-${TARGET_ARCH}/lib/libtoxcore.so ${LIBS_INSTALL_DIR}
     cp -v libtoxcore-android-${TARGET_ARCH}/lib/libtoxencryptsave.so ${LIBS_INSTALL_DIR}
     cd ${DEFAULT_DIR}
