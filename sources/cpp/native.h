@@ -9,7 +9,7 @@
 #include "native/android/folderdialog.h"
 #endif
 
-#define JFUNC(type, name, ...) JNIEXPORT type JNICALL Java_org_protox_activity_QtActivityEx_##name (JNIEnv *, jobject, __VA_ARGS__)
+#define JFUNC(type, name, ...) extern "C" JNIEXPORT type JNICALL Java_org_protox_activity_QtActivityEx_##name (JNIEnv *, jobject, __VA_ARGS__)
 
 namespace Native {
 	void hideSplashScreen();

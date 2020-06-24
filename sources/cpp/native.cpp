@@ -8,42 +8,39 @@
 extern QmlCBridge *qmlbridge;
 
 #ifdef Q_OS_ANDROID
-extern "C" 
+JFUNC(void, keyboardHeightChanged, jint height)
 {
-	JFUNC(void, keyboardHeightChanged, jint height)
-	{
-		if (qmlbridge && !qmlbridge->getAppInactive()) {
-			qmlbridge->setKeyboardHeight(height);
+	if (qmlbridge && !qmlbridge->getAppInactive()) {
+		qmlbridge->setKeyboardHeight(height);
+	}
+}
+JFUNC(void, transferAccepted, jint friend_number, jint file_number)
+{
+	qmlbridge->acceptFile(friend_number, file_number);
+	qmlbridge->cancelFileNotification(friend_number, file_number);
+}
+JFUNC(void, transferCanceled, jint friend_number, jint file_number)
+{
+	qmlbridge->controlFile(friend_number, file_number, TOX_FILE_CONTROL_CANCEL);
+	qmlbridge->cancelFileNotification(friend_number, file_number);
+}
+JFUNC(jlong, getBytesTransfered, jint friend_number, jint file_number)
+{
+	for (const auto transfer : qmlbridge->transfers) {
+		if (transfer->friend_number == (quint32)friend_number && transfer->file_number == (quint32)file_number) {
+			return transfer->bytesTransfered;
 		}
 	}
-	JFUNC(void, transferAccepted, jint friend_number, jint file_number)
-	{
-		qmlbridge->acceptFile(friend_number, file_number);
-		qmlbridge->cancelFileNotification(friend_number, file_number);
-	}
-	JFUNC(void, transferCanceled, jint friend_number, jint file_number)
-	{
-		qmlbridge->controlFile(friend_number, file_number, TOX_FILE_CONTROL_CANCEL);
-		qmlbridge->cancelFileNotification(friend_number, file_number);
-	}
-	JFUNC(jlong, getBytesTransfered, jint friend_number, jint file_number)
-	{
-		for (const auto transfer : qmlbridge->transfers) {
-			if (transfer->friend_number == (quint32)friend_number && transfer->file_number == (quint32)file_number) {
-				return transfer->bytesTransfered;
-			}
+	return 0;
+}
+JFUNC(jboolean, checkFileTransferInProgress, jint friend_number, jint file_number)
+{
+	for (const auto transfer : qmlbridge->transfers) {
+		if (transfer->friend_number == (quint32)friend_number && transfer->file_number == (quint32)file_number) {
+			return true;
 		}
-		return 0;
 	}
-	JFUNC(jboolean, checkFileTransferInProgress, jint friend_number, jint file_number)
-	{
-		for (const auto transfer : qmlbridge->transfers) {
-			if (transfer->friend_number == (quint32)friend_number && transfer->file_number == (quint32)file_number) {
-				return true;
-			}
-		}
-		return false;
-	}
+	return false;
 }
 #endif
 

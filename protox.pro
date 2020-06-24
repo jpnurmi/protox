@@ -93,9 +93,9 @@ ANDROID_PACKAGE_SOURCE_DIR = \
 	$$PWD/android
 
 ANDROID_EXTRA_LIBS += \
-	$$PWD/libs/armv7/libtoxcore.so \
-	$$PWD/libs/armv7/libtoxencryptsave.so \
-	$$PWD/libs/armv7/libsodium.so
+	$$PWD/libs/armv7-a/libtoxcore.so \
+	$$PWD/libs/armv7-a/libtoxencryptsave.so \
+	$$PWD/libs/armv7-a/libsodium.so
 
 ANDROID_EXTRA_LIBS += \
 	$$PWD/libs/x86/libtoxcore.so \
@@ -103,7 +103,7 @@ ANDROID_EXTRA_LIBS += \
 	$$PWD/libs/x86/libsodium.so
 
 contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
-	LIBS += -L$$PWD/libs/armv7
+	LIBS += -L$$PWD/libs/armv7-a
 }
 
 contains(ANDROID_TARGET_ARCH,x86) {
