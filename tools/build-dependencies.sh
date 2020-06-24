@@ -33,16 +33,25 @@ LIBS_INSTALL_DIR="${INSTALL_DIR}/${TARGET_ARCH}"
 mkdir -p ${LIBS_INSTALL_DIR}
 echo "Target architecture: "${TARGET_ARCH}
 
+function error()
+{
+    echo "Operation failed."
+    exit 1
+}
+
 ### libsodium
 
 function build_sodium()
 {
     printf "${COL2}Using sodium version:${NC} "${SODIUM_VERSION}"\n"
     printf "${COL}Building libsodium${NC}\n"
-    git clone https://github.com/jedisct1/libsodium libsodium
+    if [ ! -d "libsodium" ] 
+    then
+        git clone https://github.com/jedisct1/libsodium libsodium || error
+    fi
     cd libsodium
-    git checkout ${SODIUM_VERSION}
-    sh ./autogen.sh
+    git checkout ${SODIUM_VERSION} || error
+    sh autogen.sh
     LIBSODIUM_FULL_BUILD=1 ./dist-build/android-${TARGET_ARCH}.sh
     cd ${DEFAULT_DIR}
 }
@@ -62,11 +71,14 @@ function build_toxcore()
 {
     printf "${COL2}Using toxcore version:${NC} "${TOXCORE_VERSION}"\n"
     printf "${COL}Building libtoxcore${NC}\n"
-    git clone https://github.com/TokTok/c-toxcore libtoxcore
+    if [ ! -d "libtoxcore" ] 
+    then
+        git clone https://github.com/TokTok/c-toxcore libtoxcore || error
+    fi
     cd libtoxcore
-    git checkout ${TOXCORE_VERSION}
-    sh ./autogen.sh
-    wget -O scripts.tar.bz2 "https://gitlab.com/Monsterovich/protox/-/raw/master/toxcore-dist-build.tar.bz2"
+    git checkout ${TOXCORE_VERSION} || error
+    sh autogen.sh
+    wget -O scripts.tar.bz2 "https://gitlab.com/Monsterovich/protox/-/raw/master/toxcore-dist-build.tar.bz2" || error
     tar xfv scripts.tar.bz2
     rm scripts.tar.bz2
     SODIUM_HOME=${DEFAULT_DIR}/libsodium ./dist-build/android-${TARGET_ARCH}.sh
