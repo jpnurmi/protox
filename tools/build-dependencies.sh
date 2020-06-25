@@ -3,10 +3,21 @@
 SODIUM_VERSION=1.0.18
 TOXCORE_VERSION=v0.2.12
 
-### Script
 COL='\033[1;32m'
 COL2='\e[34m'
 NC='\033[0m' # No Color
+
+INSTALL_DIR=$(pwd)/libs
+
+cd $(dirname "$0")
+
+case "$1" in
+    clean)
+        rm -rf .build-deps
+        printf "${COL}Cleaning up.${NC}\n"
+        exit 0
+        ;;
+esac
 
 if test -z "$TARGET_ARCH"
 then
@@ -19,10 +30,6 @@ then
     echo "You should set ANDROID_NDK_HOME to the directory containing the Android NDK."
     exit 1
 fi
-
-INSTALL_DIR=$(pwd)/libs
-
-cd $(dirname "$0")
 
 mkdir -p .build-deps
 cd .build-deps
@@ -60,14 +67,8 @@ function install_sodium()
 {
     cd libsodium
     printf "${COL}Installing libsodium${NC}\n"
-    if [ ! -d "libsodium-android-x86" ] 
-    then
-        ln -s libsodium-android-i686 libsodium-android-x86
-    fi
-    if [ ! -d "libsodium-android-x86_64" ] 
-    then
-        ln -s libsodium-android-westmere libsodium-android-x86_64
-    fi    
+    ln -sf libsodium-android-i686 libsodium-android-x86
+    ln -sf libsodium-android-westmere libsodium-android-x86_64
     cp -v libsodium-android-${TARGET_ARCH}/lib/libsodium.so ${LIBS_INSTALL_DIR}
     cd ${DEFAULT_DIR}
 }
@@ -96,14 +97,8 @@ function install_toxcore()
 {
     cd libtoxcore
     printf "${COL}Installing libtoxcore${NC}\n"
-    if [ ! -d "libtoxcore-android-x86" ] 
-    then
-        ln -s libtoxcore-android-i686 libtoxcore-android-x86
-    fi
-    if [ ! -d "libtoxcore-android-x86_64" ] 
-    then
-        ln -s libtoxcore-android-westmere libtoxcore-android-x86_64
-    fi  
+    ln -sf libtoxcore-android-i686 libtoxcore-android-x86
+    ln -sf libtoxcore-android-westmere libtoxcore-android-x86_64
     cp -v libtoxcore-android-${TARGET_ARCH}/lib/libtoxcore.so ${LIBS_INSTALL_DIR}
     cp -v libtoxcore-android-${TARGET_ARCH}/lib/libtoxencryptsave.so ${LIBS_INSTALL_DIR}
     cd ${DEFAULT_DIR}
@@ -125,7 +120,7 @@ case "$1" in
         install_toxcore
         ;;
     *)
-        echo $"Usage: $0 {build_sodium|build_toxcore|install}"
+        echo $"Usage: $0 {build_sodium|build_toxcore|install|clean}"
         exit 1
 esac
 
