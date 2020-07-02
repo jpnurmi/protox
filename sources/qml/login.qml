@@ -214,6 +214,7 @@ Popup {
                         loginPassword.visible = bridge.checkProfileEncrypted(modelData)
                         loginPassword.clear()
                         loginCheckbox.checked = bridge.getSettingsValue("Profile", "auto_login_profile", ptype_string, String("")) === modelData
+                        bridge.setSettingsValue("Profile", "last_selected_profile", modelData)
                     }
                 }
                 function updateList(select) {
@@ -221,8 +222,15 @@ Popup {
                     model = list
                     if (list.length > 0) {
                         if (select || list.length === 1) {
-                            accountSelectionButton.text = list[0]
-                            accountMenu.profileName = list[0]
+                            var last_selected_profile = bridge.getSettingsValue("Profile", "last_selected_profile", 
+                                                                                ptype_string, String(""))
+                            if (last_selected_profile.length > 0 && list.includes(last_selected_profile)) {
+                                accountSelectionButton.text = last_selected_profile
+                                accountMenu.profileName = last_selected_profile
+                            } else {
+                                accountSelectionButton.text = list[0]
+                                accountMenu.profileName = list[0]
+                            }
                         }
                         loginPassword.visible = bridge.checkProfileEncrypted(accountMenu.profileName)
                         accountSelectionButton.additiveVisible = true
