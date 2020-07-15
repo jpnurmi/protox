@@ -340,7 +340,11 @@ QVariant QmlCBridge::getSettingsValue(const QString &group, const QString &key, 
 void QmlCBridge::setSettingsValue(const QString &group, const QString &key, const QVariant &value)
 {
 	settings->beginGroup(group);
-	settings->setValue(key, value);
+	if (value.type() == QVariant::String && value.toString().isEmpty()) {
+		settings->remove(key);
+	} else {
+		settings->setValue(key, value);
+	}
 	settings->endGroup();
 }
 
