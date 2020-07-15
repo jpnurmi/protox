@@ -251,15 +251,33 @@ Menu {
     z: z_menu
     modal: true
     property int currentFriendNumber
+    // enable adjustTop only for this menu
+    Connections {
+        target: window
+        onKeyboardActiveChanged: {
+            if (friendInfoMenu.visible) {
+                bridge.setKeyboardAdjustMode(!window.keyboardActive)
+            }
+        }
+        onFocusObjectChanged: {
+            if (friendInfoMenu.visible && window.keyboardActive) {
+                bridge.setKeyboardAdjustMode(false)
+            }
+        }
+    }
     function prepareAndOpen(friend_number) {
         currentFriendNumber = friend_number
         var avatar_path = bridge.getFriendAvatarPath(friend_number)
         infoAvatar.source = bridge.checkFileImage(avatar_path) ? 
                     "file://" + avatar_path : identiconBuffer.getImageSource(friend_number, false)
         infoNickname.text = bridge.getFriendNickname(friend_number, false)
+        infoNickname.font.italic = bridge.checkFriendCustomNickname(friend_number)
         infoStatus.text = bridge.getFriendStatusMessage(friend_number)
         infoPublicKey.text = bridge.getFriendPublicKeyHex(friend_number)
         friendInfoMenu.popup()
+    }
+    onClosed: {
+        infoNickname.focus = false
     }
     Text {
         padding: 10
@@ -297,21 +315,36 @@ Menu {
         text: qsTr("Nickname")
         color: getTheme().primaryTextColor
     }
-    Text {
+    TextField {
         id: infoNickname
         padding: 10
         width: parent.width
-        horizontalAlignment: Qt.AlignHCenter
-        wrapMode: Text.Wrap
         color: getTheme().primaryTextColor
-        Text {
-            anchors.centerIn: parent
-            visible: parent.text.length === 0
-            text: qsTr("<empty>")
-            font.italic: true
-            color: getTheme().primaryTextColor
+        font.pointSize: fontMetrics.normalize(standardFontPointSize)
+        leftPadding: 10
+        rightPadding: leftPadding
+        verticalAlignment: TextInput.AlignVCenter
+        horizontalAlignment: Qt.AlignHCenter
+        onAccepted: {
+            focus = false
+            var friend_number = friendInfoMenu.currentFriendNumber
+            if (text.length === 0) {
+                bridge.setSettingsValue("Client_" + bridge.getCurrentProfile(), 
+                                        "name_" + bridge.getFriendPublicKeyHex(friend_number),
+                                        "")
+                var name = bridge.getFriendNickname(friend_number, false)
+                text = name
+                updateFriendNickName(friend_number, name)
+            } else {
+                bridge.setSettingsValue("Client_" + bridge.getCurrentProfile(), 
+                                        "name_" + bridge.getFriendPublicKeyHex(friend_number),
+                                        text)
+                updateFriendNickName(friend_number, bridge.getFriendNickname(friend_number, false))
+            }
+            font.italic = bridge.checkFriendCustomNickname(friend_number)
         }
     }
+
     Text {
         padding: 10
         font.bold: true

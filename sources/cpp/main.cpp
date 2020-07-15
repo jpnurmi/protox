@@ -120,7 +120,23 @@ int QmlCBridge::getFriendConnStatus(quint32 friend_number)
 
 const QString QmlCBridge::getFriendNickname(quint32 friend_number, bool publicKey)
 {
+	QString nickname;
+	settings->beginGroup("Client_" + current_profile);
+	nickname = settings->value("name_" + ToxConverter::toString(Toxcore::get_friend_public_key(tox, friend_number)), "").toString();
+	settings->endGroup();
+	if (!nickname.isEmpty()) {
+		return nickname;
+	}
 	return Toxcore::get_friend_name(tox, friend_number, publicKey);
+}
+
+bool QmlCBridge::checkFriendCustomNickname(quint32 friend_number)
+{
+	QString nickname;
+	settings->beginGroup("Client_" + current_profile);
+	nickname = settings->value("name_" + ToxConverter::toString(Toxcore::get_friend_public_key(tox, friend_number)), "").toString();
+	settings->endGroup();
+	return !nickname.isEmpty();
 }
 
 void QmlCBridge::setCurrentFriend(quint32 newFriend)
@@ -463,7 +479,7 @@ int QmlCBridge::signInProfile(const QString &profile, bool create_new, const QSt
 	}
 
 	for (auto _friend : friend_list) {
-		qmlbridge->insertFriend(_friend.toUInt(), Toxcore::get_friend_name(tox, _friend.toUInt()));
+		qmlbridge->insertFriend(_friend.toUInt(), getFriendNickname(_friend.toUInt()));
 	}
 
 	Tools::debug("Bootstrapping...");

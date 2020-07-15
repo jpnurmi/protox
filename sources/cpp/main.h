@@ -45,6 +45,7 @@ public slots:
 	Q_INVOKABLE quint32 getCurrentFriendNumber();
 	Q_INVOKABLE int getFriendConnStatus(quint32 friend_number);
 	Q_INVOKABLE const QString getFriendNickname(quint32 friend_number, bool publicKey = true);
+	Q_INVOKABLE bool checkFriendCustomNickname(quint32 friend_number);
 	Q_INVOKABLE void setCurrentFriend(quint32 newFriend);
 	Q_INVOKABLE void retrieveChatLog(quint32 start = 0, bool from = true, bool reverse = false);
 	Q_INVOKABLE QString getToxId();

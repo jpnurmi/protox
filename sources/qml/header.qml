@@ -150,6 +150,7 @@ ToolBar {
             anchors.fill: parent
             onClicked: {
                 if (!cleanProfile) {
+                    chatMessage.focus = false
                     friendInfoMenu.prepareAndOpen(bridge.getCurrentFriendNumber())
                 }
             }
