@@ -42,6 +42,12 @@ ColumnLayout {
                     contentY += typingText.height + typingText.margin 
                 }
             }
+            Behavior on bottomMargin {
+                NumberAnimation {
+                    duration: 100
+                    easing.type: Easing.OutCubic
+                }
+            }
             Rectangle {
                 id: typingText
                 readonly property int margin: 5
