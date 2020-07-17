@@ -101,7 +101,6 @@ ColumnLayout {
                     }
                 }
             }
-
             onContentYChanged: {
                 if (atYEnd) {
                     scrollToEndButton.visible = false
@@ -129,9 +128,43 @@ ColumnLayout {
             }
             onFlickStarted: {
                 wasAtYEnd = false
+                
             }
             onFlickEnded: {
                 wasAtYEnd = atYEnd
+            }
+            Timer {
+                id: preloadingTimer
+                interval: 1
+                onTriggered: {
+                    var uniqueId = messagesModel.get(0).msgUniqueId
+                    messages.addTransitionEnabled = false
+                    bridge.retrieveChatLog(uniqueId, true)
+                    messages.addTransitionEnabled = true
+                    for (var i = 0; i < messagesModel.count; i++) {
+                        if (messagesModel.get(i).msgUniqueId === uniqueId) {
+                            messages.positionViewAtIndex(i, ListView.Beginning)
+                            messages.contentY -= parent.flickable_margin
+                            break
+                        }
+                    }
+                    messagesLoadingNotification.visible = false
+                }
+            }
+            function preloadHistory() {
+                if (atYBeginning && messagesModel.count > 0) {
+                    var uniqueId = messagesModel.get(0).msgUniqueId
+                    if (!bridge.checkRemainingMessages(uniqueId)) {
+                        return
+                    }
+                    messagesLoadingNotification.visible = true
+                    preloadingTimer.start()
+                }
+            }
+            onAtYBeginningChanged: {
+                if (atYBeginning) {
+                    preloadHistory()
+                }
             }
             property int defaultHeight
             Component.onCompleted: {
@@ -1168,8 +1201,9 @@ PhotoDialog {
 Rectangle {
     id: scrollToEndButton
     z: z_top
-    width: 200
-    height: 40
+    readonly property real padding: 10
+    width: nextPageButtonText.contentWidth + padding * 2
+    height: nextPageButtonText.contentHeight + padding * 2
     radius: height * 0.5
     color: "white"
     property real alpha: 0.9
@@ -1199,6 +1233,7 @@ Rectangle {
         }
     }
 }
+
 DropShadow {
     anchors.fill: scrollToEndButton
     visible: scrollToEndButton.visible
@@ -1207,6 +1242,40 @@ DropShadow {
     samples: 16
     color: "#80000000"
     source: scrollToEndButton
+}
+
+Rectangle {
+    id: messagesLoadingNotification
+    z: z_top
+    readonly property real padding: 10
+    width: messagesLoadingNotificationText.contentWidth + padding * 2
+    height: messagesLoadingNotificationText.contentHeight + padding * 2
+    radius: height * 0.5
+    color: "white"
+    readonly property real alpha: 0.9
+    readonly property int topMargin: 15
+    opacity: alpha
+    x: (parent.width - width) * 0.5
+    y: overlayHeader.height + topMargin
+    visible: false
+    Text {
+        id: messagesLoadingNotificationText
+        text: qsTr("Loading history...")
+        font.bold: true
+        font.pointSize: fontMetrics.normalize(12.5)
+        opacity: parent.opacity
+        anchors.centerIn: parent
+    }
+}
+
+DropShadow {
+    anchors.fill: messagesLoadingNotification
+    visible: messagesLoadingNotification.visible
+    opacity: messagesLoadingNotification.opacity
+    radius: 8.0
+    samples: 16
+    color: "#80000000"
+    source: messagesLoadingNotification
 }
 
 /*[remove]*/ }

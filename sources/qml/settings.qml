@@ -90,7 +90,7 @@ Popup {
     }
     RegExpValidator { id: default_validator; regExp: /.*/gm }
     RegExpValidator { id: hex_validator; regExp: /[0-9A-F]+/ }
-    IntValidator { id: last_messages_limit_validator; bottom: 5; top: 10000 }
+    IntValidator { id: last_messages_limit_validator; bottom: 32; top: 10000 }
     IntValidator { id: absent_timer_interval_validator; bottom: 0; top: 10000 }
     Component.onCompleted: {
         settingsModel.actions = {
@@ -101,9 +101,6 @@ Popup {
                     nospam += hex_symbols.charAt(Math.floor(Math.random() * hex_symbols.length))
                 }
                 settingsModel.setValueString("no_spam_value", nospam)
-            },
-            "reload_chat" : function () {
-                settingsWindow.reloadChatHistory = true
             },
             "change_password" : function () {
                 var password = String(settingsModel.getValueString("password"))
@@ -168,10 +165,14 @@ Popup {
                     fieldValidator: absent_timer_interval_validator, itemWidth: 96, 
                     name: qsTr("Auto-away after"), prop: "absent_timer_interval", helperText: "10",
                     svalue: bridge.getSettingsValue("Client", "absent_timer_interval", ptype_string, String("10"))})
-        settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only | sf_placeholder | sf_acceptAction, 
-                    acceptAction : "reload_chat", fieldValidator: last_messages_limit_validator, itemWidth: 96, 
+        settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only | sf_placeholder, 
+                    fieldValidator: last_messages_limit_validator, itemWidth: 96, 
                     name: qsTr("Recent messages limit"), prop: "last_messages_limit", helperText: "128",
                     svalue: bridge.getSettingsValue("Client", "last_messages_limit", ptype_string, 128) })
+        settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only | sf_placeholder, 
+                    fieldValidator: last_messages_limit_validator, itemWidth: 96, 
+                    name: qsTr("Number of messages to load when scrolling up"), prop: "load_messages_limit", helperText: "64",
+                    svalue: bridge.getSettingsValue("Client", "load_messages_limit", ptype_string, 64) })
         settingsModel.append({ flags: sf_text | sf_button, prop: "downloads_folder", 
                                  svalue: bridge.getSettingsValue("Client", "downloads_folder", ptype_string, bridge.getDefaultDownloadsDirectory()), 
                                  name: qsTr("Downloads folder"), buttonText: qsTr("Select"), 
@@ -209,7 +210,7 @@ Popup {
         leftOverlayButton.highlighted = false
         closeSettingsButton.highlighted = false
     }
-    property bool reloadChatHistory: false
+    //property bool reloadChatHistory: false
     function _close() {
         drawer.dragEnabled = true
         if (dontSave) {
@@ -224,11 +225,13 @@ Popup {
         bridge.setSettingsValue("Client", "absent_timer_interval", String(settingsModel.getValueString("absent_timer_interval")))
         absentTimer.interval = parseInt(settingsModel.getValueString("absent_timer_interval")) * 60 * 1000
         bridge.setSettingsValue("Client", "last_messages_limit", settingsModel.getValueString("last_messages_limit"))
+        bridge.setSettingsValue("Client", "load_messages_limit", settingsModel.getValueString("load_messages_limit"))
         bridge.setSettingsValue("Client", "downloads_folder", String(settingsModel.getValueString("downloads_folder")))
         bridge.setSettingsValue("Privacy", "keep_chat_history", Boolean(settingsModel.getValueNumber("keep_chat_history")))
         bridge.setSettingsValue("Profile", "auto_login_profile", settingsModel.getValueNumber("auto_login_enabled") ? bridge.getCurrentProfile() : "")
         bridge.setNospamValue(settingsModel.getValueString("no_spam_value"))
         updateQRcode()
+        /*
         if (reloadChatHistory) {
             messages.addTransitionEnabled = false
             bridge.retrieveChatLog()
@@ -237,6 +240,7 @@ Popup {
             reloadChatHistory = false
             scrollToEndAgainTimer.start()
         }
+        */
     }
 
     onClosed: {

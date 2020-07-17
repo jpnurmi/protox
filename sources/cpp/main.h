@@ -18,7 +18,7 @@ public:
 	explicit QmlCBridge();
 	~QmlCBridge();
 	void setComponent(QObject *_component);
-	void insertMessage(const ToxVariantMessage &message, quint32 friend_number, const QDateTime &dt, bool self = false, quint64 unique_id = 0, bool history = false, bool failed = false);
+	void insertMessage(const ToxVariantMessage &message, quint32 friend_number, const QDateTime &dt, bool self = false, quint64 unique_id = 0, bool history = false, bool failed = false, bool preload = false);
 	void insertFriend(qint32 friend_number, const QString &nickName, bool request = false, const QString &request_message = "", const ToxPk &friendToxId = "");
 	void setMessageReceived(quint32 friend_number, quint64 unique_id = 0);
 	void setCurrentFriendConnStatus(quint32 friend_number, int conn_status);
@@ -47,7 +47,8 @@ public slots:
 	Q_INVOKABLE const QString getFriendNickname(quint32 friend_number, bool publicKey = true);
 	Q_INVOKABLE bool checkFriendCustomNickname(quint32 friend_number);
 	Q_INVOKABLE void setCurrentFriend(quint32 newFriend);
-	Q_INVOKABLE void retrieveChatLog(quint32 start = 0, bool from = true, bool reverse = false);
+	Q_INVOKABLE bool checkRemainingMessages(quint32 start);
+	Q_INVOKABLE void retrieveChatLog(quint32 start = 0, bool preload = false);
 	Q_INVOKABLE QString getToxId();
 	Q_INVOKABLE void copyTextToClipboard(QString text);
 	Q_INVOKABLE void makeFriendRequest(const QString &toxId, const QString &friendMessage);

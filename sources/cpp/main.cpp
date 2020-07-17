@@ -52,7 +52,7 @@ void QmlCBridge::setComponent(QObject *_component)
 	component = _component;
 }
 
-void QmlCBridge::insertMessage(const ToxVariantMessage &message, quint32 friend_number, const QDateTime &dt, bool self, quint64 unique_id, bool history, bool failed)
+void QmlCBridge::insertMessage(const ToxVariantMessage &message, quint32 friend_number, const QDateTime &dt, bool self, quint64 unique_id, bool history, bool failed, bool preload)
 {
 	QMetaObject::invokeMethod(component, "insertMessage", 
 							  Q_ARG(QVariant, message), 
@@ -61,7 +61,8 @@ void QmlCBridge::insertMessage(const ToxVariantMessage &message, quint32 friend_
 							  Q_ARG(QVariant, dt.toString("d MMMM hh:mm:ss")),
 							  Q_ARG(QVariant, unique_id),
 							  Q_ARG(QVariant, failed),
-							  Q_ARG(QVariant, history));
+							  Q_ARG(QVariant, history),
+							  Q_ARG(QVariant, preload));
 }
 
 void QmlCBridge::insertFriend(qint32 friend_number, const QString &nickName, bool request, const QString &request_message, const ToxPk &friendToxId)
@@ -154,13 +155,25 @@ int QmlCBridge::getFriendStatus(quint32 friend_number)
 	return Toxcore::get_friend_status(tox, friend_number);
 }
 
-void QmlCBridge::retrieveChatLog(quint32 start, bool from, bool reverse)
+bool QmlCBridge::checkRemainingMessages(quint32 start)
 {
 	settings->beginGroup("Client");
-	quint32 limit = settings->value("last_messages_limit", 128).toUInt();
+	quint32 limit = settings->value("load_messages_limit", 64).toUInt();
 	settings->endGroup();
-	ToxMessages messages = chat_db->getFriendMessages(Toxcore::get_friend_public_key(tox, current_friend_number), limit, start, from, reverse);
-	QMetaObject::invokeMethod(component, "clearChatContent");
+	quint64 count = chat_db->getFriendMessagesCount(Toxcore::get_friend_public_key(tox, current_friend_number), limit, start, true);
+	return count > 0;
+}
+
+void QmlCBridge::retrieveChatLog(quint32 start, bool preload)
+{
+	settings->beginGroup("Client");
+	quint32 limit = preload ? settings->value("load_messages_limit", 64).toUInt() 
+							: settings->value("last_messages_limit", 128).toUInt();
+	settings->endGroup();
+	ToxMessages messages = chat_db->getFriendMessages(Toxcore::get_friend_public_key(tox, current_friend_number), limit, start, preload);
+	if (!preload) {
+		QMetaObject::invokeMethod(component, "clearChatContent");
+	}
 	if (messages.isEmpty()) {
 		return;
 	}
@@ -184,7 +197,7 @@ void QmlCBridge::retrieveChatLog(quint32 start, bool from, bool reverse)
 				msg.received = true;
 			}
 		}
-		insertMessage(msg.variantMessage, current_friend_number, msg.dt, msg.self, msg.unique_id, true, false);
+		insertMessage(msg.variantMessage, current_friend_number, msg.dt, msg.self, msg.unique_id, true, false, preload);
 		if (!msg.self || msg.received)
 			setMessageReceived(current_friend_number, msg.unique_id);
 	}

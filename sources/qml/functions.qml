@@ -256,7 +256,7 @@ function selectFriend(friend_number) {
 }
 
 property int new_messages: 0
-function insertMessage(variantMessage, friend_number, self, time, unique_id, failed, history) {
+function insertMessage(variantMessage, friend_number, self, time, unique_id, failed, history, preload) {
     if (!self && !history && (appInactive || bridge.getCurrentFriendNumber() !== friend_number || settingsWindow.visible)) {
         if (!variantMessage.type) {
             notification.show({
@@ -309,7 +309,11 @@ function insertMessage(variantMessage, friend_number, self, time, unique_id, fai
         dict.msgFilenumber = variantMessage.file_number
     }
 
-    messagesModel.append(dict)
+    if (preload) {
+        messagesModel.insert(0, dict)
+    } else {
+        messagesModel.append(dict)
+    }
 
     if (!history) {
         if ((keyboardActive || variantMessage.type === msgtype_file) && self) {

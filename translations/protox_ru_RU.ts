@@ -553,6 +553,14 @@ Click on the left button to open the friend list, then on «+» to add a new fri
         <source>Tap on image to copy your Tox ID.</source>
         <translation>Нажмите на изображение, чтобы скопировать ваш Tox ID.</translation>
     </message>
+    <message>
+        <source>Number of messages to load when scrolling up</source>
+        <translation>Кол-во сообщений загружаемых при перелистывании</translation>
+    </message>
+    <message>
+        <source>Loading history...</source>
+        <translation>Загрузка истории...</translation>
+    </message>
 </context>
 <context>
     <name>QAndroidPlatformTheme</name>

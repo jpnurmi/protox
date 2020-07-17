@@ -147,13 +147,27 @@ void ChatDataBase::setMessageReceived(quint64 unique_id, const ToxPk &public_key
 	db.commit();
 }
 
-const ToxMessages ChatDataBase::getFriendMessages(const ToxPk &public_key, quint32 limit, quint32 start, bool from, bool reverse)
+quint64 ChatDataBase::getFriendMessagesCount(const ToxPk &public_key, quint32 limit, quint32 start, bool preload)
+{
+	QSqlQuery query(db);
+	query.prepare(QString("SELECT COUNT(*) FROM ("
+				  "SELECT type,reference_id,unique_id,datetime,self,received FROM Messages WHERE public_key = :public_key AND unique_id %1 :start ORDER BY unique_id DESC LIMIT :limit"
+				  ") ORDER BY unique_id %2").arg(preload ? "<" : ">=", preload ? "DESC" : "ASC"));
+	query.bindValue(":public_key", public_key);
+	query.bindValue(":start", start);
+	query.bindValue(":limit", limit);
+	execQuery(query);
+	query.next();
+	return query.value(0).toULongLong();
+}
+
+const ToxMessages ChatDataBase::getFriendMessages(const ToxPk &public_key, quint32 limit, quint32 start, bool preload)
 {
 	ToxMessages messages;
 	QSqlQuery query(db);
 	query.prepare(QString("SELECT * FROM ("
-				  "SELECT type,reference_id,unique_id,datetime,self,received FROM Messages WHERE public_key = :public_key AND unique_id %1 :start ORDER BY unique_id %2 LIMIT :limit"
-				  ") ORDER BY unique_id ASC").arg(reverse ? "<=" : ">=", from ? "DESC" : "ASC"));
+				  "SELECT type,reference_id,unique_id,datetime,self,received FROM Messages WHERE public_key = :public_key AND unique_id %1 :start ORDER BY unique_id DESC LIMIT :limit"
+				  ") ORDER BY unique_id %2").arg(preload ? "<" : ">=", preload ? "DESC" : "ASC"));
 	query.bindValue(":public_key", public_key);
 	query.bindValue(":start", start);
 	query.bindValue(":limit", limit);
