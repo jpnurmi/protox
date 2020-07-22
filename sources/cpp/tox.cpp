@@ -766,9 +766,11 @@ bool check_profile_encrypted(const QString &profile)
 QTimer *create_qtimer(Tox *m)
 {
 	QTimer *timer = new QTimer;
-	QObject::connect(timer, &QTimer::timeout, [=]() { tox_iterate(m, nullptr); });
-	timer->setSingleShot(false);
-	timer->setInterval(tox_iteration_interval(m));
+	QObject::connect(timer, &QTimer::timeout, [=]() { 
+		tox_iterate(m, nullptr);
+		timer->start(tox_iteration_interval(m));
+	});
+	timer->setSingleShot(true);
 	return timer;
 }
 
