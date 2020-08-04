@@ -131,6 +131,9 @@ ColumnLayout {
                 if (!typingText.visible && typingText.text.length > 0) {
                     typingText.visible = true
                 }
+                if (typingText.visible) {
+                    contentY += typingText.height + typingText.margin 
+                }
             }
             onFlickStarted: {
                 wasAtYEnd = false
@@ -147,6 +150,7 @@ ColumnLayout {
                     messages.addTransitionEnabled = false
                     bridge.retrieveChatLog(uniqueId, true)
                     messages.addTransitionEnabled = true
+                    // fixme: move this code to function(s) in the future
                     for (var i = 0; i < messagesModel.count; i++) {
                         if (messagesModel.get(i).msgUniqueId === uniqueId) {
                             messages.positionViewAtIndex(i, ListView.Beginning)
