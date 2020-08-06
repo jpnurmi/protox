@@ -6,6 +6,7 @@ import QtQuick.Dialogs 1.2
 import QtQuick.Window 2.12
 
 import QtFolderDialog 1.0
+import QtUtf8ByteLimitValidator 1.0
 
 Popup {
     id: settingsWindow
@@ -78,7 +79,6 @@ Popup {
             }
         }
     }
-    IntValidator { id: max_bootstrap_nodes_validator; bottom: 1; top: 10000 }
     function setAvailableNodes (count) {
         max_bootstrap_nodes_validator.top = count
         for (var i = 0; i < settingsModel.count; i++) {
@@ -90,6 +90,7 @@ Popup {
     }
     RegExpValidator { id: default_validator; regExp: /.*/gm }
     RegExpValidator { id: hex_validator; regExp: /[0-9A-F]+/ }
+    Utf8ByteLimitValidator { id: address_validator; length: safe_bridge().getHostnameMaxLength() }
     IntValidator { id: last_messages_limit_validator; bottom: 32; top: 1024 }
     IntValidator { id: absent_timer_interval_validator; bottom: 0; top: 10000 }
     IntValidator { id: proxy_port_validator; bottom: 1; top: 65535 }
@@ -208,7 +209,7 @@ Popup {
                     svalue: bridge.getSettingsValue("Toxcore", "nodes_json_file", ptype_string, String("")) })
         settingsModel.append({ flags: sf_text | sf_button, name: qsTr("Proxy type"), buttonText: qsTr("Select"), 
                                  clickAction: "select_proxy_type"})
-        settingsModel.append({ flags: sf_text | sf_input | sf_placeholder, fieldValidator: default_validator, itemWidth: 148, 
+        settingsModel.append({ flags: sf_text | sf_input | sf_placeholder, fieldValidator: address_validator, itemWidth: 148, 
                     name: qsTr("Proxy address"), prop: "proxy_host", helperText: "",
                     svalue: bridge.getSettingsValue("Toxcore", "proxy_host", ptype_string, String("")) })
         settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only | sf_placeholder, 

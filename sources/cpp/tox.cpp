@@ -860,6 +860,11 @@ quint32 get_tox_public_key_size()
 	return tox_public_key_size();
 }
 
+quint32 get_tox_max_hostname_length()
+{
+	return tox_max_hostname_length();
+}
+
 static void send_file_chunk(Tox *m, quint32 friend_number, quint32 file_number
 							, quint64 position, const QByteArray &bytesRead)
 {

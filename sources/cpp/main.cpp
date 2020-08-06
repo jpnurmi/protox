@@ -599,6 +599,11 @@ quint32 QmlCBridge::getToxPublicKeySizeHex()
 	return Toxcore::get_tox_public_key_size() * 2;
 }
 
+quint32 QmlCBridge::getHostnameMaxLength()
+{
+	return Toxcore::get_tox_max_hostname_length();
+}
+
 QString QmlCBridge::getSystemLocale()
 {
 	return QLocale::system().name();

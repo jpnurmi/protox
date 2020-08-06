@@ -89,6 +89,7 @@ public slots:
 	Q_INVOKABLE quint32 getStatusMessageMaxLength();
 	Q_INVOKABLE quint32 getToxAddressSizeHex();
 	Q_INVOKABLE quint32 getToxPublicKeySizeHex();
+	Q_INVOKABLE quint32 getHostnameMaxLength();
 	Q_INVOKABLE QString getSystemLocale();
 	Q_INVOKABLE void hideSplashScreen();
 	Q_INVOKABLE bool checkMessageInPendingList(quint32 friend_number, quint64 unique_id);
