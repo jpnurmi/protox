@@ -71,7 +71,7 @@ ToolBar {
                 bridge.test()
             }
         }
-        */
+
         MenuItem {
             text: qsTr("Clear chat")
             onClicked: {
@@ -79,6 +79,8 @@ ToolBar {
             }
         }
         MenuSeparator {}
+        */
+
         MenuItem {
             text: qsTr("Logout")
             onClicked: {
