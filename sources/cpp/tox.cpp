@@ -558,13 +558,21 @@ static Tox *load_tox(struct Tox_Options *options, const QString &path, const QSt
 		TOX_ERR_NEW err;
 		m = tox_new(options, &err);
 
+		bool reset_proxy = false;
+		if (err == TOX_ERR_NEW_PROXY_BAD_HOST) {
+			Tools::debug("Connection to proxy has failed. Ignoring proxy.");
+			tox_options_set_proxy_type(options, TOX_PROXY_TYPE_NONE);
+			m = tox_new(options, &err);
+			reset_proxy = true;
+		}
+
 		if (err != TOX_ERR_NEW_OK) {
 			Tools::debug("tox_new failed with error number: " + QString::number(err));
 			error = TOX_ERR_LOADING_NULL;
 			return nullptr;
 		}
 
-		error = TOX_ERR_LOADING_OK;
+		error = reset_proxy ? TOX_ERR_LOADING_OK_BUT_INVALID_PROXY : TOX_ERR_LOADING_OK;
 		return m;
 	}
 
@@ -614,13 +622,21 @@ static Tox *load_tox(struct Tox_Options *options, const QString &path, const QSt
 
 	m = tox_new(options, &err);
 
+	bool reset_proxy = false;
+	if (err == TOX_ERR_NEW_PROXY_BAD_HOST) {
+		Tools::debug("Connection to proxy has failed. Ignoring proxy.");
+		tox_options_set_proxy_type(options, TOX_PROXY_TYPE_NONE);
+		m = tox_new(options, &err);
+		reset_proxy = true;
+	}
+
 	if (err != TOX_ERR_NEW_OK) {
 		Tools::debug("tox_new failed with error number: " + QString::number(err));
 		error = TOX_ERR_LOADING_NULL;
 		return nullptr;
 	}
 
-	error = TOX_ERR_LOADING_OK;
+	error = reset_proxy ? TOX_ERR_LOADING_OK_BUT_INVALID_PROXY : TOX_ERR_LOADING_OK;
 	return m;
 }
 
@@ -641,7 +657,6 @@ void bootstrap_DHT(Tox *m)
 	settings->beginGroup("Toxcore");
 	QString json_file = settings->value("nodes_json_file", "").toString();
 	bool use_ipv6 = settings->value("ipv6_enabled", true).toBool();
-	uint32_t max_bootstrap_nodes = settings->value("max_bootstrap_nodes", 10).toUInt();
 	settings->endGroup();
 	QByteArray json_data;
 	if (!json_file.isEmpty()) {
@@ -655,25 +670,26 @@ void bootstrap_DHT(Tox *m)
 	QJsonArray array = doc.object()["nodes"].toArray();
 	available_nodes = array.count();
 
-	uint32_t succeed = 0;
 	for (auto node : array) {
 		QJsonObject item = node.toObject();
 		QString ipv4 = item["ipv4"].toString();
 		QString ipv6 = item["ipv6"].toString();
 		int port = item["port"].toInt();
 		QString public_key = item["public_key"].toString();
-
+		QJsonArray tcp_ports = item["tcp_ports"].toArray();
 		TOX_ERR_BOOTSTRAP err, err2;
-		tox_bootstrap(m, ipv4.toStdString().c_str(), (quint16)port, (quint8*)ToxConverter::toToxId(public_key).data(), &err);
+		tox_bootstrap(m, ipv4.toUtf8().data(), (quint16)port, (quint8*)ToxConverter::toToxId(public_key).data(), &err);
 		if (use_ipv6 && ipv6 != "-") {
-			tox_bootstrap(m, ipv6.toStdString().c_str(), (quint16)port, (quint8*)ToxConverter::toToxId(public_key).data(), &err2);
+			tox_bootstrap(m, ipv6.toUtf8().data(), (quint16)port, (quint8*)ToxConverter::toToxId(public_key).data(), &err2);
 		}
-
-		if (err == TOX_ERR_BOOTSTRAP_OK || err2 == TOX_ERR_BOOTSTRAP_OK) {
-			succeed++;
-		}
-		if (succeed == max_bootstrap_nodes) {
-			return;
+		if (!tcp_ports.isEmpty()) {
+			for (auto tcp_port : tcp_ports) {
+				TOX_ERR_BOOTSTRAP err3, err4;
+				tox_add_tcp_relay(m, ipv4.toUtf8().data(), (quint16)tcp_port.toInt(), (quint8*)ToxConverter::toToxId(public_key).data(), &err3);
+				if (use_ipv6 && ipv6 != "-") {
+					tox_add_tcp_relay(m, ipv6.toUtf8().data(), (quint16)tcp_port.toInt(), (quint8*)ToxConverter::toToxId(public_key).data(), &err4);
+				}
+			}
 		}
 	}
 }
@@ -692,6 +708,9 @@ struct Tox_Options *get_opts()
 	tox_options_set_udp_enabled(opts, settings->value("udp_enabled", true).toBool());
 	tox_options_set_ipv6_enabled(opts, settings->value("ipv6_enabled", true).toBool());
 	tox_options_set_local_discovery_enabled(opts, settings->value("local_discovery_enabled", false).toBool());
+	tox_options_set_proxy_host(opts, settings->value("proxy_host", "").toString().toUtf8().data());
+	tox_options_set_proxy_port(opts, (quint16)settings->value("proxy_port", 51552).toUInt());
+	tox_options_set_proxy_type(opts, (TOX_PROXY_TYPE)settings->value("proxy_type", TOX_PROXY_TYPE_NONE).toUInt());
 	settings->endGroup();
 	return opts;
 }
@@ -748,7 +767,6 @@ Tox *create(ToxProfileLoadingError &error, bool create_new, const QString &passw
 	if (clean) {
 		save_data(m, pass_key, Tools::getProgDir() + profile);
 	}
-	error = TOX_ERR_LOADING_OK;
 	return m;
 }
 

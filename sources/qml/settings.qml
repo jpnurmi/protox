@@ -90,8 +90,53 @@ Popup {
     }
     RegExpValidator { id: default_validator; regExp: /.*/gm }
     RegExpValidator { id: hex_validator; regExp: /[0-9A-F]+/ }
-    IntValidator { id: last_messages_limit_validator; bottom: 32; top: 10000 }
+    IntValidator { id: last_messages_limit_validator; bottom: 32; top: 1024 }
     IntValidator { id: absent_timer_interval_validator; bottom: 0; top: 10000 }
+    IntValidator { id: proxy_port_validator; bottom: 1; top: 65535 }
+    Menu {
+        id: changeProxyTypeMenu
+        readonly property int margin: 25
+        width: parent.width - margin * 2
+        title: "Change avatar"
+        x: (window.width - width) * 0.5
+        y: (window.height - height) * 0.5
+        z: z_menu
+        modal: true
+        ButtonGroup {
+            id: proxyButtonsGroup
+            buttons: proxyButtons.children
+            function selectButton(number) {
+                for (var i = 0; i < buttons.length; i++) {
+                    if (buttons[i].buttonNumber === number) {
+                        proxyButtonsGroup.checkedButton = buttons[i]
+                    }
+                }
+            }
+            onClicked: {
+                bridge.setSettingsValue("Toxcore", "proxy_type", 
+                                        String(button.buttonNumber))
+                changeProxyTypeMenu.close()
+            }
+        }
+        ColumnLayout {
+            id: proxyButtons
+            RadioButton {
+                Layout.fillWidth: true
+                readonly property int buttonNumber: 0
+                text: qsTr("None")
+            }
+            RadioButton {
+                Layout.fillWidth: true
+                readonly property int buttonNumber: 1
+                text: qsTr("HTTP")
+            }
+            RadioButton {
+                Layout.fillWidth: true
+                readonly property int buttonNumber: 2
+                text: qsTr("SOCKS5")
+            }
+        }
+    }
     Component.onCompleted: {
         settingsModel.actions = {
             "randomize_nospam" : function () {
@@ -142,6 +187,11 @@ Popup {
             },
             "change_downloads_directory" : function () {
                 downloadsFolderDialog.open()
+            },
+            "select_proxy_type" : function() {
+                proxyButtonsGroup.selectButton(parseInt(bridge.getSettingsValue("Toxcore", "proxy_type", 
+                                                                                ptype_string, 0)))
+                changeProxyTypeMenu.open()
             }
         }
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Tox options") })
@@ -152,13 +202,19 @@ Popup {
                     nvalue: bridge.getSettingsValue("Toxcore", "ipv6_enabled", ptype_bool, Boolean(true)) })
         settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Enable LAN discovery"), itemEnabled: true, prop: "local_discovery_enabled", 
                     nvalue: bridge.getSettingsValue("Toxcore", "local_discovery_enabled", ptype_bool, Boolean(false)) })
+        settingsModel.append({ flags: sf_text | sf_title | sf_help, name: "", prop: "available_nodes"})
         settingsModel.append({ flags: sf_text | sf_input | sf_placeholder, fieldValidator: default_validator, itemWidth: 128, 
                     name: qsTr("Custom nodes .json file"), prop: "nodes_json_file", helperText: "nodes.json",
-                    svalue: bridge.getSettingsValue("Client", "nodes_json_file", ptype_string, String("")) })
-        settingsModel.append({ flags: sf_text | sf_title | sf_help, name: "", prop: "available_nodes"})
-        settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only | sf_placeholder, fieldValidator: max_bootstrap_nodes_validator, itemWidth: 96, 
-                    name: qsTr("Maximum bootstrap nodes"), prop: "max_bootstrap_nodes", helperText: "10",
-                    svalue: bridge.getSettingsValue("Toxcore", "max_bootstrap_nodes", ptype_string, 10) })
+                    svalue: bridge.getSettingsValue("Toxcore", "nodes_json_file", ptype_string, String("")) })
+        settingsModel.append({ flags: sf_text | sf_button, name: qsTr("Proxy type"), buttonText: qsTr("Select"), 
+                                 clickAction: "select_proxy_type"})
+        settingsModel.append({ flags: sf_text | sf_input | sf_placeholder, fieldValidator: default_validator, itemWidth: 148, 
+                    name: qsTr("Proxy address"), prop: "proxy_host", helperText: "",
+                    svalue: bridge.getSettingsValue("Toxcore", "proxy_host", ptype_string, String("")) })
+        settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only | sf_placeholder, 
+                    fieldValidator: proxy_port_validator, itemWidth: 96, 
+                    name: qsTr("Proxy port"), prop: "proxy_port", helperText: "51552",
+                    svalue: bridge.getSettingsValue("Toxcore", "proxy_port", ptype_string, 51552) })
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Client options") })
         settingsModel.append({ flags: sf_text | sf_title | sf_help, name: qsTr("This value is measured in minutes. Set to 0 to disable.")})
         settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only | sf_placeholder, 
@@ -221,7 +277,8 @@ Popup {
         bridge.setSettingsValue("Toxcore", "ipv6_enabled", Boolean(settingsModel.getValueNumber("ipv6_enabled")))
         bridge.setSettingsValue("Toxcore", "local_discovery_enabled", Boolean(settingsModel.getValueNumber("local_discovery_enabled")))
         bridge.setSettingsValue("Toxcore", "nodes_json_file", String(settingsModel.getValueString("nodes_json_file")))
-        bridge.setSettingsValue("Toxcore", "max_bootstrap_nodes", String(settingsModel.getValueString("max_bootstrap_nodes")))
+        bridge.setSettingsValue("Toxcore", "proxy_host", String(settingsModel.getValueString("proxy_host")))
+        bridge.setSettingsValue("Toxcore", "proxy_port", String(settingsModel.getValueString("proxy_port")))
         bridge.setSettingsValue("Client", "absent_timer_interval", String(settingsModel.getValueString("absent_timer_interval")))
         absentTimer.interval = parseInt(settingsModel.getValueString("absent_timer_interval")) * 60 * 1000
         bridge.setSettingsValue("Client", "last_messages_limit", settingsModel.getValueString("last_messages_limit"))

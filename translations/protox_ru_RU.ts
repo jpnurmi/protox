@@ -299,7 +299,7 @@ Click on the left button to open the friend list, then on «+» to add a new fri
     </message>
     <message>
         <source>Clear chat</source>
-        <translation>Стереть чат</translation>
+        <translation type="vanished">Стереть чат</translation>
     </message>
     <message>
         <source>Logout</source>
@@ -560,6 +560,34 @@ Click on the left button to open the friend list, then on «+» to add a new fri
     <message>
         <source>Loading history...</source>
         <translation>Загрузка истории...</translation>
+    </message>
+    <message>
+        <source>None</source>
+        <translation>Отсутствует</translation>
+    </message>
+    <message>
+        <source>HTTP</source>
+        <translation>HTTP</translation>
+    </message>
+    <message>
+        <source>SOCKS5</source>
+        <translation>SOCKS5</translation>
+    </message>
+    <message>
+        <source>Proxy type</source>
+        <translation>Тип прокси</translation>
+    </message>
+    <message>
+        <source>Proxy address</source>
+        <translation>Адрес прокси</translation>
+    </message>
+    <message>
+        <source>Proxy port</source>
+        <translation>Порт прокси</translation>
+    </message>
+    <message>
+        <source>Connection to proxy has failed.</source>
+        <translation>Подключение к прокси не удалось.</translation>
     </message>
 </context>
 <context>

@@ -109,7 +109,7 @@ Popup {
         var error = signInProfile(profile, loginWindow.profileCreation, loginPassword.text, 
                                   doAutoLogin || (loginCheckbox.checked && loginCheckbox.visible))
         if (error > 0) {
-            var reason;
+            let reason;
             switch (error) {
             case 1: reason = qsTr("Profile loading failed."); break;
             case 2: reason = qsTr("Wrong password."); break;
@@ -124,6 +124,12 @@ Popup {
                 toast.show({ message : qsTr("Auto login failed!"), duration : Toast.Short });
             }
             return
+        } else if (error < 0) {
+            let warning;
+            switch (error) {
+                case -1: warning = qsTr("Connection to proxy has failed."); break;
+            }
+            toast.show({ message : warning, duration : Toast.Long });
         }
         loginWindow.profileSelected = true
         if (doAutoLogin) {

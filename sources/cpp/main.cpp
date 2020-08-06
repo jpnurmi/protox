@@ -504,7 +504,7 @@ int QmlCBridge::signInProfile(const QString &profile, bool create_new, const QSt
 	reconnection_timer->start();
 	toxcore_timer = Toxcore::create_qtimer(tox);
 	toxcore_timer->start();
-	return 0;
+	return error;
 }
 
 QmlCBridge::~QmlCBridge()

@@ -451,7 +451,7 @@ function signInProfile(profile, create, password, autoLogin) {
     settingsWindow.setProfileEncrypted(bridge.checkProfileEncrypted(profile))
     settingsWindow.setAvailableNodes(bridge.getToxNodesCount())
     scrollToEndAgainTimer.start()
-    return 0
+    return error
 }
 
 function resetConnectionStatus()
