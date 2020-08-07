@@ -95,7 +95,7 @@ function safe_bridge() {
     empty_bridge.getStatusMessageMaxLength = function() { return 0 }
     empty_bridge.getNicknameMaxLength = function() { return 0 }
     empty_bridge.getFriendRequestMessageMaxLength = function() { return 0 }
-    empty_bridge.getHostnameMaxLength = function() { return }
+    empty_bridge.getHostnameMaxLength = function() { return 0 }
     empty_bridge.checkMessageInPendingList = function() { return 0 }
     empty_bridge.getCurrentFriendNumber = function() { return 0 }
     empty_bridge.getSettingsValue = function() { return 0 }

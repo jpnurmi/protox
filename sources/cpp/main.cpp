@@ -877,6 +877,11 @@ const QSize QmlCBridge::getImageSize(const QString &path)
 	return Tools::getImageSize(path);
 }
 
+const QString QmlCBridge::getCurrentCommitSha1()
+{
+	return Tools::getCurrentCommitSha1();
+}
+
 int main(int argc, char *argv[])
 {
 	if (!Native::requestApplicationPermissions()) {

@@ -1,4 +1,5 @@
 #include "tools.h"
+#include "gitversion.h"
 
 namespace Tools {
 
@@ -130,6 +131,11 @@ const QString getUniqueFilepath(const QString &path)
 	return info.absolutePath() + QDir::separator() 
 			+ info.baseName() + " (" + QString::number(number) + ")." 
 			+ info.completeSuffix();
+}
+
+const QString getCurrentCommitSha1()
+{
+	return GIT_COMMIT_SHA1;
 }
 
 AsyncFileManager::AsyncFileManager(QFile *file)

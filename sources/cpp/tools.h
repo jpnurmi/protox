@@ -17,6 +17,7 @@ namespace Tools {
 	quint64 getFileSize(const QString &path);
 	const QSize getImageSize(const QString &path);
 	const QString getUniqueFilepath(const QString &path);
+	const QString getCurrentCommitSha1();
 	class AsyncFileManager : public QThread
 	{
 		Q_OBJECT

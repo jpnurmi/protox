@@ -255,7 +255,7 @@ Popup {
         settingsModel.append({ flags: sf_text | sf_button, name: qsTr("Profile deletion"), buttonText: qsTr("Delete"), 
                                  clickAction: "delete_profile"})
         settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Version") })
-        settingsModel.append({ flags: sf_text | sf_title | sf_help, name: "Protox: " + applicationVersion, prop: "application_version"})
+        settingsModel.append({ flags: sf_text | sf_title | sf_help, name: "Protox: " + applicationVersion + " (" + bridge.getCurrentCommitSha1() + ")", prop: "application_version"})
         settingsModel.append({ flags: sf_text | sf_title | sf_help, name: "Toxcore: " + bridge.getToxcoreVersion(), prop: "toxcore_version"})
     }
 

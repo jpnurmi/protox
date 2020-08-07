@@ -1,6 +1,9 @@
 QT += quick sql androidextras
 CONFIG += c++14 qzxing_qml
 
+# Generate git sha1 hash for version
+DEFINES += GIT_COMMIT_SHA1="\\\"$(shell git -C \""$$_PRO_FILE_PWD_"\" rev-parse --short HEAD)\\\""
+
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
 # depend on your compiler). Refer to the documentation for the
@@ -22,6 +25,7 @@ SOURCES += \
 HEADERS += \
 	sources/cpp/common.h \
 	sources/cpp/db.h \
+	sources/cpp/gitversion.h \
 	sources/cpp/main.h \
 	sources/cpp/native.h \
 	sources/cpp/qtutf8bytelimitvalidator.h \
