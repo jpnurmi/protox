@@ -38,25 +38,21 @@ static void cb_self_connection_change(Tox *m, TOX_CONNECTION connection_status, 
 {
 	Q_UNUSED(m);
 	Q_UNUSED(userdata);
-	int current_connection_status = -1;
 	switch (connection_status) {
 		case TOX_CONNECTION_NONE:
-			current_connection_status = 0;
 			qmlbridge->tryReconnect();
 			Tools::debug("Connection to Tox network has been lost.");
 			break;
 
 		case TOX_CONNECTION_TCP:
-			current_connection_status = 1;
 			Tools::debug("Connection to Tox network is weak (using TCP).");
 			break;
 
 		case TOX_CONNECTION_UDP:
-			current_connection_status = 2;
 			Tools::debug("Connection to Tox network is strong (using UDP).");
 			break;
 	}
-	qmlbridge->setConnStatus(current_connection_status);
+	qmlbridge->setConnStatus(connection_status);
 }
 
 static void cb_friend_request(Tox *m, const quint8 *public_key, const quint8 *data, size_t length, void *userdata)
@@ -277,6 +273,10 @@ static void cb_file_recv(Tox *m, quint32 friend_number, quint32 file_number, qui
 			tox_file_control(m, friend_number, file_number, TOX_FILE_CONTROL_RESUME, &err);
 			if (err > 0) {
 				Tools::debug("Avatar transfer resuming error, error code (tox_file_control): " + QString::number(err));
+				tox_file_control(m, friend_number, file_number, TOX_FILE_CONTROL_CANCEL, &err);
+				delete transfer;
+				qmlbridge->transfers.removeOne(transfer);
+				break;
 			}
 			break;
 		}
