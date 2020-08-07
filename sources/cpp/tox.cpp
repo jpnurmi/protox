@@ -303,7 +303,10 @@ static void cb_file_recv(Tox *m, quint32 friend_number, quint32 file_number, qui
 			variantMessage.insert("file_number", file_number);
 			// ui only
 			variantMessage.insert("name", Tools::getFilenameFromPath(new_path));
-			quint64 unique_id = chat_db->insertMessage(variantMessage, dt, Toxcore::get_friend_public_key(m, friend_number), false, false);
+			settings->beginGroup("Privacy");
+			bool keep_chat_history = settings->value("keep_chat_history", true).toBool();
+			settings->endGroup();
+			quint64 unique_id = chat_db->insertMessage(variantMessage, dt, Toxcore::get_friend_public_key(m, friend_number), !keep_chat_history, false);
 			qmlbridge->file_messages[transfer] = unique_id;
 			qmlbridge->insertMessage(variantMessage, friend_number, dt, false, unique_id);
 			break;
@@ -683,7 +686,7 @@ void bootstrap_DHT(Tox *m)
 			tox_bootstrap(m, ipv6.toUtf8().data(), (quint16)port, (quint8*)ToxConverter::toToxId(public_key).data(), &err2);
 		}
 		if (!tcp_ports.isEmpty()) {
-			for (auto tcp_port : tcp_ports) {
+			for (const auto tcp_port : tcp_ports) {
 				TOX_ERR_BOOTSTRAP err3, err4;
 				tox_add_tcp_relay(m, ipv4.toUtf8().data(), (quint16)tcp_port.toInt(), (quint8*)ToxConverter::toToxId(public_key).data(), &err3);
 				if (use_ipv6 && ipv6 != "-") {

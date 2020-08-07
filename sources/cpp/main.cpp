@@ -708,7 +708,10 @@ quint32 QmlCBridge::sendFile(quint32 friend_number, const QString &filepath)
 	variantMessage.insert("file_number", file_number);
 	// ui only
 	variantMessage.insert("name", Tools::getFilenameFromPath(filepath));
-	quint64 unique_id = chat_db->insertMessage(variantMessage, dt, Toxcore::get_friend_public_key(tox, friend_number), false, true);
+	settings->beginGroup("Privacy");
+	bool keep_chat_history = settings->value("keep_chat_history", true).toBool();
+	settings->endGroup();
+	quint64 unique_id = chat_db->insertMessage(variantMessage, dt, Toxcore::get_friend_public_key(tox, friend_number), !keep_chat_history, true);
 	file_messages[transfer] = unique_id;
 	insertMessage(variantMessage, friend_number, dt, true, unique_id);
 	return 0;
