@@ -1,4 +1,5 @@
 #include "tools.h"
+#include "native.h"
 #include "gitversion.h"
 
 namespace Tools {
@@ -8,16 +9,9 @@ void debug(const QString &msg)
 	qDebug() << msg;
 }
 
-const QString getInternalStoragePath() 
-{
-#if defined (Q_OS_ANDROID)
-	return QDir::separator() + QString("storage") + QDir::separator() + QString("emulated") + QDir::separator() + QString("0") + QDir::separator();
-#endif
-}
-
 const QString getProgDir()
 {
-	QString path = getInternalStoragePath() + QString(".protox") + QDir::separator();
+	QString path = Native::getInternalStoragePath() + QString(".protox") + QDir::separator();
 	QDir dir;
 	if (!dir.exists(path))
 		dir.mkdir(path);

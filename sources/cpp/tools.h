@@ -5,7 +5,6 @@
 
 namespace Tools {
 	void debug(const QString &msg);
-	const QString getInternalStoragePath();
 	const QString getProgDir();
 	const QString getAvatarsDir();
 	const QString replaceFileExtension(const QString &file, const QString &with);

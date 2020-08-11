@@ -17,6 +17,7 @@ namespace Native {
 	bool requestApplicationPermissions();
 	QString uriToRealPath(const QString &uriString);
 	void viewFile(const QString &path, const QString &type);
+	const QString getInternalStoragePath();
 }
 
 #endif // NATIVE_H

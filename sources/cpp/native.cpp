@@ -109,4 +109,9 @@ void viewFile(const QString &path, const QString &type)
 #endif
 }
 
+const QString getInternalStoragePath() 
+{
+	return QDir::separator() + QString("storage") + QDir::separator() + QString("emulated") + QDir::separator() + QString("0") + QDir::separator();
+}
+
 }

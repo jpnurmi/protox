@@ -137,7 +137,7 @@ namespace Toxcore {
 	const QString get_friend_name(Tox *m, quint32 friend_number, bool publicKey = true);
 	size_t get_friends_count(Tox *m);
 	ToxFriends get_friends(Tox *m);
-	int make_friend_request(Tox *m, ToxId id, const QString &friendMessage);
+	int make_friend_request(Tox *m, const ToxId &id, const QString &friendMessage);
 	int get_friend_status(Tox *m, quint32 friend_number);
 	quint32 get_friend_connection_status(Tox *m, quint32 friend_number);
 	quint32 add_friend(Tox *m, const ToxPk &friendPk, int *error);
