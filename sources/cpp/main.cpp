@@ -13,6 +13,10 @@ QmlCBridge *qmlbridge = nullptr;
 ChatDataBase *chat_db = nullptr;
 QSettings *settings = nullptr;
 
+/*
+ * QML <-> C++ object
+*/
+
 QmlCBridge::QmlCBridge()
 {
 	component = nullptr;
@@ -44,7 +48,7 @@ QmlCBridge::QmlCBridge()
 
 void QmlCBridge::test()
 {
-
+	// for testing
 }
 
 void QmlCBridge::setComponent(QObject *_component)
@@ -170,7 +174,8 @@ void QmlCBridge::retrieveChatLog(quint32 start, bool preload)
 	quint32 limit = preload ? settings->value("load_messages_limit", 64).toUInt() 
 							: settings->value("last_messages_limit", 128).toUInt();
 	settings->endGroup();
-	ToxMessages messages = chat_db->getFriendMessages(Toxcore::get_friend_public_key(tox, current_friend_number), limit, start, preload);
+	ToxMessages messages = chat_db->getFriendMessages(Toxcore::get_friend_public_key(tox, current_friend_number), 
+													  limit, start, preload);
 	if (!preload) {
 		QMetaObject::invokeMethod(component, "clearChatContent");
 	}
@@ -425,28 +430,6 @@ void QmlCBridge::tryReconnect()
 	reconnection_timer->start();
 }
 
-static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler(0);
-
-void customMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString & msg)
-{
-	const QStringList skipWarningsList = { "QML Connections: Implicitly defined onFoo properties in Connections are deprecated. Use this syntax instead: function onFoo(<arguments>) { ... }", 
-										   "QML Loader: Possible anchor loop detected on fill." };
-	switch (type) {
-	case QtWarningMsg: {
-		for (const auto &warnMsg : skipWarningsList) {
-			if (msg.contains(warnMsg)) {
-				return;
-			}
-		}
-		(*QT_DEFAULT_MESSAGE_HANDLER)(type, context, msg);
-	}
-	break;
-	default:
-		(*QT_DEFAULT_MESSAGE_HANDLER)(type, context, msg);
-		break;
-	}
-}
-
 int QmlCBridge::signInProfile(const QString &profile, bool create_new, const QString &password, bool autoLogin)
 {
 	current_profile = profile;
@@ -496,7 +479,7 @@ int QmlCBridge::signInProfile(const QString &profile, bool create_new, const QSt
 	}
 
 	for (auto _friend : friend_list) {
-		qmlbridge->insertFriend(_friend.toUInt(), getFriendNickname(_friend.toUInt()));
+		insertFriend(_friend.toUInt(), getFriendNickname(_friend.toUInt()));
 	}
 
 	Tools::debug("Bootstrapping...");
@@ -529,8 +512,8 @@ void QmlCBridge::signOutProfile(bool remove)
 	if (remove) {
 		settings->remove("");
 	} else {
-		settings->setValue("last_friend", Toxcore::get_friend_public_key(tox, qmlbridge->getCurrentFriendNumber()));
-		settings->setValue("friend_list", qmlbridge->getFriendsModelOrder());
+		settings->setValue("last_friend", Toxcore::get_friend_public_key(tox, current_friend_number));
+		settings->setValue("friend_list", getFriendsModelOrder());
 	}
 	settings->endGroup();
 	if (remove) {
@@ -801,20 +784,21 @@ void QmlCBridge::createFileProgressNotification(quint32 friend_number, quint32 f
 			QVariantMap parameters;
 			parameters["fileNumber"] = file_number;
 			const QString file_path = transfer->manager->getFile()->fileName();
+			const QString friend_name = getFriendNickname(friend_number);
 			quint64 file_size = chat_db->getFileSize(file_messages[transfer], 
 													 Toxcore::get_friend_public_key(tox, friend_number));
 			parameters["filePath"] = file_path;
 			parameters["fileSize"] = file_size;
 			parameters["speedPrefix"] = tr("/s");
-			parameters["transferFinishedText"] = QString(tr("Transfer from %1 is finished")).arg(Toxcore::get_friend_name(tox, friend_number));
-			parameters["transferCanceledText"] = QString(tr("Transfer from %1 is canceled")).arg(Toxcore::get_friend_name(tox, friend_number));
+			parameters["transferFinishedText"] = QString(tr("Transfer from %1 is finished")).arg(friend_name);
+			parameters["transferCanceledText"] = QString(tr("Transfer from %1 is canceled")).arg(friend_name);
 			QVariantMap notificationParameters;
 			notificationParameters["type"] = QtNotification::FileProgress;
 			notificationParameters["id"] = friend_number;
 			notificationParameters["parameters"] = parameters;
 			notificationParameters["caption"] = Tools::getFilenameFromPath(file_path) +
 					" (" + formatBytes(file_size) + ")";
-			notificationParameters["title"] = QString(tr("Transfering file from %1")).arg(Toxcore::get_friend_name(tox, friend_number));
+			notificationParameters["title"] = QString(tr("Transfering file from %1")).arg(friend_name);
 			QtNotification notification;
 			notification.show(notificationParameters);
 			break;
@@ -860,6 +844,20 @@ void QmlCBridge::changeSelfAvatar(const QString &path, bool remove)
 	Toxcore::send_avatar_to_all_friends(tox, remove ? QString() : avatarPath, remove);
 }
 
+const QSize QmlCBridge::getImageSize(const QString &path)
+{
+	return Tools::getImageSize(path);
+}
+
+const QString QmlCBridge::getCurrentCommitSha1()
+{
+	return Tools::getCurrentCommitSha1();
+}
+
+/*
+ * Translation object 
+*/
+
 QmlTranslator::QmlTranslator(QObject *parent) : QObject(parent) {}
 
 void QmlTranslator::setTranslation(const QString &translation)
@@ -872,15 +870,35 @@ void QmlTranslator::setTranslation(const QString &translation)
 	emit languageChanged();
 }
 
-const QSize QmlCBridge::getImageSize(const QString &path)
+/*
+ * QML warnings handler
+*/
+
+static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler(0);
+
+void customMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString & msg)
 {
-	return Tools::getImageSize(path);
+	const QStringList skipWarningsList = { "QML Connections: Implicitly defined onFoo properties in Connections are deprecated. Use this syntax instead: function onFoo(<arguments>) { ... }", 
+										   "QML Loader: Possible anchor loop detected on fill." };
+	switch (type) {
+	case QtWarningMsg: {
+		for (const auto &warnMsg : skipWarningsList) {
+			if (msg.contains(warnMsg)) {
+				return;
+			}
+		}
+		(*QT_DEFAULT_MESSAGE_HANDLER)(type, context, msg);
+	}
+	break;
+	default:
+		(*QT_DEFAULT_MESSAGE_HANDLER)(type, context, msg);
+		break;
+	}
 }
 
-const QString QmlCBridge::getCurrentCommitSha1()
-{
-	return Tools::getCurrentCommitSha1();
-}
+/*
+ * main function
+*/
 
 int main(int argc, char *argv[])
 {

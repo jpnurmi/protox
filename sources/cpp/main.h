@@ -30,7 +30,6 @@ public:
 	QList<QVariant> getFriendsModelOrder();
 	void setKeyboardHeight(int height);
 	bool getAppInactive() { return app_inactive; }
-	void updateToxPasswordKey();
 	void tryReconnect();
 	void sendPendingMessages(quint32 friend_number);
 	void removeNonFailedPendingMessages(quint32 friend_number);
@@ -38,8 +37,10 @@ public:
 	void fileControlUpdateMessage(quint32 friend_number, quint64 unique_id, quint32 control, bool remote);
 	void cancelFileNotification(quint32 friend_number, quint32 file_number);
 	void createFileProgressNotification(quint32 friend_number, quint32 file_number);
-	const QString formatBytes(quint64 bytes);
 	void updateFriendAvatar(quint32 friend_number);
+private:
+	void updateToxPasswordKey();
+	const QString formatBytes(quint64 bytes);
 public slots:
 	Q_INVOKABLE void sendMessage(const QString &message);
 	Q_INVOKABLE quint32 getCurrentFriendNumber();
