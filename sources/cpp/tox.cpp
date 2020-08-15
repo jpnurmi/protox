@@ -673,28 +673,30 @@ void bootstrap_DHT(Tox *m)
 	QJsonArray array = doc.object()["nodes"].toArray();
 	available_nodes = array.count();
 
-	for (auto node : array) {
-		QJsonObject item = node.toObject();
-		QString ipv4 = item["ipv4"].toString();
-		QString ipv6 = item["ipv6"].toString();
-		int port = item["port"].toInt();
-		QString public_key = item["public_key"].toString();
-		QJsonArray tcp_ports = item["tcp_ports"].toArray();
-		TOX_ERR_BOOTSTRAP err, err2;
-		tox_bootstrap(m, ipv4.toUtf8().data(), (quint16)port, (quint8*)ToxConverter::toToxId(public_key).data(), &err);
-		if (use_ipv6 && ipv6 != "-") {
-			tox_bootstrap(m, ipv6.toUtf8().data(), (quint16)port, (quint8*)ToxConverter::toToxId(public_key).data(), &err2);
-		}
-		if (!tcp_ports.isEmpty()) {
-			for (const auto tcp_port : tcp_ports) {
-				TOX_ERR_BOOTSTRAP err3, err4;
-				tox_add_tcp_relay(m, ipv4.toUtf8().data(), (quint16)tcp_port.toInt(), (quint8*)ToxConverter::toToxId(public_key).data(), &err3);
-				if (use_ipv6 && ipv6 != "-") {
-					tox_add_tcp_relay(m, ipv6.toUtf8().data(), (quint16)tcp_port.toInt(), (quint8*)ToxConverter::toToxId(public_key).data(), &err4);
+	QtConcurrent::run([m, use_ipv6, array]() {
+		for (const auto &node : array) {
+			QJsonObject item = node.toObject();
+			QString ipv4 = item["ipv4"].toString();
+			QString ipv6 = item["ipv6"].toString();
+			int port = item["port"].toInt();
+			QString public_key = item["public_key"].toString();
+			QJsonArray tcp_ports = item["tcp_ports"].toArray();
+			TOX_ERR_BOOTSTRAP err, err2;
+			tox_bootstrap(m, ipv4.toUtf8().data(), (quint16)port, (quint8*)ToxConverter::toToxId(public_key).data(), &err);
+			if (use_ipv6 && ipv6 != "-") {
+				tox_bootstrap(m, ipv6.toUtf8().data(), (quint16)port, (quint8*)ToxConverter::toToxId(public_key).data(), &err2);
+			}
+			if (!tcp_ports.isEmpty()) {
+				for (const auto tcp_port : tcp_ports) {
+					TOX_ERR_BOOTSTRAP err3, err4;
+					tox_add_tcp_relay(m, ipv4.toUtf8().data(), (quint16)tcp_port.toInt(), (quint8*)ToxConverter::toToxId(public_key).data(), &err3);
+					if (use_ipv6 && ipv6 != "-") {
+						tox_add_tcp_relay(m, ipv6.toUtf8().data(), (quint16)tcp_port.toInt(), (quint8*)ToxConverter::toToxId(public_key).data(), &err4);
+					}
 				}
 			}
 		}
-	}
+	});
 }
 
 struct Tox_Options *get_opts()
