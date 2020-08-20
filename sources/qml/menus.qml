@@ -12,41 +12,6 @@ import QtPhotoDialog 1.0
 /*[remove]*/ Item {
 
 /*
-    QRCode capture & decoding
-*/
-
-/*
-Menu {
-    id: qrScannerMenu
-    z: z_splash
-    width: window.width
-    height: window.height
-    Camera{
-        id: camera
-    }
-    Rectangle {
-        anchors.fill: parent
-        VideoOutput {
-            source: camera
-            anchors.fill: parent
-            focus : visible
-        }
-    }
-
-
-}
-
-
-QZXing {
-    id: qrDecoder
-    enabledDecoders: QZXing.DecoderFormat_QR_COD
-    onDecodingStarted: console.log("Decoding of image started...")
-    onTagFound: console.log("Barcode data: " + tag)
-    onDecodingFinished: console.log("Decoding finished " + (succeeded==true ? "successfully" :    "unsuccessfully") )
-}
-    */
-
-/*
     Add friend menu
 */
 Menu {
@@ -367,6 +332,15 @@ Menu {
             font.italic: true
             color: getTheme().primaryTextColor
         }
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                if (parent.text.length > 0) {
+                    bridge.copyTextToClipboard(parent.text)
+                    toast.show({ message : qsTr("Text copied to clipboard."), duration : Toast.Short });
+                }
+            }
+        }
     }
     Text {
         padding: 10
@@ -383,6 +357,15 @@ Menu {
         horizontalAlignment: Qt.AlignHCenter
         wrapMode: Text.Wrap
         color: getTheme().primaryTextColor
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                if (parent.text.length > 0) {
+                    bridge.copyTextToClipboard(parent.text)
+                    toast.show({ message : qsTr("Text copied to clipboard."), duration : Toast.Short });
+                }
+            }
+        }
     }
     Button {
         text: qsTr("Delete chat history")
@@ -563,7 +546,7 @@ Menu {
 Menu {
     id: changeAvatarMenu
     readonly property int margin: 25
-    width: parent.width - margin * 2
+    width: 300
     title: "Change avatar"
     x: (window.width - width) * 0.5
     y: (window.height - height) * 0.5
