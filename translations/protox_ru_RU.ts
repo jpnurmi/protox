@@ -143,7 +143,7 @@ Click on the left button to open the friend list, then on «+» to add a new fri
     </message>
     <message>
         <source>Maximum bootstrap nodes</source>
-        <translation>Максимальное кол-во узлов инициализации</translation>
+        <translation type="vanished">Максимальное кол-во узлов инициализации</translation>
     </message>
     <message>
         <source>Client options</source>
@@ -588,6 +588,10 @@ Click on the left button to open the friend list, then on «+» to add a new fri
     <message>
         <source>Connection to proxy has failed.</source>
         <translation>Подключение к прокси не удалось.</translation>
+    </message>
+    <message>
+        <source>Text copied to clipboard.</source>
+        <translation>Текст скопирован в буфер обмена.</translation>
     </message>
 </context>
 <context>
