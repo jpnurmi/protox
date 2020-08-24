@@ -879,7 +879,10 @@ static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandle
 void customMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString & msg)
 {
 	const QStringList skipWarningsList = { "QML Connections: Implicitly defined onFoo properties in Connections are deprecated. Use this syntax instead: function onFoo(<arguments>) { ... }", 
-										   "QML Loader: Possible anchor loop detected on fill." };
+										   "QML Loader: Possible anchor loop detected on fill.",
+										   // Qt 5.15.1
+										   "QML TableViewColumn: Accessible must be attached to an Item",
+										   "QML ToolBar (parent or ancestor of Material): Binding loop detected for property \"foreground\""};
 	switch (type) {
 	case QtWarningMsg: {
 		for (const auto &warnMsg : skipWarningsList) {
