@@ -26,6 +26,12 @@ Drawer {
     property bool dragEnabled: true
     dragMargin: dragEnabled ? 20 : 0
     z: z_drawer
+    Behavior on position {
+        NumberAnimation {
+            duration: 100
+            easing.type: Easing.OutCubic
+        }
+    }
 
     onOpened: {
         chatMessage.focus = false

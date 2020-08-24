@@ -181,11 +181,11 @@ ColumnLayout {
                 defaultHeight = height
             }
             onHeightChanged: {
-                if (height === defaultHeight - keyboardHeight 
+                var cond1 = height === defaultHeight - keyboardHeight 
                         && keyboardActive 
-                        && (!chatFlickable.backToDefaultHeight)) {
-                    scrollToEndWithTypingText()
-                } else if (height < defaultHeight - keyboardHeight && wasAtYEnd) {
+                        && (!chatFlickable.backToDefaultHeight)
+                var cond2 = height < defaultHeight - keyboardHeight && wasAtYEnd
+                if (cond1 || cond2) {
                     scrollToEndWithTypingText()
                 }
             }
