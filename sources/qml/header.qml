@@ -159,7 +159,7 @@ ToolBar {
             onPressAndHold: {
                 chatMessage.forceActiveFocus()
                 Qt.inputMethod.reset()
-                chatMessage.text += friendNickname.text
+                chatMessage.text += bridge.getFriendNickname(bridge.getCurrentFriendNumber())
                 if (chatMessage) {
                     chatMessage.cursorPosition = chatMessage.length
                 }

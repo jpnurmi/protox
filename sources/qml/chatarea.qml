@@ -181,11 +181,11 @@ ColumnLayout {
                 defaultHeight = height
             }
             onHeightChanged: {
-                if (height === defaultHeight - keyboardHeight 
+                var cond1 = height === defaultHeight - keyboardHeight 
                         && keyboardActive 
-                        && (!chatFlickable.backToDefaultHeight)) {
-                    scrollToEndWithTypingText()
-                } else if (height < defaultHeight - keyboardHeight && wasAtYEnd) {
+                        && (!chatFlickable.backToDefaultHeight)
+                var cond2 = height < defaultHeight - keyboardHeight && wasAtYEnd
+                if (cond1 || cond2) {
                     scrollToEndWithTypingText()
                 }
             }
@@ -940,27 +940,6 @@ ColumnLayout {
                     onClicked: {
                         attachFileButton.hideButtons()
                         chatFilePickerDialog.open()
-                        /*
-                        var filePicker = Qt.createQmlObject("import QtQuick.Dialogs 1.2;\nFileDialog {
-                                                title: qsTr(\"Select a file\")
-                                                selectMultiple: true
-                                                property bool once: false
-                                                onAccepted: {
-                                                    if (once) {
-                                                        return
-                                                    }
-                                                    once = true
-                                                    messages.addTransitionEnabled = fileUrls.length === 1
-                                                    for (var i = 0; i < fileUrls.length; i++) {
-                                                        sendFile(fileUrls[i])
-                                                    }
-                                                    messages.addTransitionEnabled = true
-                                                    destroy()
-                                                }
-                                                onRejected: destroy()
-                                            }", window, "filePicker");
-                        filePicker.open()
-                        */
                     }
                 }
             }

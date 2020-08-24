@@ -403,16 +403,20 @@ function setConnStatus(conn_status) {
 }
 
 property real keyboardHeight: 0
+property real keyboardHeightSmooth: 0
 property bool keyboardActive: false
-/*
-NumberAnimation on keyboardHeight {
-    id: keyboardHeightSmoothMover
-    running: false
+
+Behavior on keyboardHeightSmooth {
+    NumberAnimation {
+        duration: 100
+        easing.type: Easing.OutCubic
+    }
 }
-*/
+
 function setKeyboardHeight(height) {
     keyboardActive = height > 0
     keyboardHeight = height / Screen.devicePixelRatio
+    keyboardHeightSmooth = height / Screen.devicePixelRatio
 }
 
 function updateQRcode() {
