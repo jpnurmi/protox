@@ -628,6 +628,30 @@ ColumnLayout {
                                     height: makeMultBy(fileLayout.width * ratio, filePreviewImageAlphaLayer.magicSize)
                                     asynchronous: true
                                     mipmap: true
+                                    LinearGradient {
+                                        id: moreHeightGradient
+                                        property bool allowRender: false
+                                        visible: parent.status === Image.Ready && allowRender
+                                        anchors.fill: parent
+                                        start: Qt.point(0, 0)
+                                        gradient: Gradient {
+                                            GradientStop { position: 0.0; color: "#00000000" }
+                                            GradientStop { position: 0.75; color: "#00000000" }
+                                            GradientStop { position: 1.0; color: getTheme().highlightedButtonColor }
+                                        }
+                                    }
+                                    onHeightChanged: {
+                                        var h = makeMultBy(fileLayout.width * ratio, filePreviewImageAlphaLayer.magicSize)
+                                        if (height === h && height > messages.height) {
+                                            let requiredHeight = makeMultBy(messages.height, filePreviewImageAlphaLayer.magicSize)
+                                            height = requiredHeight
+                                            reservedImageSpace.height = requiredHeight
+                                            fillMode = Image.PreserveAspectCrop
+                                            verticalAlignment = Image.AlignTop
+                                            moreHeightGradient.allowRender = true
+                                            moreHeightGradient.end = Qt.point(0, requiredHeight)
+                                        }
+                                    }
                                     MouseArea {
                                         anchors.fill: parent
                                         onClicked: {
