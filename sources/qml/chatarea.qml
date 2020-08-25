@@ -1192,9 +1192,13 @@ ColumnLayout {
 FileDialog {
     id: chatFilePickerDialog
     title: qsTr("Select a file")
-    selectMultiple: false
+    selectMultiple: true
     onAccepted: {
-        sendFile(fileUrl)
+        messages.addTransitionEnabled = fileUrls.length === 1
+        for (var i = 0; i < fileUrls.length; i++) {
+            sendFile(fileUrls[i])
+        }
+        messages.addTransitionEnabled = true
     }
 }
 
