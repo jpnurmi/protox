@@ -284,6 +284,8 @@ static void cb_file_recv(Tox *m, quint32 friend_number, quint32 file_number, qui
 			QString fileName = QString::fromUtf8((char*)filename, filename_length);
 			settings->beginGroup("Client");
 			const QString downloadsFolder = settings->value("downloads_folder", Tools::getDefaultDownloadsDirectory()).toString();
+			bool auto_accept_files = settings->value("auto_accept_files", false).toBool();
+			quint64 auto_accept_file_size = settings->value("auto_accept_file_size", 20).toULongLong();
 			settings->endGroup();
 			const QString file_path = downloadsFolder + QDir::separator() + fileName;
 			const QString new_path = Tools::getUniqueFilepath(file_path);
@@ -309,6 +311,9 @@ static void cb_file_recv(Tox *m, quint32 friend_number, quint32 file_number, qui
 			quint64 unique_id = chat_db->insertMessage(variantMessage, dt, Toxcore::get_friend_public_key(m, friend_number), !keep_chat_history, false);
 			qmlbridge->file_messages[transfer] = unique_id;
 			qmlbridge->insertMessage(variantMessage, friend_number, dt, false, unique_id);
+			if (auto_accept_files && (auto_accept_file_size == 0 || file_size <= auto_accept_file_size * 1024 * 1024)) {
+				qmlbridge->acceptFile(friend_number, file_number);
+			}
 			break;
 		}
 	}
