@@ -42,6 +42,15 @@ JFUNC(jboolean, checkFileTransferInProgress, jint friend_number, jint file_numbe
 	}
 	return false;
 }
+JFUNC(jboolean, checkFileTransferSelfCanceled, jint friend_number, jint file_number)
+{
+	ToxSelfCanceledTransfer self_canceled_transfer((quint32)friend_number, (quint32)file_number);
+	bool exists = qmlbridge->self_canceled_transfers.contains(self_canceled_transfer);
+	if (exists) {
+		qmlbridge->self_canceled_transfers.removeOne(self_canceled_transfer);
+	}
+	return exists;
+}
 #endif
 
 namespace Native {

@@ -116,6 +116,7 @@ public:
 	ToxPendingMessages pending_messages;
 	ToxFileTransfers transfers;
 	ToxFileMessages file_messages;
+	ToxSelfCanceledTransfers self_canceled_transfers;
 private:
 	quint32 current_friend_number;
 	QString current_profile;

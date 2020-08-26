@@ -59,6 +59,7 @@ public class QtActivityEx extends QtActivity
     private static native void transferCanceled(int friend_number, int file_number);
     public static native long getBytesTransfered(int friend_number, int file_number);
     public static native boolean checkFileTransferInProgress(int friend_number, int file_number);
+    public static native boolean checkFileTransferSelfCanceled(int friend_number, int file_number);
 
     @Override
     protected void onNewIntent(Intent intent) {

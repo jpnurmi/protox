@@ -1013,9 +1013,11 @@ bool file_control(Tox *m, quint32 friend_number, quint32 file_number, quint32 co
 						chat_db->updateFileMessageState(unique_id, 
 														get_friend_public_key(m, friend_number), 
 														ToxFileState::TOX_FILE_CANCELED);
+						qmlbridge->self_canceled_transfers.push_back(ToxSelfCanceledTransfer(friend_number, file_number));
 						delete transfer;
 						qmlbridge->file_messages.remove(transfer);
 						qmlbridge->transfers.removeOne(transfer);
+						qmlbridge->cancelFileNotification(friend_number, file_number);
 						return true;
 					}
 					case TOX_FILE_CONTROL_PAUSE: {

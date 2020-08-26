@@ -12,6 +12,7 @@
 QmlCBridge *qmlbridge = nullptr;
 ChatDataBase *chat_db = nullptr;
 QSettings *settings = nullptr;
+QtNotification *notification = nullptr;
 
 /*
  * QML <-> C++ object
@@ -550,6 +551,7 @@ void QmlCBridge::signOutProfile(bool remove)
 	pending_messages.clear();
 	transfers.clear();
 	file_messages.clear();
+	self_canceled_transfers.clear();
 }
 
 quint32 QmlCBridge::getToxNodesCount()
@@ -748,6 +750,7 @@ quint32 QmlCBridge::acceptFile(quint32 friend_number, quint32 file_number)
 	quint64 unique_id = 0;
 	quint32 control = Toxcore::acceptFile(friend_number, file_number, unique_id);
 	fileControlUpdateMessage(friend_number, unique_id, control, false);
+	cancelFileNotification(friend_number, file_number);
 	createFileProgressNotification(friend_number, file_number);
 	return control;
 }
@@ -765,8 +768,7 @@ void QmlCBridge::cancelFileNotification(quint32 friend_number, quint32 file_numb
 	notificationParameters["type"] = QtNotification::FileRequest;
 	notificationParameters["id"] = friend_number;
 	notificationParameters["parameters"] = parameters;
-	QtNotification notification;
-	notification.cancel(notificationParameters);
+	notification->cancel(notificationParameters);
 }
 
 const QString QmlCBridge::formatBytes(quint64 bytes)
@@ -799,8 +801,7 @@ void QmlCBridge::createFileProgressNotification(quint32 friend_number, quint32 f
 			notificationParameters["caption"] = Tools::getFilenameFromPath(file_path) +
 					" (" + formatBytes(file_size) + ")";
 			notificationParameters["title"] = QString(tr("Transfering file from %1")).arg(friend_name);
-			QtNotification notification;
-			notification.show(notificationParameters);
+			notification->show(notificationParameters);
 			break;
 		}
 	}
@@ -907,6 +908,7 @@ int main(int argc, char *argv[])
 	}
 	ChatDataBase::registerSQLDriver();
 	settings = new QSettings(Tools::getProgDir() + "settings.ini", QSettings::IniFormat);
+	notification = new QtNotification;
 
 	Tools::debug("App started.");
 	QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
@@ -947,6 +949,7 @@ int main(int argc, char *argv[])
 	int result = app.exec();
 	delete qmlbridge;
 	delete settings;
+	delete notification;
 	Tools::debug("Program exited successfully.");
 
 	return result;
