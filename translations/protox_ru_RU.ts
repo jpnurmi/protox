@@ -142,10 +142,6 @@ Click on the left button to open the friend list, then on «+» to add a new fri
         <translation>.json файл с пользовательскими узлами</translation>
     </message>
     <message>
-        <source>Maximum bootstrap nodes</source>
-        <translation type="vanished">Максимальное кол-во узлов инициализации</translation>
-    </message>
-    <message>
         <source>Client options</source>
         <translation>Параметры клиента</translation>
     </message>
@@ -162,8 +158,8 @@ Click on the left button to open the friend list, then on «+» to add a new fri
         <translation>Сохранять историю чата</translation>
     </message>
     <message>
-        <source>The NoSpam value is a part of your ToxID that can be changed at will.</source>
-        <translation>NoSpam это часть вашего ToxID, которая может быть изменена по желанию.</translation>
+        <source>The NoSpam value is a part of your Tox ID that can be changed at will.</source>
+        <translation>NoSpam это часть вашего Tox ID, которая может быть изменена по желанию.</translation>
     </message>
     <message>
         <source>If you are getting spammed with friend requests, change this value.</source>
@@ -296,10 +292,6 @@ Click on the left button to open the friend list, then on «+» to add a new fri
     <message>
         <source>My profile info</source>
         <translation>Моя информация о профиле</translation>
-    </message>
-    <message>
-        <source>Clear chat</source>
-        <translation type="vanished">Стереть чат</translation>
     </message>
     <message>
         <source>Logout</source>
@@ -592,6 +584,18 @@ Click on the left button to open the friend list, then on «+» to add a new fri
     <message>
         <source>Text copied to clipboard.</source>
         <translation>Текст скопирован в буфер обмена.</translation>
+    </message>
+    <message>
+        <source>Auto-accept files</source>
+        <translation>Автоприём файлов</translation>
+    </message>
+    <message>
+        <source>This value is measured in megabytes. Set to 0 to disable the limit.</source>
+        <translation>Это значение измеряется в мегабайтах. Установите 0 для отключения ограничения.</translation>
+    </message>
+    <message>
+        <source>Max auto-accept file size</source>
+        <translation>Макс. размер файла для автоприёма</translation>
     </message>
 </context>
 <context>
