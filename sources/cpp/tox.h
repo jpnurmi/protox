@@ -126,6 +126,20 @@ struct ToxMessage {
 };
 typedef QVector <ToxMessage> ToxMessages;
 
+struct ToxSelfCanceledTransfer
+{
+	quint32 friend_number;
+	quint32 file_number;
+	ToxSelfCanceledTransfer(quint32 _friend_number, quint32 _file_number) {
+		friend_number = _friend_number;
+		file_number = _file_number;
+	}
+	friend bool operator==(const ToxSelfCanceledTransfer &a, const ToxSelfCanceledTransfer &b) {
+		return a.friend_number == b.friend_number && a.file_number == b.file_number;
+	}
+};
+typedef QVector <ToxSelfCanceledTransfer> ToxSelfCanceledTransfers;
+
 namespace Toxcore {
 	Tox *create(ToxProfileLoadingError &error, bool create_new, const QString &password, const QString &profile, const Tox_Pass_Key *pass_key);
 	void destroy(Tox *m);

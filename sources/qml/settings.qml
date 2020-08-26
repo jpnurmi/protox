@@ -40,7 +40,7 @@ Popup {
         NumberAnimation { property: "x"; from: 0; to: settingsWindow.width + settingsWindow.shadowWidth; easing.type: Easing.OutCubic }
     }
     readonly property int sf_none: 0
-    readonly property int sf_text: 1 // unused, text is always present
+    // slot 1 unused
     readonly property int sf_title: 1 << 1
     readonly property int sf_switch: 1 << 2
     readonly property int sf_help: 1 << 3
@@ -93,6 +93,7 @@ Popup {
     IntValidator { id: last_messages_limit_validator; bottom: 32; top: 1024 }
     IntValidator { id: absent_timer_interval_validator; bottom: 0; top: 10000 }
     IntValidator { id: proxy_port_validator; bottom: 1; top: 65535 }
+    IntValidator { id: max_accept_file_size_validator; bottom: 0; top: 100 }
     Menu {
         id: changeProxyTypeMenu
         readonly property int margin: 25
@@ -194,69 +195,76 @@ Popup {
                 changeProxyTypeMenu.open()
             }
         }
-        settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Tox options") })
-        settingsModel.append({ flags: sf_text | sf_title | sf_help | sf_warning, name: qsTr("These settings require client restart!") })
-        settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Enable UDP"), itemEnabled: true, prop: "udp_enabled", 
+        settingsModel.append({ flags: sf_title, name: qsTr("Tox options") })
+        settingsModel.append({ flags: sf_title | sf_help | sf_warning, name: qsTr("These settings require client restart!") })
+        settingsModel.append({ flags: sf_switch, name: qsTr("Enable UDP"), itemEnabled: true, prop: "udp_enabled", 
                     nvalue: bridge.getSettingsValue("Toxcore", "udp_enabled", ptype_bool, Boolean(true)) })
-        settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Enable IPv6"), itemEnabled: true, prop: "ipv6_enabled", 
+        settingsModel.append({ flags: sf_switch, name: qsTr("Enable IPv6"), itemEnabled: true, prop: "ipv6_enabled", 
                     nvalue: bridge.getSettingsValue("Toxcore", "ipv6_enabled", ptype_bool, Boolean(true)) })
-        settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Enable LAN discovery"), itemEnabled: true, prop: "local_discovery_enabled", 
+        settingsModel.append({ flags: sf_switch, name: qsTr("Enable LAN discovery"), itemEnabled: true, prop: "local_discovery_enabled", 
                     nvalue: bridge.getSettingsValue("Toxcore", "local_discovery_enabled", ptype_bool, Boolean(false)) })
-        settingsModel.append({ flags: sf_text | sf_title | sf_help, name: "", prop: "available_nodes"})
-        settingsModel.append({ flags: sf_text | sf_input | sf_placeholder, fieldValidator: default_validator, itemWidth: 128, 
+        settingsModel.append({ flags: sf_title | sf_help, name: "", prop: "available_nodes"})
+        settingsModel.append({ flags: sf_input | sf_placeholder, fieldValidator: default_validator, itemWidth: 128, 
                     name: qsTr("Custom nodes .json file"), prop: "nodes_json_file", helperText: "nodes.json",
                     svalue: bridge.getSettingsValue("Toxcore", "nodes_json_file", ptype_string, String("")) })
-        settingsModel.append({ flags: sf_text | sf_button, name: qsTr("Proxy type"), buttonText: qsTr("Select"), 
+        settingsModel.append({ flags: sf_button, name: qsTr("Proxy type"), buttonText: qsTr("Select"), 
                                  clickAction: "select_proxy_type"})
-        settingsModel.append({ flags: sf_text | sf_input | sf_placeholder, fieldValidator: address_validator, itemWidth: 148, 
+        settingsModel.append({ flags: sf_input | sf_placeholder, fieldValidator: address_validator, itemWidth: 148, 
                     name: qsTr("Proxy address"), prop: "proxy_host", helperText: "",
                     svalue: bridge.getSettingsValue("Toxcore", "proxy_host", ptype_string, String("")) })
-        settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only | sf_placeholder, 
+        settingsModel.append({ flags: sf_input | sf_numbers_only | sf_placeholder, 
                     fieldValidator: proxy_port_validator, itemWidth: 96, 
                     name: qsTr("Proxy port"), prop: "proxy_port", helperText: "51552",
                     svalue: bridge.getSettingsValue("Toxcore", "proxy_port", ptype_string, 51552) })
-        settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Client options") })
-        settingsModel.append({ flags: sf_text | sf_title | sf_help, name: qsTr("This value is measured in minutes. Set to 0 to disable.")})
-        settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only | sf_placeholder, 
+        settingsModel.append({ flags: sf_title, name: qsTr("Client options") })
+        settingsModel.append({ flags: sf_title | sf_help, name: qsTr("This value is measured in minutes. Set to 0 to disable.")})
+        settingsModel.append({ flags: sf_input | sf_numbers_only | sf_placeholder, 
                     fieldValidator: absent_timer_interval_validator, itemWidth: 96, 
                     name: qsTr("Auto-away after"), prop: "absent_timer_interval", helperText: "10",
                     svalue: bridge.getSettingsValue("Client", "absent_timer_interval", ptype_string, String("10"))})
-        settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only | sf_placeholder, 
+        settingsModel.append({ flags: sf_input | sf_numbers_only | sf_placeholder, 
                     fieldValidator: last_messages_limit_validator, itemWidth: 96, 
                     name: qsTr("Recent messages limit"), prop: "last_messages_limit", helperText: "128",
                     svalue: bridge.getSettingsValue("Client", "last_messages_limit", ptype_string, 128) })
-        settingsModel.append({ flags: sf_text | sf_input | sf_numbers_only | sf_placeholder, 
+        settingsModel.append({ flags: sf_input | sf_numbers_only | sf_placeholder, 
                     fieldValidator: last_messages_limit_validator, itemWidth: 96, 
                     name: qsTr("Number of messages to load when scrolling up"), prop: "load_messages_limit", helperText: "64",
                     svalue: bridge.getSettingsValue("Client", "load_messages_limit", ptype_string, 64) })
-        settingsModel.append({ flags: sf_text | sf_button, prop: "downloads_folder", 
+        settingsModel.append({ flags: sf_button, prop: "downloads_folder", 
                                  svalue: bridge.getSettingsValue("Client", "downloads_folder", ptype_string, bridge.getDefaultDownloadsDirectory()), 
                                  name: qsTr("Downloads folder"), buttonText: qsTr("Select"), 
                                  clickAction: "change_downloads_directory"})
-        settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Privacy") })
-        settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Keep chat history"), itemEnabled: true, prop: "keep_chat_history", 
+        settingsModel.append({ flags: sf_switch, name: qsTr("Auto-accept files"), itemEnabled: true, prop: "auto_accept_files", 
+                    nvalue: bridge.getSettingsValue("Client", "auto_accept_files", ptype_bool, Boolean(false)) })
+        settingsModel.append({ flags: sf_title | sf_help, name: qsTr("This value is measured in megabytes. Set to 0 to disable the limit.")})
+        settingsModel.append({ flags: sf_input | sf_numbers_only | sf_placeholder, 
+                    fieldValidator: max_accept_file_size_validator, itemWidth: 96, 
+                    name: qsTr("Max auto-accept file size"), prop: "auto_accept_file_size", helperText: "20",
+                    svalue: bridge.getSettingsValue("Client", "auto_accept_file_size", ptype_string, 20) })
+        settingsModel.append({ flags: sf_title, name: qsTr("Privacy") })
+        settingsModel.append({ flags: sf_switch, name: qsTr("Keep chat history"), itemEnabled: true, prop: "keep_chat_history", 
                     nvalue: bridge.getSettingsValue("Privacy", "keep_chat_history", ptype_bool, Boolean(true)) })
-        settingsModel.append({ flags: sf_text | sf_title | sf_help, name: qsTr("The NoSpam value is a part of your ToxID that can be changed at will.")})
-        settingsModel.append({ flags: sf_text | sf_title | sf_help, name: qsTr("If you are getting spammed with friend requests, change this value.")})
-        settingsModel.append({ flags: sf_text | sf_title | sf_help, name: qsTr("Only hexadecimal characters are allowed.")})
-        settingsModel.append({ flags: sf_text | sf_input | sf_mask | sf_button, fieldValidator: hex_validator, name: qsTr("NoSpam"), prop: "no_spam_value", 
+        settingsModel.append({ flags: sf_title | sf_help, name: qsTr("The NoSpam value is a part of your ToxID that can be changed at will.")})
+        settingsModel.append({ flags: sf_title | sf_help, name: qsTr("If you are getting spammed with friend requests, change this value.")})
+        settingsModel.append({ flags: sf_title | sf_help, name: qsTr("Only hexadecimal characters are allowed.")})
+        settingsModel.append({ flags: sf_input | sf_mask | sf_button, fieldValidator: hex_validator, name: qsTr("NoSpam"), prop: "no_spam_value", 
                     svalue: "" /* will be set later */, itemWidth: 128, mask: ">HHHHHHHH;0", buttonText: qsTr("Randomize"), 
                     clickAction: "randomize_nospam"})
-        settingsModel.append({ flags: sf_text | sf_title | sf_help, fieldValidator: default_validator, name: "", prop: "profile_encrypted"})
-        settingsModel.append({ flags: sf_text | sf_input | sf_password, name: qsTr("Password"), prop: "password", 
+        settingsModel.append({ flags: sf_title | sf_help, fieldValidator: default_validator, name: "", prop: "profile_encrypted"})
+        settingsModel.append({ flags: sf_input | sf_password, name: qsTr("Password"), prop: "password", 
                     svalue: "", itemWidth: 128
                     })
-        settingsModel.append({ flags: sf_text | sf_input | sf_button | sf_password, fieldValidator: default_validator, name: qsTr("Repeat"), prop: "repeated_password", 
+        settingsModel.append({ flags: sf_input | sf_button | sf_password, fieldValidator: default_validator, name: qsTr("Repeat"), prop: "repeated_password", 
                     svalue: "", itemWidth: 128, buttonText: qsTr("Change"), clickAction: "change_password"
                     })
-        settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Profile") })
-        settingsModel.append({ flags: sf_text | sf_switch, name: qsTr("Auto-login into this profile"), itemEnabled: true, prop: "auto_login_enabled", 
+        settingsModel.append({ flags: sf_title, name: qsTr("Profile") })
+        settingsModel.append({ flags: sf_switch, name: qsTr("Auto-login into this profile"), itemEnabled: true, prop: "auto_login_enabled", 
                     nvalue: false /* will be set later */ })
-        settingsModel.append({ flags: sf_text | sf_button, name: qsTr("Profile deletion"), buttonText: qsTr("Delete"), 
+        settingsModel.append({ flags: sf_button, name: qsTr("Profile deletion"), buttonText: qsTr("Delete"), 
                                  clickAction: "delete_profile"})
-        settingsModel.append({ flags: sf_text | sf_title, name: qsTr("Version") })
-        settingsModel.append({ flags: sf_text | sf_title | sf_help, name: "Protox: " + applicationVersion + " (" + bridge.getCurrentCommitSha1() + ")", prop: "application_version"})
-        settingsModel.append({ flags: sf_text | sf_title | sf_help, name: "Toxcore: " + bridge.getToxcoreVersion(), prop: "toxcore_version"})
+        settingsModel.append({ flags: sf_title, name: qsTr("Version") })
+        settingsModel.append({ flags: sf_title | sf_help, name: "Protox: " + applicationVersion + " (" + bridge.getCurrentCommitSha1() + ")", prop: "application_version"})
+        settingsModel.append({ flags: sf_title | sf_help, name: "Toxcore: " + bridge.getToxcoreVersion(), prop: "toxcore_version"})
     }
 
     function open() {
@@ -284,6 +292,8 @@ Popup {
         bridge.setSettingsValue("Client", "last_messages_limit", settingsModel.getValueString("last_messages_limit"))
         bridge.setSettingsValue("Client", "load_messages_limit", settingsModel.getValueString("load_messages_limit"))
         bridge.setSettingsValue("Client", "downloads_folder", String(settingsModel.getValueString("downloads_folder")))
+        bridge.setSettingsValue("Client", "auto_accept_files", Boolean(settingsModel.getValueNumber("auto_accept_files")))
+        bridge.setSettingsValue("Client", "auto_accept_file_size", String(settingsModel.getValueString("auto_accept_file_size")))
         bridge.setSettingsValue("Privacy", "keep_chat_history", Boolean(settingsModel.getValueNumber("keep_chat_history")))
         bridge.setSettingsValue("Profile", "auto_login_profile", settingsModel.getValueNumber("auto_login_enabled") ? bridge.getCurrentProfile() : "")
         bridge.setNospamValue(settingsModel.getValueString("no_spam_value"))
