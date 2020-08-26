@@ -244,7 +244,7 @@ Popup {
         settingsModel.append({ flags: sf_title, name: qsTr("Privacy") })
         settingsModel.append({ flags: sf_switch, name: qsTr("Keep chat history"), itemEnabled: true, prop: "keep_chat_history", 
                     nvalue: bridge.getSettingsValue("Privacy", "keep_chat_history", ptype_bool, Boolean(true)) })
-        settingsModel.append({ flags: sf_title | sf_help, name: qsTr("The NoSpam value is a part of your ToxID that can be changed at will.")})
+        settingsModel.append({ flags: sf_title | sf_help, name: qsTr("The NoSpam value is a part of your Tox ID that can be changed at will.")})
         settingsModel.append({ flags: sf_title | sf_help, name: qsTr("If you are getting spammed with friend requests, change this value.")})
         settingsModel.append({ flags: sf_title | sf_help, name: qsTr("Only hexadecimal characters are allowed.")})
         settingsModel.append({ flags: sf_input | sf_mask | sf_button, fieldValidator: hex_validator, name: qsTr("NoSpam"), prop: "no_spam_value", 
