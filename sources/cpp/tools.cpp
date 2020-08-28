@@ -150,8 +150,17 @@ void AsyncFileManager::onChunkReadRequest(quint64 position, quint32 length)
 		emit fileTransferEnded(m_parent);
 		return;
 	}
-	m_file->seek(position);
+	if (!m_file->seek(position)) {
+		Tools::debug("File manager thread 0x" + 
+					 QString::number((quint64)m_file->thread(), 16) + 
+					 " error - seek failed: " + m_file->fileName() + ".");
+	}
 	QByteArray data = m_file->read(length);
+	if (data.isEmpty()) {
+		Tools::debug("File manager thread 0x" + 
+					 QString::number((quint64)m_file->thread(), 16) + 
+					 " error - data is empty: " + m_file->fileName() + ".");
+	}
 	emit fileChunkReady(m_parent, data, position);
 }
 
@@ -162,8 +171,16 @@ void AsyncFileManager::onChunkWriteRequest(quint64 position, const QByteArray &d
 		emit fileTransferEnded(m_parent);
 		return;
 	}
-	m_file->seek(position);
-	m_file->write(data);
+	if (!m_file->seek(position)) {
+		Tools::debug("File manager thread 0x" + 
+					 QString::number((quint64)m_file->thread(), 16) + 
+					 " error - seek failed: " + m_file->fileName() + ".");
+	}
+	if (m_file->write(data) == -1) {
+		Tools::debug("File manager thread 0x" + 
+					 QString::number((quint64)m_file->thread(), 16) + 
+					 " error - write failed: " + m_file->fileName() + ".");
+	}
 }
 
 bool AsyncFileManager::onFileTransferStarted()
