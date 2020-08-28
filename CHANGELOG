@@ -108,3 +108,20 @@ v1.5.1beta
 
 - Fixed bug: user can't accept friend requests because Tox Id is broken on client's side (https://gitlab.com/Monsterovich/protox/-/issues/7).
 - Improved file threads code to resolve potential thread crashes.
+
+v1.6beta
+
+- Added proxy support.
+- Added feature: history loading during scrolling.
+- Added custom nicknames.
+- Fixed bug: TCP mode (when "Enable UDP" is off) didn't always work.
+- Added a smooth transition animation for "friend is typing" indicator and fixed a few issues with it.
+- Fixed wrong implementation of toxcore timer.
+- Added feature: save last selected profile to config upon selection.
+- Fixed bug: file messages were not treated as temporary messages when "Keep chat history" is disabled.
+- Added ability to copy friend properties to clipboard in friend info menu.
+- Added animations to some menus.
+- Improved file notifications.
+- Added file transfer auto-accept feature.
+- Improved login performance.
+- Added support for sending multiple files (qt5.15.1 build only).
