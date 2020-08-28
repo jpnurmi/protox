@@ -96,6 +96,8 @@ DISTFILES += \
 ANDROID_PACKAGE_SOURCE_DIR = \
 	$$PWD/android
 
+ANDROID_ABIS = armeabi-v7a x86
+
 ANDROID_EXTRA_LIBS += \
 	$$PWD/libs/armv7-a/libtoxcore.so \
 	$$PWD/libs/armv7-a/libtoxencryptsave.so \
@@ -113,10 +115,3 @@ contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
 contains(ANDROID_TARGET_ARCH,x86) {
 	LIBS += -L$$PWD/libs/x86
 }
-
-
-
-
-
-
-
