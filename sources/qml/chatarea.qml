@@ -898,7 +898,7 @@ ColumnLayout {
                 }
             }
             readonly property int buttonsDistance: 80
-            readonly property real fullOpacity: 0.75
+            readonly property real fullOpacity: 0.9
             ParallelAnimation {
                 id: sendAnyFileButtonMoveInAnimation
                 NumberAnimation { target: sendAnyFileButton; property: "y"; 
