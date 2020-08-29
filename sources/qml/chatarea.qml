@@ -84,6 +84,7 @@ ColumnLayout {
                     }
                 }
                 Text {
+                    id: typingTextReal
                     anchors.left: parent.left
                     anchors.leftMargin: 5
                     anchors.verticalCenter: parent.verticalCenter
@@ -91,15 +92,15 @@ ColumnLayout {
                     font.italic: true
                     visible: parent.visible
                     readonly property int typingTextIndicatorSize: 6
-                    readonly property real typingTextIndicatorAnimationDuration: 1000 / 3
+                    readonly property int typingTextIndicatorAnimationDuration: 250
                     Rectangle {
                         id: typingTextIndicator1
                         width: parent.typingTextIndicatorSize
                         height: width
                         radius: height * 0.5
-                        ColorAnimation on color { to: getUserTheme().typingTextIndicatorActiveColor; duration: parent.parent.typingTextIndicatorAnimationDuration; 
+                        ColorAnimation on color { to: getUserTheme().typingTextIndicatorActiveColor; duration: typingTextReal.typingTextIndicatorAnimationDuration; 
                             running: typingTextAnimationTimer.symbol === 1 }
-                        ColorAnimation on color { to: getUserTheme().typingTextIndicatorColor; duration: parent.parent.typingTextIndicatorAnimationDuration; 
+                        ColorAnimation on color { to: getUserTheme().typingTextIndicatorColor; duration: typingTextReal.typingTextIndicatorAnimationDuration; 
                             running: typingTextAnimationTimer.symbol !== 1 }
                         color: getUserTheme().typingTextIndicatorColor
                         anchors.left: parent.right
@@ -111,9 +112,9 @@ ColumnLayout {
                         width: parent.typingTextIndicatorSize
                         height: width
                         radius: height * 0.5
-                        ColorAnimation on color { to: getUserTheme().typingTextIndicatorActiveColor; duration: parent.parent.typingTextIndicatorAnimationDuration; 
+                        ColorAnimation on color { to: getUserTheme().typingTextIndicatorActiveColor; duration: typingTextReal.typingTextIndicatorAnimationDuration; 
                             running: typingTextAnimationTimer.symbol === 2 }
-                        ColorAnimation on color { to: getUserTheme().typingTextIndicatorColor; duration: parent.parent.typingTextIndicatorAnimationDuration; 
+                        ColorAnimation on color { to: getUserTheme().typingTextIndicatorColor; duration: typingTextReal.typingTextIndicatorAnimationDuration; 
                             running: typingTextAnimationTimer.symbol !== 2 }
                         color: getUserTheme().typingTextIndicatorColor
                         anchors.left: typingTextIndicator1.right
@@ -125,9 +126,9 @@ ColumnLayout {
                         width: parent.typingTextIndicatorSize
                         height: width
                         radius: height * 0.5
-                        ColorAnimation on color { to: getUserTheme().typingTextIndicatorActiveColor; duration: parent.parent.typingTextIndicatorAnimationDuration; 
+                        ColorAnimation on color { to: getUserTheme().typingTextIndicatorActiveColor; duration: typingTextReal.typingTextIndicatorAnimationDuration; 
                             running: typingTextAnimationTimer.symbol === 3 }
-                        ColorAnimation on color { to: getUserTheme().typingTextIndicatorColor; duration: parent.parent.typingTextIndicatorAnimationDuration; 
+                        ColorAnimation on color { to: getUserTheme().typingTextIndicatorColor; duration: typingTextReal.typingTextIndicatorAnimationDuration; 
                             running: typingTextAnimationTimer.symbol !== 3 }
                         color: getUserTheme().typingTextIndicatorColor
                         anchors.left: typingTextIndicator2.right
