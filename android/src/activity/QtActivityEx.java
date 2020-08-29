@@ -42,7 +42,7 @@ public class QtActivityEx extends QtActivity
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = getWindow();
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.setStatusBarColor(Color.parseColor("#3F51B5"));
+            window.setStatusBarColor(Color.parseColor("#3F51B5")); // Material.Indigo
         }
         super.onCreate(savedInstanceState);
         processIntent(getIntent());

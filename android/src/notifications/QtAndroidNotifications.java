@@ -15,6 +15,7 @@ import android.os.Build;
 import android.util.Log;
 import android.text.format.Formatter;
 import android.net.Uri;
+import android.graphics.Color;
 
 // java
 import java.lang.String;
@@ -32,6 +33,7 @@ class QtAndroidNotifications {
         final Notification.Builder builder =
                 new Notification.Builder(context)
                 .setSmallIcon(org.protox.R.drawable.icon)
+                .setColor(Color.parseColor("#673AB7")) // Material.DeepPurple
                 .setContentTitle(title)
                 .setContentText(caption)
                 .setDefaults(Notification.DEFAULT_ALL)
