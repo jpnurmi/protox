@@ -78,7 +78,9 @@ function getUserTheme() {
         "fileCancelButtonColor" : "#f52b1d",
         "transferSuccededTextColor" : "green",
         "transferCanceledTextColor" : "#f52b1d",
-        "transferRemotePausedTextColor" : "#404040"
+        "transferRemotePausedTextColor" : "#404040",
+        "typingTextIndicatorActiveColor" : "black",
+        "typingTextIndicatorColor" : "gray"
     }
 }
 
@@ -161,9 +163,9 @@ function setFriendTyping(friend_number, typing) {
         var nick = bridge.getFriendNickname(friend_number)
         // don't print long nicks
         if (nick.length > friendNickname.charsLimit) {
-            typingText.text = qsTr("A friend is typing...")
+            typingText.text = qsTr("A friend is typing")
         } else {
-            typingText.text = qsTr("%1 is typing...").arg(nick)
+            typingText.text = qsTr("%1 is typing").arg(nick)
         }
         if (!typingText.visible) {
             typingText.visible = true

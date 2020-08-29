@@ -64,6 +64,25 @@ ColumnLayout {
                 anchors.bottomMargin: margin
                 color: "white"
                 property string text
+                Timer {
+                    id: typingTextAnimationTimer
+                    running: parent.visible
+                    repeat: true
+                    readonly property int timerInterval: 500
+                    interval: timerInterval
+                    property int symbol: 1
+                    onTriggered: {
+                        symbol++
+                        if (symbol > 3) {
+                            symbol = 1
+                        }
+                    }
+                    onRunningChanged: {
+                        if (!running) {
+                            symbol = 1
+                        }
+                    }
+                }
                 Text {
                     anchors.left: parent.left
                     anchors.leftMargin: 5
@@ -71,6 +90,50 @@ ColumnLayout {
                     text: parent.text
                     font.italic: true
                     visible: parent.visible
+                    readonly property int typingTextIndicatorSize: 6
+                    readonly property real typingTextIndicatorAnimationDuration: 1000 / 3
+                    Rectangle {
+                        id: typingTextIndicator1
+                        width: parent.typingTextIndicatorSize
+                        height: width
+                        radius: height * 0.5
+                        ColorAnimation on color { to: getUserTheme().typingTextIndicatorActiveColor; duration: parent.parent.typingTextIndicatorAnimationDuration; 
+                            running: typingTextAnimationTimer.symbol === 1 }
+                        ColorAnimation on color { to: getUserTheme().typingTextIndicatorColor; duration: parent.parent.typingTextIndicatorAnimationDuration; 
+                            running: typingTextAnimationTimer.symbol !== 1 }
+                        color: getUserTheme().typingTextIndicatorColor
+                        anchors.left: parent.right
+                        anchors.leftMargin: 4
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                    Rectangle {
+                        id: typingTextIndicator2
+                        width: parent.typingTextIndicatorSize
+                        height: width
+                        radius: height * 0.5
+                        ColorAnimation on color { to: getUserTheme().typingTextIndicatorActiveColor; duration: parent.parent.typingTextIndicatorAnimationDuration; 
+                            running: typingTextAnimationTimer.symbol === 2 }
+                        ColorAnimation on color { to: getUserTheme().typingTextIndicatorColor; duration: parent.parent.typingTextIndicatorAnimationDuration; 
+                            running: typingTextAnimationTimer.symbol !== 2 }
+                        color: getUserTheme().typingTextIndicatorColor
+                        anchors.left: typingTextIndicator1.right
+                        anchors.leftMargin: 2
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                    Rectangle {
+                        id: typingTextIndicator3
+                        width: parent.typingTextIndicatorSize
+                        height: width
+                        radius: height * 0.5
+                        ColorAnimation on color { to: getUserTheme().typingTextIndicatorActiveColor; duration: parent.parent.typingTextIndicatorAnimationDuration; 
+                            running: typingTextAnimationTimer.symbol === 3 }
+                        ColorAnimation on color { to: getUserTheme().typingTextIndicatorColor; duration: parent.parent.typingTextIndicatorAnimationDuration; 
+                            running: typingTextAnimationTimer.symbol !== 3 }
+                        color: getUserTheme().typingTextIndicatorColor
+                        anchors.left: typingTextIndicator2.right
+                        anchors.leftMargin: 2
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
                 }
                 visible: false
             }

@@ -18,12 +18,12 @@ Click on the left button to open the friend list, then on «+» to add a new fri
 Удачи!</translation>
     </message>
     <message>
-        <source>A friend is typing...</source>
-        <translation>Друг печатает...</translation>
+        <source>A friend is typing</source>
+        <translation>Друг печатает</translation>
     </message>
     <message>
-        <source>%1 is typing...</source>
-        <translation>%1 печатает...</translation>
+        <source>%1 is typing</source>
+        <translation>%1 печатает</translation>
     </message>
     <message>
         <source>Request sent!</source>
