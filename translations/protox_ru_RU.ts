@@ -597,6 +597,14 @@ Click on the left button to open the friend list, then on «+» to add a new fri
         <source>Max auto-accept file size</source>
         <translation>Макс. размер файла для автоприёма</translation>
     </message>
+    <message>
+        <source>Reply</source>
+        <translation>Ответить</translation>
+    </message>
+    <message>
+        <source>Enter your reply here</source>
+        <translation>Введите ваш ответ здесь</translation>
+    </message>
 </context>
 <context>
     <name>QAndroidPlatformTheme</name>
