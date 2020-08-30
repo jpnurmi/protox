@@ -28,6 +28,7 @@ QmlCBridge::QmlCBridge()
 	current_profile = "";
 	current_friend_number = 0;
 	profile_password = "";
+	abort_bootstrapping = false;
 
 	settings->beginGroup("Client");
 	int reconnection_interval = settings->value("reconnection_interval", 60000).toInt();
@@ -537,7 +538,7 @@ void QmlCBridge::signOutProfile(bool remove)
 		Toxcore::save_data(tox, tox_pass_key, Tools::getProgDir() + current_profile);
 	}
 	if (bootstrapping_thread.isRunning()) {
-		bootstrapping_thread.cancel();
+		abort_bootstrapping = true;
 		bootstrapping_thread.waitForFinished();
 	}
 	Toxcore::destroy(tox);

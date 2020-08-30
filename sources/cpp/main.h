@@ -115,6 +115,7 @@ public slots:
 
 public:
 	ToxBootstrapingThread bootstrapping_thread;
+	bool abort_bootstrapping;
 public:
 	ToxPendingMessages pending_messages;
 	ToxFileTransfers transfers;
