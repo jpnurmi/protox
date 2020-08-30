@@ -536,9 +536,9 @@ void QmlCBridge::signOutProfile(bool remove)
 	if (!remove) {
 		Toxcore::save_data(tox, tox_pass_key, Tools::getProgDir() + current_profile);
 	}
-	if (dht_connection.isRunning()) {
-		dht_connection.cancel();
-		dht_connection.waitForFinished();
+	if (bootstrapping_thread.isRunning()) {
+		bootstrapping_thread.cancel();
+		bootstrapping_thread.waitForFinished();
 	}
 	Toxcore::destroy(tox);
 	Toxcore::reset_pass_key(tox_pass_key);

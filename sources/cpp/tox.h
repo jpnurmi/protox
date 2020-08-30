@@ -142,7 +142,7 @@ struct ToxSelfCanceledTransfer
 	}
 };
 typedef QVector <ToxSelfCanceledTransfer> ToxSelfCanceledTransfers;
-typedef QFuture <void> ToxDHTConnection;
+typedef QFuture <void> ToxBootstrapingThread;
 
 namespace Toxcore {
 	Tox *create(ToxProfileLoadingError &error, bool create_new, const QString &password, const QString &profile, const Tox_Pass_Key *pass_key);

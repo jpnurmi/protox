@@ -682,7 +682,7 @@ void bootstrap_DHT(Tox *m)
 	QJsonArray array = doc.object()["nodes"].toArray();
 	available_nodes = array.count();
 
-	qmlbridge->dht_connection = QtConcurrent::run([m, use_ipv6, array]() {
+	qmlbridge->bootstrapping_thread = QtConcurrent::run([m, use_ipv6, array]() {
 		for (const auto &node : array) {
 			QJsonObject item = node.toObject();
 			QString ipv4 = item["ipv4"].toString();
