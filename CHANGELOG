@@ -126,3 +126,5 @@ v1.6beta
 - Improved login performance.
 - Inline image preview height is now limited to prevent overly tall images from disrupting the chat log. Images that are too tall are cut off so that the center is visible, with gradients indicating that the image is too tall.
 - Added support for sending multiple files (qt5.15.1 build only).
+- Added animated dots to "friend is typing" indicator.
+- Added a "reply" button to message notifications, allowing to write and send a response right in the notification.
