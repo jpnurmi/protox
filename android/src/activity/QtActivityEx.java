@@ -26,6 +26,7 @@ import android.provider.DocumentsContract;
 import android.database.Cursor;
 import android.net.Uri;
 import android.webkit.MimeTypeMap;
+import android.app.RemoteInput;
 
 import KeyboardProvider.KeyboardProvider;
 
@@ -57,6 +58,7 @@ public class QtActivityEx extends QtActivity
     private static native void keyboardHeightChanged(int height);
     private static native void transferAccepted(int friend_number, int file_number);
     private static native void transferCanceled(int friend_number, int file_number);
+    private static native void messageReplied(int friend_number, String quote_text, String reply_text);
     public static native long getBytesTransfered(int friend_number, int file_number);
     public static native boolean checkFileTransferInProgress(int friend_number, int file_number);
     public static native boolean checkFileTransferSelfCanceled(int friend_number, int file_number);
@@ -79,6 +81,11 @@ public class QtActivityEx extends QtActivity
                 } else {
                     transferCanceled(bundle.getInt("friendNumber"), bundle.getInt("fileNumber"));
                 }
+            }
+            Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
+            if (remoteInput != null) {
+                String replyText = remoteInput.getCharSequence("key_text_reply").toString();
+                messageReplied(bundle.getInt("friendNumber"), bundle.getString("quoteText"), replyText);
             }
         }
     }

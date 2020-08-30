@@ -10,12 +10,14 @@ import android.app.PendingIntent;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.NotificationChannel;
+import android.app.RemoteInput;
 import android.os.Bundle;
 import android.os.Build;
 import android.util.Log;
 import android.text.format.Formatter;
 import android.net.Uri;
 import android.graphics.Color;
+import android.R.drawable;
 
 // java
 import java.lang.String;
@@ -50,6 +52,21 @@ class QtAndroidNotifications {
                 resultIntent.putExtras(bundle);
                 PendingIntent resultPendingIntent = PendingIntent.getActivity(context, 0,
                         resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && id >= 0) {
+                    RemoteInput remoteInput = new RemoteInput.Builder("key_text_reply")
+                            .setLabel((String)parameters.get("replyPlaceholderText"))
+                            .build();
+                    Intent intentActionReply = new Intent(context, QtActivityEx.class);
+                    intentActionReply.putExtra("friendNumber", id);
+                    intentActionReply.putExtra("quoteText", caption);
+                    PendingIntent pendingIntentReply =
+                            PendingIntent.getActivity(context, 0, intentActionReply, PendingIntent.FLAG_UPDATE_CURRENT);
+                    Notification.Action replyAction = new Notification.Action.Builder(android.R.drawable.ic_dialog_info,
+                                    (String)parameters.get("replyButtonText"), pendingIntentReply)
+                                    .addRemoteInput(remoteInput)
+                                    .build();
+                    builder.addAction(replyAction);
+                }
                 builder.setContentIntent(resultPendingIntent);
                 notificationManager.notify(getTagByType(type), id, builder.build());
                 break;

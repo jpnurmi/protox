@@ -1218,7 +1218,7 @@ ColumnLayout {
             function sendMessage() {
                 Qt.inputMethod.reset()
                 if (chatMessage.text.length > 0) {
-                    bridge.sendMessage(chatMessage.text)
+                    bridge.sendMessage(bridge.getCurrentFriendNumber(), chatMessage.text)
                     chatMessage.clear()
                 } else {
                     chatMessage.focus = false

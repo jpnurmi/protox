@@ -36,13 +36,14 @@ public:
 	void changeFileProgress(quint32 friend_number, quint32 file_number, quint32 bytesTransfered, bool finished);
 	void fileControlUpdateMessage(quint32 friend_number, quint64 unique_id, quint32 control, bool remote);
 	void cancelFileNotification(quint32 friend_number, quint32 file_number);
+	void cancelTextNotification(quint32 friend_number);
 	void createFileProgressNotification(quint32 friend_number, quint32 file_number);
 	void updateFriendAvatar(quint32 friend_number);
 private:
 	void updateToxPasswordKey();
 	const QString formatBytes(quint64 bytes);
 public slots:
-	Q_INVOKABLE void sendMessage(const QString &message);
+	Q_INVOKABLE void sendMessage(quint32 friend_number, const QString &message, bool reply = false);
 	Q_INVOKABLE quint32 getCurrentFriendNumber();
 	Q_INVOKABLE int getFriendConnStatus(quint32 friend_number);
 	Q_INVOKABLE const QString getFriendNickname(quint32 friend_number, bool publicKey = true);

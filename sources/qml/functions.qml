@@ -266,7 +266,11 @@ function insertMessage(variantMessage, friend_number, self, time, unique_id, fai
                               caption : variantMessage.message,
                               title : qsTr("New message from %1").arg(bridge.getFriendNickname(friend_number)),
                               type : Notification.Text,
-                              id : friend_number
+                              id : friend_number,
+                              parameters : {
+                                  "replyButtonText" : qsTr("Reply"),
+                                  "replyPlaceholderText" : qsTr("Enter your reply here")
+                                  }
                             });
         } else {
             notification.show({

@@ -20,12 +20,14 @@ struct ToxPendingMessage {
 	quint32 unique_id;
 	quint32 friend_number;
 	bool failed;
+	bool reply;
 	bool resent;
-	ToxPendingMessage(quint32 _message_id, quint32 _unique_id, quint32 _friend_number, bool _failed) {
+	ToxPendingMessage(quint32 _message_id, quint32 _unique_id, quint32 _friend_number, bool _failed, bool _reply) {
 		message_id = _message_id;
 		unique_id = _unique_id;
 		friend_number = _friend_number;
 		failed = _failed;
+		reply = _reply;
 		resent = false;
 	}
 	friend bool operator==(const ToxPendingMessage &a, const ToxPendingMessage &b) {
@@ -33,6 +35,7 @@ struct ToxPendingMessage {
 				a.unique_id == b.unique_id && 
 				a.friend_number == b.friend_number &&
 				a.failed == b.failed &&
+				a.reply == b.reply &&
 				a.resent == b.resent;
 	}
 };
