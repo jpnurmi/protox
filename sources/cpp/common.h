@@ -22,6 +22,7 @@
 #include <QJsonObject>
 #include <QTextBoundaryFinder>
 #include <QImageReader>
+#include <QAtomicInteger>
 
 #if defined (Q_OS_ANDROID)
 #include <QAndroidService>
