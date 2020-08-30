@@ -99,7 +99,7 @@ struct ToxFileTransfer {
 		} else {
 			progress_update_timer = new QTimer;
 			progress_update_timer->setSingleShot(true);
-			progress_update_timer->setInterval(16);
+			progress_update_timer->setInterval(32);
 		}
 	}
 	~ToxFileTransfer() {
