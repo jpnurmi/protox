@@ -66,6 +66,7 @@ class QtAndroidNotifications {
                                     .addRemoteInput(remoteInput)
                                     .build();
                     builder.addAction(replyAction);
+                    builder.setStyle(new Notification.BigTextStyle().bigText(caption));
                 }
                 builder.setContentIntent(resultPendingIntent);
                 notificationManager.notify(getTagByType(type), id, builder.build());
