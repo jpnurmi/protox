@@ -10,6 +10,8 @@ import android.content.Intent;
 import android.content.Context;
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.BroadcastReceiver;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Build;
 import android.os.Environment;
@@ -53,6 +55,27 @@ public class QtActivityEx extends QtActivity
                 keyboardHeightChanged(height);
             }
         });
+        BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Bundle bundle = intent.getExtras();
+                if (bundle != null) {
+                    if (bundle.containsKey("transferAccepted")) {
+                        if (bundle.getBoolean("transferAccepted")) {
+                            transferAccepted(bundle.getInt("friendNumber"), bundle.getInt("fileNumber"));
+                        } else {
+                            transferCanceled(bundle.getInt("friendNumber"), bundle.getInt("fileNumber"));
+                        }
+                    }
+                    Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
+                    if (remoteInput != null) {
+                        String replyText = remoteInput.getCharSequence("key_text_reply").toString();
+                        messageReplied(bundle.getInt("friendNumber"), bundle.getString("quoteText"), replyText);
+                    }
+                }
+            }
+        };
+        registerReceiver(receiver, new IntentFilter("notificationAction"));
     }
 
     private static native void keyboardHeightChanged(int height);
@@ -74,18 +97,6 @@ public class QtActivityEx extends QtActivity
         if (bundle != null) {
             if (bundle.containsKey("notificationId")) {
                 notificationId = bundle.getInt("notificationId");
-            }
-            if (bundle.containsKey("transferAccepted")) {
-                if (bundle.getBoolean("transferAccepted")) {
-                    transferAccepted(bundle.getInt("friendNumber"), bundle.getInt("fileNumber"));
-                } else {
-                    transferCanceled(bundle.getInt("friendNumber"), bundle.getInt("fileNumber"));
-                }
-            }
-            Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
-            if (remoteInput != null) {
-                String replyText = remoteInput.getCharSequence("key_text_reply").toString();
-                messageReplied(bundle.getInt("friendNumber"), bundle.getString("quoteText"), replyText);
             }
         }
     }
