@@ -114,7 +114,7 @@ public slots:
 	Q_INVOKABLE const QString getCurrentCommitSha1();
 
 public:
-	QFuture <void> dht_connection;
+	ToxDHTConnection dht_connection;
 public:
 	ToxPendingMessages pending_messages;
 	ToxFileTransfers transfers;
