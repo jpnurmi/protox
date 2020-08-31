@@ -10,6 +10,8 @@ import android.content.Intent;
 import android.content.Context;
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.BroadcastReceiver;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Build;
 import android.os.Environment;
@@ -26,6 +28,7 @@ import android.provider.DocumentsContract;
 import android.database.Cursor;
 import android.net.Uri;
 import android.webkit.MimeTypeMap;
+import android.app.RemoteInput;
 
 import KeyboardProvider.KeyboardProvider;
 
@@ -42,7 +45,7 @@ public class QtActivityEx extends QtActivity
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = getWindow();
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.setStatusBarColor(Color.parseColor("#3F51B5"));
+            window.setStatusBarColor(Color.parseColor("#3F51B5")); // Material.Indigo
         }
         super.onCreate(savedInstanceState);
         processIntent(getIntent());
@@ -52,11 +55,33 @@ public class QtActivityEx extends QtActivity
                 keyboardHeightChanged(height);
             }
         });
+        BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Bundle bundle = intent.getExtras();
+                if (bundle != null) {
+                    if (bundle.containsKey("transferAccepted")) {
+                        if (bundle.getBoolean("transferAccepted")) {
+                            transferAccepted(bundle.getInt("friendNumber"), bundle.getInt("fileNumber"));
+                        } else {
+                            transferCanceled(bundle.getInt("friendNumber"), bundle.getInt("fileNumber"));
+                        }
+                    }
+                    Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
+                    if (remoteInput != null) {
+                        String replyText = remoteInput.getCharSequence("key_text_reply").toString();
+                        messageReplied(bundle.getInt("friendNumber"), bundle.getString("quoteText"), replyText);
+                    }
+                }
+            }
+        };
+        registerReceiver(receiver, new IntentFilter("notificationAction"));
     }
 
     private static native void keyboardHeightChanged(int height);
     private static native void transferAccepted(int friend_number, int file_number);
     private static native void transferCanceled(int friend_number, int file_number);
+    private static native void messageReplied(int friend_number, String quote_text, String reply_text);
     public static native long getBytesTransfered(int friend_number, int file_number);
     public static native boolean checkFileTransferInProgress(int friend_number, int file_number);
     public static native boolean checkFileTransferSelfCanceled(int friend_number, int file_number);
@@ -72,13 +97,6 @@ public class QtActivityEx extends QtActivity
         if (bundle != null) {
             if (bundle.containsKey("notificationId")) {
                 notificationId = bundle.getInt("notificationId");
-            }
-            if (bundle.containsKey("transferAccepted")) {
-                if (bundle.getBoolean("transferAccepted")) {
-                    transferAccepted(bundle.getInt("friendNumber"), bundle.getInt("fileNumber"));
-                } else {
-                    transferCanceled(bundle.getInt("friendNumber"), bundle.getInt("fileNumber"));
-                }
             }
         }
     }

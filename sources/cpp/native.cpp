@@ -16,13 +16,18 @@ JFUNC(void, keyboardHeightChanged, jint height)
 }
 JFUNC(void, transferAccepted, jint friend_number, jint file_number)
 {
-	qmlbridge->acceptFile(friend_number, file_number);
-	qmlbridge->cancelFileNotification(friend_number, file_number);
+	QMetaObject::invokeMethod(qmlbridge, "acceptFile", Qt::QueuedConnection, 
+							  Q_ARG(quint32, friend_number),
+							  Q_ARG(quint32, file_number));
+	qmlbridge->cancelFileNotification(friend_number, file_number); // fixme: move to Qt thread?
 }
 JFUNC(void, transferCanceled, jint friend_number, jint file_number)
 {
-	qmlbridge->controlFile(friend_number, file_number, TOX_FILE_CONTROL_CANCEL);
-	qmlbridge->cancelFileNotification(friend_number, file_number);
+	QMetaObject::invokeMethod(qmlbridge, "controlFile", Qt::QueuedConnection, 
+							  Q_ARG(quint32, friend_number),
+							  Q_ARG(quint32, file_number),
+							  Q_ARG(quint32, TOX_FILE_CONTROL_CANCEL));
+	qmlbridge->cancelFileNotification(friend_number, file_number); // fixme: move to Qt thread?
 }
 JFUNC(jlong, getBytesTransfered, jint friend_number, jint file_number)
 {
@@ -48,6 +53,19 @@ JFUNC(jboolean, checkFileTransferSelfCanceled, jint friend_number, jint file_num
 	bool exists = qmlbridge->self_canceled_transfers.contains(self_canceled_transfer);
 	qmlbridge->self_canceled_transfers.removeOne(self_canceled_transfer);
 	return exists;
+}
+JFUNC(void, messageReplied, jint friend_number, jstring quote_text, jstring reply_text)
+{
+	QAndroidJniObject javaQuoteString("java/lang/String", "(Ljava/lang/String;)V", quote_text);
+	QAndroidJniObject javaReplyString("java/lang/String", "(Ljava/lang/String;)V", reply_text);
+	const QString finalReplyText = "> " + 
+			javaQuoteString.toString().replace("\n", "\n> ") + 
+			"\n" + 
+			javaReplyString.toString();
+	QMetaObject::invokeMethod(qmlbridge, "sendMessage", Qt::QueuedConnection, 
+							  Q_ARG(quint32, (quint32)friend_number),
+							  Q_ARG(QString, finalReplyText),
+							  Q_ARG(bool, true));
 }
 #endif
 

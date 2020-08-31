@@ -78,7 +78,9 @@ function getUserTheme() {
         "fileCancelButtonColor" : "#f52b1d",
         "transferSuccededTextColor" : "green",
         "transferCanceledTextColor" : "#f52b1d",
-        "transferRemotePausedTextColor" : "#404040"
+        "transferRemotePausedTextColor" : "#404040",
+        "typingTextIndicatorActiveColor" : "black",
+        "typingTextIndicatorColor" : "gray"
     }
 }
 
@@ -161,9 +163,9 @@ function setFriendTyping(friend_number, typing) {
         var nick = bridge.getFriendNickname(friend_number)
         // don't print long nicks
         if (nick.length > friendNickname.charsLimit) {
-            typingText.text = qsTr("A friend is typing...")
+            typingText.text = qsTr("A friend is typing")
         } else {
-            typingText.text = qsTr("%1 is typing...").arg(nick)
+            typingText.text = qsTr("%1 is typing").arg(nick)
         }
         if (!typingText.visible) {
             typingText.visible = true
@@ -264,7 +266,11 @@ function insertMessage(variantMessage, friend_number, self, time, unique_id, fai
                               caption : variantMessage.message,
                               title : qsTr("New message from %1").arg(bridge.getFriendNickname(friend_number)),
                               type : Notification.Text,
-                              id : friend_number
+                              id : friend_number,
+                              parameters : {
+                                  "replyButtonText" : qsTr("Reply"),
+                                  "replyPlaceholderText" : qsTr("Enter your reply here")
+                                  }
                             });
         } else {
             notification.show({

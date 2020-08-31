@@ -28,6 +28,7 @@ QmlCBridge::QmlCBridge()
 	current_profile = "";
 	current_friend_number = 0;
 	profile_password = "";
+	abort_bootstrapping = false;
 
 	settings->beginGroup("Client");
 	int reconnection_interval = settings->value("reconnection_interval", 60000).toInt();
@@ -94,9 +95,9 @@ void QmlCBridge::setCurrentFriendConnStatus(quint32 friend_number, int conn_stat
 							  Q_ARG(QVariant, conn_status));
 }
 
-void QmlCBridge::sendMessage(const QString &message)
+void QmlCBridge::sendMessage(quint32 friend_number, const QString &message, bool reply)
 {
-	ToxPk friend_pk = Toxcore::get_friend_public_key(tox, current_friend_number);
+	ToxPk friend_pk = Toxcore::get_friend_public_key(tox, friend_number);
 	settings->beginGroup("Privacy");
 	bool keep_chat_history = settings->value("keep_chat_history", true).toBool();
 	settings->endGroup();
@@ -107,10 +108,10 @@ void QmlCBridge::sendMessage(const QString &message)
 		ToxVariantMessage variantMessage;
 		variantMessage.insert("type", ToxVariantMessageType::TOXMSG_TEXT);
 		variantMessage.insert("message", msg);
-		quint32 message_id = Toxcore::send_message(tox, current_friend_number, msg, failed);
+		quint32 message_id = Toxcore::send_message(tox, friend_number, msg, failed);
 		quint64 new_unique_id = chat_db->insertMessage(variantMessage, dt, friend_pk, !keep_chat_history, true);
-		insertMessage(variantMessage, current_friend_number, dt, true, new_unique_id, false, failed);
-		pending_messages.push_back(ToxPendingMessage(message_id, new_unique_id, current_friend_number, failed));
+		insertMessage(variantMessage, friend_number, dt, true, new_unique_id, false, failed);
+		pending_messages.push_back(ToxPendingMessage(message_id, new_unique_id, friend_number, failed, reply));
 	}
 }
 
@@ -536,6 +537,10 @@ void QmlCBridge::signOutProfile(bool remove)
 	if (!remove) {
 		Toxcore::save_data(tox, tox_pass_key, Tools::getProgDir() + current_profile);
 	}
+	if (bootstrapping_thread.isRunning()) {
+		abort_bootstrapping = true;
+		bootstrapping_thread.waitForFinished();
+	}
 	Toxcore::destroy(tox);
 	Toxcore::reset_pass_key(tox_pass_key);
 	tox_pass_key = nullptr;
@@ -637,7 +642,7 @@ void QmlCBridge::resendMessage(quint32 friend_number, quint64 unique_id)
 	const QString msg = chat_db->getTextMessage(unique_id, 
 										  Toxcore::get_friend_public_key(tox, friend_number));
 	quint32 message_id = Toxcore::send_message(tox, friend_number, msg, failed);
-	pending_messages.push_back(ToxPendingMessage(message_id, unique_id, friend_number, failed));
+	pending_messages.push_back(ToxPendingMessage(message_id, unique_id, friend_number, failed, false));
 }
 
 void QmlCBridge::removeMessageFromPendingList(quint32 friend_number, quint64 unique_id)
@@ -768,6 +773,14 @@ void QmlCBridge::cancelFileNotification(quint32 friend_number, quint32 file_numb
 	notificationParameters["type"] = QtNotification::FileRequest;
 	notificationParameters["id"] = friend_number;
 	notificationParameters["parameters"] = parameters;
+	notification->cancel(notificationParameters);
+}
+
+void QmlCBridge::cancelTextNotification(quint32 friend_number)
+{
+	QVariantMap notificationParameters;
+	notificationParameters["type"] = QtNotification::Text;
+	notificationParameters["id"] = friend_number;
 	notification->cancel(notificationParameters);
 }
 
