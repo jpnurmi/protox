@@ -335,9 +335,10 @@ void cb_file_recv_chunk(Tox *m, quint32 friend_number, quint32 file_number, quin
 									  Q_ARG(qulonglong, position), 
 									  Q_ARG(QByteArray, QByteArray((char*)data, length)));
 			transfer->bytesTransfered += length;
-			if (!transfer->avatar) {
+			if (!transfer->avatar && !transfer->progress_update_timer->isActive()) {
 				qmlbridge->changeFileProgress(transfer->friend_number, transfer->file_number, 
 											  transfer->bytesTransfered, false);
+				transfer->progress_update_timer->start();
 			}
 		}
 	}

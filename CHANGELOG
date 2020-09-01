@@ -129,3 +129,4 @@ v1.6beta
 - Added animated dots to "friend is typing" indicator.
 - Added a "reply" button to message notifications, allowing to write and send a response right in the notification.
 - Added ability to scan a QR code with an external application to fill the Tox ID field without typing.
+- Fixed UI lags when a user recieves file(s) at high speed.
