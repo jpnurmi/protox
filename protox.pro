@@ -19,7 +19,6 @@ SOURCES += \
 	sources/cpp/db.cpp \
 	sources/cpp/main.cpp \
 	sources/cpp/native.cpp \
-	sources/cpp/native/android/qrcodescanner.cpp \
 	sources/cpp/tools.cpp \
 	sources/cpp/tox.cpp
 
@@ -29,7 +28,6 @@ HEADERS += \
 	sources/cpp/gitversion.h \
 	sources/cpp/main.h \
 	sources/cpp/native.h \
-	sources/cpp/native/android/qrcodescanner.h \
 	sources/cpp/qtutf8bytelimitvalidator.h \
 	sources/cpp/tools.h \
 	sources/cpp/tox.h
@@ -37,10 +35,12 @@ HEADERS += \
 android {
 SOURCES += sources/cpp/native/android/photodialog.cpp \
 	sources/cpp/native/android/folderdialog.cpp \
-	sources/cpp/native/android/toasts.cpp
+	sources/cpp/native/android/toasts.cpp \
+	sources/cpp/native/android/qrcodescanner.cpp
 HEADERS += sources/cpp/native/android/photodialog.h \
 	sources/cpp/native/android/folderdialog.h \
 	sources/cpp/native/android/toasts.h
+	sources/cpp/native/android/qrcodescanner.h
 }
 
 LIBS += -ltoxcore -ltoxencryptsave
