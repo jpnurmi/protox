@@ -15,6 +15,7 @@ import QtUtf8ByteLimitValidator 1.0
 import QtToast 1.0
 import QtPhotoDialog 1.0
 import QtFolderDialog 1.0
+import QtQRCodeScanner 1.0
 import QZXing 2.3
 
 import "qrc:/deps/jdenticon/jdenticon.js" as Jdenticon

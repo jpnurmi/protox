@@ -7,6 +7,7 @@
 #include "native/android/toasts.h"
 #include "native/android/photodialog.h"
 #include "native/android/folderdialog.h"
+#include "native/android/qrcodescanner.h"
 #endif
 
 #define JFUNC(type, name, ...) extern "C" JNIEXPORT type JNICALL Java_org_protox_activity_QtActivityEx_##name (JNIEnv *, jobject, __VA_ARGS__)

@@ -128,3 +128,4 @@ v1.6beta
 - Added support for sending multiple files (qt5.15.1 build only).
 - Added animated dots to "friend is typing" indicator.
 - Added a "reply" button to message notifications, allowing to write and send a response right in the notification.
+- Added ability to scan a QR code with an external application to fill the Tox ID field without typing.

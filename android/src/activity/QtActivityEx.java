@@ -12,6 +12,7 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Build;
 import android.os.Environment;
@@ -127,6 +128,23 @@ public class QtActivityEx extends QtActivity
         }
         intent.setType("image/*");
         return Intent.createChooser(intent, title);
+    }
+
+    public static Intent createScanQRCodeIntent() {
+        PackageManager packageManager = QtNative.activity().getPackageManager();
+        Intent intent = new Intent("com.google.zxing.client.android.SCAN");
+        intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
+        if (intent.resolveActivity(packageManager) != null) {
+            return intent;
+        } else {
+            return null;
+        }
+    }
+
+    public void browseForQRCodeScanner() {
+        Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
+        Intent marketIntent = new Intent(Intent.ACTION_VIEW, marketUri);
+        startActivity(marketIntent);
     }
 
     public static Intent createChooseFolderIntent() {

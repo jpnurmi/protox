@@ -605,6 +605,10 @@ Click on the left button to open the friend list, then on «+» to add a new fri
         <source>Enter your reply here</source>
         <translation>Введите ваш ответ здесь</translation>
     </message>
+    <message>
+        <source>Scan QR code</source>
+        <translation>Сканировать QR-код</translation>
+    </message>
 </context>
 <context>
     <name>QAndroidPlatformTheme</name>

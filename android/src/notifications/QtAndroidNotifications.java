@@ -59,7 +59,8 @@ class QtAndroidNotifications {
                     Intent intentActionReply = new Intent("notificationAction");
                     intentActionReply.putExtra("friendNumber", id);
                     intentActionReply.putExtra("quoteText", caption);
-                    PendingIntent pendingIntentReply = PendingIntent.getBroadcast(context, 0, intentActionReply, 0);
+                    PendingIntent pendingIntentReply = PendingIntent.getBroadcast(context, 0, intentActionReply, 
+                                    PendingIntent.FLAG_UPDATE_CURRENT);
                     Notification.Action replyAction = new Notification.Action.Builder(android.R.drawable.ic_dialog_info,
                                     (String)parameters.get("replyButtonText"), pendingIntentReply)
                                     .addRemoteInput(remoteInput)
@@ -75,18 +76,18 @@ class QtAndroidNotifications {
                 int file_number = (int)parameters.get("fileNumber");
                 // accept button
                 Intent intentActionAccept = new Intent("notificationAction");
-                intentActionAccept.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                intentActionAccept.putExtra("transferAccepted",true);
+                intentActionAccept.putExtra("transferAccepted", true);
                 intentActionAccept.putExtra("friendNumber", id);
                 intentActionAccept.putExtra("fileNumber", file_number);
                 // cancel button
                 Intent intentActionCancel = new Intent("notificationAction");
-                intentActionCancel.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                intentActionCancel.putExtra("transferAccepted",false);
+                intentActionCancel.putExtra("transferAccepted", false);
                 intentActionCancel.putExtra("friendNumber", id);
                 intentActionCancel.putExtra("fileNumber", file_number);
-                PendingIntent pendingIntentAccept = PendingIntent.getBroadcast(context, 0, intentActionAccept, 0);
-                PendingIntent pendingIntentCancel = PendingIntent.getBroadcast(context, 1, intentActionCancel, 0);
+                PendingIntent pendingIntentAccept = PendingIntent.getBroadcast(context, 0, intentActionAccept, 
+                                    PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent pendingIntentCancel = PendingIntent.getBroadcast(context, 1, intentActionCancel, 
+                                    PendingIntent.FLAG_UPDATE_CURRENT);
                 builder.addAction(0, (String)parameters.get("acceptButtonText"), pendingIntentAccept);
                 builder.addAction(0, (String)parameters.get("cancelButtonText"), pendingIntentCancel);
                 notificationManager.notify(getTagByType(type) + "_" + id, file_number, builder.build());
