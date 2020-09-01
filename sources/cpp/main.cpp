@@ -951,6 +951,7 @@ int main(int argc, char *argv[])
 	QtToast::declareQML();
 	QtPhotoDialog::declareQML();
 	QtFolderDialog::declareQML();
+	QtQRCodeScanner::declareQML();
 	QUtf8ByteLimitValidator::declareQML();
 	QZXing::registerQMLTypes();
 	QZXing::registerQMLImageProvider(engine);

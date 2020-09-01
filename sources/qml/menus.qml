@@ -8,6 +8,7 @@ import QtGraphicalEffects 1.0
 
 import QtUtf8ByteLimitValidator 1.0
 import QtPhotoDialog 1.0
+import QtQRCodeScanner 1.0
 
 /*[remove]*/ Item {
 
@@ -66,14 +67,15 @@ Menu {
             addFriendMessage.focus = true
         }
     }
-    /*
     Button {
-        text: qsTr("Scan QRCode")
+        id: scanQRCodeButton
+        leftInset: 15
+        rightInset: leftInset
+        text: qsTr("Scan QR code")
         onClicked: {
-            qrScannerMenu.popup()
+            toxIDCodeScanner.open()
         }
     }
-    */
     Text {
         padding: 10
         font.bold: true
@@ -627,6 +629,13 @@ PhotoDialog {
         accountAvatar.source = changeAvatarImage.source = file_image ? 
                     "file://" + avatar_path : identiconBuffer.getImageSource(0, true)
         removeAvatarButton.enabled = file_image
+    }
+}
+
+QRCodeScanner {
+    id: toxIDCodeScanner
+    onTriggered: {
+        toxId.text = result
     }
 }
 
