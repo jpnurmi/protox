@@ -109,7 +109,7 @@ public slots:
 	Q_INVOKABLE QString getFriendPublicKeyHex(quint32 friend_number);
 	Q_INVOKABLE const QString getFriendAvatarPath(quint32 friend_number);
 	Q_INVOKABLE const QString getSelfAvatarPath();
-	Q_INVOKABLE void changeSelfAvatar(const QString &path, bool remove = false);
+	Q_INVOKABLE void changeSelfAvatar(const QString &path);
 	Q_INVOKABLE const QSize getImageSize(const QString &path);
 	Q_INVOKABLE const QString getCurrentCommitSha1();
 

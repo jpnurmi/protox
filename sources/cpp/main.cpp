@@ -842,12 +842,13 @@ void QmlCBridge::updateFriendAvatar(quint32 friend_number)
 	QMetaObject::invokeMethod(component, "updateFriendAvatar", Q_ARG(QVariant, friend_number));
 }
 
-void QmlCBridge::changeSelfAvatar(const QString &path, bool remove)
+void QmlCBridge::changeSelfAvatar(const QString &path)
 {
 	const int scaled_avatar_size = 128;
-	const QString avatarPath = getSelfAvatarPath();
-	if (remove) {
+	QString avatarPath = getSelfAvatarPath();;
+	if (path.isEmpty()) {
 		QFile::remove(avatarPath);
+		avatarPath.clear();
 	} else {
 		QImage avatar(path);
 		QImage scaledAvatar = avatar.scaled(QSize(scaled_avatar_size, scaled_avatar_size), 
@@ -855,7 +856,7 @@ void QmlCBridge::changeSelfAvatar(const QString &path, bool remove)
 											Qt::SmoothTransformation);
 		scaledAvatar.save(avatarPath, "PNG");
 	}
-	Toxcore::send_avatar_to_all_friends(tox, remove ? QString() : avatarPath, remove);
+	Toxcore::send_avatar_to_all_friends(tox, avatarPath);
 }
 
 const QSize QmlCBridge::getImageSize(const QString &path)

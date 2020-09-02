@@ -155,11 +155,12 @@ void AsyncFileManager::onChunkReadRequest(quint64 position, quint32 length)
 					 QString::number((quint64)m_file->thread(), 16) + 
 					 " error - seek failed: " + m_file->fileName() + ".");
 	}
-	QByteArray data = m_file->read(length);
-	if (data.isEmpty()) {
+	QByteArray data;
+	data.resize(length);
+	if (m_file->read(data.data(), length) == -1) {
 		Tools::debug("File manager thread 0x" + 
 					 QString::number((quint64)m_file->thread(), 16) + 
-					 " error - data is empty: " + m_file->fileName() + ".");
+					 " error - read failed: " + m_file->fileName() + ".");
 	}
 	emit fileChunkReady(m_parent, data, position);
 }

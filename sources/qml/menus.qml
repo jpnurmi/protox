@@ -608,7 +608,7 @@ Menu {
         leftInset: 10
         rightInset: leftInset
         onClicked: {
-            bridge.changeSelfAvatar("", true)
+            bridge.changeSelfAvatar("")
             var avatar_path = accountAvatar.avatarPath
             var file_image = bridge.checkFileImage(avatar_path)
             accountAvatar.source = changeAvatarImage.source = file_image ? 
