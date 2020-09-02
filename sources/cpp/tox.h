@@ -184,14 +184,14 @@ namespace Toxcore {
 	quint32 get_tox_address_size();
 	quint32 get_tox_public_key_size();
 	quint32 get_tox_max_hostname_length();
-	quint32 send_file(Tox *m, quint32 friend_number, const QString &path, ToxFileTransfer **transfer, quint64 &filesize, ToxFileId &file_id, quint32 &error, bool avatar = false, bool remove_avatar = false);
+	quint32 send_file(Tox *m, quint32 friend_number, const QString &path, ToxFileTransfer **transfer, quint64 &filesize, ToxFileId &file_id, quint32 &error, bool avatar = false);
 	bool file_control(Tox *m, quint32 friend_number, quint32 file_number, quint32 control, quint64 &unique_id);
 	void cancel_all_file_transfers();
 	void cancel_all_file_transfers_for_friend(quint32 friend_number);
 	void iterate(Tox *m);
 	quint32 acceptFile(quint32 friend_number, quint32 file_number, quint64 &unique_id);
-	void send_avatar_to_friend(Tox *m, quint32 friend_number, const QString &path, bool remove_avatar = false);
-	void send_avatar_to_all_friends(Tox *m, const QString &path, bool remove_avatar = false);
+	void send_avatar_to_friend(Tox *m, quint32 friend_number, const QString &path);
+	void send_avatar_to_all_friends(Tox *m, const QString &path);
 }
 
 namespace ToxConverter {
