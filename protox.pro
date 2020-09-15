@@ -43,7 +43,7 @@ HEADERS += sources/cpp/native/android/photodialog.h \
 	sources/cpp/native/android/qrcodescanner.h
 }
 
-LIBS += -ltoxcore -ltoxencryptsave
+LIBS += -ltoxcore -ltoxencryptsave -ltoxav
 
 RESOURCES += qml.qrc
 
@@ -100,24 +100,28 @@ ANDROID_PACKAGE_SOURCE_DIR = \
 
 ANDROID_ABIS = armeabi-v7a
 
-contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
+contains(ANDROID_ABIS, armeabi-v7a) {
 	ANDROID_EXTRA_LIBS += \
 		$$PWD/libs/armv7-a/libtoxcore.so \
 		$$PWD/libs/armv7-a/libtoxencryptsave.so \
-		$$PWD/libs/armv7-a/libsodium.so
+		$$PWD/libs/armv7-a/libsodium.so \
+		$$PWD/libs/armv7-a/libtoxav.so \
+		$$PWD/libs/armv7-a/libopus.so
 }
 
-contains(ANDROID_TARGET_ARCH,x86) {
+contains(ANDROID_ABIS, x86) {
 	ANDROID_EXTRA_LIBS += \
 		$$PWD/libs/x86/libtoxcore.so \
 		$$PWD/libs/x86/libtoxencryptsave.so \
-		$$PWD/libs/x86/libsodium.so
+		$$PWD/libs/x86/libsodium.so \
+		$$PWD/libs/x86/libtoxav.so \
+		$$PWD/libs/x86/libopus.so
 }
 
-contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
+contains(ANDROID_TARGET_ARCH, armeabi-v7a) {
 	LIBS += -L$$PWD/libs/armv7-a
 }
 
-contains(ANDROID_TARGET_ARCH,x86) {
+contains(ANDROID_TARGET_ARCH, x86) {
 	LIBS += -L$$PWD/libs/x86
 }
