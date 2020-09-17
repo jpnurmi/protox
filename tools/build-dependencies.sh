@@ -8,7 +8,7 @@ COL='\033[1;32m'
 COL2='\e[34m'
 NC='\033[0m' # No Color
 
-TOOLS_DIR=$(pwd)/tools
+TOOLS_DIR=$(dirname $(readlink -f $0))
 INSTALL_DIR=$(pwd)/libs
 
 cd $(dirname "$0")
@@ -22,17 +22,37 @@ case "$1" in
         ;;
 esac
 
-if test -z "$TARGET_ARCH"
-then
-    echo "You should set TARGET_ARCH to required architecture (armv7-a, armv8-a, x86, x86_64)."
-    exit 1
-fi
+
 
 if test -z "$ANDROID_NDK_HOME"
 then
     echo "You should set ANDROID_NDK_HOME to the directory containing the Android NDK."
     exit 1
 fi
+
+if [ -z "$TARGET_ARCH" ]
+then
+    PS3='Please choose target archcitecture: '
+    options=("armv7-a" "x86" "quit")
+    select opt in "${options[@]}"
+    do
+        case $opt in
+            "armv7-a")
+                export TARGET_ARCH="armv7-a"
+                break
+                ;;
+            "x86")
+                export TARGET_ARCH="x86"
+                break
+                ;;
+            "quit")
+                exit 0
+                ;;
+            *) echo "invalid option $REPLY";;
+        esac
+    done
+fi
+
 
 mkdir -p .build-deps
 cd .build-deps
