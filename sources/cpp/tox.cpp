@@ -114,12 +114,14 @@ static void cb_friend_message(Tox *m, quint32 friend_number, TOX_MESSAGE_TYPE ty
 static void cb_friend_name(Tox *m, quint32 friend_number, const quint8 *name, size_t length, void *user_data)
 {
 	Q_UNUSED(user_data)
-	// I replace newlines with spaces to not make a mess in UI
-	QString nickName = QString::fromUtf8((char*)name, length).replace("\n", " ");
-	if (nickName.isEmpty()) {
-		nickName = ToxConverter::toString(get_friend_public_key(m, friend_number));
+	if (!qmlbridge->checkFriendCustomNickname(friend_number)) {
+		// I replace newlines with spaces to not make a mess in UI
+		QString nickName = QString::fromUtf8((char*)name, length).replace("\n", " ");
+		if (nickName.isEmpty()) {
+			nickName = ToxConverter::toString(get_friend_public_key(m, friend_number));
+		}
+		qmlbridge->updateFriendNickName(friend_number, nickName);
 	}
-	qmlbridge->updateFriendNickName(friend_number, nickName);
 }
 
 static void cb_friend_connection_change(Tox *m, quint32 friend_number, TOX_CONNECTION connection_status, void *userdata)
