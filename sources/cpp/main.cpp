@@ -22,8 +22,9 @@ QmlCBridge::QmlCBridge()
 {
 	component = nullptr;
 	tox = nullptr;
-	toxcore_timer = nullptr;
 	tox_pass_key = nullptr;
+	tox_opts = nullptr;
+	toxcore_timer = nullptr;
 	app_inactive = true;
 	current_profile = "";
 	current_friend_number = 0;
@@ -408,7 +409,7 @@ void QmlCBridge::saveProfile()
 
 void QmlCBridge::updateToxPasswordKey()
 {
-	Toxcore::reset_pass_key(tox_pass_key);
+	Toxcore::reset_pass_key(&tox_pass_key);
 	tox_pass_key = Toxcore::generate_pass_key(profile_password);
 }
 
@@ -438,7 +439,8 @@ int QmlCBridge::signInProfile(const QString &profile, bool create_new, const QSt
 	setToxPassword(password);
 	updateToxPasswordKey();
 	ToxProfileLoadingError error;
-	tox = Toxcore::create(error, create_new, password, current_profile, tox_pass_key);
+	tox_opts = Toxcore::create_opts();
+	tox = Toxcore::create_tox(error, create_new, password, current_profile, tox_pass_key, tox_opts);
 	if (!tox) {
 		current_profile.clear();
 		return error;
@@ -541,9 +543,9 @@ void QmlCBridge::signOutProfile(bool remove)
 		abort_bootstrapping = true;
 		bootstrapping_thread.waitForFinished();
 	}
-	Toxcore::destroy(tox);
-	Toxcore::reset_pass_key(tox_pass_key);
-	tox_pass_key = nullptr;
+	Toxcore::destroy_tox(tox);
+	Toxcore::reset_pass_key(&tox_pass_key);
+	Toxcore::destroy_opts(tox_opts);
 
 	delete chat_db;
 	profile_password.clear();

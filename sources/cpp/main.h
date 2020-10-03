@@ -132,9 +132,9 @@ private:
 	QTimer *toxcore_timer;
 	QTimer *reconnection_timer;
 private:
-	// fixme: move to tox.cpp, may be?
 	Tox *tox;
 	Tox_Pass_Key *tox_pass_key;
+	Tox_Options *tox_opts;
 };
 
 class QmlTranslator : public QObject

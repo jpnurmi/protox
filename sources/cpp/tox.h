@@ -145,8 +145,10 @@ typedef QVector <ToxSelfCanceledTransfer> ToxSelfCanceledTransfers;
 typedef QFuture <void> ToxBootstrapingThread;
 
 namespace Toxcore {
-	Tox *create(ToxProfileLoadingError &error, bool create_new, const QString &password, const QString &profile, const Tox_Pass_Key *pass_key);
-	void destroy(Tox *m);
+	struct Tox_Options *create_opts();
+	void destroy_opts(struct Tox_Options *opts);
+	Tox *create_tox(ToxProfileLoadingError &error, bool create_new, const QString &password, const QString &profile, const Tox_Pass_Key *pass_key, Tox_Options *opts);
+	void destroy_tox(Tox *m);
 	QTimer *create_qtimer(Tox *m);
 	void bootstrap_DHT(Tox *m);
 	ToxId get_address(Tox *m);
@@ -174,7 +176,7 @@ namespace Toxcore {
 	bool check_profile_encrypted(const QString &profile);
 	bool save_data(Tox *m, const Tox_Pass_Key *pass_key, const QString &path);
 	Tox_Pass_Key *generate_pass_key(const QString &password);
-	void reset_pass_key(Tox_Pass_Key *key);
+	void reset_pass_key(Tox_Pass_Key **key);
 	const QString get_version_string();
 	quint32 get_available_nodes();
 	quint32 get_message_max_length();

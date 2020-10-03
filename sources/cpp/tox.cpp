@@ -13,7 +13,6 @@ extern QSettings *settings;
 
 namespace Toxcore {
 
-struct Tox_Options *opts = nullptr;
 quint32 available_nodes = 0;
 ToxLocalFileManager local_manager;
 
@@ -717,7 +716,7 @@ void bootstrap_DHT(Tox *m)
 	});
 }
 
-struct Tox_Options *get_opts()
+struct Tox_Options *create_opts()
 {
 	TOX_ERR_OPTIONS_NEW err;
 	struct Tox_Options *opts = tox_options_new(&err);
@@ -738,7 +737,12 @@ struct Tox_Options *get_opts()
 	return opts;
 }
 
-Tox *create(ToxProfileLoadingError &error, bool create_new, const QString &password, const QString &profile, const Tox_Pass_Key *pass_key)
+void destroy_opts(struct Tox_Options *opts)
+{
+	tox_options_free(opts);
+}
+
+Tox *create_tox(ToxProfileLoadingError &error, bool create_new, const QString &password, const QString &profile, const Tox_Pass_Key *pass_key, struct Tox_Options *opts)
 {
 	QFile f(Tools::getProgDir() + profile);
 	bool clean = !f.exists();
@@ -751,7 +755,6 @@ Tox *create(ToxProfileLoadingError &error, bool create_new, const QString &passw
 		return nullptr;
 	}
 
-	opts = get_opts();
 	Tox *m = load_tox(opts, Tools::getProgDir() + profile, password, error);
 
 	if (!m) {
@@ -823,15 +826,15 @@ ToxId get_address(Tox *m)
 	return address;
 }
 
-void destroy(Tox *m)
+void destroy_tox(Tox *m)
 {
 	tox_kill(m);
-	tox_options_free(opts);
 }
 
-void reset_pass_key(Tox_Pass_Key *key)
+void reset_pass_key(Tox_Pass_Key **key)
 {
-	tox_pass_key_free(key);
+	tox_pass_key_free(*key);
+	*key = nullptr;
 }
 
 Tox_Pass_Key *generate_pass_key(const QString &password)
