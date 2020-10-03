@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "tools.h"
+#include "asyncfilemanager.h"
 
 // Toxcore
 #include "deps/tox/tox.h"

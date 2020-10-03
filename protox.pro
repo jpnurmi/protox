@@ -16,6 +16,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+	sources/cpp/asyncfilemanager.cpp \
 	sources/cpp/db.cpp \
 	sources/cpp/main.cpp \
 	sources/cpp/native.cpp \
@@ -23,6 +24,7 @@ SOURCES += \
 	sources/cpp/tox.cpp
 
 HEADERS += \
+	sources/cpp/asyncfilemanager.h \
 	sources/cpp/common.h \
 	sources/cpp/db.h \
 	sources/cpp/gitversion.h \
