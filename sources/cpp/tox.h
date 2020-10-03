@@ -81,6 +81,16 @@ public slots:
 	void onFileTransferEnded(void *parent);
 };
 
+struct ToxFileChunk {
+	quint64 position;
+	QByteArray data;
+
+	ToxFileChunk(quint64 _position, const QByteArray &_data) {
+		position = _position;
+		data = _data;
+	}
+};
+
 struct ToxFileTransfer {
 	Tox *tox;
 	quint32 friend_number;
@@ -89,6 +99,7 @@ struct ToxFileTransfer {
 	quint32 bytesTransfered;
 	bool avatar;
 	QTimer *progress_update_timer; // ui only
+	QQueue <ToxFileChunk> chunks_buffer;
 	ToxFileTransfer (Tox *_tox, quint32 _friend_number, quint32 _file_number,  bool _avatar, Tools::AsyncFileManager *_manager) {
 		tox = _tox;
 		friend_number = _friend_number;

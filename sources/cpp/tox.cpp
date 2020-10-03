@@ -807,11 +807,13 @@ bool check_profile_encrypted(const QString &profile)
 	return encrypted;
 }
 
+static void resend_all_file_chunks(Tox *m);
 QTimer *create_qtimer(Tox *m)
 {
 	QTimer *timer = new QTimer;
 	QObject::connect(timer, &QTimer::timeout, [=]() { 
 		tox_iterate(m, nullptr);
+		resend_all_file_chunks(m);
 		timer->start(tox_iteration_interval(m));
 	});
 	timer->setSingleShot(true);
@@ -891,20 +893,47 @@ quint32 get_tox_max_hostname_length()
 	return tox_max_hostname_length();
 }
 
-static void send_file_chunk(Tox *m, quint32 friend_number, quint32 file_number
-							, quint64 position, const QByteArray &bytesRead)
+static bool send_file_chunk(Tox *m, quint32 friend_number, quint32 file_number
+							, quint64 position, const QByteArray &bytesRead, bool resend = false)
 {
 	TOX_ERR_FILE_SEND_CHUNK err;
 	tox_file_send_chunk(m, friend_number, file_number, position, (quint8*)bytesRead.data(), bytesRead.length(), &err);
+	bool save_to_buffer = false;
+	if (err == TOX_ERR_FILE_SEND_CHUNK_SENDQ) {
+		if (resend) {
+			return false;
+		}
+		save_to_buffer = true;
+	}
 
 	for (const auto transfer : qmlbridge->transfers) {
 		if (transfer->friend_number == friend_number && transfer->file_number == file_number) {
+			if (save_to_buffer) {
+				transfer->chunks_buffer.enqueue(ToxFileChunk(position, bytesRead));
+				return true;
+			}
 			transfer->bytesTransfered += bytesRead.length();
 			if (!transfer->avatar && !transfer->progress_update_timer->isActive()) {
 				qmlbridge->changeFileProgress(friend_number, file_number, transfer->bytesTransfered, false);
 				transfer->progress_update_timer->start();
 			}
 			break;
+		}
+	}
+	return true;
+}
+
+static void resend_all_file_chunks(Tox *m)
+{
+	for (const auto &transfer : qmlbridge->transfers) {
+		while (!transfer->chunks_buffer.isEmpty()) {
+			const ToxFileChunk &chunk = transfer->chunks_buffer.first();
+			if (send_file_chunk(m, transfer->friend_number, transfer->file_number, 
+								 chunk.position, chunk.data, true)) {
+				transfer->chunks_buffer.removeFirst();
+			} else {
+				break;
+			}
 		}
 	}
 }
@@ -1131,8 +1160,12 @@ void send_avatar_to_all_friends(Tox *m, const QString &path)
 void ToxLocalFileManager::onFileChunkReady(void *parent, const QByteArray &data, quint64 position)
 {
 	ToxFileTransfer *parent_transfer = (ToxFileTransfer*)parent;
-	Toxcore::send_file_chunk(parent_transfer->tox, parent_transfer->friend_number, parent_transfer->file_number,
-					position, data);
+	if (parent_transfer->chunks_buffer.empty()) {
+		Toxcore::send_file_chunk(parent_transfer->tox, parent_transfer->friend_number, parent_transfer->file_number,
+						position, data);
+	} else {
+		parent_transfer->chunks_buffer.enqueue(ToxFileChunk(position, data));
+	}
 }
 
 void ToxLocalFileManager::onFileTransferEnded(void *parent)
