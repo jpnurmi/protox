@@ -174,6 +174,7 @@ Drawer {
                         }
                     }
                     Text {
+                        id: statusArrow
                         text: "\uE64B"
                         font.family: themify.name
                         font.pointSize: 10
@@ -181,6 +182,17 @@ Drawer {
                         anchors.left: statusIndicator.right
                         anchors.leftMargin: 20
                         anchors.verticalCenter: statusIndicator.verticalCenter
+                        transform: Rotation { 
+                            origin.x: statusArrow.width * 0.5
+                            origin.y: statusArrow.height * 0.5
+                            angle: accountStatusMenu.visible ? -180 : 0
+                            Behavior on angle {
+                                NumberAnimation {
+                                    duration: 200
+                                    easing.type: Easing.Linear
+                                }
+                            }
+                        }
                     }
                     onPressed: {
                         if (accountStatusMenu.visible) {
