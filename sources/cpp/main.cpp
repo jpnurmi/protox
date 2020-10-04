@@ -274,9 +274,9 @@ void QmlCBridge::setFriendStatus(quint32 friend_number, quint32 status)
 							  Q_ARG(QVariant, status));
 }
 
-const QString QmlCBridge::getNickname(bool toxId)
+const QString QmlCBridge::getNickname(bool toxPk)
 {
-	return Toxcore::get_nickname(tox, toxId);
+	return Toxcore::get_nickname(tox, toxPk);
 }
 
 void QmlCBridge::setNickname(const QString &nickname)

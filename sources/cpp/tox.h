@@ -186,7 +186,7 @@ namespace Toxcore {
 	void delete_friend(Tox *m, quint32 friend_number);
 	void set_typing_friend(Tox *m, quint32 friend_number, bool typing);
 	const QString get_friend_status_message(Tox *m, quint32 friend_number);
-	const QString get_nickname(Tox* m, bool toxId = false);
+	const QString get_nickname(Tox* m, bool toxPk = false);
 	void set_nickname(Tox *m, const QString &nickname);
 	const QString get_status_message(Tox *m);
 	void set_status_message(Tox *m, const QString &statusMessage);

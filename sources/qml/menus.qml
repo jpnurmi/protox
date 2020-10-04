@@ -495,7 +495,7 @@ Menu {
             }
             onTriggered: {
                 bridge.setNickname(myNickname.text)
-                accountName.text = bridge.getNickname(true)
+                accountName.text = bridge.getNickname()
                 bridge.setStatusMessage(myStatusMessage.text)
                 bridge.saveProfile()
                 profileMenu.close()

@@ -310,7 +310,8 @@ function insertMessage(variantMessage, friend_number, self, time, unique_id, fai
         dict.msgFilestate = 0
         dict.msgFilenumber = 0
         if (variantMessage.action) {
-            dict.msgText = bridge.getFriendNickname(friend_number) + " " + variantMessage.message
+            let nick = self ? bridge.getNickname() : bridge.getFriendNickname(friend_number)
+            dict.msgText = nick + " " + variantMessage.message
         } else {
             dict.msgText = variantMessage.message
         }
@@ -452,7 +453,7 @@ function signInProfile(profile, create, password, autoLogin) {
     // drawer
     identiconModel.appendIfNotExists(0, true)
     accountAvatar.avatarPath = bridge.getSelfAvatarPath()
-    accountName.text = bridge.getNickname(true)
+    accountName.text = bridge.getNickname()
     statusIndicator.setStatus(bridge.getStatus())
     // QR code
     updateQRcode()

@@ -451,11 +451,16 @@ void set_typing_friend(Tox *m, quint32 friend_number, bool typing)
 	tox_self_set_typing(m, friend_number, typing, nullptr);
 }
 
-const QString get_nickname(Tox *m, bool toxId)
+const QString get_nickname(Tox *m, bool toxPk)
 {
 	size_t length = tox_self_get_name_size(m);
 	if (!length) {
-		return toxId ? ToxConverter::toString(get_address(m)) : QString();
+		QString result;
+		if (toxPk) {
+			result = ToxConverter::toString(get_address(m));
+			result.truncate(get_tox_public_key_size() * 2);
+		}
+		return result;
 	}
 	QByteArray name;
 	name.resize(length);
