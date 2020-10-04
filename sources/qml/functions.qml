@@ -80,7 +80,9 @@ function getUserTheme() {
         "transferCanceledTextColor" : "#f52b1d",
         "transferRemotePausedTextColor" : "#404040",
         "typingTextIndicatorActiveColor" : "black",
-        "typingTextIndicatorColor" : "gray"
+        "typingTextIndicatorColor" : "gray",
+        "actionTextColor" : "#2196f3",
+        "actionTextSelfColor" : "#9c27b0"
     }
 }
 
@@ -264,13 +266,13 @@ function insertMessage(variantMessage, friend_number, self, time, unique_id, fai
     if (!self && !history && (appInactive || bridge.getCurrentFriendNumber() !== friend_number || settingsWindow.visible)) {
         if (!variantMessage.type) {
             notification.show({
-                              caption : variantMessage.message,
+                              caption : variantMessage.action 
+                                        ? bridge.getFriendNickname(friend_number) + " " + variantMessage.message
+                                        : variantMessage.message,
                               title : qsTr("New message from %1").arg(bridge.getFriendNickname(friend_number)),
                               type : Notification.Text,
                               id : friend_number,
                               parameters : {
-                                  "action" : variantMessage.action,
-                                  "nickName" : bridge.getFriendNickname(friend_number),
                                   "replyButtonText" : qsTr("Reply"),
                                   "replyPlaceholderText" : qsTr("Enter your reply here")
                                   }
