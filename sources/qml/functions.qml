@@ -268,6 +268,8 @@ function insertMessage(variantMessage, friend_number, self, time, unique_id, fai
                               type : Notification.Text,
                               id : friend_number,
                               parameters : {
+                                  "action" : variantMessage.action,
+                                  "nickName" : bridge.getFriendNickname(friend_number),
                                   "replyButtonText" : qsTr("Reply"),
                                   "replyPlaceholderText" : qsTr("Enter your reply here")
                                   }
@@ -307,8 +309,7 @@ function insertMessage(variantMessage, friend_number, self, time, unique_id, fai
         dict.msgFilestate = 0
         dict.msgFilenumber = 0
         if (variantMessage.action) {
-            dict.msgText = "* " + bridge.getFriendNickname(friend_number) 
-                    + " " + variantMessage.message
+            dict.msgText = bridge.getFriendNickname(friend_number) + " " + variantMessage.message
         } else {
             dict.msgText = variantMessage.message
         }

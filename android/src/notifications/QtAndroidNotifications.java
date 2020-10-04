@@ -32,12 +32,18 @@ class QtAndroidNotifications {
     public static void show(final String title, final String caption, final int id, final int type, final HashMap <String, Object> parameters) {
         final Context context = QtNative.activity();
         final NotificationManager notificationManager = getManager();
+        String text;
+        if (parameters.containsKey("action") && (boolean)parameters.get("action")) {
+            text = (String)parameters.get("nickName") + " " + caption;
+        } else {
+            text = caption;
+        }
         final Notification.Builder builder =
                 new Notification.Builder(context)
                 .setSmallIcon(org.protox.R.drawable.icon)
                 .setColor(Color.parseColor("#673AB7")) // Material.DeepPurple
                 .setContentTitle(title)
-                .setContentText(caption)
+                .setContentText(text)
                 .setDefaults(Notification.DEFAULT_ALL)
                 .setPriority(Notification.PRIORITY_HIGH)
                 .setAutoCancel(true);
@@ -58,7 +64,7 @@ class QtAndroidNotifications {
                             .build();
                     Intent intentActionReply = new Intent("notificationAction");
                     intentActionReply.putExtra("friendNumber", id);
-                    intentActionReply.putExtra("quoteText", caption);
+                    intentActionReply.putExtra("quoteText", text);
                     PendingIntent pendingIntentReply = PendingIntent.getBroadcast(context, 0, intentActionReply, 
                                     PendingIntent.FLAG_UPDATE_CURRENT);
                     Notification.Action replyAction = new Notification.Action.Builder(android.R.drawable.ic_dialog_info,
@@ -66,7 +72,7 @@ class QtAndroidNotifications {
                                     .addRemoteInput(remoteInput)
                                     .build();
                     builder.addAction(replyAction);
-                    builder.setStyle(new Notification.BigTextStyle().bigText(caption));
+                    builder.setStyle(new Notification.BigTextStyle().bigText(text));
                 }
                 builder.setContentIntent(resultPendingIntent);
                 notificationManager.notify(getTagByType(type), id, builder.build());
