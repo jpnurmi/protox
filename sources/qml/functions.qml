@@ -236,6 +236,7 @@ function selectFriend(friend_number) {
     }
     notification.cancel({ type : Notification.Text, id : friend_number })
     dropTypingTimer.stop()
+    typingText.text = ""
     typingText.visible = false
     each_friend_text[bridge.getCurrentFriendNumber()] = chatMessage.text
     bridge.setCurrentFriend(friend_number)
