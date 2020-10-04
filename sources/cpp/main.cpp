@@ -103,19 +103,16 @@ void QmlCBridge::sendMessage(quint32 friend_number, const QString &message, bool
 	bool keep_chat_history = settings->value("keep_chat_history", true).toBool();
 	settings->endGroup();
 	QDateTime dt = QDateTime::currentDateTime();
-	const QStringList splitMessage = Tools::qstringSplitUnicode(message, Toxcore::get_message_max_length());
+	bool action = message.left(4).toLower() == "/me ";
+	const QStringList splitMessage = Tools::qstringSplitUnicode(action ? QString(message).remove(0, 4) : message, 
+																Toxcore::get_message_max_length());
 	for (const auto &msg : splitMessage) {
 		bool failed;
 		ToxVariantMessage variantMessage;
 		variantMessage.insert("type", ToxVariantMessageType::TOXMSG_TEXT);
-		if (message.left(4).toLower() == "/me ") {
-			variantMessage.insert("message", QString(msg).remove(0, 4));
-			variantMessage.insert("action", true);
-		} else {
-			variantMessage.insert("message", msg);
-			variantMessage.insert("action", false);
-		}
-		quint32 message_id = Toxcore::send_message(tox, friend_number, msg, variantMessage["action"].toBool(), failed);
+		variantMessage.insert("message", msg);
+		variantMessage.insert("action", action);
+		quint32 message_id = Toxcore::send_message(tox, friend_number, msg, action, failed);
 		quint64 new_unique_id = chat_db->insertMessage(variantMessage, dt, friend_pk, !keep_chat_history, true);
 		insertMessage(variantMessage, friend_number, dt, true, new_unique_id, false, failed);
 		pending_messages.push_back(ToxPendingMessage(message_id, new_unique_id, friend_number, failed, reply));
