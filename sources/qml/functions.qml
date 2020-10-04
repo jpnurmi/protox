@@ -306,9 +306,16 @@ function insertMessage(variantMessage, friend_number, self, time, unique_id, fai
         dict.msgFilesize = 0
         dict.msgFilestate = 0
         dict.msgFilenumber = 0
-        dict.msgText = variantMessage.message
+        if (variantMessage.action) {
+            dict.msgText = "* " + bridge.getFriendNickname(friend_number) 
+                    + " " + variantMessage.message
+        } else {
+            dict.msgText = variantMessage.message
+        }
+        dict.msgAction = variantMessage.action
     } else {
         dict.msgText = ""
+        dict.msgAction = false
         dict.msgFilepath = variantMessage.file_path
         dict.msgFilename = variantMessage.name
         dict.msgFilesize = variantMessage.size

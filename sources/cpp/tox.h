@@ -125,6 +125,16 @@ struct ToxFileTransfer {
 typedef QVector <ToxFileTransfer*> ToxFileTransfers;
 typedef QMap <ToxFileTransfer*, quint64> ToxFileMessages;
 
+struct ToxTextMessage {
+	QString message;
+	bool action;
+	ToxTextMessage() {}
+	ToxTextMessage(const QString &_message, bool _action) {
+		message = _message;
+		action = _action;
+	}
+};
+
 struct ToxMessage {
 	ToxVariantMessage variantMessage;
 	QDateTime dt;
@@ -164,7 +174,7 @@ namespace Toxcore {
 	QTimer *create_qtimer(Tox *m);
 	void bootstrap_DHT(Tox *m);
 	ToxId get_address(Tox *m);
-	quint32 send_message(Tox *m, quint32 friend_number, const QString &message, bool &failed);
+	quint32 send_message(Tox *m, quint32 friend_number, const QString &message, bool action, bool &failed);
 	ToxPk get_friend_public_key(Tox *m, quint32 friend_number);
 	const QString get_friend_name(Tox *m, quint32 friend_number, bool publicKey = true);
 	size_t get_friends_count(Tox *m);
