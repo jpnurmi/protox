@@ -81,8 +81,7 @@ function getUserTheme() {
         "transferRemotePausedTextColor" : "#404040",
         "typingTextIndicatorActiveColor" : "black",
         "typingTextIndicatorColor" : "gray",
-        "actionTextColor" : "#2196f3",
-        "actionTextSelfColor" : "#9c27b0"
+        "actionTextColor" : "#b30b8c"
     }
 }
 

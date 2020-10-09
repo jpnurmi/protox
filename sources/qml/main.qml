@@ -319,4 +319,5 @@ ApplicationWindow {
     //include: leftpanel.qml
     //include: chatarea.qml
     //include: login.qml
+    //include: debug.qml
 }

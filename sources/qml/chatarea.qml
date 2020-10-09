@@ -518,9 +518,7 @@ ColumnLayout {
                                 textFormat = Text.StyledText
                                 wrapMode = Text.Wrap
                                 if (msgAction) {
-                                    let textColor = msgSelf ? getUserTheme().actionTextSelfColor 
-                                                            : getUserTheme().actionTextColor;
-                                    text = '<i><font color="' + textColor + '">' + text + '</font></i>'
+                                    text = '<i><font color="' + getUserTheme().actionTextColor + '">' + text + '</font></i>'
                                 } else {
                                     text = processText(plainText)
                                 }
