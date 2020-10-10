@@ -45,7 +45,7 @@ HEADERS += sources/cpp/native/android/photodialog.h \
 	sources/cpp/native/android/qrcodescanner.h
 }
 
-LIBS += -ltoxcore -ltoxencryptsave -ltoxav
+LIBS += -ltoxcore -ltoxencryptsave
 
 RESOURCES += qml.qrc
 
@@ -95,7 +95,8 @@ DISTFILES += \
 	sources/qml/main.qml \
 	sources/qml/menus.qml \
 	sources/qml/settings.qml \
-	sources/qml/login.qml
+	sources/qml/login.qml \
+	sources/qml/debug.qml
 
 ANDROID_PACKAGE_SOURCE_DIR = \
 	$$PWD/android
@@ -106,18 +107,14 @@ contains(ANDROID_ABIS, armeabi-v7a) {
 	ANDROID_EXTRA_LIBS += \
 		$$PWD/libs/armv7-a/libtoxcore.so \
 		$$PWD/libs/armv7-a/libtoxencryptsave.so \
-		$$PWD/libs/armv7-a/libsodium.so \
-		$$PWD/libs/armv7-a/libtoxav.so \
-		$$PWD/libs/armv7-a/libopus.so
+		$$PWD/libs/armv7-a/libsodium.so
 }
 
 contains(ANDROID_ABIS, x86) {
 	ANDROID_EXTRA_LIBS += \
 		$$PWD/libs/x86/libtoxcore.so \
 		$$PWD/libs/x86/libtoxencryptsave.so \
-		$$PWD/libs/x86/libsodium.so \
-		$$PWD/libs/x86/libtoxav.so \
-		$$PWD/libs/x86/libopus.so
+		$$PWD/libs/x86/libsodium.so
 }
 
 contains(ANDROID_TARGET_ARCH, armeabi-v7a) {
