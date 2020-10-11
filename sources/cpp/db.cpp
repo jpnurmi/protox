@@ -3,7 +3,7 @@
 
 #include "deps/sqlitecipher/sqlitecipher_p.h"
 
-#define DATABASE_VERSION 4
+#define DATABASE_VERSION 5
 #define APPLICATION_ID ('P' << 24) + ('T' << 16) + ('O' << 8) + 'X'
 
 ChatDataBase::ChatDataBase(const QString &fileName, const QString &password)
@@ -20,7 +20,7 @@ ChatDataBase::ChatDataBase(const QString &fileName, const QString &password)
 
 	db.open();
 
-	upgradeFromV2toV3();
+	upgradeFromV4toV5();
 
 	QSqlQuery query;
 	query = execQuery(QString("PRAGMA application_id=%1").arg(APPLICATION_ID));
@@ -43,7 +43,8 @@ ChatDataBase::ChatDataBase(const QString &fileName, const QString &password)
 			"CREATE TABLE IF NOT EXISTS TextMessages\n"
 			"(\n"
 			"	reference_id INTEGER PRIMARY KEY,\n"
-			"	message STRING\n"
+			"	message STRING,\n"
+			"	action INTEGER\n"
 			");\n"
 			"";
 	query = execQuery(create_command_text_messages);
@@ -60,18 +61,17 @@ ChatDataBase::ChatDataBase(const QString &fileName, const QString &password)
 	db.commit();
 }
 
-void ChatDataBase::upgradeFromV2toV3()
+void ChatDataBase::upgradeFromV4toV5()
 {
 	QSqlQuery check = execQuery("PRAGMA user_version");
 	check.next();
 	quint64 user_version = check.value(0).toULongLong();
 	check.finish();
-	if (user_version == 2) {
-		Tools::debug("Detected v2 .db. Upgrading...");
-		QFile::copy(db.databaseName(), db.databaseName() + ".v2bak");
-		// not the best solution, "failed" column will remain but SQLite 3.24 doesn't allow to rename or remove it
-		execQuery("ALTER TABLE Messages ADD COLUMN temporary INTEGER");
-		execQuery("UPDATE Messages SET temporary = 0");
+	if (user_version == 4) {
+		Tools::debug("Detected v4 .db. Upgrading...");
+		QFile::copy(db.databaseName(), db.databaseName() + ".v4bak");
+		execQuery("ALTER TABLE TextMessages ADD COLUMN action INTEGER");
+		execQuery("UPDATE TextMessages SET action = 0");
 	}
 }
 
@@ -93,9 +93,10 @@ quint64 ChatDataBase::insertMessage(const ToxVariantMessage &variantMessage, con
 	QString table;
 	switch (type) {
 		case ToxVariantMessageType::TOXMSG_TEXT: 
-			msg_query.prepare("INSERT INTO TextMessages (message) " 
-							  "VALUES (:message)");
+			msg_query.prepare("INSERT INTO TextMessages (message, action) " 
+							  "VALUES (:message, :action)");
 			msg_query.bindValue(":message", variantMessage["message"]);
+			msg_query.bindValue(":action", variantMessage["action"]);
 			table = "TextMessages";
 			break;
 		case ToxVariantMessageType::TOXMSG_FILE:
@@ -178,7 +179,7 @@ const ToxMessages ChatDataBase::getFriendMessages(const ToxPk &public_key, quint
 		quint32 reference_id = query.value(1).toUInt();
 		switch (type) {
 			case ToxVariantMessageType::TOXMSG_TEXT: 
-				msg_query.prepare("SELECT message FROM TextMessages WHERE reference_id = :reference_id");
+				msg_query.prepare("SELECT message,action FROM TextMessages WHERE reference_id = :reference_id");
 				break;
 			case ToxVariantMessageType::TOXMSG_FILE:
 				msg_query.prepare("SELECT file_path,size,state,file_id FROM FileMessages WHERE reference_id = :reference_id");
@@ -192,6 +193,7 @@ const ToxMessages ChatDataBase::getFriendMessages(const ToxPk &public_key, quint
 		switch (type) {
 			case ToxVariantMessageType::TOXMSG_TEXT:
 				variantMessage.insert("message", msg_query.value(0).toString());
+				variantMessage.insert("action", msg_query.value(1).toBool());
 				break;
 			case ToxVariantMessageType::TOXMSG_FILE:
 				QString file_path = msg_query.value(0).toString();
@@ -230,7 +232,7 @@ quint64 ChatDataBase::getFileSize(quint64 unique_id, const ToxPk &public_key)
 	}
 }
 
-const QString ChatDataBase::getTextMessage(quint64 unique_id, const ToxPk &public_key)
+const ToxTextMessage ChatDataBase::getTextMessage(quint64 unique_id, const ToxPk &public_key)
 {
 	QSqlQuery query(db);
 	query.prepare("SELECT type,reference_id FROM Messages WHERE unique_id = :unique_id AND public_key = :public_key");
@@ -240,13 +242,13 @@ const QString ChatDataBase::getTextMessage(quint64 unique_id, const ToxPk &publi
 	query.next();
 	if (query.value(0).toInt() == ToxVariantMessageType::TOXMSG_TEXT) {
 		QSqlQuery msg_query(db);
-		msg_query.prepare("SELECT message FROM TextMessages WHERE reference_id = :reference_id");
+		msg_query.prepare("SELECT message,action FROM TextMessages WHERE reference_id = :reference_id");
 		msg_query.bindValue(":reference_id", query.value(1).toUInt());
 		execQuery(msg_query);
 		msg_query.next();
-		return msg_query.value(0).toString();
+		return ToxTextMessage(msg_query.value(0).toString(), msg_query.value(1).toBool());
 	} else {
-		return QString();
+		return ToxTextMessage();
 	}
 }
 

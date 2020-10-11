@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>protox_ru_RU.qm</file>
+        <file>protox_pt_BR.qm</file>
     </qresource>
 </RCC>

@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "tools.h"
+#include "asyncfilemanager.h"
 
 // Toxcore
 #include "deps/tox/tox.h"
@@ -81,6 +82,16 @@ public slots:
 	void onFileTransferEnded(void *parent);
 };
 
+struct ToxFileChunk {
+	quint64 position;
+	QByteArray data;
+
+	ToxFileChunk(quint64 _position, const QByteArray &_data) {
+		position = _position;
+		data = _data;
+	}
+};
+
 struct ToxFileTransfer {
 	Tox *tox;
 	quint32 friend_number;
@@ -89,6 +100,7 @@ struct ToxFileTransfer {
 	quint32 bytesTransfered;
 	bool avatar;
 	QTimer *progress_update_timer; // ui only
+	QQueue <ToxFileChunk> chunks_buffer;
 	ToxFileTransfer (Tox *_tox, quint32 _friend_number, quint32 _file_number,  bool _avatar, Tools::AsyncFileManager *_manager) {
 		tox = _tox;
 		friend_number = _friend_number;
@@ -112,6 +124,16 @@ struct ToxFileTransfer {
 };
 typedef QVector <ToxFileTransfer*> ToxFileTransfers;
 typedef QMap <ToxFileTransfer*, quint64> ToxFileMessages;
+
+struct ToxTextMessage {
+	QString message;
+	bool action;
+	ToxTextMessage() {}
+	ToxTextMessage(const QString &_message, bool _action) {
+		message = _message;
+		action = _action;
+	}
+};
 
 struct ToxMessage {
 	ToxVariantMessage variantMessage;
@@ -145,12 +167,14 @@ typedef QVector <ToxSelfCanceledTransfer> ToxSelfCanceledTransfers;
 typedef QFuture <void> ToxBootstrapingThread;
 
 namespace Toxcore {
-	Tox *create(ToxProfileLoadingError &error, bool create_new, const QString &password, const QString &profile, const Tox_Pass_Key *pass_key);
-	void destroy(Tox *m);
+	struct Tox_Options *create_opts();
+	void destroy_opts(struct Tox_Options *opts);
+	Tox *create_tox(ToxProfileLoadingError &error, bool create_new, const QString &password, const QString &profile, const Tox_Pass_Key *pass_key, Tox_Options *opts);
+	void destroy_tox(Tox *m);
 	QTimer *create_qtimer(Tox *m);
 	void bootstrap_DHT(Tox *m);
 	ToxId get_address(Tox *m);
-	quint32 send_message(Tox *m, quint32 friend_number, const QString &message, bool &failed);
+	quint32 send_message(Tox *m, quint32 friend_number, const QString &message, bool action, bool &failed);
 	ToxPk get_friend_public_key(Tox *m, quint32 friend_number);
 	const QString get_friend_name(Tox *m, quint32 friend_number, bool publicKey = true);
 	size_t get_friends_count(Tox *m);
@@ -162,7 +186,7 @@ namespace Toxcore {
 	void delete_friend(Tox *m, quint32 friend_number);
 	void set_typing_friend(Tox *m, quint32 friend_number, bool typing);
 	const QString get_friend_status_message(Tox *m, quint32 friend_number);
-	const QString get_nickname(Tox* m, bool toxId = false);
+	const QString get_nickname(Tox* m, bool toxPk = false);
 	void set_nickname(Tox *m, const QString &nickname);
 	const QString get_status_message(Tox *m);
 	void set_status_message(Tox *m, const QString &statusMessage);
@@ -174,7 +198,7 @@ namespace Toxcore {
 	bool check_profile_encrypted(const QString &profile);
 	bool save_data(Tox *m, const Tox_Pass_Key *pass_key, const QString &path);
 	Tox_Pass_Key *generate_pass_key(const QString &password);
-	void reset_pass_key(Tox_Pass_Key *key);
+	void reset_pass_key(Tox_Pass_Key **key);
 	const QString get_version_string();
 	quint32 get_available_nodes();
 	quint32 get_message_max_length();

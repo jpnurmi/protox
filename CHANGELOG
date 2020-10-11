@@ -130,3 +130,12 @@ v1.6beta
 - Added a "reply" button to message notifications, allowing to write and send a response right in the notification.
 - Added ability to scan a QR code with an external application to fill the Tox ID field without typing.
 - Fixed UI lags when a user recieves file(s) at high speed.
+
+v1.6.1beta
+
+- Fixed bug: file transfers no longer randomly get stuck after reaching high speeds. This was caused by an unhandled file chunk send error due to limited size of outgoing packet queue. Fixed by adding resending logic for this case.
+- Added support for "/me" command.
+- Fixed a small issue with typing text which remained after friend change in rare cases.
+- Fixed bug: custom nicknames are ignored on friend nickname change.
+- Added Brazilian Portuguese translation.
+- Added animation to status indicator button.

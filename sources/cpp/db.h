@@ -13,7 +13,7 @@ public:
 	quint64 getFriendMessagesCount(const ToxPk &public_key, quint32 limit, quint32 start, bool preload);
 	const ToxMessages getFriendMessages(const ToxPk &public_key, quint32 limit, quint32 start, bool preload);
 	quint64 getFileSize(quint64 unique_id, const ToxPk &public_key);
-	const QString getTextMessage(quint64 unique_id, const ToxPk &public_key);
+	const ToxTextMessage getTextMessage(quint64 unique_id, const ToxPk &public_key);
 	bool updateFileMessageState(quint64 unique_id, const ToxPk &public_key, ToxFileState state);
 	void removeMessage(quint64 unique_id, const ToxPk &public_key);
 	quint64 getMessagesCountFriend(const ToxPk &public_key);
@@ -24,7 +24,7 @@ public:
 	~ChatDataBase();
 private:
 	void removeAllTemporaryMessages();
-	void upgradeFromV2toV3();
+	void upgradeFromV4toV5();
 	void execQuery(QSqlQuery &query);
 	const QSqlQuery execQuery(const QString &query_string);
 private:

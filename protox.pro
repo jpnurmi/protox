@@ -16,6 +16,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+	sources/cpp/asyncfilemanager.cpp \
 	sources/cpp/db.cpp \
 	sources/cpp/main.cpp \
 	sources/cpp/native.cpp \
@@ -23,6 +24,7 @@ SOURCES += \
 	sources/cpp/tox.cpp
 
 HEADERS += \
+	sources/cpp/asyncfilemanager.h \
 	sources/cpp/common.h \
 	sources/cpp/db.h \
 	sources/cpp/gitversion.h \
@@ -93,27 +95,32 @@ DISTFILES += \
 	sources/qml/main.qml \
 	sources/qml/menus.qml \
 	sources/qml/settings.qml \
-	sources/qml/login.qml
+	sources/qml/login.qml \
+	sources/qml/debug.qml
 
 ANDROID_PACKAGE_SOURCE_DIR = \
 	$$PWD/android
 
-ANDROID_ABIS = armeabi-v7a x86
+ANDROID_ABIS = armeabi-v7a
 
-ANDROID_EXTRA_LIBS += \
-	$$PWD/libs/armv7-a/libtoxcore.so \
-	$$PWD/libs/armv7-a/libtoxencryptsave.so \
-	$$PWD/libs/armv7-a/libsodium.so
+contains(ANDROID_ABIS, armeabi-v7a) {
+	ANDROID_EXTRA_LIBS += \
+		$$PWD/libs/armv7-a/libtoxcore.so \
+		$$PWD/libs/armv7-a/libtoxencryptsave.so \
+		$$PWD/libs/armv7-a/libsodium.so
+}
 
-ANDROID_EXTRA_LIBS += \
-	$$PWD/libs/x86/libtoxcore.so \
-	$$PWD/libs/x86/libtoxencryptsave.so \
-	$$PWD/libs/x86/libsodium.so
+contains(ANDROID_ABIS, x86) {
+	ANDROID_EXTRA_LIBS += \
+		$$PWD/libs/x86/libtoxcore.so \
+		$$PWD/libs/x86/libtoxencryptsave.so \
+		$$PWD/libs/x86/libsodium.so
+}
 
-contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
+contains(ANDROID_TARGET_ARCH, armeabi-v7a) {
 	LIBS += -L$$PWD/libs/armv7-a
 }
 
-contains(ANDROID_TARGET_ARCH,x86) {
+contains(ANDROID_TARGET_ARCH, x86) {
 	LIBS += -L$$PWD/libs/x86
 }

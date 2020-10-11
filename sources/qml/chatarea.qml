@@ -517,7 +517,11 @@ ColumnLayout {
                                 messageCloud.cloudTextWidth = width
                                 textFormat = Text.StyledText
                                 wrapMode = Text.Wrap
-                                text = processText(plainText)
+                                if (msgAction) {
+                                    text = '<i><font color="' + getUserTheme().actionTextColor + '">' + text + '</font></i>'
+                                } else {
+                                    text = processText(plainText)
+                                }
                                 messageCloud.implicitWidth = contentWidth + chatContent.cloud_margin * 2
                             }
                             onContentHeightChanged: {

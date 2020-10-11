@@ -66,18 +66,12 @@ ToolBar {
 
         /*
         MenuItem {
-            text: qsTr("test")
+            text: qsTr("Debug: colors")
             onClicked: {
-                bridge.test()
+                colorDebugDialog.open()
             }
         }
 
-        MenuItem {
-            text: qsTr("Clear chat")
-            onClicked: {
-                messagesModel.clear()
-            }
-        }
         MenuSeparator {}
         */
 

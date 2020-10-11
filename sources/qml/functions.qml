@@ -80,7 +80,8 @@ function getUserTheme() {
         "transferCanceledTextColor" : "#f52b1d",
         "transferRemotePausedTextColor" : "#404040",
         "typingTextIndicatorActiveColor" : "black",
-        "typingTextIndicatorColor" : "gray"
+        "typingTextIndicatorColor" : "gray",
+        "actionTextColor" : "#b30b8c"
     }
 }
 
@@ -236,6 +237,7 @@ function selectFriend(friend_number) {
     }
     notification.cancel({ type : Notification.Text, id : friend_number })
     dropTypingTimer.stop()
+    typingText.text = ""
     typingText.visible = false
     each_friend_text[bridge.getCurrentFriendNumber()] = chatMessage.text
     bridge.setCurrentFriend(friend_number)
@@ -263,7 +265,9 @@ function insertMessage(variantMessage, friend_number, self, time, unique_id, fai
     if (!self && !history && (appInactive || bridge.getCurrentFriendNumber() !== friend_number || settingsWindow.visible)) {
         if (!variantMessage.type) {
             notification.show({
-                              caption : variantMessage.message,
+                              caption : variantMessage.action 
+                                        ? bridge.getFriendNickname(friend_number) + " " + variantMessage.message
+                                        : variantMessage.message,
                               title : qsTr("New message from %1").arg(bridge.getFriendNickname(friend_number)),
                               type : Notification.Text,
                               id : friend_number,
@@ -306,9 +310,16 @@ function insertMessage(variantMessage, friend_number, self, time, unique_id, fai
         dict.msgFilesize = 0
         dict.msgFilestate = 0
         dict.msgFilenumber = 0
-        dict.msgText = variantMessage.message
+        if (variantMessage.action) {
+            let nick = self ? bridge.getNickname() : bridge.getFriendNickname(friend_number)
+            dict.msgText = nick + " " + variantMessage.message
+        } else {
+            dict.msgText = variantMessage.message
+        }
+        dict.msgAction = variantMessage.action
     } else {
         dict.msgText = ""
+        dict.msgAction = false
         dict.msgFilepath = variantMessage.file_path
         dict.msgFilename = variantMessage.name
         dict.msgFilesize = variantMessage.size
@@ -443,7 +454,7 @@ function signInProfile(profile, create, password, autoLogin) {
     // drawer
     identiconModel.appendIfNotExists(0, true)
     accountAvatar.avatarPath = bridge.getSelfAvatarPath()
-    accountName.text = bridge.getNickname(true)
+    accountName.text = bridge.getNickname()
     statusIndicator.setStatus(bridge.getStatus())
     // QR code
     updateQRcode()

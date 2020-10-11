@@ -58,7 +58,7 @@ public slots:
 	Q_INVOKABLE void clearFriendChatHistory(quint32 friend_number, const QString &friendPkHex, bool keep_active_file_transfers);
 	Q_INVOKABLE void setTypingFriend(quint32 friend_number, bool typing);
 	Q_INVOKABLE const QString getFriendStatusMessage(quint32 friend_number);
-	Q_INVOKABLE const QString getNickname(bool toxId = false);
+	Q_INVOKABLE const QString getNickname(bool toxPk = true);
 	Q_INVOKABLE void setNickname(const QString &nickname);
 	Q_INVOKABLE const QString getStatusMessage();
 	Q_INVOKABLE void setStatusMessage(const QString &statusMessage);
@@ -132,9 +132,9 @@ private:
 	QTimer *toxcore_timer;
 	QTimer *reconnection_timer;
 private:
-	// fixme: move to tox.cpp, may be?
 	Tox *tox;
 	Tox_Pass_Key *tox_pass_key;
+	Tox_Options *tox_opts;
 };
 
 class QmlTranslator : public QObject

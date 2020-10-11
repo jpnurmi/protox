@@ -13,7 +13,6 @@ extern QSettings *settings;
 
 namespace Toxcore {
 
-struct Tox_Options *opts = nullptr;
 quint32 available_nodes = 0;
 ToxLocalFileManager local_manager;
 
@@ -88,21 +87,12 @@ void cb_friend_read_receipt(Tox *m, quint32 friend_number, quint32 message_id, v
 static void cb_friend_message(Tox *m, quint32 friend_number, TOX_MESSAGE_TYPE type, const quint8 *string, size_t length, void *userdata)
 {
 	Q_UNUSED(userdata);
-	if (type != TOX_MESSAGE_TYPE_NORMAL) {
-		return;
-	}
-	QByteArray public_key;
-	public_key.resize(tox_public_key_size());
-	TOX_ERR_FRIEND_GET_PUBLIC_KEY err;
-	if (!tox_friend_get_public_key(m, friend_number, (quint8*)public_key.data(), &err)) {
-		Tools::debug("tox_friend_get_public_key failed with error number: " + QString::number(err));
-		return;
-	}
-	QString message(QByteArray((char*)string, length));
+	QString message = QString::fromUtf8((char*)string, length);
 	ToxPk friend_pk = get_friend_public_key(m, friend_number);
 	ToxVariantMessage variantMessage;
 	variantMessage.insert("type", ToxVariantMessageType::TOXMSG_TEXT);
 	variantMessage.insert("message", message);
+	variantMessage.insert("action", type != TOX_MESSAGE_TYPE_NORMAL);
 	QDateTime dt = QDateTime::currentDateTime();
 	settings->beginGroup("Privacy");
 	bool keep_chat_history = settings->value("keep_chat_history", true).toBool();
@@ -114,12 +104,14 @@ static void cb_friend_message(Tox *m, quint32 friend_number, TOX_MESSAGE_TYPE ty
 static void cb_friend_name(Tox *m, quint32 friend_number, const quint8 *name, size_t length, void *user_data)
 {
 	Q_UNUSED(user_data)
-	// I replace newlines with spaces to not make a mess in UI
-	QString nickName = QString::fromUtf8((char*)name, length).replace("\n", " ");
-	if (nickName.isEmpty()) {
-		nickName = ToxConverter::toString(get_friend_public_key(m, friend_number));
+	if (!qmlbridge->checkFriendCustomNickname(friend_number)) {
+		// I replace newlines with spaces to not make a mess in UI
+		QString nickName = QString::fromUtf8((char*)name, length).replace("\n", " ");
+		if (nickName.isEmpty()) {
+			nickName = ToxConverter::toString(get_friend_public_key(m, friend_number));
+		}
+		qmlbridge->updateFriendNickName(friend_number, nickName);
 	}
-	qmlbridge->updateFriendNickName(friend_number, nickName);
 }
 
 static void cb_friend_connection_change(Tox *m, quint32 friend_number, TOX_CONNECTION connection_status, void *userdata)
@@ -249,7 +241,7 @@ static void cb_file_recv(Tox *m, quint32 friend_number, quint32 file_number, qui
 					delete file;
 					break;
 				}
-				if (hash.compare(hash_local)) {
+				if (hash == hash_local) {
 					Tools::debug("Avatar transfer canceled for friend: " + QString::number(friend_number) + ". Avatar already exists.");
 					tox_file_control(m, friend_number, file_number, TOX_FILE_CONTROL_CANCEL, &err2);
 					file->close();
@@ -304,7 +296,6 @@ static void cb_file_recv(Tox *m, quint32 friend_number, quint32 file_number, qui
 			variantMessage.insert("type", ToxVariantMessageType::TOXMSG_FILE);
 			variantMessage.insert("size", file_size);
 			variantMessage.insert("state", ToxFileState::TOX_FILE_REQUEST);
-			variantMessage.insert("file_id", ToxFileId());
 			variantMessage.insert("file_path", new_path);
 			variantMessage.insert("file_number", file_number);
 			// ui only
@@ -417,11 +408,13 @@ void set_status(Tox *m, quint32 status)
 	tox_self_set_status(m, (TOX_USER_STATUS)status);
 }
 
-quint32 send_message(Tox *m, quint32 friend_number, const QString &message, bool &failed)
+quint32 send_message(Tox *m, quint32 friend_number, const QString &message, bool action, bool &failed)
 {
 	TOX_ERR_FRIEND_SEND_MESSAGE err;
 	QByteArray encodedMessage = message.toUtf8();
-	quint32 message_id = tox_friend_send_message(m, friend_number, TOX_MESSAGE_TYPE_NORMAL, (quint8*)encodedMessage.data(), encodedMessage.size(), &err);
+	quint32 message_id = tox_friend_send_message(m, friend_number, 
+												 action ? TOX_MESSAGE_TYPE_ACTION : TOX_MESSAGE_TYPE_NORMAL, 
+												 (quint8*)encodedMessage.data(), encodedMessage.size(), &err);
 	if (err > 0) {
 		failed = true;
 		Tools::debug("tox_friend_send_message failed with error number: " + QString::number(err));
@@ -458,11 +451,16 @@ void set_typing_friend(Tox *m, quint32 friend_number, bool typing)
 	tox_self_set_typing(m, friend_number, typing, nullptr);
 }
 
-const QString get_nickname(Tox *m, bool toxId)
+const QString get_nickname(Tox *m, bool toxPk)
 {
 	size_t length = tox_self_get_name_size(m);
 	if (!length) {
-		return toxId ? ToxConverter::toString(get_address(m)) : QString();
+		QString result;
+		if (toxPk) {
+			result = ToxConverter::toString(get_address(m));
+			result.truncate(get_tox_public_key_size() * 2);
+		}
+		return result;
 	}
 	QByteArray name;
 	name.resize(length);
@@ -715,7 +713,7 @@ void bootstrap_DHT(Tox *m)
 	});
 }
 
-struct Tox_Options *get_opts()
+struct Tox_Options *create_opts()
 {
 	TOX_ERR_OPTIONS_NEW err;
 	struct Tox_Options *opts = tox_options_new(&err);
@@ -736,7 +734,12 @@ struct Tox_Options *get_opts()
 	return opts;
 }
 
-Tox *create(ToxProfileLoadingError &error, bool create_new, const QString &password, const QString &profile, const Tox_Pass_Key *pass_key)
+void destroy_opts(struct Tox_Options *opts)
+{
+	tox_options_free(opts);
+}
+
+Tox *create_tox(ToxProfileLoadingError &error, bool create_new, const QString &password, const QString &profile, const Tox_Pass_Key *pass_key, struct Tox_Options *opts)
 {
 	QFile f(Tools::getProgDir() + profile);
 	bool clean = !f.exists();
@@ -749,7 +752,6 @@ Tox *create(ToxProfileLoadingError &error, bool create_new, const QString &passw
 		return nullptr;
 	}
 
-	opts = get_opts();
 	Tox *m = load_tox(opts, Tools::getProgDir() + profile, password, error);
 
 	if (!m) {
@@ -802,11 +804,13 @@ bool check_profile_encrypted(const QString &profile)
 	return encrypted;
 }
 
+static void resend_all_file_chunks(Tox *m);
 QTimer *create_qtimer(Tox *m)
 {
 	QTimer *timer = new QTimer;
 	QObject::connect(timer, &QTimer::timeout, [=]() { 
 		tox_iterate(m, nullptr);
+		resend_all_file_chunks(m);
 		timer->start(tox_iteration_interval(m));
 	});
 	timer->setSingleShot(true);
@@ -821,15 +825,15 @@ ToxId get_address(Tox *m)
 	return address;
 }
 
-void destroy(Tox *m)
+void destroy_tox(Tox *m)
 {
 	tox_kill(m);
-	tox_options_free(opts);
 }
 
-void reset_pass_key(Tox_Pass_Key *key)
+void reset_pass_key(Tox_Pass_Key **key)
 {
-	tox_pass_key_free(key);
+	tox_pass_key_free(*key);
+	*key = nullptr;
 }
 
 Tox_Pass_Key *generate_pass_key(const QString &password)
@@ -886,20 +890,47 @@ quint32 get_tox_max_hostname_length()
 	return tox_max_hostname_length();
 }
 
-static void send_file_chunk(Tox *m, quint32 friend_number, quint32 file_number
-							, quint64 position, const QByteArray &bytesRead)
+static bool send_file_chunk(Tox *m, quint32 friend_number, quint32 file_number
+							, quint64 position, const QByteArray &bytesRead, bool resend = false)
 {
 	TOX_ERR_FILE_SEND_CHUNK err;
 	tox_file_send_chunk(m, friend_number, file_number, position, (quint8*)bytesRead.data(), bytesRead.length(), &err);
+	bool save_to_buffer = false;
+	if (err == TOX_ERR_FILE_SEND_CHUNK_SENDQ) {
+		if (resend) {
+			return false;
+		}
+		save_to_buffer = true;
+	}
 
 	for (const auto transfer : qmlbridge->transfers) {
 		if (transfer->friend_number == friend_number && transfer->file_number == file_number) {
+			if (save_to_buffer) {
+				transfer->chunks_buffer.enqueue(ToxFileChunk(position, bytesRead));
+				return true;
+			}
 			transfer->bytesTransfered += bytesRead.length();
 			if (!transfer->avatar && !transfer->progress_update_timer->isActive()) {
 				qmlbridge->changeFileProgress(friend_number, file_number, transfer->bytesTransfered, false);
 				transfer->progress_update_timer->start();
 			}
 			break;
+		}
+	}
+	return true;
+}
+
+static void resend_all_file_chunks(Tox *m)
+{
+	for (const auto &transfer : qmlbridge->transfers) {
+		while (!transfer->chunks_buffer.isEmpty()) {
+			const ToxFileChunk &chunk = transfer->chunks_buffer.first();
+			if (send_file_chunk(m, transfer->friend_number, transfer->file_number, 
+								 chunk.position, chunk.data, true)) {
+				transfer->chunks_buffer.removeFirst();
+			} else {
+				break;
+			}
 		}
 	}
 }
@@ -1126,8 +1157,12 @@ void send_avatar_to_all_friends(Tox *m, const QString &path)
 void ToxLocalFileManager::onFileChunkReady(void *parent, const QByteArray &data, quint64 position)
 {
 	ToxFileTransfer *parent_transfer = (ToxFileTransfer*)parent;
-	Toxcore::send_file_chunk(parent_transfer->tox, parent_transfer->friend_number, parent_transfer->file_number,
-					position, data);
+	if (parent_transfer->chunks_buffer.empty()) {
+		Toxcore::send_file_chunk(parent_transfer->tox, parent_transfer->friend_number, parent_transfer->file_number,
+						position, data);
+	} else {
+		parent_transfer->chunks_buffer.enqueue(ToxFileChunk(position, data));
+	}
 }
 
 void ToxLocalFileManager::onFileTransferEnded(void *parent)
