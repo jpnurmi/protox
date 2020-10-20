@@ -7,7 +7,7 @@ QSettingsExt::QSettingsExt(const QString &fileName) : QSettings(fileName, QSetti
 {
 	default_values = {
 		// Toxcore
-		{ "udp_enabled", true},
+		{ "udp_enabled", true },
 		{ "ipv6_enabled", true },
 		{ "local_discovery_enabled", false },
 		{ "nodes_json_file", QString() },
@@ -33,5 +33,5 @@ QVariant QSettingsExt::valued(const QString &key)
 		Tools::debug("QSettingsExt: default value for key \"" + key + "\" is missing.");
 		return QVariant();
 	}
-	return value("key", default_values.value(key));
+	return value(key, default_values.value(key));
 }
