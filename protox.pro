@@ -20,6 +20,7 @@ SOURCES += \
 	sources/cpp/db.cpp \
 	sources/cpp/main.cpp \
 	sources/cpp/native.cpp \
+	sources/cpp/settings.cpp \
 	sources/cpp/tools.cpp \
 	sources/cpp/tox.cpp
 
@@ -31,6 +32,7 @@ HEADERS += \
 	sources/cpp/main.h \
 	sources/cpp/native.h \
 	sources/cpp/qtutf8bytelimitvalidator.h \
+	sources/cpp/settings.h \
 	sources/cpp/tools.h \
 	sources/cpp/tox.h
 

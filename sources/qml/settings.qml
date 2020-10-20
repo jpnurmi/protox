@@ -190,60 +190,60 @@ Popup {
                 downloadsFolderDialog.open()
             },
             "select_proxy_type" : function() {
-                proxyButtonsGroup.selectButton(parseInt(bridge.getSettingsValue("Toxcore", "proxy_type", 
-                                                                                ptype_string, "0")))
+                proxyButtonsGroup.selectButton(parseInt(bridge.getSettingsValueDefault("Toxcore", "proxy_type", 
+                                                                                ptype_string)))
                 changeProxyTypeMenu.open()
             }
         }
         settingsModel.append({ flags: sf_title, name: qsTr("Tox options") })
         settingsModel.append({ flags: sf_title | sf_help | sf_warning, name: qsTr("These settings require client restart!") })
         settingsModel.append({ flags: sf_switch, name: qsTr("Enable UDP"), itemEnabled: true, prop: "udp_enabled", 
-                    nvalue: bridge.getSettingsValue("Toxcore", "udp_enabled", ptype_bool, Boolean(true)) })
+                    nvalue: bridge.getSettingsValueDefault("Toxcore", "udp_enabled", ptype_bool) })
         settingsModel.append({ flags: sf_switch, name: qsTr("Enable IPv6"), itemEnabled: true, prop: "ipv6_enabled", 
-                    nvalue: bridge.getSettingsValue("Toxcore", "ipv6_enabled", ptype_bool, Boolean(true)) })
+                    nvalue: bridge.getSettingsValueDefault("Toxcore", "ipv6_enabled", ptype_bool) })
         settingsModel.append({ flags: sf_switch, name: qsTr("Enable LAN discovery"), itemEnabled: true, prop: "local_discovery_enabled", 
-                    nvalue: bridge.getSettingsValue("Toxcore", "local_discovery_enabled", ptype_bool, Boolean(false)) })
+                    nvalue: bridge.getSettingsValueDefault("Toxcore", "local_discovery_enabled", ptype_bool) })
         settingsModel.append({ flags: sf_title | sf_help, name: "", prop: "available_nodes"})
         settingsModel.append({ flags: sf_input | sf_placeholder, fieldValidator: default_validator, itemWidth: 128, 
                     name: qsTr("Custom nodes .json file"), prop: "nodes_json_file", helperText: "nodes.json",
-                    svalue: bridge.getSettingsValue("Toxcore", "nodes_json_file", ptype_string, String("")) })
+                    svalue: bridge.getSettingsValueDefault("Toxcore", "nodes_json_file", ptype_string) })
         settingsModel.append({ flags: sf_button, name: qsTr("Proxy type"), buttonText: qsTr("Select"), 
                                  clickAction: "select_proxy_type"})
         settingsModel.append({ flags: sf_input | sf_placeholder, fieldValidator: address_validator, itemWidth: 148, 
                     name: qsTr("Proxy address"), prop: "proxy_host", helperText: "",
-                    svalue: bridge.getSettingsValue("Toxcore", "proxy_host", ptype_string, String("")) })
+                    svalue: bridge.getSettingsValueDefault("Toxcore", "proxy_host", ptype_string) })
         settingsModel.append({ flags: sf_input | sf_numbers_only | sf_placeholder, 
                     fieldValidator: proxy_port_validator, itemWidth: 96, 
                     name: qsTr("Proxy port"), prop: "proxy_port", helperText: "51552",
-                    svalue: bridge.getSettingsValue("Toxcore", "proxy_port", ptype_string, 51552) })
+                    svalue: bridge.getSettingsValueDefault("Toxcore", "proxy_port", ptype_string) })
         settingsModel.append({ flags: sf_title, name: qsTr("Client options") })
         settingsModel.append({ flags: sf_title | sf_help, name: qsTr("This value is measured in minutes. Set to 0 to disable.")})
         settingsModel.append({ flags: sf_input | sf_numbers_only | sf_placeholder, 
                     fieldValidator: absent_timer_interval_validator, itemWidth: 96, 
                     name: qsTr("Auto-away after"), prop: "absent_timer_interval", helperText: "10",
-                    svalue: bridge.getSettingsValue("Client", "absent_timer_interval", ptype_string, String("10"))})
+                    svalue: bridge.getSettingsValueDefault("Client", "absent_timer_interval", ptype_string)})
         settingsModel.append({ flags: sf_input | sf_numbers_only | sf_placeholder, 
                     fieldValidator: last_messages_limit_validator, itemWidth: 96, 
                     name: qsTr("Recent messages limit"), prop: "last_messages_limit", helperText: "128",
-                    svalue: bridge.getSettingsValue("Client", "last_messages_limit", ptype_string, 128) })
+                    svalue: bridge.getSettingsValueDefault("Client", "last_messages_limit", ptype_string) })
         settingsModel.append({ flags: sf_input | sf_numbers_only | sf_placeholder, 
                     fieldValidator: last_messages_limit_validator, itemWidth: 96, 
                     name: qsTr("Number of messages to load when scrolling up"), prop: "load_messages_limit", helperText: "64",
-                    svalue: bridge.getSettingsValue("Client", "load_messages_limit", ptype_string, 64) })
+                    svalue: bridge.getSettingsValueDefault("Client", "load_messages_limit", ptype_string) })
         settingsModel.append({ flags: sf_button, prop: "downloads_folder", 
-                                 svalue: bridge.getSettingsValue("Client", "downloads_folder", ptype_string, bridge.getDefaultDownloadsDirectory()), 
+                                 svalue: bridge.getSettingsValueDefault("Client", "downloads_folder", ptype_string), 
                                  name: qsTr("Downloads folder"), buttonText: qsTr("Select"), 
                                  clickAction: "change_downloads_directory"})
         settingsModel.append({ flags: sf_switch, name: qsTr("Auto-accept files"), itemEnabled: true, prop: "auto_accept_files", 
-                    nvalue: bridge.getSettingsValue("Client", "auto_accept_files", ptype_bool, Boolean(false)) })
+                    nvalue: bridge.getSettingsValueDefault("Client", "auto_accept_files", ptype_bool) })
         settingsModel.append({ flags: sf_title | sf_help, name: qsTr("This value is measured in megabytes. Set to 0 to disable the limit.")})
         settingsModel.append({ flags: sf_input | sf_numbers_only | sf_placeholder, 
                     fieldValidator: max_accept_file_size_validator, itemWidth: 96, 
                     name: qsTr("Max auto-accept file size"), prop: "auto_accept_file_size", helperText: "20",
-                    svalue: bridge.getSettingsValue("Client", "auto_accept_file_size", ptype_string, 20) })
+                    svalue: bridge.getSettingsValueDefault("Client", "auto_accept_file_size", ptype_string) })
         settingsModel.append({ flags: sf_title, name: qsTr("Privacy") })
         settingsModel.append({ flags: sf_switch, name: qsTr("Keep chat history"), itemEnabled: true, prop: "keep_chat_history", 
-                    nvalue: bridge.getSettingsValue("Privacy", "keep_chat_history", ptype_bool, Boolean(true)) })
+                    nvalue: bridge.getSettingsValueDefault("Privacy", "keep_chat_history", ptype_bool) })
         settingsModel.append({ flags: sf_title | sf_help, name: qsTr("The NoSpam value is a part of your Tox ID that can be changed at will.")})
         settingsModel.append({ flags: sf_title | sf_help, name: qsTr("If you are getting spammed with friend requests, change this value.")})
         settingsModel.append({ flags: sf_title | sf_help, name: qsTr("Only hexadecimal characters are allowed.")})

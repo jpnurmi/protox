@@ -2,10 +2,11 @@
 #include "main.h"
 #include "tools.h"
 #include "db.h"
+#include "settings.h"
 
 extern QmlCBridge *qmlbridge;
 extern ChatDataBase *chat_db;
-extern QSettings *settings;
+extern QSettingsExt *settings;
 
 /*
  * Toxcore callbacks
@@ -95,7 +96,7 @@ static void cb_friend_message(Tox *m, quint32 friend_number, TOX_MESSAGE_TYPE ty
 	variantMessage.insert("action", type != TOX_MESSAGE_TYPE_NORMAL);
 	QDateTime dt = QDateTime::currentDateTime();
 	settings->beginGroup("Privacy");
-	bool keep_chat_history = settings->value("keep_chat_history", true).toBool();
+	bool keep_chat_history = settings->valued("keep_chat_history").toBool();
 	settings->endGroup();
 	chat_db->insertMessage(variantMessage, dt, friend_pk, !keep_chat_history, false);
 	qmlbridge->insertMessage(variantMessage, friend_number, dt);
@@ -279,9 +280,9 @@ static void cb_file_recv(Tox *m, quint32 friend_number, quint32 file_number, qui
 		case TOX_FILE_KIND_DATA: {
 			QString fileName = QString::fromUtf8((char*)filename, filename_length);
 			settings->beginGroup("Client");
-			const QString downloadsFolder = settings->value("downloads_folder", Tools::getDefaultDownloadsDirectory()).toString();
-			bool auto_accept_files = settings->value("auto_accept_files", false).toBool();
-			quint64 auto_accept_file_size = settings->value("auto_accept_file_size", 20).toULongLong();
+			const QString downloadsFolder = settings->valued("downloads_folder").toString();
+			bool auto_accept_files = settings->valued("auto_accept_files").toBool();
+			quint64 auto_accept_file_size = settings->valued("auto_accept_file_size").toULongLong();
 			settings->endGroup();
 			const QString file_path = downloadsFolder + QDir::separator() + fileName;
 			const QString new_path = Tools::getUniqueFilepath(file_path);
@@ -301,7 +302,7 @@ static void cb_file_recv(Tox *m, quint32 friend_number, quint32 file_number, qui
 			// ui only
 			variantMessage.insert("name", Tools::getFilenameFromPath(new_path));
 			settings->beginGroup("Privacy");
-			bool keep_chat_history = settings->value("keep_chat_history", true).toBool();
+			bool keep_chat_history = settings->valued("keep_chat_history").toBool();
 			settings->endGroup();
 			quint64 unique_id = chat_db->insertMessage(variantMessage, dt, Toxcore::get_friend_public_key(m, friend_number), !keep_chat_history, false);
 			qmlbridge->file_messages[transfer] = unique_id;
@@ -668,8 +669,8 @@ const QString default_nodes_json = "{\"last_scan\":1581207188,\"last_refresh\":1
 void bootstrap_DHT(Tox *m)
 {
 	settings->beginGroup("Toxcore");
-	QString json_file = settings->value("nodes_json_file", "").toString();
-	bool use_ipv6 = settings->value("ipv6_enabled", true).toBool();
+	QString json_file = settings->valued("nodes_json_file").toString();
+	bool use_ipv6 = settings->valued("ipv6_enabled").toBool();
 	settings->endGroup();
 	QByteArray json_data;
 	if (!json_file.isEmpty()) {
@@ -724,12 +725,12 @@ struct Tox_Options *create_opts()
 	tox_options_default(opts);
 	tox_options_set_log_callback(opts, cb_log);
 	settings->beginGroup("Toxcore");
-	tox_options_set_udp_enabled(opts, settings->value("udp_enabled", true).toBool());
-	tox_options_set_ipv6_enabled(opts, settings->value("ipv6_enabled", true).toBool());
-	tox_options_set_local_discovery_enabled(opts, settings->value("local_discovery_enabled", false).toBool());
-	tox_options_set_proxy_host(opts, settings->value("proxy_host", "").toString().toUtf8().data());
-	tox_options_set_proxy_port(opts, (quint16)settings->value("proxy_port", 51552).toUInt());
-	tox_options_set_proxy_type(opts, (TOX_PROXY_TYPE)settings->value("proxy_type", TOX_PROXY_TYPE_NONE).toUInt());
+	tox_options_set_udp_enabled(opts, settings->valued("udp_enabled").toBool());
+	tox_options_set_ipv6_enabled(opts, settings->valued("ipv6_enabled").toBool());
+	tox_options_set_local_discovery_enabled(opts, settings->valued("local_discovery_enabled").toBool());
+	tox_options_set_proxy_host(opts, settings->valued("proxy_host").toString().toUtf8().data());
+	tox_options_set_proxy_port(opts, (quint16)settings->valued("proxy_port").toUInt());
+	tox_options_set_proxy_type(opts, (TOX_PROXY_TYPE)settings->valued("proxy_type").toUInt());
 	settings->endGroup();
 	return opts;
 }

@@ -8,10 +8,11 @@
 #include "QZXing.h"
 #include "native.h"
 #include "qtutf8bytelimitvalidator.h"
+#include "settings.h"
 
 QmlCBridge *qmlbridge = nullptr;
 ChatDataBase *chat_db = nullptr;
-QSettings *settings = nullptr;
+QSettingsExt *settings = nullptr;
 QtNotification *notification = nullptr;
 
 /*
@@ -32,8 +33,9 @@ QmlCBridge::QmlCBridge()
 	abort_bootstrapping = false;
 
 	settings->beginGroup("Client");
-	int reconnection_interval = settings->value("reconnection_interval", 60000).toInt();
+	int reconnection_interval = settings->valued("reconnection_interval").toInt();
 	settings->endGroup();
+
 	reconnection_timer = new QTimer;
 	reconnection_timer->setInterval(reconnection_interval);
 	reconnection_timer->setSingleShot(false);
@@ -100,7 +102,7 @@ void QmlCBridge::sendMessage(quint32 friend_number, const QString &message, bool
 {
 	ToxPk friend_pk = Toxcore::get_friend_public_key(tox, friend_number);
 	settings->beginGroup("Privacy");
-	bool keep_chat_history = settings->value("keep_chat_history", true).toBool();
+	bool keep_chat_history = settings->valued("keep_chat_history").toBool();
 	settings->endGroup();
 	QDateTime dt = QDateTime::currentDateTime();
 	bool action = message.left(4).toLower() == "/me ";
@@ -168,7 +170,7 @@ int QmlCBridge::getFriendStatus(quint32 friend_number)
 bool QmlCBridge::checkRemainingMessages(quint32 start)
 {
 	settings->beginGroup("Client");
-	quint32 limit = settings->value("load_messages_limit", 64).toUInt();
+	quint32 limit = settings->valued("load_messages_limit").toUInt();
 	settings->endGroup();
 	quint64 count = chat_db->getFriendMessagesCount(Toxcore::get_friend_public_key(tox, current_friend_number), limit, start, true);
 	return count > 0;
@@ -177,8 +179,8 @@ bool QmlCBridge::checkRemainingMessages(quint32 start)
 void QmlCBridge::retrieveChatLog(quint32 start, bool preload)
 {
 	settings->beginGroup("Client");
-	quint32 limit = preload ? settings->value("load_messages_limit", 64).toUInt() 
-							: settings->value("last_messages_limit", 128).toUInt();
+	quint32 limit = preload ? settings->valued("load_messages_limit").toUInt() 
+							: settings->valued("last_messages_limit").toUInt();
 	settings->endGroup();
 	ToxMessages messages = chat_db->getFriendMessages(Toxcore::get_friend_public_key(tox, current_friend_number), 
 													  limit, start, preload);
@@ -353,6 +355,19 @@ QVariant QmlCBridge::getSettingsValue(const QString &group, const QString &key, 
 	QVariant result;
 	settings->beginGroup(group);
 	result = settings->value(key, default_value);
+	settings->endGroup();
+	switch (type) {
+	case QVariant::Bool: return result.toBool(); break;
+	case QVariant::String: return result.toString(); break;
+	default: return result; break;
+	}
+}
+
+QVariant QmlCBridge::getSettingsValueDefault(const QString &group, const QString &key, int type)
+{
+	QVariant result;
+	settings->beginGroup(group);
+	result = settings->valued(key);
 	settings->endGroup();
 	switch (type) {
 	case QVariant::Bool: return result.toBool(); break;
@@ -704,7 +719,7 @@ quint32 QmlCBridge::sendFile(quint32 friend_number, const QString &filepath)
 	// ui only
 	variantMessage.insert("name", Tools::getFilenameFromPath(filepath));
 	settings->beginGroup("Privacy");
-	bool keep_chat_history = settings->value("keep_chat_history", true).toBool();
+	bool keep_chat_history = settings->valued("keep_chat_history").toBool();
 	settings->endGroup();
 	quint64 unique_id = chat_db->insertMessage(variantMessage, dt, Toxcore::get_friend_public_key(tox, friend_number), !keep_chat_history, true);
 	file_messages[transfer] = unique_id;
@@ -926,7 +941,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 	ChatDataBase::registerSQLDriver();
-	settings = new QSettings(Tools::getProgDir() + "settings.ini", QSettings::IniFormat);
+	settings = new QSettingsExt(Tools::getProgDir() + "settings.ini");
 	notification = new QtNotification;
 
 	Tools::debug("App started.");

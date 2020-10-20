@@ -71,6 +71,7 @@ public slots:
 	Q_INVOKABLE QString getNospamValue();
 	Q_INVOKABLE void setNospamValue(const QString &nospam);
 	Q_INVOKABLE QVariant getSettingsValue(const QString &group, const QString &key, int type, const QVariant &default_value);
+	Q_INVOKABLE QVariant getSettingsValueDefault(const QString &group, const QString &key, int type);
 	Q_INVOKABLE void setSettingsValue(const QString &group, const QString &key, const QVariant &value);
 	Q_INVOKABLE void setAppInactive(bool inactive) { app_inactive = inactive; }
 	Q_INVOKABLE void setKeyboardAdjustMode(bool adjustNothing);
