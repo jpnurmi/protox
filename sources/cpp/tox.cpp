@@ -55,7 +55,7 @@ static void cb_self_connection_change(Tox *m, TOX_CONNECTION connection_status, 
 	qmlbridge->setConnStatus(connection_status);
 }
 
-static void cb_friend_request(Tox *m, const quint8 *public_key, const quint8 *data, size_t length, void *userdata)
+static void cb_friend_request(Tox *m, const uint8_t *public_key, const uint8_t *data, size_t length, void *userdata)
 {
 	Q_UNUSED(m)
 	Q_UNUSED(userdata);
@@ -66,7 +66,7 @@ static void cb_friend_request(Tox *m, const quint8 *public_key, const quint8 *da
 							true, QString::fromUtf8((char*)data, length), pk);
 }
 
-void cb_friend_read_receipt(Tox *m, quint32 friend_number, quint32 message_id, void *userdata)
+void cb_friend_read_receipt(Tox *m, uint32_t friend_number, uint32_t message_id, void *userdata)
 {
 	Q_UNUSED(m);
 	Q_UNUSED(userdata);
@@ -85,7 +85,7 @@ void cb_friend_read_receipt(Tox *m, quint32 friend_number, quint32 message_id, v
 	}
 }
 
-static void cb_friend_message(Tox *m, quint32 friend_number, TOX_MESSAGE_TYPE type, const quint8 *string, size_t length, void *userdata)
+static void cb_friend_message(Tox *m, uint32_t friend_number, TOX_MESSAGE_TYPE type, const uint8_t *string, size_t length, void *userdata)
 {
 	Q_UNUSED(userdata);
 	QString message = QString::fromUtf8((char*)string, length);
@@ -102,7 +102,7 @@ static void cb_friend_message(Tox *m, quint32 friend_number, TOX_MESSAGE_TYPE ty
 	qmlbridge->insertMessage(variantMessage, friend_number, dt);
 }
 
-static void cb_friend_name(Tox *m, quint32 friend_number, const quint8 *name, size_t length, void *user_data)
+static void cb_friend_name(Tox *m, uint32_t friend_number, const uint8_t *name, size_t length, void *user_data)
 {
 	Q_UNUSED(user_data)
 	if (!qmlbridge->checkFriendCustomNickname(friend_number)) {
@@ -115,7 +115,7 @@ static void cb_friend_name(Tox *m, quint32 friend_number, const quint8 *name, si
 	}
 }
 
-static void cb_friend_connection_change(Tox *m, quint32 friend_number, TOX_CONNECTION connection_status, void *userdata)
+static void cb_friend_connection_change(Tox *m, uint32_t friend_number, TOX_CONNECTION connection_status, void *userdata)
 {
 	Q_UNUSED(userdata)
 	size_t size = tox_self_get_friend_list_size(m);
@@ -139,7 +139,7 @@ static void cb_friend_connection_change(Tox *m, quint32 friend_number, TOX_CONNE
 	}
 }
 
-static void cb_friend_typing(Tox *m, quint32 friend_number, bool is_typing, void *user_data)
+static void cb_friend_typing(Tox *m, uint32_t friend_number, bool is_typing, void *user_data)
 {
 	Q_UNUSED(m)
 	Q_UNUSED(user_data)
@@ -147,7 +147,7 @@ static void cb_friend_typing(Tox *m, quint32 friend_number, bool is_typing, void
 	qmlbridge->setFriendTyping(friend_number, is_typing);
 }
 
-static void cb_friend_status_message(Tox *m, quint32 friend_number, const quint8 *message, size_t length, void *user_data)
+static void cb_friend_status_message(Tox *m, uint32_t friend_number, const uint8_t *message, size_t length, void *user_data)
 {
 	Q_UNUSED(m)
 	Q_UNUSED(user_data)
@@ -164,7 +164,7 @@ static void cb_friend_status(Tox *m, uint32_t friend_number, TOX_USER_STATUS sta
 	qmlbridge->setFriendStatus(friend_number, status);
 }
 
-static void cb_file_chunk_request(Tox *m, quint32 friend_number, quint32 file_number, quint64 position,
+static void cb_file_chunk_request(Tox *m, uint32_t friend_number, uint32_t file_number, uint64_t position,
                                        size_t length, void *user_data)
 {
 	Q_UNUSED(m)
@@ -173,7 +173,7 @@ static void cb_file_chunk_request(Tox *m, quint32 friend_number, quint32 file_nu
 	for (const auto transfer : qmlbridge->transfers) {
 		if (transfer->friend_number == friend_number && transfer->file_number == file_number) {
 			QMetaObject::invokeMethod(transfer->manager, "onChunkReadRequest", 
-									  Q_ARG(qulonglong, position), 
+									  Q_ARG(qulonglong, (quint64)position), 
 									  Q_ARG(uint, length));
 		}
 	}
@@ -210,8 +210,8 @@ static void cb_file_recv_control_cb(Tox *m, uint32_t friend_number, uint32_t fil
 }
 
 static void file_transfer_end(Tox *m, quint32 friend_number, quint32 file_number);
-static void cb_file_recv(Tox *m, quint32 friend_number, quint32 file_number, quint32 kind, quint64 file_size,
-                              const quint8 *filename, size_t filename_length, void *user_data)
+static void cb_file_recv(Tox *m, uint32_t friend_number, uint32_t file_number, uint32_t kind, uint64_t file_size,
+                              const uint8_t *filename, size_t filename_length, void *user_data)
 {
 	Q_UNUSED(user_data)
 
@@ -295,7 +295,7 @@ static void cb_file_recv(Tox *m, quint32 friend_number, quint32 file_number, qui
 			QDateTime dt = QDateTime::currentDateTime();
 			ToxVariantMessage variantMessage;
 			variantMessage.insert("type", ToxVariantMessageType::TOXMSG_FILE);
-			variantMessage.insert("size", file_size);
+			variantMessage.insert("size", (quint64)file_size);
 			variantMessage.insert("state", ToxFileState::TOX_FILE_REQUEST);
 			variantMessage.insert("file_path", new_path);
 			variantMessage.insert("file_number", file_number);
@@ -307,7 +307,7 @@ static void cb_file_recv(Tox *m, quint32 friend_number, quint32 file_number, qui
 			quint64 unique_id = chat_db->insertMessage(variantMessage, dt, Toxcore::get_friend_public_key(m, friend_number), !keep_chat_history, false);
 			qmlbridge->file_messages[transfer] = unique_id;
 			qmlbridge->insertMessage(variantMessage, friend_number, dt, false, unique_id);
-			if (auto_accept_files && (auto_accept_file_size == 0 || file_size <= auto_accept_file_size * 1024 * 1024)) {
+			if (auto_accept_files && (auto_accept_file_size == 0 || (quint64)file_size <= auto_accept_file_size * 1024 * 1024)) {
 				qmlbridge->acceptFile(friend_number, file_number);
 			}
 			break;
@@ -315,8 +315,8 @@ static void cb_file_recv(Tox *m, quint32 friend_number, quint32 file_number, qui
 	}
 }
 
-void cb_file_recv_chunk(Tox *m, quint32 friend_number, quint32 file_number, quint64 position,
-                                    const quint8 *data, size_t length, void *user_data)
+void cb_file_recv_chunk(Tox *m, uint32_t friend_number, uint32_t file_number, uint64_t position,
+                                    const uint8_t *data, size_t length, void *user_data)
 {
 	Q_UNUSED(m)
 	Q_UNUSED(user_data)
@@ -324,7 +324,7 @@ void cb_file_recv_chunk(Tox *m, quint32 friend_number, quint32 file_number, quin
 	for (const auto transfer : qmlbridge->transfers) {
 		if (transfer->friend_number == friend_number && transfer->file_number == file_number) {
 			QMetaObject::invokeMethod(transfer->manager, "onChunkWriteRequest", 
-									  Q_ARG(qulonglong, position), 
+									  Q_ARG(qulonglong, (quint64)position), 
 									  Q_ARG(QByteArray, QByteArray((char*)data, length)));
 			transfer->bytesTransfered += length;
 			if (!transfer->avatar && !transfer->progress_update_timer->isActive()) {

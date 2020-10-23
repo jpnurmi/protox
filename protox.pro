@@ -103,13 +103,20 @@ DISTFILES += \
 ANDROID_PACKAGE_SOURCE_DIR = \
 	$$PWD/android
 
-ANDROID_ABIS = armeabi-v7a
+ANDROID_ABIS = armeabi-v7a arm64-v8a
 
 contains(ANDROID_ABIS, armeabi-v7a) {
 	ANDROID_EXTRA_LIBS += \
 		$$PWD/libs/armv7-a/libtoxcore.so \
 		$$PWD/libs/armv7-a/libtoxencryptsave.so \
 		$$PWD/libs/armv7-a/libsodium.so
+}
+
+contains(ANDROID_ABIS, arm64-v8a) {
+	ANDROID_EXTRA_LIBS += \
+		$$PWD/libs/armv8-a/libtoxcore.so \
+		$$PWD/libs/armv8-a/libtoxencryptsave.so \
+		$$PWD/libs/armv8-a/libsodium.so
 }
 
 contains(ANDROID_ABIS, x86) {
@@ -121,6 +128,10 @@ contains(ANDROID_ABIS, x86) {
 
 contains(ANDROID_TARGET_ARCH, armeabi-v7a) {
 	LIBS += -L$$PWD/libs/armv7-a
+}
+
+contains(ANDROID_TARGET_ARCH, arm64-v8a) {
+	LIBS += -L$$PWD/libs/armv8-a
 }
 
 contains(ANDROID_TARGET_ARCH, x86) {
