@@ -14,5 +14,5 @@ Protox privacy policy:
 7.1 In order to be able to discover other Tox users and be discovered by them, libtoxcore uses DHT. Every Tox client is a DHT node. The data that is stored in DHT is 1) your temporary DHT public key, which can't be used to identify you as it's generated randomly and changes every time you restart Protox, and 2) your IP address.
 7.2 The implication of this is that everyone can traverse the DHT and find IP addresses of all Tox users, including you. Everyone can tell that someone on your IP address is running Tox. Those IP addresses might be the actual addresses of Tox users, or addresses of proxies if the Tox users used a proxy. If you don't want to let anyone know that you are running Tox on your IP address, you should use a proxy.
 7.3 Tox is designed to prevent any user you have not authorized (added as a friend) from finding the association of your Tox Id and IP based on DHT data.
-8. To connect to the DHT Protox utilizes a list of bootstrap nodes maintained by Tox Project at https://nodes.tox.chat/. Protox choses several of the bootstrap nodes of this list at random and connects to them.
+8. To connect to the DHT Protox utilizes a list of bootstrap nodes maintained by Tox Project at https://nodes.tox.chat/.
 
