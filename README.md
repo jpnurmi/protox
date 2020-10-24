@@ -24,8 +24,8 @@ You can donate if you want to support this project.
 
 * PayPal: [Donate](https://www.paypal.me/monsterovich)
 * Patreon: [Link](https://www.patreon.com/monsterovich)
-* Yandex money: 410014539584441
-* BCH: bitcoincash:qq6s9n8kauykxtd2v5h5pymzjtn3yw0ktvd5gp09n8
+* Yandex money: `410014539584441`
+* Bitcoin Cash (BCH): `bitcoincash:qq6s9n8kauykxtd2v5h5pymzjtn3yw0ktvd5gp09n8`
 
 # Screenshots
 
