@@ -69,7 +69,7 @@ class QtAndroidNotifications {
                     builder.setStyle(new Notification.BigTextStyle().bigText(caption));
                 }
                 builder.setContentIntent(resultPendingIntent);
-                notificationManager.notify(getTagByType(type), id, builder.build());
+                release(getTagByType(type) + "_" + id, 0, builder);
                 break;
             }
             case 1: {
@@ -90,7 +90,7 @@ class QtAndroidNotifications {
                                     PendingIntent.FLAG_UPDATE_CURRENT);
                 builder.addAction(0, (String)parameters.get("acceptButtonText"), pendingIntentAccept);
                 builder.addAction(0, (String)parameters.get("cancelButtonText"), pendingIntentCancel);
-                notificationManager.notify(getTagByType(type) + "_" + id, file_number, builder.build());
+                release(getTagByType(type) + "_" + id, file_number, builder);
                 break;
             }
             case 2:
@@ -109,7 +109,7 @@ class QtAndroidNotifications {
                             builder.setProgress(Short.MAX_VALUE, current, false);
                             builder.setOngoing(true);
                             builder.setDefaults(Notification.DEFAULT_LIGHTS);
-                            notificationManager.notify(getTagByType(type) + "_" + id, file_number, builder.build());
+                            release(getTagByType(type) + "_" + id, file_number, builder);
                             if (file_size == bytesTransfered) {
                                 break;
                             }
@@ -131,10 +131,10 @@ class QtAndroidNotifications {
                             builder.setContentTitle((String)parameters.get("transferCanceledText"));
                         }
                         if (transfer_succeded || (!transfer_succeded && !self_canceled)) {
-                            notificationManager.notify(getTagByType(type) + "_" + id, file_number, builder.build());
+                            release(getTagByType(type) + "_" + id, file_number, builder);
                         }
                         if (self_canceled) {
-                            notificationManager.cancel(getTagByType(type) + "_" + id, file_number);
+                            remove(getTagByType(type) + "_" + id, file_number);
                         }
                     }
                 }).start();
@@ -144,10 +144,32 @@ class QtAndroidNotifications {
 
     public static void cancel(int type, int id, HashMap <String, Object> parameters) {
         switch (type) {
-            case 0: getManager().cancel(getTagByType(type), id); break;
-            case 1: getManager().cancel(getTagByType(type) + "_" + id, (int)parameters.get("fileNumber"));
+            case 0: remove(getTagByType(type) + "_" + id, 0); break;
+            case 1: remove(getTagByType(type) + "_" + id, (int)parameters.get("fileNumber"));
         }
 
+    }
+
+    private static void release(String channel, int id, Notification.Builder builder) {
+        final NotificationManager notificationManager = getManager();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel chan = new NotificationChannel(channel,
+                                                                  "Protox",
+                                                                  NotificationManager.IMPORTANCE_DEFAULT);
+            notificationManager.createNotificationChannel(chan);
+            builder.setChannelId(channel);
+            notificationManager.notify(id, builder.build());
+        } else {
+            notificationManager.notify(channel, id, builder.build());
+        }
+    }
+
+    private static void remove(String channel, int id) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            getManager().deleteNotificationChannel(channel);
+        } else {
+            getManager().cancel(channel, id);
+        }
     }
 
     public static void cancelAll() {
