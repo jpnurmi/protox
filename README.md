@@ -36,6 +36,7 @@ You can donate if you want to support this project.
 
 # Download
 
+* [Google Play](https://play.google.com/store/apps/details?id=org.protox)
 * [FDroid repository](https://submarine.strangled.net/fdroid/)
 * [Download](https://gitlab.com/Monsterovich/protox/-/releases)
 * [Download (nightly builds)](https://submarine.strangled.net/protox/builds/nightly/)
