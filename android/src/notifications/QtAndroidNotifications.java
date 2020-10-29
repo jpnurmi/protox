@@ -22,10 +22,13 @@ import android.R.drawable;
 // java
 import java.lang.String;
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.io.File;
 
 import org.protox.R;
 import org.protox.activity.QtActivityEx;
+
+
 
 class QtAndroidNotifications {
 
@@ -96,6 +99,7 @@ class QtAndroidNotifications {
             case 2:
                 final int file_number = (int)parameters.get("fileNumber");
                 final long file_size = (long)parameters.get("fileSize");
+                final int notification_id = getUniqueID();
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -109,7 +113,7 @@ class QtAndroidNotifications {
                             builder.setProgress(Short.MAX_VALUE, current, false);
                             builder.setOngoing(true);
                             builder.setDefaults(Notification.DEFAULT_LIGHTS);
-                            release(String.valueOf(id) + "_" + String.valueOf(file_number), type, builder);
+                            release(String.valueOf(id) + "_" + String.valueOf(file_number), notification_id, builder);
                             if (file_size == bytesTransfered) {
                                 break;
                             }
@@ -131,10 +135,10 @@ class QtAndroidNotifications {
                             builder.setContentTitle((String)parameters.get("transferCanceledText"));
                         }
                         if (transfer_succeded || (!transfer_succeded && !self_canceled)) {
-                            release(String.valueOf(id) + "_" + String.valueOf(file_number), type, builder);
+                            release(String.valueOf(id) + "_" + String.valueOf(file_number), notification_id, builder);
                         }
                         if (self_canceled) {
-                            remove(String.valueOf(id) + "_" + String.valueOf(file_number), type);
+                            remove(String.valueOf(id) + "_" + String.valueOf(file_number), notification_id);
                         }
                     }
                 }).start();
@@ -179,5 +183,10 @@ class QtAndroidNotifications {
     private static NotificationManager getManager() {
         Context context = QtNative.activity();
         return (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+    }
+
+    private final static AtomicInteger c = new AtomicInteger(0);
+    private static int getUniqueID() {
+        return c.incrementAndGet() + 2;
     }
 }
