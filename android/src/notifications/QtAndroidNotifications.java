@@ -22,13 +22,19 @@ import android.R.drawable;
 // java
 import java.lang.String;
 import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.io.File;
 
 import org.protox.R;
 import org.protox.activity.QtActivityEx;
 
-
+class NotificationModel
+{
+    public int type; 
+    public int id;
+    public HashMap <String, Object> parameters;
+};
 
 class QtAndroidNotifications {
 
@@ -45,6 +51,7 @@ class QtAndroidNotifications {
                 .setPriority(Notification.PRIORITY_HIGH)
                 .setAutoCancel(true);
 
+        final int notification_id = getUniqueNotificationID();
         switch (type) {
             case 0: {
                 String packageName = context.getApplicationContext().getPackageName();
@@ -62,7 +69,7 @@ class QtAndroidNotifications {
                     Intent intentActionReply = new Intent("notificationAction");
                     intentActionReply.putExtra("friendNumber", id);
                     intentActionReply.putExtra("quoteText", caption);
-                    PendingIntent pendingIntentReply = PendingIntent.getBroadcast(context, 0, intentActionReply, 
+                    PendingIntent pendingIntentReply = PendingIntent.getBroadcast(context, getUniquePendingIntentID(), intentActionReply, 
                                     PendingIntent.FLAG_UPDATE_CURRENT);
                     Notification.Action replyAction = new Notification.Action.Builder(android.R.drawable.ic_dialog_info,
                                     (String)parameters.get("replyButtonText"), pendingIntentReply)
@@ -72,7 +79,7 @@ class QtAndroidNotifications {
                     builder.setStyle(new Notification.BigTextStyle().bigText(caption));
                 }
                 builder.setContentIntent(resultPendingIntent);
-                release(String.valueOf(id), type, builder);
+                release("Text", id, type, parameters, notification_id, builder);
                 break;
             }
             case 1: {
@@ -87,19 +94,18 @@ class QtAndroidNotifications {
                 intentActionCancel.putExtra("transferAccepted", false);
                 intentActionCancel.putExtra("friendNumber", id);
                 intentActionCancel.putExtra("fileNumber", file_number);
-                PendingIntent pendingIntentAccept = PendingIntent.getBroadcast(context, 0, intentActionAccept, 
+                PendingIntent pendingIntentAccept = PendingIntent.getBroadcast(context, getUniquePendingIntentID(), intentActionAccept, 
                                     PendingIntent.FLAG_UPDATE_CURRENT);
-                PendingIntent pendingIntentCancel = PendingIntent.getBroadcast(context, 1, intentActionCancel, 
+                PendingIntent pendingIntentCancel = PendingIntent.getBroadcast(context, getUniquePendingIntentID(), intentActionCancel, 
                                     PendingIntent.FLAG_UPDATE_CURRENT);
                 builder.addAction(0, (String)parameters.get("acceptButtonText"), pendingIntentAccept);
                 builder.addAction(0, (String)parameters.get("cancelButtonText"), pendingIntentCancel);
-                release(String.valueOf(id) + "_" + String.valueOf(file_number), type, builder);
+                release("FileRequest", id, type, parameters, notification_id, builder);
                 break;
             }
             case 2:
                 final int file_number = (int)parameters.get("fileNumber");
                 final long file_size = (long)parameters.get("fileSize");
-                final int notification_id = getUniqueID();
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -113,7 +119,7 @@ class QtAndroidNotifications {
                             builder.setProgress(Short.MAX_VALUE, current, false);
                             builder.setOngoing(true);
                             builder.setDefaults(Notification.DEFAULT_LIGHTS);
-                            release(String.valueOf(id) + "_" + String.valueOf(file_number), notification_id, builder);
+                            release("FileProgress", id, type, parameters, notification_id, builder);
                             if (file_size == bytesTransfered) {
                                 break;
                             }
@@ -122,6 +128,11 @@ class QtAndroidNotifications {
                             } catch (InterruptedException e) {
                                 Log.d("Notifications", "Sleep failure!");
                             }
+                        }
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            Log.d("Notifications", "Sleep failure!");
                         }
                         builder.setProgress(0, 0, false);
                         builder.setOngoing(false);
@@ -135,10 +146,10 @@ class QtAndroidNotifications {
                             builder.setContentTitle((String)parameters.get("transferCanceledText"));
                         }
                         if (transfer_succeded || (!transfer_succeded && !self_canceled)) {
-                            release(String.valueOf(id) + "_" + String.valueOf(file_number), notification_id, builder);
+                            release("FileProgress", id, type, parameters, notification_id, builder);
                         }
                         if (self_canceled) {
-                            remove(String.valueOf(id) + "_" + String.valueOf(file_number), notification_id);
+                            getManager().cancel(notification_id);
                         }
                     }
                 }).start();
@@ -147,14 +158,21 @@ class QtAndroidNotifications {
     }
 
     public static void cancel(int type, int id, HashMap <String, Object> parameters) {
-        switch (type) {
-            case 0: remove(String.valueOf(id), type); break;
-            case 1: remove(String.valueOf(id) + "_" + String.valueOf((int)parameters.get("fileNumber")), type);
+        for (Entry <Integer, NotificationModel> entry : notifications.entrySet()) {
+            final int current_notification_id = entry.getKey();
+            final NotificationModel current_model = entry.getValue();
+            if (current_model.type == type && current_model.id == id) {
+                if (type == 1 && (int)current_model.parameters.get("fileNumber") != (int)parameters.get("fileNumber")) {
+                    continue;
+                }
+                getManager().cancel(current_notification_id);
+                notifications.remove(current_notification_id);
+                break;
+            }
         }
-
     }
 
-    private static void release(String channel, int type, Notification.Builder builder) {
+    private static void release(String channel, int id, int type, HashMap <String, Object> parameters, int notification_id, Notification.Builder builder) {
         final NotificationManager notificationManager = getManager();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel chan = new NotificationChannel(channel,
@@ -162,18 +180,30 @@ class QtAndroidNotifications {
                                                                   NotificationManager.IMPORTANCE_DEFAULT);
             notificationManager.createNotificationChannel(chan);
             builder.setChannelId(channel);
-            notificationManager.notify(type, builder.build());
-        } else {
-            notificationManager.notify(type, builder.build());
         }
-    }
-
-    private static void remove(String channel, int type) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            getManager().deleteNotificationChannel(channel);
-        } else {
-            getManager().cancel(type);
+        if (type < 2) {
+            for (Entry <Integer, NotificationModel> entry : notifications.entrySet()) {
+                final int current_notification_id = entry.getKey();
+                final NotificationModel current_model = entry.getValue();
+                if (current_model.type == type && current_model.id == id) {
+                    if (type == 1 && (int)current_model.parameters.get("fileNumber") != (int)parameters.get("fileNumber")) {
+                        continue;
+                    }
+                    getManager().cancel(current_notification_id);
+                    notifications.remove(current_notification_id);
+                    break;
+                }
+            }
+            NotificationModel model = new NotificationModel();
+            model.type = type;
+            model.id = id;
+            if (type == 1) {
+                model.parameters = new HashMap <String, Object>();
+                model.parameters.put("fileNumber", parameters.get("fileNumber"));
+            }
+            notifications.put(notification_id, model);
         }
+        notificationManager.notify(notification_id, builder.build());
     }
 
     public static void cancelAll() {
@@ -185,8 +215,14 @@ class QtAndroidNotifications {
         return (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
-    private final static AtomicInteger c = new AtomicInteger(0);
-    private static int getUniqueID() {
-        return c.incrementAndGet() + 2;
+    private final static AtomicInteger unique_notification_id = new AtomicInteger(0);
+    private final static AtomicInteger unique_pending_intent_id = new AtomicInteger(0);
+    private static int getUniqueNotificationID() {
+        return unique_notification_id.incrementAndGet();
     }
+    private static int getUniquePendingIntentID() {
+        return unique_pending_intent_id.incrementAndGet();
+    }
+
+    private static HashMap <Integer, NotificationModel> notifications = new HashMap <Integer, NotificationModel>();
 }
