@@ -139,3 +139,8 @@ v1.6.1beta
 - Fixed bug: custom nicknames are ignored on friend nickname change.
 - Added Brazilian Portuguese translation.
 - Added animation to status indicator button.
+
+v1.6.2beta
+
+- Fixed bug: notification don't work on Android O and higher
+- Reworked notifications, which resolved many issues with them and generally improved notification behavior
