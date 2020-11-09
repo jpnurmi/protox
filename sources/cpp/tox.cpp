@@ -676,7 +676,6 @@ void bootstrap_DHT(Tox *m)
 		QFile file(Tools::getProgDir() + json_file);
 		if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
 			json_data = file.readAll();
-			file.close();
 		}
 	}
 	QJsonDocument doc = QJsonDocument::fromJson(json_data.isEmpty() ? default_nodes_json.toUtf8() : json_data);
