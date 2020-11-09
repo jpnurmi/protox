@@ -1,6 +1,11 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+// C++
+#include <iostream>
+using std::unique_ptr;
+using std::make_unique;
+
 // Qt
 #include <QString>
 #include <QObject>

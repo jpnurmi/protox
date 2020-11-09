@@ -219,11 +219,10 @@ static void cb_file_recv(Tox *m, uint32_t friend_number, uint32_t file_number, u
 		case TOX_FILE_KIND_AVATAR: {
 			const QString file_path = Tools::getAvatarsDir() + 
 					ToxConverter::toString(get_friend_public_key(m, friend_number));
-			QFile *file = new QFile(file_path);
+			auto file = make_unique<QFile>(file_path);
 			if (file->exists()) {
 				if (!file->open(QIODevice::ReadOnly)) {
 					Tools::debug("Couldn't open avatar file for reading: " + file->fileName());
-					delete file;
 					break;
 				}
 				QByteArray data = file->readAll();
@@ -238,18 +237,16 @@ static void cb_file_recv(Tox *m, uint32_t friend_number, uint32_t file_number, u
 				if (err > 0) {
 					Tools::debug("Couldn't get file id for friend: " + QString::number(friend_number) + ".");
 					tox_file_control(m, friend_number, file_number, TOX_FILE_CONTROL_CANCEL, &err2);
-					delete file;
 					break;
 				}
 				if (hash == hash_local) {
 					Tools::debug("Avatar transfer canceled for friend: " + QString::number(friend_number) + ". Avatar already exists.");
 					tox_file_control(m, friend_number, file_number, TOX_FILE_CONTROL_CANCEL, &err2);
-					delete file;
 					break;
 				}
 				file->close();
 			}
-			Tools::AsyncFileManager *manager = new Tools::AsyncFileManager(file);
+			Tools::AsyncFileManager *manager = new Tools::AsyncFileManager(file.release());
 			QObject::connect(manager, &Tools::AsyncFileManager::fileTransferEnded, 
 							 &local_manager, &ToxLocalFileManager::onFileTransferEnded);
 			ToxFileTransfer *transfer = new ToxFileTransfer(m, friend_number, file_number, true, manager);
@@ -284,8 +281,7 @@ static void cb_file_recv(Tox *m, uint32_t friend_number, uint32_t file_number, u
 			settings->endGroup();
 			const QString file_path = downloadsFolder + QDir::separator() + fileName;
 			const QString new_path = Tools::getUniqueFilepath(file_path);
-			QFile *file = new QFile(new_path);
-			Tools::AsyncFileManager *manager = new Tools::AsyncFileManager(file);
+			Tools::AsyncFileManager *manager = new Tools::AsyncFileManager(new QFile(new_path));
 			QObject::connect(manager, &Tools::AsyncFileManager::fileTransferEnded, 
 							 &local_manager, &ToxLocalFileManager::onFileTransferEnded);
 			ToxFileTransfer *transfer = new ToxFileTransfer(m, friend_number, file_number, false, manager);
@@ -957,14 +953,13 @@ static void file_transfer_end(Tox *m, quint32 friend_number, quint32 file_number
 
 quint32 send_file(Tox *m, quint32 friend_number, const QString &path, ToxFileTransfer **transfer, quint64 &filesize, ToxFileId &file_id, quint32 &error, bool avatar)
 {
-	QFile *file = nullptr;
+	unique_ptr<QFile> file;
 	bool remove_avatar = avatar && path.isEmpty();
 	if (!remove_avatar) {
-		file = new QFile(path);
+		file = make_unique<QFile>(path);
 	}
 	if (file && !file->open(QIODevice::ReadOnly)) {
 		error = TOX_ERR_SENDING_OPEN_FAILED;
-		delete file;
 		return 0;
 	}
 	if (file) {
@@ -975,7 +970,6 @@ quint32 send_file(Tox *m, quint32 friend_number, const QString &path, ToxFileTra
 	if (file && avatar && filesize > TOX_AVATAR_MAX_CLIENT_SIZE) {
 		Tools::debug("Can't send avatar. File is too large: " + QString::number(filesize) + " > " + QString::number(TOX_AVATAR_MAX_CLIENT_SIZE));
 		error = TOX_ERR_SENDING_OTHER;
-		delete file;
 		return 0;
 	}
 	QByteArray encodedFilename;
@@ -988,7 +982,6 @@ quint32 send_file(Tox *m, quint32 friend_number, const QString &path, ToxFileTra
 				  (quint8*)encodedFilename.data(), encodedFilename.length(), &err);
 	if (err > 0) {
 		Tools::debug("tox_file_send file failed with error number: " + QString::number(err));
-		delete file;
 	}
 	switch (err) {
 		case TOX_ERR_FILE_SEND_OK: error = TOX_ERR_SENDING_OK; break;
@@ -997,7 +990,7 @@ quint32 send_file(Tox *m, quint32 friend_number, const QString &path, ToxFileTra
 		default: error = TOX_ERR_SENDING_OTHER; return 0;
 	}
 	if (file) {
-		Tools::AsyncFileManager *manager = new Tools::AsyncFileManager(file);
+		Tools::AsyncFileManager *manager = new Tools::AsyncFileManager(file.release());
 		QObject::connect(manager, &Tools::AsyncFileManager::fileChunkReady, 
 						 &local_manager, &ToxLocalFileManager::onFileChunkReady);
 		QObject::connect(manager, &Tools::AsyncFileManager::fileTransferEnded, 
