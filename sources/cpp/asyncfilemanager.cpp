@@ -61,6 +61,11 @@ bool AsyncFileManager::onFileTransferStarted()
 
 void AsyncFileManager::onCloseFileRequest()
 {
+	if(m_file->isWritable() && !m_file->flush()) {
+		Tools::debug("File manager thread 0x" + 
+					 QString::number((quint64)m_file->thread(), 16) + 
+					 " error - flush failed: " + m_file->fileName() + ".");
+	}
 	delete m_file;
 }
 
