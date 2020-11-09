@@ -113,6 +113,7 @@ public slots:
 	Q_INVOKABLE void changeSelfAvatar(const QString &path);
 	Q_INVOKABLE const QSize getImageSize(const QString &path);
 	Q_INVOKABLE const QString getCurrentCommitSha1();
+	Q_INVOKABLE void setTranslation(const QString &translation);
 
 public:
 	ToxBootstrapingThread bootstrapping_thread;
@@ -130,27 +131,14 @@ private:
 private:
 	QObject *component;
 private:
+	QTranslator *translator;
+private:
 	QTimer *toxcore_timer;
 	QTimer *reconnection_timer;
 private:
 	Tox *tox;
 	Tox_Pass_Key *tox_pass_key;
 	Tox_Options *tox_opts;
-};
-
-class QmlTranslator : public QObject
-{
-	Q_OBJECT
-public:
-	explicit QmlTranslator(QObject *parent = 0);
-signals:
-	// The signal of change the current language to change the interface translation
-	void languageChanged();
-public:
-	// Translation installation method, which will be available in QML
-	Q_INVOKABLE void setTranslation(const QString &translation);
-private:
-	QTranslator translator;
 };
 
 #endif // MAIN_H

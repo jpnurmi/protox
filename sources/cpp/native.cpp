@@ -81,7 +81,8 @@ void hideSplashScreen()
 bool requestApplicationPermissions()
 {
 #if defined (Q_OS_ANDROID)
-	const QStringList permission_list = { "android.permission.WRITE_EXTERNAL_STORAGE" };
+	const QStringList permission_list = { "android.permission.WRITE_EXTERNAL_STORAGE", 
+										  "android.permission.READ_EXTERNAL_STORAGE" };
 	for (auto permission : permission_list) {
 		auto permission_result = QtAndroid::checkPermission(permission);
 		if(permission_result == QtAndroid::PermissionResult::Denied){

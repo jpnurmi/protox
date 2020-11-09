@@ -49,6 +49,7 @@ QmlCBridge::QmlCBridge()
 		QMetaObject::invokeMethod(component, "resetConnectionStatus");
 		Toxcore::bootstrap_DHT(tox);
 	});
+	translator = new QTranslator;
 }
 
 void QmlCBridge::test()
@@ -218,7 +219,7 @@ void QmlCBridge::retrieveChatLog(quint32 start, bool preload)
 
 void QmlCBridge::copyTextToClipboard(QString text)
 {
-	QClipboard *clipboard = QGuiApplication::clipboard(); 
+	QClipboard *clipboard = qApp->clipboard();
 	clipboard->setText(text);
 }
 
@@ -514,11 +515,12 @@ int QmlCBridge::signInProfile(const QString &profile, bool create_new, const QSt
 
 QmlCBridge::~QmlCBridge()
 {
-	if (current_profile.isEmpty()) {
-		return;
+	if (!current_profile.isEmpty()) {
+		signOutProfile();
 	}
-	signOutProfile();
 	delete reconnection_timer;
+	qApp->removeTranslator(translator);
+	delete translator;
 }
 
 QVariant QmlCBridge::getProfileList()
@@ -889,20 +891,17 @@ const QString QmlCBridge::getCurrentCommitSha1()
 	return Tools::getCurrentCommitSha1();
 }
 
-/*
- * Translation object 
-*/
-
-QmlTranslator::QmlTranslator(QObject *parent) : QObject(parent) {}
-
-void QmlTranslator::setTranslation(const QString &translation)
+void QmlCBridge::setTranslation(const QString &translation)
 {
-	if (!translator.load(":protox_" + translation, ".")) {
+	// default language
+	if (translation == "en_US") {
+		return;
+	}
+	if (!translator->load(":protox_" + translation, ".")) {
 		Tools::debug("Translation loading failed: " + translation);
 		return;
 	}
-	qApp->installTranslator(&translator);
-	emit languageChanged();
+	qApp->installTranslator(translator);
 }
 
 /*
@@ -962,11 +961,9 @@ int main(int argc, char *argv[])
 			QCoreApplication::exit(-1);
 	}, Qt::QueuedConnection);
 
-	QmlTranslator qmltranslator;
 	qmlbridge = new QmlCBridge;
 	QQmlContext *root = engine.rootContext();
 	root->setContextProperty("bridge", qmlbridge);
-	root->setContextProperty("translator", &qmltranslator);
 	QtNotification::declareQML();
 	QtStatusBar::declareQML();
 	QtToast::declareQML();
@@ -976,7 +973,7 @@ int main(int argc, char *argv[])
 	QUtf8ByteLimitValidator::declareQML();
 	QZXing::registerQMLTypes();
 	QZXing::registerQMLImageProvider(engine);
-	qmltranslator.setTranslation(qmlbridge->getSystemLocale());
+	qmlbridge->setTranslation(qmlbridge->getSystemLocale());
 	engine.load(url);
 	QObject *component = engine.rootObjects().first();
 	qmlbridge->setComponent(component);
