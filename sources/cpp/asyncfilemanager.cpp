@@ -38,6 +38,11 @@ void AsyncFileManager::onChunkReadRequest(quint64 position, quint32 length)
 void AsyncFileManager::onChunkWriteRequest(quint64 position, const QByteArray &data)
 {
 	if (!data.length()) {
+		if(!m_file->flush()) {
+			Tools::debug("File manager thread 0x" + 
+						 QString::number((quint64)m_file->thread(), 16) + 
+						 " error - flush failed: " + m_file->fileName() + ".");
+		}
 		m_file->close();
 		emit fileTransferEnded(m_parent);
 		return;
