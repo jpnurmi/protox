@@ -238,14 +238,12 @@ static void cb_file_recv(Tox *m, uint32_t friend_number, uint32_t file_number, u
 				if (err > 0) {
 					Tools::debug("Couldn't get file id for friend: " + QString::number(friend_number) + ".");
 					tox_file_control(m, friend_number, file_number, TOX_FILE_CONTROL_CANCEL, &err2);
-					file->close();
 					delete file;
 					break;
 				}
 				if (hash == hash_local) {
 					Tools::debug("Avatar transfer canceled for friend: " + QString::number(friend_number) + ". Avatar already exists.");
 					tox_file_control(m, friend_number, file_number, TOX_FILE_CONTROL_CANCEL, &err2);
-					file->close();
 					delete file;
 					break;
 				}
@@ -552,12 +550,15 @@ bool save_data(Tox *m, const Tox_Pass_Key *pass_key, const QString &path)
 	}
 
 	if (result == -1) {
-		file.close();
 		Tools::debug("Warning: save_data failed: write failed.");
 		return false;
 	}
 
-	file.close();
+	if (!file.flush()) {
+		Tools::debug("Warning: save_data failed: flush failed.");
+		return false;
+	}
+
 	return true;
 }
 
@@ -591,14 +592,12 @@ static Tox *load_tox(struct Tox_Options *options, const QString &path, const QSt
 	quint64 data_len = file.size();
 
 	if (data_len == 0) {
-		file.close();
 		error = TOX_ERR_LOADING_NULL;
 		return nullptr;
 	}
 
 	QByteArray data = file.readAll();
 	if (data.isEmpty()) {
-		file.close();
 		error = TOX_ERR_LOADING_NULL;
 		return nullptr;
 	}
@@ -801,7 +800,6 @@ bool check_profile_encrypted(const QString &profile)
 		return false;
 	}
 	bool encrypted = tox_is_data_encrypted((quint8*)f.readAll().data());
-	f.close();
 	return encrypted;
 }
 
@@ -978,7 +976,6 @@ quint32 send_file(Tox *m, quint32 friend_number, const QString &path, ToxFileTra
 	if (file && avatar && filesize > TOX_AVATAR_MAX_CLIENT_SIZE) {
 		Tools::debug("Can't send avatar. File is too large: " + QString::number(filesize) + " > " + QString::number(TOX_AVATAR_MAX_CLIENT_SIZE));
 		error = TOX_ERR_SENDING_OTHER;
-		file->close();
 		delete file;
 		return 0;
 	}
@@ -993,7 +990,6 @@ quint32 send_file(Tox *m, quint32 friend_number, const QString &path, ToxFileTra
 	if (err > 0) {
 		Tools::debug("tox_file_send file failed with error number: " + QString::number(err));
 		if (file) {
-			file->close();
 			delete file;
 		}
 	}
