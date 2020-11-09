@@ -989,14 +989,12 @@ quint32 send_file(Tox *m, quint32 friend_number, const QString &path, ToxFileTra
 				  (quint8*)encodedFilename.data(), encodedFilename.length(), &err);
 	if (err > 0) {
 		Tools::debug("tox_file_send file failed with error number: " + QString::number(err));
-		if (file) {
-			delete file;
-		}
+		delete file;
 	}
 	switch (err) {
-		case TOX_ERR_FILE_SEND_TOO_MANY: error = TOX_ERR_SENDING_TOO_MANY_REQUESTS; return 0;
-		case TOX_ERR_FILE_SEND_FRIEND_NOT_CONNECTED: error = TOX_ERR_SENDING_FRIEND_OFFLINE; return 0;
 		case TOX_ERR_FILE_SEND_OK: error = TOX_ERR_SENDING_OK; break;
+		case TOX_ERR_FILE_SEND_FRIEND_NOT_CONNECTED: error = TOX_ERR_SENDING_FRIEND_OFFLINE; return 0;
+		case TOX_ERR_FILE_SEND_TOO_MANY: error = TOX_ERR_SENDING_TOO_MANY_REQUESTS; return 0;
 		default: error = TOX_ERR_SENDING_OTHER; return 0;
 	}
 	if (file) {
