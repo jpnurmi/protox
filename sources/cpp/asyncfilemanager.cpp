@@ -61,9 +61,6 @@ bool AsyncFileManager::onFileTransferStarted()
 
 void AsyncFileManager::onCloseFileRequest()
 {
-	if (m_file->isOpen()) {
-		m_file->close();
-	}
 	delete m_file;
 }
 
