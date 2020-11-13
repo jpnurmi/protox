@@ -135,6 +135,15 @@ void viewFile(const QString &path, const QString &type)
 #endif
 }
 
+void startProtoxService()
+{
+	QAndroidJniObject::callStaticMethod<void>(
+		"org/protox/ProtoxService",
+		"startBackgroundService",
+		"(Landroid/content/Context;)V",
+		QtAndroid::androidActivity().object());
+}
+
 const QString getInternalStoragePath() 
 {
 	return QDir::separator() + QString("storage") + QDir::separator() + QString("emulated") + QDir::separator() + QString("0") + QDir::separator();

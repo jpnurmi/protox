@@ -936,6 +936,15 @@ void customMessageHandler(QtMsgType type, const QMessageLogContext &context, con
 
 int main(int argc, char *argv[])
 {
+	if (argc > 1 && strcmp(argv[1], "-service") == 0) {
+		//QFile f(Native::getInternalStoragePath() + "test.txt");
+		//f.open(QFile::WriteOnly | QFile::Text);
+		//f.write(QString("Service starting with from the same .so file").toUtf8());
+		//f.flush();
+		qDebug() << "lalalalal";
+		QAndroidService app(argc, argv);
+		return app.exec();
+	}
 	if (!Native::requestApplicationPermissions()) {
 		return 1;
 	}
@@ -977,6 +986,8 @@ int main(int argc, char *argv[])
 	engine.load(url);
 	QObject *component = engine.rootObjects().first();
 	qmlbridge->setComponent(component);
+
+	Native::startProtoxService();
 
 	int result = app.exec();
 	delete qmlbridge;
