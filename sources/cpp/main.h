@@ -39,6 +39,7 @@ public:
 	void cancelTextNotification(quint32 friend_number);
 	void createFileProgressNotification(quint32 friend_number, quint32 file_number);
 	void updateFriendAvatar(quint32 friend_number);
+	void moveTimersToThread(QThread *thread);
 private:
 	void updateToxPasswordKey();
 	const QString formatBytes(quint64 bytes);

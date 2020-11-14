@@ -32,6 +32,7 @@ import android.webkit.MimeTypeMap;
 import android.app.RemoteInput;
 
 import KeyboardProvider.KeyboardProvider;
+import org.protox.ProtoxService;
 
 // java
 import java.lang.String;

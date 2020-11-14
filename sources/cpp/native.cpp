@@ -67,6 +67,20 @@ JFUNC(void, messageReplied, jint friend_number, jstring quote_text, jstring repl
 							  Q_ARG(QString, finalReplyText),
 							  Q_ARG(bool, true));
 }
+
+JFUNC_SERVICE_NOARGS(void, serviceLoop)
+{
+	//qmlbridge->moveTimersToThread(QThread::currentThread());
+	QEventLoop loop;
+	QTimer timer;
+	QObject::connect(&timer, &QTimer::timeout, []() {
+		Tools::debug("test");
+	});
+	timer.setSingleShot(false);
+	timer.start(100);
+	loop.exec();
+	Tools::debug("Protox service exited successfully.");
+}
 #endif
 
 namespace Native {
@@ -137,11 +151,16 @@ void viewFile(const QString &path, const QString &type)
 
 void startProtoxService()
 {
-	QAndroidJniObject::callStaticMethod<void>(
-		"org/protox/ProtoxService",
-		"startBackgroundService",
-		"(Landroid/content/Context;)V",
-		QtAndroid::androidActivity().object());
+#if defined (Q_OS_ANDROID)
+	QtAndroid::runOnAndroidThread([]() {
+		QAndroidIntent serviceIntent(QtAndroid::androidActivity().object(), 
+									 "org/protox/ProtoxService");
+		QAndroidJniObject result = QtAndroid::androidActivity().callObjectMethod(
+					"startService", 
+					"(Landroid/content/Intent;)Landroid/content/ComponentName;",
+					serviceIntent.handle().object());
+	});
+#endif
 }
 
 const QString getInternalStoragePath() 

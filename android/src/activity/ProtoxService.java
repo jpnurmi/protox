@@ -3,11 +3,14 @@ package org.protox;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+import android.app.Service;
 import android.os.IBinder;
-import org.qtproject.qt5.android.bindings.QtService;
 
-public class ProtoxService extends QtService
+import java.lang.Thread;
+
+public class ProtoxService extends Service
 {
+    private static native void serviceLoop();
     private static final String TAG = "QtAndroidService";
 
     @Override
@@ -26,7 +29,7 @@ public class ProtoxService extends QtService
     public int onStartCommand(Intent intent, int flags, int startId) {
         int ret = super.onStartCommand(intent, flags, startId);
 
-        // Do some work
+        serviceLoop();
 
         return ret;
     }
@@ -34,10 +37,5 @@ public class ProtoxService extends QtService
     @Override
     public IBinder onBind(Intent intent) {
         return null;
-    }
-
-    public static void startBackgroundService(Context context) {
-        Log.i(TAG, "Starting Service");
-        context.startService(new Intent(context, ProtoxService.class));
     }
 }

@@ -891,6 +891,12 @@ const QString QmlCBridge::getCurrentCommitSha1()
 	return Tools::getCurrentCommitSha1();
 }
 
+void QmlCBridge::moveTimersToThread(QThread *thread)
+{
+	toxcore_timer->moveToThread(thread);
+	reconnection_timer->moveToThread(thread);
+}
+
 void QmlCBridge::setTranslation(const QString &translation)
 {
 	// default language
@@ -936,15 +942,6 @@ void customMessageHandler(QtMsgType type, const QMessageLogContext &context, con
 
 int main(int argc, char *argv[])
 {
-	if (argc > 1 && strcmp(argv[1], "-service") == 0) {
-		//QFile f(Native::getInternalStoragePath() + "test.txt");
-		//f.open(QFile::WriteOnly | QFile::Text);
-		//f.write(QString("Service starting with from the same .so file").toUtf8());
-		//f.flush();
-		qDebug() << "lalalalal";
-		QAndroidService app(argc, argv);
-		return app.exec();
-	}
 	if (!Native::requestApplicationPermissions()) {
 		return 1;
 	}
@@ -987,13 +984,13 @@ int main(int argc, char *argv[])
 	QObject *component = engine.rootObjects().first();
 	qmlbridge->setComponent(component);
 
-	Native::startProtoxService();
-
 	int result = app.exec();
-	delete qmlbridge;
-	delete settings;
-	delete notification;
+	//delete qmlbridge;
+	//delete settings;
+	//delete notification;
 	Tools::debug("Program exited successfully.");
+
+	Native::startProtoxService();
 
 	return result;
 }

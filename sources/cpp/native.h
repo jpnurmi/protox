@@ -11,6 +11,7 @@
 #endif
 
 #define JFUNC(type, name, ...) extern "C" JNIEXPORT type JNICALL Java_org_protox_activity_QtActivityEx_##name (JNIEnv *, jobject, __VA_ARGS__)
+#define JFUNC_SERVICE_NOARGS(type, name) extern "C" JNIEXPORT type JNICALL Java_org_protox_ProtoxService_##name (JNIEnv *, jobject)
 
 namespace Native {
 	void hideSplashScreen();
