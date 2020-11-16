@@ -68,7 +68,7 @@ JFUNC(void, messageReplied, jint friend_number, jstring quote_text, jstring repl
 							  Q_ARG(bool, true));
 }
 
-JFUNC_SERVICE_NOARGS(void, serviceLoop)
+JFUNC_SERVICE_NO_ARGS(void, serviceLoop)
 {
 	//qmlbridge->moveTimersToThread(QThread::currentThread());
 	QEventLoop loop;

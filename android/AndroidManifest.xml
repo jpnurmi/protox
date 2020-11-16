@@ -58,7 +58,7 @@
             <meta-data android:name="android.app.extract_android_style" android:value="full"/>
             <!-- extract android style -->
     </activity>
-    <service android:name=".ProtoxService">
+    <service android:name=".ProtoxService" android:stopWithTask="false">
         <!-- Background running -->
         <meta-data android:name="android.app.background_running" android:value="true"/>
         <!-- Background running -->
@@ -84,6 +84,7 @@
     <!-- %%INSERT_FEATURES -->
 
 <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
 
 </manifest>

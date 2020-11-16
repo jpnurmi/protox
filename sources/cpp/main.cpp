@@ -985,12 +985,12 @@ int main(int argc, char *argv[])
 	qmlbridge->setComponent(component);
 
 	int result = app.exec();
-	//delete qmlbridge;
-	//delete settings;
-	//delete notification;
+	delete qmlbridge;
+	delete settings;
+	delete notification;
 	Tools::debug("Program exited successfully.");
 
-	Native::startProtoxService();
+	//Native::startProtoxService();
 
 	return result;
 }
