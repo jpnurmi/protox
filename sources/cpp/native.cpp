@@ -1,11 +1,13 @@
 #include "native.h"
 #include "main.h"
+#include "db.h"
 
 #ifdef Q_OS_ANDROID
 #include "deps/QtMobileNotification/QtNotification.h"
 #endif
 
 extern QmlCBridge *qmlbridge;
+extern ChatDataBase *chat_db;
 
 #ifdef Q_OS_ANDROID
 JFUNC(void, keyboardHeightChanged, jint height)
@@ -70,14 +72,8 @@ JFUNC(void, messageReplied, jint friend_number, jstring quote_text, jstring repl
 
 JFUNC_SERVICE_NO_ARGS(void, serviceLoop)
 {
-	//qmlbridge->moveTimersToThread(QThread::currentThread());
 	QEventLoop loop;
-	QTimer timer;
-	QObject::connect(&timer, &QTimer::timeout, []() {
-		Tools::debug("test");
-	});
-	timer.setSingleShot(false);
-	timer.start(100);
+	qmlbridge->createTimers();
 	loop.exec();
 	Tools::debug("Protox service exited successfully.");
 }
@@ -153,12 +149,7 @@ void startProtoxService()
 {
 #if defined (Q_OS_ANDROID)
 	QtAndroid::runOnAndroidThread([]() {
-		QAndroidIntent serviceIntent(QtAndroid::androidActivity().object(), 
-									 "org/protox/ProtoxService");
-		QAndroidJniObject result = QtAndroid::androidActivity().callObjectMethod(
-					"startService", 
-					"(Landroid/content/Intent;)Landroid/content/ComponentName;",
-					serviceIntent.handle().object());
+		QtAndroid::androidActivity().callMethod<void>("startProtoxService", "()V");
 	});
 #endif
 }

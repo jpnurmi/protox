@@ -58,15 +58,17 @@
             <meta-data android:name="android.app.extract_android_style" android:value="full"/>
             <!-- extract android style -->
     </activity>
-    <service android:name=".ProtoxService" android:stopWithTask="false">
+    <activity
+        android:name=".activity.ExitActivity"
+        android:configChanges="screenSize|locale|touchscreen|navigation|orientation|fontScale|keyboard|keyboardHidden"
+        android:label="Protox"
+        android:windowSoftInputMode="stateAlwaysHidden"
+        android:launchMode="singleTask"/>
+    <service android:name=".service.ProtoxService" android:stopWithTask="false">
         <!-- Background running -->
         <meta-data android:name="android.app.background_running" android:value="true"/>
         <!-- Background running -->
         <meta-data android:name="android.app.lib_name" android:value="-- %%INSERT_APP_LIB_NAME%% --"/>
-
-        <!-- Application arguments -->
-        <meta-data android:name="android.app.arguments" android:value="-service"/>
-        <!-- Application arguments -->
     </service>
 
     </application>

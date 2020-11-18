@@ -31,11 +31,14 @@ import android.net.Uri;
 import android.webkit.MimeTypeMap;
 import android.app.RemoteInput;
 
+// project
 import KeyboardProvider.KeyboardProvider;
-import org.protox.ProtoxService;
+import org.protox.service.ProtoxService;
 
 // java
 import java.lang.String;
+
+
 
 public class QtActivityEx extends QtActivity
 {
@@ -295,6 +298,19 @@ public class QtActivityEx extends QtActivity
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_VIEW);
         intent.setDataAndType(Uri.parse("file://" + path), type);
+        startActivity(intent);
+    }
+
+    public void startProtoxService() {
+        Intent serviceIntent = new Intent(this, ProtoxService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent);
+        } else {
+            startService(serviceIntent);
+        }
+        Intent intent = new Intent(this, ExitActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK 
+                | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS | Intent.FLAG_ACTIVITY_NO_ANIMATION);
         startActivity(intent);
     }
 }

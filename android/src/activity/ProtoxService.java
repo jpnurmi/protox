@@ -1,4 +1,4 @@
-package org.protox;
+package org.protox.service;
 
 import android.content.Context;
 import android.content.Intent;

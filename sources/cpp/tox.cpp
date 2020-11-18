@@ -5,7 +5,6 @@
 #include "settings.h"
 
 extern QmlCBridge *qmlbridge;
-extern ChatDataBase *chat_db;
 extern QSettingsExt *settings;
 
 /*
@@ -74,7 +73,7 @@ void cb_friend_read_receipt(Tox *m, uint32_t friend_number, uint32_t message_id,
 	for (int i = 0; i < qmlbridge->pending_messages.count(); i++) {
 		const ToxPendingMessage &pending_message = qmlbridge->pending_messages[i];
 		if (pending_message.message_id == message_id && pending_message.friend_number == friend_number) {
-			chat_db->setMessageReceived(pending_message.unique_id, get_friend_public_key(m, friend_number));
+			qmlbridge->getChatDB()->setMessageReceived(pending_message.unique_id, get_friend_public_key(m, friend_number));
 			qmlbridge->setMessageReceived(friend_number, pending_message.unique_id);
 			if (pending_message.reply) {
 				qmlbridge->cancelTextNotification(friend_number);
@@ -98,7 +97,7 @@ static void cb_friend_message(Tox *m, uint32_t friend_number, TOX_MESSAGE_TYPE t
 	settings->beginGroup("Privacy");
 	bool keep_chat_history = settings->valued("keep_chat_history").toBool();
 	settings->endGroup();
-	chat_db->insertMessage(variantMessage, dt, friend_pk, !keep_chat_history, false);
+	qmlbridge->getChatDB()->insertMessage(variantMessage, dt, friend_pk, !keep_chat_history, false);
 	qmlbridge->insertMessage(variantMessage, friend_number, dt);
 }
 
@@ -193,7 +192,7 @@ static void cb_file_recv_control_cb(Tox *m, uint32_t friend_number, uint32_t fil
 					return;
 				}
 				case TOX_FILE_CONTROL_CANCEL: {
-					chat_db->updateFileMessageState(qmlbridge->file_messages[transfer], 
+					qmlbridge->getChatDB()->updateFileMessageState(qmlbridge->file_messages[transfer], 
 													get_friend_public_key(m, friend_number), 
 													ToxFileState::TOX_FILE_CANCELED);
 					delete transfer;
@@ -298,7 +297,7 @@ static void cb_file_recv(Tox *m, uint32_t friend_number, uint32_t file_number, u
 			settings->beginGroup("Privacy");
 			bool keep_chat_history = settings->valued("keep_chat_history").toBool();
 			settings->endGroup();
-			quint64 unique_id = chat_db->insertMessage(variantMessage, dt, Toxcore::get_friend_public_key(m, friend_number), !keep_chat_history, false);
+			quint64 unique_id = qmlbridge->getChatDB()->insertMessage(variantMessage, dt, Toxcore::get_friend_public_key(m, friend_number), !keep_chat_history, false);
 			qmlbridge->file_messages[transfer] = unique_id;
 			qmlbridge->insertMessage(variantMessage, friend_number, dt, false, unique_id);
 			if (auto_accept_files && (auto_accept_file_size == 0 || (quint64)file_size <= auto_accept_file_size * 1024 * 1024)) {
@@ -935,7 +934,7 @@ static void file_transfer_end(Tox *m, quint32 friend_number, quint32 file_number
 		if (transfer->friend_number == friend_number && transfer->file_number == file_number) {
 			bool avatar = transfer->avatar;
 			if (!avatar) {
-				chat_db->updateFileMessageState(qmlbridge->file_messages[transfer], 
+				qmlbridge->getChatDB()->updateFileMessageState(qmlbridge->file_messages[transfer], 
 												get_friend_public_key(m, friend_number), 
 												ToxFileState::TOX_FILE_FINISHED);
 				qmlbridge->changeFileProgress(friend_number, file_number, transfer->bytesTransfered, true);
@@ -1013,7 +1012,7 @@ void cancel_all_file_transfers_for_friend(quint32 friend_number)
 		TOX_ERR_FILE_CONTROL err; // we don't care about errors here
 		tox_file_control(transfer->tox, transfer->friend_number, transfer->file_number, TOX_FILE_CONTROL_CANCEL, &err);
 		if (!transfer->avatar) {
-			chat_db->updateFileMessageState(qmlbridge->file_messages[transfer], 
+			qmlbridge->getChatDB()->updateFileMessageState(qmlbridge->file_messages[transfer], 
 											get_friend_public_key(transfer->tox, transfer->friend_number), 
 											ToxFileState::TOX_FILE_CANCELED);
 			qmlbridge->file_messages.remove(transfer);
@@ -1030,7 +1029,7 @@ void cancel_all_file_transfers()
 		TOX_ERR_FILE_CONTROL err; // we don't care about errors here
 		tox_file_control(transfer->tox, transfer->friend_number, transfer->file_number, TOX_FILE_CONTROL_CANCEL, &err);
 		if (!transfer->avatar) {
-			chat_db->updateFileMessageState(qmlbridge->file_messages[transfer], 
+			qmlbridge->getChatDB()->updateFileMessageState(qmlbridge->file_messages[transfer], 
 											get_friend_public_key(transfer->tox, transfer->friend_number), 
 											ToxFileState::TOX_FILE_CANCELED);
 			qmlbridge->file_messages.remove(transfer);
@@ -1052,7 +1051,7 @@ bool file_control(Tox *m, quint32 friend_number, quint32 file_number, quint32 co
 				unique_id = qmlbridge->file_messages[transfer];
 				switch (control) {
 					case TOX_FILE_CONTROL_CANCEL: {
-						chat_db->updateFileMessageState(unique_id, 
+						qmlbridge->getChatDB()->updateFileMessageState(unique_id, 
 														get_friend_public_key(m, friend_number), 
 														ToxFileState::TOX_FILE_CANCELED);
 						qmlbridge->self_canceled_transfers.push_back(ToxSelfCanceledTransfer(friend_number, file_number));
@@ -1063,13 +1062,13 @@ bool file_control(Tox *m, quint32 friend_number, quint32 file_number, quint32 co
 						return true;
 					}
 					case TOX_FILE_CONTROL_PAUSE: {
-						chat_db->updateFileMessageState(unique_id, 
+						qmlbridge->getChatDB()->updateFileMessageState(unique_id, 
 														get_friend_public_key(m, friend_number), 
 														ToxFileState::TOX_FILE_PAUSED);
 						return true;
 					}
 					case TOX_FILE_CONTROL_RESUME: {
-						chat_db->updateFileMessageState(unique_id, 
+						qmlbridge->getChatDB()->updateFileMessageState(unique_id, 
 														get_friend_public_key(m, friend_number), 
 														ToxFileState::TOX_FILE_INPROGRESS);
 						return true;
@@ -1106,7 +1105,7 @@ quint32 acceptFile(quint32 friend_number, quint32 file_number, quint64 &unique_i
 				TOX_ERR_FILE_CONTROL err;
 				tox_file_control(transfer->tox, transfer->friend_number, transfer->file_number, 
 								 TOX_FILE_CONTROL_CANCEL, &err);
-				chat_db->updateFileMessageState(unique_id, 
+				qmlbridge->getChatDB()->updateFileMessageState(unique_id, 
 												get_friend_public_key(transfer->tox, friend_number), 
 												ToxFileState::TOX_FILE_CANCELED);
 				delete transfer;
