@@ -7,7 +7,7 @@ QSettingsExt::QSettingsExt(const QString &fileName) : QSettings(fileName, QSetti
 {
 	default_values = {
 		// Toxcore
-		{ "udp_enabled", true },
+		{ "udp_enabled", false },
 		{ "ipv6_enabled", true },
 		{ "local_discovery_enabled", false },
 		{ "nodes_json_file", QString() },
