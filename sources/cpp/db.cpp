@@ -22,7 +22,7 @@ ChatDataBase::ChatDataBase(const QString &fileName, const QString &password)
 
 	upgradeFromV4toV5();
 
-	QSqlQuery query;
+	QSqlQuery query(db);
 	query = execQuery(QString("PRAGMA application_id=%1").arg(APPLICATION_ID));
 	query = execQuery(QString("PRAGMA user_version=%1").arg(DATABASE_VERSION));
 	const QString create_command_messages =
@@ -114,7 +114,7 @@ quint64 ChatDataBase::insertMessage(const ToxVariantMessage &variantMessage, con
 	QSqlQuery last_msg_query = execQuery(QString("SELECT reference_id FROM %1 ORDER BY reference_id DESC LIMIT 1").arg(table));
 	last_msg_query.next();
 
-	QSqlQuery new_unique_id_query;
+	QSqlQuery new_unique_id_query(db);
 	new_unique_id_query.prepare("SELECT MAX(unique_id) + 1 FROM Messages WHERE public_key = :public_key");
 	new_unique_id_query.bindValue(":public_key", public_key);
 	execQuery(new_unique_id_query);

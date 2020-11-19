@@ -301,16 +301,13 @@ public class QtActivityEx extends QtActivity
         startActivity(intent);
     }
 
-    public void startProtoxService() {
+    public void startProtoxService(String contentText) {
         Intent serviceIntent = new Intent(this, ProtoxService.class);
+        serviceIntent.putExtra("contentText", contentText);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(serviceIntent);
         } else {
             startService(serviceIntent);
         }
-        Intent intent = new Intent(this, ExitActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK 
-                | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS | Intent.FLAG_ACTIVITY_NO_ANIMATION);
-        startActivity(intent);
     }
 }

@@ -69,14 +69,6 @@ JFUNC(void, messageReplied, jint friend_number, jstring quote_text, jstring repl
 							  Q_ARG(QString, finalReplyText),
 							  Q_ARG(bool, true));
 }
-
-JFUNC_SERVICE_NO_ARGS(void, serviceLoop)
-{
-	QEventLoop loop;
-	qmlbridge->createTimers();
-	loop.exec();
-	Tools::debug("Protox service exited successfully.");
-}
 #endif
 
 namespace Native {
@@ -145,11 +137,12 @@ void viewFile(const QString &path, const QString &type)
 #endif
 }
 
-void startProtoxService()
+void startProtoxService(const QString &contentText)
 {
 #if defined (Q_OS_ANDROID)
-	QtAndroid::runOnAndroidThread([]() {
-		QtAndroid::androidActivity().callMethod<void>("startProtoxService", "()V");
+	QtAndroid::runOnAndroidThread([=]() {
+		QtAndroid::androidActivity().callMethod<void>("startProtoxService", "(Ljava/lang/String;)V", 
+													  QAndroidJniObject::fromString(contentText).object());
 	});
 #endif
 }

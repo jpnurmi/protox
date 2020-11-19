@@ -40,11 +40,8 @@ public:
 	void cancelTextNotification(quint32 friend_number);
 	void createFileProgressNotification(quint32 friend_number, quint32 file_number);
 	void updateFriendAvatar(quint32 friend_number);
-	void deleteTimers();
 	void createTimers();
 	bool checkSignedIn();
-	void deleteChatDB();
-	void createChatDB();
 	ChatDataBase *getChatDB() { return chat_db; }
 private:
 	void updateToxPasswordKey();

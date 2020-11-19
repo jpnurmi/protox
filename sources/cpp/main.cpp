@@ -462,7 +462,7 @@ int QmlCBridge::signInProfile(const QString &profile, bool create_new, const QSt
 	}
 	settings->endGroup();
 	//Tools::debug("My address: " + ToxConverter::toString(Toxcore::get_address(tox)));
-	createChatDB();
+		chat_db = new ChatDataBase("chat_" + Tools::replaceFileExtension(current_profile, ".db"), profile_password);
 
 	// load config
 	settings->beginGroup("Client_" + current_profile);
@@ -540,7 +540,8 @@ void QmlCBridge::signOutProfile(bool remove)
 	Toxcore::cancel_all_file_transfers();
 	Toxcore::iterate(tox);
 
-	deleteTimers();
+	delete toxcore_timer;
+	delete reconnection_timer;
 	if (!remove) {
 		Toxcore::save_data(tox, tox_pass_key, Tools::getProgDir() + current_profile);
 	}
@@ -552,7 +553,7 @@ void QmlCBridge::signOutProfile(bool remove)
 	Toxcore::reset_pass_key(&tox_pass_key);
 	Toxcore::destroy_opts(tox_opts);
 
-	deleteChatDB();
+	delete chat_db;
 	profile_password.clear();
 
 	if (remove) {
@@ -876,12 +877,6 @@ const QString QmlCBridge::getCurrentCommitSha1()
 	return Tools::getCurrentCommitSha1();
 }
 
-void QmlCBridge::deleteTimers()
-{
-	delete toxcore_timer;
-	delete reconnection_timer;
-}
-
 void QmlCBridge::createTimers()
 {
 	toxcore_timer = Toxcore::create_qtimer(tox);
@@ -912,16 +907,6 @@ void QmlCBridge::createTimers()
 bool QmlCBridge::checkSignedIn()
 {
 	return !current_profile.isEmpty();
-}
-
-void QmlCBridge::deleteChatDB()
-{
-	delete chat_db;
-}
-
-void QmlCBridge::createChatDB()
-{
-	chat_db = new ChatDataBase("chat_" + Tools::replaceFileExtension(current_profile, ".db"), profile_password);
 }
 
 void QmlCBridge::setTranslation(const QString &translation)
@@ -979,49 +964,39 @@ int main(int argc, char *argv[])
 	qmlbridge = new QmlCBridge;
 
 	Tools::debug("App started.");
+
 	QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+	QGuiApplication app(argc, argv);
+	// eleminate QML warnings
+	app.setOrganizationName("protox");
+	app.setOrganizationDomain("org");
 
-	int result = 1;
-	while (true) {
-		QGuiApplication app(argc, argv);
-		// eleminate QML warnings
-		app.setOrganizationName("protox");
-		app.setOrganizationDomain("org");
+	QQmlApplicationEngine engine;
+	const QUrl url(QStringLiteral(QML_MAIN));
+	QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
+					 &app, [url](QObject *obj, const QUrl &objUrl) {
+		if (!obj && url == objUrl)
+			QCoreApplication::exit(-1);
+	}, Qt::QueuedConnection);
 
-		QQmlApplicationEngine engine;
-		const QUrl url(QStringLiteral(QML_MAIN));
-		QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
-						 &app, [url](QObject *obj, const QUrl &objUrl) {
-			if (!obj && url == objUrl)
-				QCoreApplication::exit(-1);
-		}, Qt::QueuedConnection);
+	QQmlContext *root = engine.rootContext();
+	root->setContextProperty("bridge", qmlbridge);
+	QtNotification::declareQML();
+	QtStatusBar::declareQML();
+	QtToast::declareQML();
+	QtPhotoDialog::declareQML();
+	QtFolderDialog::declareQML();
+	QtQRCodeScanner::declareQML();
+	QUtf8ByteLimitValidator::declareQML();
+	QZXing::registerQMLTypes();
+	QZXing::registerQMLImageProvider(engine);
+	qmlbridge->setTranslation(qmlbridge->getSystemLocale());
+	engine.load(url);
+	QObject *component = engine.rootObjects().first();
+	qmlbridge->setComponent(component);
 
-		QQmlContext *root = engine.rootContext();
-		root->setContextProperty("bridge", qmlbridge);
-		QtNotification::declareQML();
-		QtStatusBar::declareQML();
-		QtToast::declareQML();
-		QtPhotoDialog::declareQML();
-		QtFolderDialog::declareQML();
-		QtQRCodeScanner::declareQML();
-		QUtf8ByteLimitValidator::declareQML();
-		QZXing::registerQMLTypes();
-		QZXing::registerQMLImageProvider(engine);
-		qmlbridge->setTranslation(qmlbridge->getSystemLocale());
-		engine.load(url);
-		QObject *component = engine.rootObjects().first();
-		qmlbridge->setComponent(component);
-
-		result = app.exec();
-
-		if (!qmlbridge->checkSignedIn()) {
-			break;
-		}
-
-		qmlbridge->setComponent(nullptr);
-		qmlbridge->deleteTimers();
-		Native::startProtoxService();
-	}
+	Native::startProtoxService(QObject::tr("Application is running."));
+	int result = app.exec();
 
 	delete qmlbridge;
 	delete settings;
