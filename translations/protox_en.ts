@@ -653,6 +653,10 @@ Click on the left button to open the friend list, then on «+» to add a new fri
         <source>Transfering file from %1</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Application is running.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SQLiteCipherDriver</name>

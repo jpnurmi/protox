@@ -147,6 +147,15 @@ void startProtoxService(const QString &contentText)
 #endif
 }
 
+void stopProtoxService()
+{
+#if defined (Q_OS_ANDROID)
+	QtAndroid::runOnAndroidThread([=]() {
+		QtAndroid::androidActivity().callMethod<void>("stopProtoxService", "()V");
+	});
+#endif
+}
+
 const QString getInternalStoragePath() 
 {
 	return QDir::separator() + QString("storage") + QDir::separator() + QString("emulated") + QDir::separator() + QString("0") + QDir::separator();

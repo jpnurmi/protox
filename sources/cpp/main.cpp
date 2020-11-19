@@ -525,6 +525,7 @@ int QmlCBridge::signInProfile(const QString &profile, bool create_new, const QSt
 	Tools::debug("Bootstrapping...");
 	Toxcore::bootstrap_DHT(tox);
 	createTimers();
+	Native::startProtoxService(tr("Application is running."));
 	return error;
 }
 
@@ -592,6 +593,8 @@ void QmlCBridge::signOutProfile(bool remove)
 	transfers.clear();
 	file_messages.clear();
 	self_canceled_transfers.clear();
+
+	Native::stopProtoxService();
 }
 
 quint32 QmlCBridge::getToxNodesCount()
@@ -990,7 +993,6 @@ int main(int argc, char *argv[])
 	QObject *component = engine.rootObjects().first();
 	qmlbridge->setComponent(component);
 
-	Native::startProtoxService(QObject::tr("Application is running."));
 	int result = app.exec();
 
 	delete qmlbridge;

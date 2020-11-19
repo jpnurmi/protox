@@ -310,4 +310,8 @@ public class QtActivityEx extends QtActivity
             startService(serviceIntent);
         }
     }
+
+    public void stopProtoxService() {
+        stopService(new Intent(this, ProtoxService.class));
+    }
 }
