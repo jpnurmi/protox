@@ -442,6 +442,33 @@ void QmlCBridge::tryReconnect()
 	reconnection_timer->start();
 }
 
+void QmlCBridge::createTimers()
+{
+	toxcore_timer = Toxcore::create_qtimer(tox);
+	toxcore_timer->start();
+
+	settings->beginGroup("Client");
+	int reconnection_interval = settings->valued("reconnection_interval").toInt();
+	settings->endGroup();
+
+	reconnection_timer = new QTimer;
+	reconnection_timer->setInterval(reconnection_interval);
+	reconnection_timer->setSingleShot(false);
+	QObject::connect(reconnection_timer, &QTimer::timeout, [=]() {
+		if (Toxcore::get_connection_status(tox) > 0) {
+			reconnection_timer->stop();
+			Tools::debug("Reconnection timer aborted: successfully connected!");
+			return;
+		}
+		Tools::debug("Bootstrapping...");
+		if (component) {
+			QMetaObject::invokeMethod(component, "resetConnectionStatus");
+		}
+		Toxcore::bootstrap_DHT(tox);
+	});
+	reconnection_timer->start();
+}
+
 int QmlCBridge::signInProfile(const QString &profile, bool create_new, const QString &password, bool autoLogin)
 {
 	current_profile = profile;
@@ -875,38 +902,6 @@ const QSize QmlCBridge::getImageSize(const QString &path)
 const QString QmlCBridge::getCurrentCommitSha1()
 {
 	return Tools::getCurrentCommitSha1();
-}
-
-void QmlCBridge::createTimers()
-{
-	toxcore_timer = Toxcore::create_qtimer(tox);
-	toxcore_timer->start();
-
-	settings->beginGroup("Client");
-	int reconnection_interval = settings->valued("reconnection_interval").toInt();
-	settings->endGroup();
-
-	reconnection_timer = new QTimer;
-	reconnection_timer->setInterval(reconnection_interval);
-	reconnection_timer->setSingleShot(false);
-	QObject::connect(reconnection_timer, &QTimer::timeout, [=]() {
-		if (Toxcore::get_connection_status(tox) > 0) {
-			reconnection_timer->stop();
-			Tools::debug("Reconnection timer aborted: successfully connected!");
-			return;
-		}
-		Tools::debug("Bootstrapping...");
-		if (component) {
-			QMetaObject::invokeMethod(component, "resetConnectionStatus");
-		}
-		Toxcore::bootstrap_DHT(tox);
-	});
-	reconnection_timer->start();
-}
-
-bool QmlCBridge::checkSignedIn()
-{
-	return !current_profile.isEmpty();
 }
 
 void QmlCBridge::setTranslation(const QString &translation)
