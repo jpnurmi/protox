@@ -60,7 +60,7 @@ class QtAndroidNotifications {
                 Bundle bundle = new Bundle();
                 bundle.putInt("notificationId", id);
                 resultIntent.putExtras(bundle);
-                PendingIntent resultPendingIntent = PendingIntent.getActivity(context, 0,
+                PendingIntent resultPendingIntent = PendingIntent.getActivity(context, getUniquePendingIntentID(),
                         resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && id >= 0) {
                     RemoteInput remoteInput = new RemoteInput.Builder("key_text_reply")
