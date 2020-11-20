@@ -67,6 +67,7 @@ void ChatDataBase::upgradeFromV4toV5()
 	check.next();
 	quint64 user_version = check.value(0).toULongLong();
 	check.finish();
+
 	if (user_version == 4) {
 		Tools::debug("Detected v4 .db. Upgrading...");
 		QFile::copy(db.databaseName(), db.databaseName() + ".v4bak");
@@ -173,6 +174,7 @@ const ToxMessages ChatDataBase::getFriendMessages(const ToxPk &public_key, quint
 	query.bindValue(":start", start);
 	query.bindValue(":limit", limit);
 	execQuery(query);
+
 	while (query.next()) {
 		QSqlQuery msg_query(db);
 		int type = query.value(0).toInt();
