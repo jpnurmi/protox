@@ -23,7 +23,7 @@ import "qrc:/deps/jdenticon/jdenticon.js" as Jdenticon
 ApplicationWindow {
     id: window
     visible: true
-    readonly property string applicationVersion: "1.6.1beta"
+    readonly property string applicationVersion: "1.6.2beta"
 
     /*
       Window events
@@ -77,8 +77,8 @@ ApplicationWindow {
     Timer {
         id: absentTimer
         repeat: false
-        interval: parseInt(safe_bridge().getSettingsValue("Client", "absent_timer_interval", 
-                                          ptype_string, String("10"))) * 60 * 1000
+        interval: parseInt(safe_bridge().getSettingsValueDefault("Client", "absent_timer_interval", 
+                                          ptype_string)) * 60 * 1000
         onTriggered: {
            lastStatus = bridge.getStatus()
            bridge.setStatus(1)
@@ -95,8 +95,8 @@ ApplicationWindow {
                 return
             }
             loginWindow.open()
-            bridge.hideSplashScreen()
             statusBar.color = getApplicationTheme().loginPrimaryColor
+            bridge.hideSplashScreen()
         }
     }
 

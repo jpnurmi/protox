@@ -6,6 +6,7 @@
 
 class ChatDataBase : public QObject
 {
+	Q_OBJECT
 public:
 	ChatDataBase(const QString &fileName, const QString &password = "");
 	quint64 insertMessage(const ToxVariantMessage &variantMessage, const QDateTime &dt, const ToxPk &public_key, bool temporary, bool self);

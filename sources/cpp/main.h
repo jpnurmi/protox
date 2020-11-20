@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "tox.h"
+#include "db.h"
 
 #include <QQmlApplicationEngine>
 #include <QGuiApplication>
@@ -39,6 +40,8 @@ public:
 	void cancelTextNotification(quint32 friend_number);
 	void createFileProgressNotification(quint32 friend_number, quint32 file_number);
 	void updateFriendAvatar(quint32 friend_number);
+	void createTimers();
+	ChatDataBase *getChatDB() { return chat_db; }
 private:
 	void updateToxPasswordKey();
 	const QString formatBytes(quint64 bytes);
@@ -71,6 +74,7 @@ public slots:
 	Q_INVOKABLE QString getNospamValue();
 	Q_INVOKABLE void setNospamValue(const QString &nospam);
 	Q_INVOKABLE QVariant getSettingsValue(const QString &group, const QString &key, int type, const QVariant &default_value);
+	Q_INVOKABLE QVariant getSettingsValueDefault(const QString &group, const QString &key, int type);
 	Q_INVOKABLE void setSettingsValue(const QString &group, const QString &key, const QVariant &value);
 	Q_INVOKABLE void setAppInactive(bool inactive) { app_inactive = inactive; }
 	Q_INVOKABLE void setKeyboardAdjustMode(bool adjustNothing);
@@ -112,6 +116,7 @@ public slots:
 	Q_INVOKABLE void changeSelfAvatar(const QString &path);
 	Q_INVOKABLE const QSize getImageSize(const QString &path);
 	Q_INVOKABLE const QString getCurrentCommitSha1();
+	Q_INVOKABLE void setTranslation(const QString &translation);
 
 public:
 	ToxBootstrapingThread bootstrapping_thread;
@@ -127,29 +132,16 @@ private:
 	QString profile_password;
 	bool app_inactive;
 private:
-	QObject *component;
+	ChatDataBase *chat_db;
 private:
+	QObject *component;
+	QTranslator *translator;
 	QTimer *toxcore_timer;
 	QTimer *reconnection_timer;
 private:
 	Tox *tox;
 	Tox_Pass_Key *tox_pass_key;
 	Tox_Options *tox_opts;
-};
-
-class QmlTranslator : public QObject
-{
-	Q_OBJECT
-public:
-	explicit QmlTranslator(QObject *parent = 0);
-signals:
-	// The signal of change the current language to change the interface translation
-	void languageChanged();
-public:
-	// Translation installation method, which will be available in QML
-	Q_INVOKABLE void setTranslation(const QString &translation);
-private:
-	QTranslator translator;
 };
 
 #endif // MAIN_H

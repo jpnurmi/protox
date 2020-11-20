@@ -102,6 +102,7 @@ function safe_bridge() {
     empty_bridge.checkMessageInPendingList = function() { return 0 }
     empty_bridge.getCurrentFriendNumber = function() { return 0 }
     empty_bridge.getSettingsValue = function() { return 0 }
+    empty_bridge.getSettingsValueDefault = function() { return 0 }
     empty_bridge.checkFileImage = function() { return "" }
     empty_bridge.checkFileExists = function() { return 0 }
     empty_bridge.getFriendAvatarPath = function() { return "" }
@@ -230,6 +231,15 @@ Timer {
     }
 }
 
+Timer {
+    id: addTransitionEnableTimer
+    interval: 1
+    repeat: false
+    onTriggered: {
+        messages.addTransitionEnabled = true
+    }
+}
+
 property variant each_friend_text: []
 function selectFriend(friend_number) {
     if (bridge.getCurrentFriendNumber() === friend_number) {
@@ -252,7 +262,7 @@ function selectFriend(friend_number) {
     messages.addTransitionEnabled = false
     bridge.retrieveChatLog()
     chatScrollToEnd()
-    messages.addTransitionEnabled = true
+    addTransitionEnableTimer.start()
     chatMessage.clear()
     if (each_friend_text[friend_number] !== undefined) {
         chatMessage.append(each_friend_text[friend_number])
@@ -462,7 +472,7 @@ function signInProfile(profile, create, password, autoLogin) {
     messages.addTransitionEnabled = false
     bridge.retrieveChatLog()
     messages.scrollToEnd()
-    messages.addTransitionEnabled = true
+    addTransitionEnableTimer.start()
     // menus
     myNickname.text = bridge.getNickname(false)
     myStatusMessage.text = bridge.getStatusMessage()

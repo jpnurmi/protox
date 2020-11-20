@@ -1,7 +1,7 @@
 Copyright 2020 Nikolay Borodin
 
 Protox source code is licensed under the terms of the MIT License.
-Protox builds which are linked with c-toxcore, QtCipherSqlitePlugin are licensed 
+Protox builds which are linked with c-toxcore are licensed 
 under the terms of the GNU General Public License version 3, or any later version.
 
 The terms of each license can be found in the main directory of the Protox source

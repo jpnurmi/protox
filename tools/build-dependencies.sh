@@ -33,12 +33,16 @@ fi
 if [ -z "$TARGET_ARCH" ]
 then
     PS3='Please choose target archcitecture: '
-    options=("armv7-a" "x86" "quit")
+    options=("armv7-a" "armv8-a" "x86" "quit")
     select opt in "${options[@]}"
     do
         case $opt in
             "armv7-a")
                 export TARGET_ARCH="armv7-a"
+                break
+                ;;
+            "armv8-a")
+                export TARGET_ARCH="armv8-a"
                 break
                 ;;
             "x86")
@@ -109,6 +113,8 @@ function build_vpx()
     cd libvpx
     if [ "$TARGET_ARCH" = "armv7-a" ]; then
         export VPX_ARCH="armeabi-v7a"
+    elif [ "$TARGET_ARCH" = "armv8-a" ]; then
+        export VPX_ARCH="arm64-v8a"
     else
         export VPX_ARCH=${TARGET_ARCH}
     fi

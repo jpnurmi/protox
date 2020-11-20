@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<manifest package="org.protox" xmlns:android="http://schemas.android.com/apk/res/android" android:versionName="1.6.1beta" android:versionCode="14" android:installLocation="auto">
+<manifest package="org.protox" xmlns:android="http://schemas.android.com/apk/res/android" android:versionName="1.6.2beta" android:versionCode="16" android:installLocation="auto">
     <application android:resizeableActivity="false" android:extractNativeLibs="true" android:hardwareAccelerated="true" android:name="org.qtproject.qt5.android.bindings.QtApplication" android:label="Protox" android:icon="@drawable/icon">
         <activity android:theme="@style/ProtoxTheme" android:windowSoftInputMode="adjustNothing" android:isScrollContainer="false" android:configChanges="orientation|uiMode|screenLayout|screenSize|smallestScreenSize|layoutDirection|locale|fontScale|keyboard|keyboardHidden|navigation|mcc|mnc|density" android:name="org.protox.activity.QtActivityEx" android:label="Protox" android:launchMode="singleTop">
             <intent-filter>
@@ -58,12 +58,17 @@
             <meta-data android:name="android.app.extract_android_style" android:value="full"/>
             <!-- extract android style -->
     </activity>
-    <!-- For adding service(s) please check: https://wiki.qt.io/AndroidServices -->
+    <service android:name=".service.ProtoxService" android:stopWithTask="false">
+        <!-- Background running -->
+        <meta-data android:name="android.app.background_running" android:value="true"/>
+        <!-- Background running -->
+        <meta-data android:name="android.app.lib_name" android:value="-- %%INSERT_APP_LIB_NAME%% --"/>
+    </service>
 
     </application>
 
 
-    <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="25"/>
+    <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="29"/>
     <supports-screens android:largeScreens="true" android:normalScreens="true" android:anyDensity="true" android:smallScreens="true"/>
 
     <!-- The following comment will be replaced upon deployment with default permissions based on the dependencies of the application.
@@ -74,15 +79,6 @@
          Remove the comment if you do not require these default features. -->
     <!-- %%INSERT_FEATURES -->
 
-
-    
-
-
-
-
-    
-
-<uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
-
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
 </manifest>

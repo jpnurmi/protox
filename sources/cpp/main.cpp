@@ -1,17 +1,17 @@
 #include "main.h"
 
 #include "tools.h"
-#include "db.h"
 
-#include "QtNotification.h"
-#include "QtStatusBar.h"
 #include "QZXing.h"
 #include "native.h"
 #include "qtutf8bytelimitvalidator.h"
+#include "settings.h"
+
+#include "components/QtMobileNotification/QtNotification.h"
+#include "components/QtStatusBar/QtStatusBar.h"
 
 QmlCBridge *qmlbridge = nullptr;
-ChatDataBase *chat_db = nullptr;
-QSettings *settings = nullptr;
+QSettingsExt *settings = nullptr;
 QtNotification *notification = nullptr;
 
 /*
@@ -21,6 +21,7 @@ QtNotification *notification = nullptr;
 QmlCBridge::QmlCBridge()
 {
 	component = nullptr;
+	chat_db = nullptr;
 	tox = nullptr;
 	tox_pass_key = nullptr;
 	tox_opts = nullptr;
@@ -31,22 +32,7 @@ QmlCBridge::QmlCBridge()
 	profile_password = "";
 	abort_bootstrapping = false;
 
-	settings->beginGroup("Client");
-	int reconnection_interval = settings->value("reconnection_interval", 60000).toInt();
-	settings->endGroup();
-	reconnection_timer = new QTimer;
-	reconnection_timer->setInterval(reconnection_interval);
-	reconnection_timer->setSingleShot(false);
-	QObject::connect(reconnection_timer, &QTimer::timeout, [=]() {
-		if (Toxcore::get_connection_status(tox) > 0) {
-			reconnection_timer->stop();
-			Tools::debug("Reconnection timer aborted: successfully connected!");
-			return;
-		}
-		Tools::debug("Bootstrapping...");
-		QMetaObject::invokeMethod(component, "resetConnectionStatus");
-		Toxcore::bootstrap_DHT(tox);
-	});
+	translator = new QTranslator;
 }
 
 void QmlCBridge::test()
@@ -61,59 +47,73 @@ void QmlCBridge::setComponent(QObject *_component)
 
 void QmlCBridge::insertMessage(const ToxVariantMessage &message, quint32 friend_number, const QDateTime &dt, bool self, quint64 unique_id, bool history, bool failed, bool preload)
 {
-	QMetaObject::invokeMethod(component, "insertMessage", 
-							  Q_ARG(QVariant, message), 
-							  Q_ARG(QVariant, friend_number), 
-							  Q_ARG(QVariant, self),
-							  Q_ARG(QVariant, dt.toString("d MMMM hh:mm:ss")),
-							  Q_ARG(QVariant, unique_id),
-							  Q_ARG(QVariant, failed),
-							  Q_ARG(QVariant, history),
-							  Q_ARG(QVariant, preload));
+	if (component) {
+		QMetaObject::invokeMethod(component, "insertMessage", 
+								  Q_ARG(QVariant, message), 
+								  Q_ARG(QVariant, friend_number), 
+								  Q_ARG(QVariant, self),
+								  Q_ARG(QVariant, dt.toString("d MMMM hh:mm:ss")),
+								  Q_ARG(QVariant, unique_id),
+								  Q_ARG(QVariant, failed),
+								  Q_ARG(QVariant, history),
+								  Q_ARG(QVariant, preload));
+	}
 }
 
 void QmlCBridge::insertFriend(qint32 friend_number, const QString &nickName, bool request, const QString &request_message, const ToxPk &friendToxId)
 {
-	QMetaObject::invokeMethod(component, "insertFriend",
-							  Q_ARG(QVariant, friend_number), 
-							  Q_ARG(QVariant, nickName), 
-							  Q_ARG(QVariant, request),
-							  Q_ARG(QVariant, request_message),
-							  Q_ARG(QVariant, ToxConverter::toString(friendToxId)));
+	if (component) {
+		QMetaObject::invokeMethod(component, "insertFriend",
+								  Q_ARG(QVariant, friend_number), 
+								  Q_ARG(QVariant, nickName), 
+								  Q_ARG(QVariant, request),
+								  Q_ARG(QVariant, request_message),
+								  Q_ARG(QVariant, ToxConverter::toString(friendToxId)));
+	}
 }
 
 void QmlCBridge::setMessageReceived(quint32 friend_number, quint64 unique_id)
 {
-	QMetaObject::invokeMethod(component, "setMessageReceived",
-							  Q_ARG(QVariant, friend_number), 
-							  Q_ARG(QVariant, unique_id));
+	if (component) {
+		QMetaObject::invokeMethod(component, "setMessageReceived",
+								  Q_ARG(QVariant, friend_number), 
+								  Q_ARG(QVariant, unique_id));
+	}
 }
 
 void QmlCBridge::setCurrentFriendConnStatus(quint32 friend_number, int conn_status)
 {
-	QMetaObject::invokeMethod(component, "setCurrentFriendConnStatus", 
-							  Q_ARG(QVariant, friend_number), 
-							  Q_ARG(QVariant, conn_status));
+	if (component) {
+		QMetaObject::invokeMethod(component, "setCurrentFriendConnStatus", 
+								  Q_ARG(QVariant, friend_number), 
+								  Q_ARG(QVariant, conn_status));
+	}
 }
 
 void QmlCBridge::sendMessage(quint32 friend_number, const QString &message, bool reply)
 {
 	ToxPk friend_pk = Toxcore::get_friend_public_key(tox, friend_number);
+
 	settings->beginGroup("Privacy");
-	bool keep_chat_history = settings->value("keep_chat_history", true).toBool();
+	bool keep_chat_history = settings->valued("keep_chat_history").toBool();
 	settings->endGroup();
+
 	QDateTime dt = QDateTime::currentDateTime();
 	bool action = message.left(4).toLower() == "/me ";
 	const QStringList splitMessage = Tools::qstringSplitUnicode(action ? QString(message).remove(0, 4) : message, 
 																Toxcore::get_message_max_length());
+
 	for (const auto &msg : splitMessage) {
 		bool failed;
+
 		ToxVariantMessage variantMessage;
 		variantMessage.insert("type", ToxVariantMessageType::TOXMSG_TEXT);
 		variantMessage.insert("message", msg);
 		variantMessage.insert("action", action);
+
 		quint32 message_id = Toxcore::send_message(tox, friend_number, msg, action, failed);
 		quint64 new_unique_id = chat_db->insertMessage(variantMessage, dt, friend_pk, !keep_chat_history, true);
+
 		insertMessage(variantMessage, friend_number, dt, true, new_unique_id, false, failed);
 		pending_messages.push_back(ToxPendingMessage(message_id, new_unique_id, friend_number, failed, reply));
 	}
@@ -132,21 +132,26 @@ int QmlCBridge::getFriendConnStatus(quint32 friend_number)
 const QString QmlCBridge::getFriendNickname(quint32 friend_number, bool publicKey)
 {
 	QString nickname;
+
 	settings->beginGroup("Client_" + current_profile);
 	nickname = settings->value("name_" + ToxConverter::toString(Toxcore::get_friend_public_key(tox, friend_number)), "").toString();
 	settings->endGroup();
+
 	if (!nickname.isEmpty()) {
 		return nickname;
 	}
+
 	return Toxcore::get_friend_name(tox, friend_number, publicKey);
 }
 
 bool QmlCBridge::checkFriendCustomNickname(quint32 friend_number)
 {
 	QString nickname;
+
 	settings->beginGroup("Client_" + current_profile);
 	nickname = settings->value("name_" + ToxConverter::toString(Toxcore::get_friend_public_key(tox, friend_number)), "").toString();
 	settings->endGroup();
+
 	return !nickname.isEmpty();
 }
 
@@ -168,8 +173,9 @@ int QmlCBridge::getFriendStatus(quint32 friend_number)
 bool QmlCBridge::checkRemainingMessages(quint32 start)
 {
 	settings->beginGroup("Client");
-	quint32 limit = settings->value("load_messages_limit", 64).toUInt();
+	quint32 limit = settings->valued("load_messages_limit").toUInt();
 	settings->endGroup();
+
 	quint64 count = chat_db->getFriendMessagesCount(Toxcore::get_friend_public_key(tox, current_friend_number), limit, start, true);
 	return count > 0;
 }
@@ -177,17 +183,21 @@ bool QmlCBridge::checkRemainingMessages(quint32 start)
 void QmlCBridge::retrieveChatLog(quint32 start, bool preload)
 {
 	settings->beginGroup("Client");
-	quint32 limit = preload ? settings->value("load_messages_limit", 64).toUInt() 
-							: settings->value("last_messages_limit", 128).toUInt();
+	quint32 limit = preload ? settings->valued("load_messages_limit").toUInt() 
+							: settings->valued("last_messages_limit").toUInt();
 	settings->endGroup();
+
 	ToxMessages messages = chat_db->getFriendMessages(Toxcore::get_friend_public_key(tox, current_friend_number), 
 													  limit, start, preload);
+
 	if (!preload) {
 		QMetaObject::invokeMethod(component, "clearChatContent");
 	}
+
 	if (messages.isEmpty()) {
 		return;
 	}
+
 	for (auto &msg : messages) {
 		if (msg.variantMessage["type"].toUInt() == TOXMSG_FILE) {
 			quint32 file_number = 0;
@@ -199,6 +209,7 @@ void QmlCBridge::retrieveChatLog(quint32 start, bool preload)
 					break;
 				}
 			}
+
 			msg.variantMessage.insert("file_number", file_number);
 			msg.variantMessage.insert("name", Tools::getFilenameFromPath(msg.variantMessage["file_path"].toString()));
 			if (!transfer_exists && msg.variantMessage["state"].toInt() <= TOX_FILE_PAUSED) {
@@ -208,7 +219,9 @@ void QmlCBridge::retrieveChatLog(quint32 start, bool preload)
 				msg.received = true;
 			}
 		}
+
 		insertMessage(msg.variantMessage, current_friend_number, msg.dt, msg.self, msg.unique_id, true, false, preload);
+
 		if (!msg.self || msg.received)
 			setMessageReceived(current_friend_number, msg.unique_id);
 	}
@@ -216,7 +229,7 @@ void QmlCBridge::retrieveChatLog(quint32 start, bool preload)
 
 void QmlCBridge::copyTextToClipboard(QString text)
 {
-	QClipboard *clipboard = QGuiApplication::clipboard(); 
+	QClipboard *clipboard = qApp->clipboard();
 	clipboard->setText(text);
 }
 
@@ -238,6 +251,7 @@ void QmlCBridge::clearFriendChatHistory(quint32 friend_number, const QString &fr
 	ToxPk pk = friendPkHex.isEmpty() 
 			? Toxcore::get_friend_public_key(tox, friend_number) 
 			: ToxConverter::toToxId(friendPkHex);
+
 	chat_db->clearFriendChatHistory(pk, keep_active_file_transfers);
 }
 
@@ -328,9 +342,11 @@ int QmlCBridge::addFriend(const QString &friendToxIdHex)
 {
 	int error;
 	quint32 friend_number = Toxcore::add_friend(tox, ToxConverter::toToxId(friendToxIdHex), &error);
+
 	if (error > 0) {
 		return error;
 	}
+
 	insertFriend(friend_number, Toxcore::get_friend_name(tox, friend_number));
 	return 0;
 }
@@ -354,6 +370,21 @@ QVariant QmlCBridge::getSettingsValue(const QString &group, const QString &key, 
 	settings->beginGroup(group);
 	result = settings->value(key, default_value);
 	settings->endGroup();
+
+	switch (type) {
+	case QVariant::Bool: return result.toBool(); break;
+	case QVariant::String: return result.toString(); break;
+	default: return result; break;
+	}
+}
+
+QVariant QmlCBridge::getSettingsValueDefault(const QString &group, const QString &key, int type)
+{
+	QVariant result;
+	settings->beginGroup(group);
+	result = settings->valued(key);
+	settings->endGroup();
+
 	switch (type) {
 	case QVariant::Bool: return result.toBool(); break;
 	case QVariant::String: return result.toString(); break;
@@ -436,18 +467,49 @@ void QmlCBridge::tryReconnect()
 	reconnection_timer->start();
 }
 
+void QmlCBridge::createTimers()
+{
+	toxcore_timer = Toxcore::create_qtimer(tox);
+	toxcore_timer->start();
+
+	settings->beginGroup("Client");
+	int reconnection_interval = settings->valued("reconnection_interval").toInt();
+	settings->endGroup();
+
+	reconnection_timer = new QTimer;
+	reconnection_timer->setInterval(reconnection_interval);
+	reconnection_timer->setSingleShot(false);
+	QObject::connect(reconnection_timer, &QTimer::timeout, [=]() {
+		if (Toxcore::get_connection_status(tox) > 0) {
+			reconnection_timer->stop();
+			Tools::debug("Reconnection timer aborted: successfully connected!");
+			return;
+		}
+		Tools::debug("Bootstrapping...");
+		if (component) {
+			QMetaObject::invokeMethod(component, "resetConnectionStatus");
+		}
+		Toxcore::bootstrap_DHT(tox);
+	});
+	reconnection_timer->start();
+}
+
 int QmlCBridge::signInProfile(const QString &profile, bool create_new, const QString &password, bool autoLogin)
 {
 	current_profile = profile;
+
 	setToxPassword(password);
 	updateToxPasswordKey();
+
 	ToxProfileLoadingError error;
 	tox_opts = Toxcore::create_opts();
 	tox = Toxcore::create_tox(error, create_new, password, current_profile, tox_pass_key, tox_opts);
+
 	if (!tox) {
 		current_profile.clear();
 		return error;
 	}
+
 	settings->beginGroup("Profile");
 	if (autoLogin) {
 		settings->setValue("auto_login_profile", profile);
@@ -455,16 +517,17 @@ int QmlCBridge::signInProfile(const QString &profile, bool create_new, const QSt
 		settings->setValue("auto_login_profile", "");
 	}
 	settings->endGroup();
+
 	//Tools::debug("My address: " + ToxConverter::toString(Toxcore::get_address(tox)));
-	chat_db = new ChatDataBase("chat_" + Tools::replaceFileExtension(current_profile, ".db"), password);
+		chat_db = new ChatDataBase("chat_" + Tools::replaceFileExtension(current_profile, ".db"), profile_password);
 
 	// load config
 	settings->beginGroup("Client_" + current_profile);
 	ToxPk friendPk = settings->value("last_friend", Toxcore::get_friend_public_key(tox, 0)).toByteArray();
 	QList <QVariant> friend_list = settings->value("friend_list", QList <QVariant>()).toList();
 	settings->endGroup();
-	ToxFriends friends = Toxcore::get_friends(tox);
 
+	ToxFriends friends = Toxcore::get_friends(tox);
 	for (auto _friend : friends) {
 		if (friend_list.lastIndexOf(_friend) < 0) {
 			friend_list.append(_friend);
@@ -491,19 +554,21 @@ int QmlCBridge::signInProfile(const QString &profile, bool create_new, const QSt
 
 	Tools::debug("Bootstrapping...");
 	Toxcore::bootstrap_DHT(tox);
-	reconnection_timer->start();
-	toxcore_timer = Toxcore::create_qtimer(tox);
-	toxcore_timer->start();
+	createTimers();
+
+	Native::startProtoxService(tr("Application is running."));
+
 	return error;
 }
 
 QmlCBridge::~QmlCBridge()
 {
-	if (current_profile.isEmpty()) {
-		return;
+	if (!current_profile.isEmpty()) {
+		signOutProfile();
 	}
-	signOutProfile();
-	delete reconnection_timer;
+
+	qApp->removeTranslator(translator);
+	delete translator;
 }
 
 QVariant QmlCBridge::getProfileList()
@@ -515,6 +580,7 @@ QVariant QmlCBridge::getProfileList()
 void QmlCBridge::signOutProfile(bool remove)
 {
 	Tools::debug("Logout.");
+
 	settings->beginGroup("Client_" + current_profile);
 	if (remove) {
 		settings->remove("");
@@ -523,6 +589,7 @@ void QmlCBridge::signOutProfile(bool remove)
 		settings->setValue("friend_list", getFriendsModelOrder());
 	}
 	settings->endGroup();
+
 	if (remove) {
 		settings->beginGroup("Profile");
 		QString autoLoginProfile = settings->value("auto_login_profile").toString();
@@ -536,16 +603,18 @@ void QmlCBridge::signOutProfile(bool remove)
 	Toxcore::cancel_all_file_transfers();
 	Toxcore::iterate(tox);
 
-	reconnection_timer->stop();
-	toxcore_timer->stop();
 	delete toxcore_timer;
+	delete reconnection_timer;
+
 	if (!remove) {
 		Toxcore::save_data(tox, tox_pass_key, Tools::getProgDir() + current_profile);
 	}
+
 	if (bootstrapping_thread.isRunning()) {
 		abort_bootstrapping = true;
 		bootstrapping_thread.waitForFinished();
 	}
+
 	Toxcore::destroy_tox(tox);
 	Toxcore::reset_pass_key(&tox_pass_key);
 	Toxcore::destroy_opts(tox_opts);
@@ -557,11 +626,14 @@ void QmlCBridge::signOutProfile(bool remove)
 		QFile::remove(Tools::getProgDir() + current_profile);
 		QFile::remove(Tools::getProgDir() + "chat_" + Tools::replaceFileExtension(current_profile, ".db"));
 	}
+
 	current_profile.clear();
 	pending_messages.clear();
 	transfers.clear();
 	file_messages.clear();
 	self_canceled_transfers.clear();
+
+	Native::stopProtoxService();
 }
 
 quint32 QmlCBridge::getToxNodesCount()
@@ -615,13 +687,17 @@ void QmlCBridge::sendPendingMessages(quint32 friend_number)
 		if (friend_number != pending_messages[i].friend_number && !pending_messages[i].failed) {
 			continue;
 		}
+	
 		if (pending_messages[i].resent) {
 			continue;
 		}
+	
 		const ToxTextMessage msg = chat_db->getTextMessage(pending_messages[i].unique_id, 
 											  Toxcore::get_friend_public_key(tox, pending_messages[i].friend_number));
+
 		bool failed;
 		quint32 message_id = Toxcore::send_message(tox, pending_messages[i].friend_number, msg.message, msg.action, failed);
+
 		pending_messages[i].message_id = message_id;
 		pending_messages[i].failed = failed;
 		pending_messages[i].resent = !pending_messages[i].failed;
@@ -690,10 +766,13 @@ quint32 QmlCBridge::sendFile(quint32 friend_number, const QString &filepath)
 	quint32 error;
 	ToxFileTransfer *transfer = nullptr;
 	quint32 file_number = Toxcore::send_file(tox, friend_number, filepath, &transfer, filesize, file_id, error);
+
 	if (error > 0) {
 		return error;
 	}
+
 	QDateTime dt = QDateTime::currentDateTime();
+
 	ToxVariantMessage variantMessage;
 	variantMessage.insert("type", ToxVariantMessageType::TOXMSG_FILE);
 	variantMessage.insert("size", filesize);
@@ -703,12 +782,15 @@ quint32 QmlCBridge::sendFile(quint32 friend_number, const QString &filepath)
 	variantMessage.insert("file_number", file_number);
 	// ui only
 	variantMessage.insert("name", Tools::getFilenameFromPath(filepath));
+
 	settings->beginGroup("Privacy");
-	bool keep_chat_history = settings->value("keep_chat_history", true).toBool();
+	bool keep_chat_history = settings->valued("keep_chat_history").toBool();
 	settings->endGroup();
+
 	quint64 unique_id = chat_db->insertMessage(variantMessage, dt, Toxcore::get_friend_public_key(tox, friend_number), !keep_chat_history, true);
 	file_messages[transfer] = unique_id;
 	insertMessage(variantMessage, friend_number, dt, true, unique_id);
+
 	return 0;
 }
 
@@ -725,9 +807,11 @@ bool QmlCBridge::controlFile(quint32 friend_number, quint32 file_number, quint32
 {
 	quint64 unique_id = 0;
 	bool success = Toxcore::file_control(tox, friend_number, file_number, control, unique_id);
+
 	if (success) {
 		fileControlUpdateMessage(friend_number, unique_id, control, false);
 	}
+
 	return success;
 }
 
@@ -760,8 +844,10 @@ quint32 QmlCBridge::acceptFile(quint32 friend_number, quint32 file_number)
 	quint64 unique_id = 0;
 	quint32 control = Toxcore::acceptFile(friend_number, file_number, unique_id);
 	fileControlUpdateMessage(friend_number, unique_id, control, false);
+
 	cancelFileNotification(friend_number, file_number);
 	createFileProgressNotification(friend_number, file_number);
+
 	return control;
 }
 
@@ -803,10 +889,12 @@ void QmlCBridge::createFileProgressNotification(quint32 friend_number, quint32 f
 		if (transfer->friend_number == friend_number && transfer->file_number == file_number) {
 			QVariantMap parameters;
 			parameters["fileNumber"] = file_number;
+
 			const QString file_path = transfer->manager->getFile()->fileName();
 			const QString friend_name = getFriendNickname(friend_number);
 			quint64 file_size = chat_db->getFileSize(file_messages[transfer], 
 													 Toxcore::get_friend_public_key(tox, friend_number));
+
 			parameters["filePath"] = file_path;
 			parameters["fileSize"] = file_size;
 			parameters["speedPrefix"] = tr("/s");
@@ -819,6 +907,7 @@ void QmlCBridge::createFileProgressNotification(quint32 friend_number, quint32 f
 			notificationParameters["caption"] = Tools::getFilenameFromPath(file_path) +
 					" (" + formatBytes(file_size) + ")";
 			notificationParameters["title"] = QString(tr("Transfering file from %1")).arg(friend_name);
+
 			notification->show(notificationParameters);
 			break;
 		}
@@ -850,7 +939,8 @@ void QmlCBridge::updateFriendAvatar(quint32 friend_number)
 void QmlCBridge::changeSelfAvatar(const QString &path)
 {
 	const int scaled_avatar_size = 128;
-	QString avatarPath = getSelfAvatarPath();;
+	QString avatarPath = getSelfAvatarPath();
+
 	if (path.isEmpty()) {
 		QFile::remove(avatarPath);
 		avatarPath.clear();
@@ -861,6 +951,7 @@ void QmlCBridge::changeSelfAvatar(const QString &path)
 											Qt::SmoothTransformation);
 		scaledAvatar.save(avatarPath, "PNG");
 	}
+
 	Toxcore::send_avatar_to_all_friends(tox, avatarPath);
 }
 
@@ -874,20 +965,19 @@ const QString QmlCBridge::getCurrentCommitSha1()
 	return Tools::getCurrentCommitSha1();
 }
 
-/*
- * Translation object 
-*/
-
-QmlTranslator::QmlTranslator(QObject *parent) : QObject(parent) {}
-
-void QmlTranslator::setTranslation(const QString &translation)
+void QmlCBridge::setTranslation(const QString &translation)
 {
-	if (!translator.load(":protox_" + translation, ".")) {
+	// default language
+	if (translation == "en_US") {
+		return;
+	}
+
+	if (!translator->load(":protox_" + translation, ".")) {
 		Tools::debug("Translation loading failed: " + translation);
 		return;
 	}
-	qApp->installTranslator(&translator);
-	emit languageChanged();
+
+	qApp->installTranslator(translator);
 }
 
 /*
@@ -925,22 +1015,25 @@ void customMessageHandler(QtMsgType type, const QMessageLogContext &context, con
 
 int main(int argc, char *argv[])
 {
+	qInstallMessageHandler(customMessageHandler);
+
 	if (!Native::requestApplicationPermissions()) {
 		return 1;
 	}
+
 	ChatDataBase::registerSQLDriver();
-	settings = new QSettings(Tools::getProgDir() + "settings.ini", QSettings::IniFormat);
+
+	settings = new QSettingsExt(Tools::getProgDir() + "settings.ini");
 	notification = new QtNotification;
+	qmlbridge = new QmlCBridge;
 
 	Tools::debug("App started.");
-	QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
+	QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 	QGuiApplication app(argc, argv);
 	// eleminate QML warnings
 	app.setOrganizationName("protox");
 	app.setOrganizationDomain("org");
-
-	qInstallMessageHandler(customMessageHandler);
 
 	QQmlApplicationEngine engine;
 	const QUrl url(QStringLiteral(QML_MAIN));
@@ -950,11 +1043,8 @@ int main(int argc, char *argv[])
 			QCoreApplication::exit(-1);
 	}, Qt::QueuedConnection);
 
-	QmlTranslator qmltranslator;
-	qmlbridge = new QmlCBridge;
 	QQmlContext *root = engine.rootContext();
 	root->setContextProperty("bridge", qmlbridge);
-	root->setContextProperty("translator", &qmltranslator);
 	QtNotification::declareQML();
 	QtStatusBar::declareQML();
 	QtToast::declareQML();
@@ -964,15 +1054,17 @@ int main(int argc, char *argv[])
 	QUtf8ByteLimitValidator::declareQML();
 	QZXing::registerQMLTypes();
 	QZXing::registerQMLImageProvider(engine);
-	qmltranslator.setTranslation(qmlbridge->getSystemLocale());
+	qmlbridge->setTranslation(qmlbridge->getSystemLocale());
 	engine.load(url);
 	QObject *component = engine.rootObjects().first();
 	qmlbridge->setComponent(component);
 
 	int result = app.exec();
+
 	delete qmlbridge;
 	delete settings;
 	delete notification;
+
 	Tools::debug("Program exited successfully.");
 
 	return result;

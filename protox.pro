@@ -15,11 +15,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+# Program sources
+
 SOURCES += \
 	sources/cpp/asyncfilemanager.cpp \
 	sources/cpp/db.cpp \
 	sources/cpp/main.cpp \
 	sources/cpp/native.cpp \
+	sources/cpp/settings.cpp \
 	sources/cpp/tools.cpp \
 	sources/cpp/tox.cpp
 
@@ -31,8 +34,11 @@ HEADERS += \
 	sources/cpp/main.h \
 	sources/cpp/native.h \
 	sources/cpp/qtutf8bytelimitvalidator.h \
+	sources/cpp/settings.h \
 	sources/cpp/tools.h \
 	sources/cpp/tox.h
+
+# Native sources
 
 android {
 SOURCES += sources/cpp/native/android/photodialog.cpp \
@@ -43,6 +49,32 @@ HEADERS += sources/cpp/native/android/photodialog.h \
 	sources/cpp/native/android/folderdialog.h \
 	sources/cpp/native/android/toasts.h \
 	sources/cpp/native/android/qrcodescanner.h
+}
+
+# Components 
+
+SOURCES += \ 
+	# Notifications
+	sources/cpp/components/QtMobileNotification/QtNotification.cpp \
+	sources/cpp/components/QtMobileNotification/QtNotifierFactory.cpp \
+	# StatusBar
+	sources/cpp/components/QtStatusBar/QtStatusBar.cpp
+HEADERS += \ 
+	# Notifications
+	sources/cpp/components/QtMobileNotification/QtNotification.h \
+	sources/cpp/components/QtMobileNotification/QtAbstractNotifier.h \
+	sources/cpp/components/QtMobileNotification/QtNotifierFactory.h \
+	# StatusBar
+	sources/cpp/components/QtStatusBar/QtStatusBar.h \
+	sources/cpp/components/QtStatusBar/QtStatusBar_p.h
+
+android {
+SOURCES += \
+	# Notifications
+	sources/cpp/components/QtMobileNotification/QtAndroidNotifier.cpp \
+	# StatusBar
+	sources/cpp/components/QtStatusBar/QtAndroidStatusBar.cpp
+HEADERS += sources/cpp/components/QtMobileNotification/QtAndroidNotifier.h
 }
 
 LIBS += -ltoxcore -ltoxencryptsave
@@ -60,8 +92,6 @@ PRE_TARGETDEPS = extra
 
 include(translations/translations.pri)
 
-include(deps/QtMobileNotification/QtMobileNotification.pri)
-include(deps/QtStatusBar/QtStatusBar.pri)
 include(deps/QZXing/QZXing.pri)
 include(deps/sqlitecipher/sqlitecipher.pri)
 
@@ -87,6 +117,7 @@ DISTFILES += \
 	android/src/notifications/QtAndroidNotifications.java \
 	android/src/activity/QtActivityEx.java \
 	android/src/activity/KeyboardProvider.java \
+	android/src/activity/ProtoxService.java \
 	tools/qmlcombiner.py \
 	sources/qml/chatarea.qml \
 	sources/qml/functions.qml \
@@ -101,13 +132,20 @@ DISTFILES += \
 ANDROID_PACKAGE_SOURCE_DIR = \
 	$$PWD/android
 
-ANDROID_ABIS = armeabi-v7a
+ANDROID_ABIS = armeabi-v7a arm64-v8a
 
 contains(ANDROID_ABIS, armeabi-v7a) {
 	ANDROID_EXTRA_LIBS += \
 		$$PWD/libs/armv7-a/libtoxcore.so \
 		$$PWD/libs/armv7-a/libtoxencryptsave.so \
 		$$PWD/libs/armv7-a/libsodium.so
+}
+
+contains(ANDROID_ABIS, arm64-v8a) {
+	ANDROID_EXTRA_LIBS += \
+		$$PWD/libs/armv8-a/libtoxcore.so \
+		$$PWD/libs/armv8-a/libtoxencryptsave.so \
+		$$PWD/libs/armv8-a/libsodium.so
 }
 
 contains(ANDROID_ABIS, x86) {
@@ -119,6 +157,10 @@ contains(ANDROID_ABIS, x86) {
 
 contains(ANDROID_TARGET_ARCH, armeabi-v7a) {
 	LIBS += -L$$PWD/libs/armv7-a
+}
+
+contains(ANDROID_TARGET_ARCH, arm64-v8a) {
+	LIBS += -L$$PWD/libs/armv8-a
 }
 
 contains(ANDROID_TARGET_ARCH, x86) {

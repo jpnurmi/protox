@@ -10,7 +10,7 @@ Minimum requirments: Android 5.0 (API level 21).
 
 # Features
 
-All toxcore features are implemented except:
+All Tox features are implemented, except for:
 *  Conferences
 *  Audio/video calls
 
@@ -24,8 +24,8 @@ You can donate if you want to support this project.
 
 * PayPal: [Donate](https://www.paypal.me/monsterovich)
 * Patreon: [Link](https://www.patreon.com/monsterovich)
-* Yandex money: 410014539584441
-* BCH: bitcoincash:qq6s9n8kauykxtd2v5h5pymzjtn3yw0ktvd5gp09n8
+* Yandex money: `410014539584441`
+* Bitcoin Cash (BCH): `bitcoincash:qq6s9n8kauykxtd2v5h5pymzjtn3yw0ktvd5gp09n8`
 
 # Screenshots
 
@@ -36,6 +36,7 @@ You can donate if you want to support this project.
 
 # Download
 
+* [Google Play](https://play.google.com/store/apps/details?id=org.protox)
 * [FDroid repository](https://submarine.strangled.net/fdroid/)
 * [Download](https://gitlab.com/Monsterovich/protox/-/releases)
 * [Download (nightly builds)](https://submarine.strangled.net/protox/builds/nightly/)

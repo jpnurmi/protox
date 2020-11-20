@@ -657,6 +657,10 @@ Boa sorte!</translation>
         <source>Transfer from %1 is canceled</source>
         <translation>Transferência de %1 cancelada</translation>
     </message>
+    <message>
+        <source>Application is running.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SQLiteCipherDriver</name>

@@ -38,6 +38,11 @@ void AsyncFileManager::onChunkReadRequest(quint64 position, quint32 length)
 void AsyncFileManager::onChunkWriteRequest(quint64 position, const QByteArray &data)
 {
 	if (!data.length()) {
+		if(!m_file->flush()) {
+			Tools::debug("File manager thread 0x" + 
+						 QString::number((quint64)m_file->thread(), 16) + 
+						 " error - flush failed: " + m_file->fileName() + ".");
+		}
 		m_file->close();
 		emit fileTransferEnded(m_parent);
 		return;
@@ -61,8 +66,10 @@ bool AsyncFileManager::onFileTransferStarted()
 
 void AsyncFileManager::onCloseFileRequest()
 {
-	if (m_file->isOpen()) {
-		m_file->close();
+	if(m_file->isWritable() && !m_file->flush()) {
+		Tools::debug("File manager thread 0x" + 
+					 QString::number((quint64)m_file->thread(), 16) + 
+					 " error - flush failed: " + m_file->fileName() + ".");
 	}
 	delete m_file;
 }
@@ -71,7 +78,7 @@ AsyncFileManager::~AsyncFileManager()
 {
 	Tools::debug("Destroying file manager thread 0x" + 
 				 QString::number((quint64)m_file->thread(), 16) + ".");
-	QMetaObject::invokeMethod(this, "onCloseFileRequest", Qt::DirectConnection);
+	QMetaObject::invokeMethod(this, "onCloseFileRequest", Qt::BlockingQueuedConnection);
 	quit();
 	if (!wait()) {
 		terminate();
