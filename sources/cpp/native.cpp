@@ -1,11 +1,13 @@
 #include "native.h"
 #include "main.h"
+#include "db.h"
 
 #ifdef Q_OS_ANDROID
 #include "deps/QtMobileNotification/QtNotification.h"
 #endif
 
 extern QmlCBridge *qmlbridge;
+extern ChatDataBase *chat_db;
 
 #ifdef Q_OS_ANDROID
 JFUNC(void, keyboardHeightChanged, jint height)
@@ -131,6 +133,25 @@ void viewFile(const QString &path, const QString &type)
 		QtAndroid::androidActivity().callMethod<void>("viewFile", 
 													  "(Ljava/lang/String;Ljava/lang/String;)V", 
 													  javaString.object(), javaString2.object());
+	});
+#endif
+}
+
+void startProtoxService(const QString &contentText)
+{
+#if defined (Q_OS_ANDROID)
+	QtAndroid::runOnAndroidThread([=]() {
+		QtAndroid::androidActivity().callMethod<void>("startProtoxService", "(Ljava/lang/String;)V", 
+													  QAndroidJniObject::fromString(contentText).object());
+	});
+#endif
+}
+
+void stopProtoxService()
+{
+#if defined (Q_OS_ANDROID)
+	QtAndroid::runOnAndroidThread([=]() {
+		QtAndroid::androidActivity().callMethod<void>("stopProtoxService", "()V");
 	});
 #endif
 }

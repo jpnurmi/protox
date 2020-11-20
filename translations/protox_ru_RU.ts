@@ -658,6 +658,10 @@ Click on the left button to open the friend list, then on «+» to add a new fri
         <source>Transfer from %1 is canceled</source>
         <translation>Передача от %1 отменена</translation>
     </message>
+    <message>
+        <source>Application is running.</source>
+        <translation>Приложение запущено.</translation>
+    </message>
 </context>
 <context>
     <name>SQLiteCipherDriver</name>

@@ -89,6 +89,7 @@ DISTFILES += \
 	android/src/notifications/QtAndroidNotifications.java \
 	android/src/activity/QtActivityEx.java \
 	android/src/activity/KeyboardProvider.java \
+	android/src/activity/ProtoxService.java \
 	tools/qmlcombiner.py \
 	sources/qml/chatarea.qml \
 	sources/qml/functions.qml \

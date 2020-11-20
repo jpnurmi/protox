@@ -18,6 +18,8 @@ namespace Native {
 	bool requestApplicationPermissions();
 	QString uriToRealPath(const QString &uriString);
 	void viewFile(const QString &path, const QString &type);
+	void startProtoxService(const QString &contentText);
+	void stopProtoxService();
 	const QString getInternalStoragePath();
 }
 

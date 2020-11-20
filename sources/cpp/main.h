@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "tox.h"
+#include "db.h"
 
 #include <QQmlApplicationEngine>
 #include <QGuiApplication>
@@ -39,6 +40,8 @@ public:
 	void cancelTextNotification(quint32 friend_number);
 	void createFileProgressNotification(quint32 friend_number, quint32 file_number);
 	void updateFriendAvatar(quint32 friend_number);
+	void createTimers();
+	ChatDataBase *getChatDB() { return chat_db; }
 private:
 	void updateToxPasswordKey();
 	const QString formatBytes(quint64 bytes);
@@ -129,10 +132,10 @@ private:
 	QString profile_password;
 	bool app_inactive;
 private:
+	ChatDataBase *chat_db;
+private:
 	QObject *component;
-private:
 	QTranslator *translator;
-private:
 	QTimer *toxcore_timer;
 	QTimer *reconnection_timer;
 private:
