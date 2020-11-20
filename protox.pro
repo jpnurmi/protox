@@ -15,6 +15,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+# Program sources
+
 SOURCES += \
 	sources/cpp/asyncfilemanager.cpp \
 	sources/cpp/db.cpp \
@@ -36,6 +38,8 @@ HEADERS += \
 	sources/cpp/tools.h \
 	sources/cpp/tox.h
 
+# Native sources
+
 android {
 SOURCES += sources/cpp/native/android/photodialog.cpp \
 	sources/cpp/native/android/folderdialog.cpp \
@@ -45,6 +49,32 @@ HEADERS += sources/cpp/native/android/photodialog.h \
 	sources/cpp/native/android/folderdialog.h \
 	sources/cpp/native/android/toasts.h \
 	sources/cpp/native/android/qrcodescanner.h
+}
+
+# Components 
+
+SOURCES += \ 
+	# Notifications
+	sources/cpp/components/QtMobileNotification/QtNotification.cpp \
+	sources/cpp/components/QtMobileNotification/QtNotifierFactory.cpp \
+	# StatusBar
+	sources/cpp/components/QtStatusBar/QtStatusBar.cpp
+HEADERS += \ 
+	# Notifications
+	sources/cpp/components/QtMobileNotification/QtNotification.h \
+	sources/cpp/components/QtMobileNotification/QtAbstractNotifier.h \
+	sources/cpp/components/QtMobileNotification/QtNotifierFactory.h \
+	# StatusBar
+	sources/cpp/components/QtStatusBar/QtStatusBar.h \
+	sources/cpp/components/QtStatusBar/QtStatusBar_p.h
+
+android {
+SOURCES += \
+	# Notifications
+	sources/cpp/components/QtMobileNotification/QtAndroidNotifier.cpp \
+	# StatusBar
+	sources/cpp/components/QtStatusBar/QtAndroidStatusBar.cpp
+HEADERS += sources/cpp/components/QtMobileNotification/QtAndroidNotifier.h
 }
 
 LIBS += -ltoxcore -ltoxencryptsave
@@ -62,8 +92,6 @@ PRE_TARGETDEPS = extra
 
 include(translations/translations.pri)
 
-include(deps/QtMobileNotification/QtMobileNotification.pri)
-include(deps/QtStatusBar/QtStatusBar.pri)
 include(deps/QZXing/QZXing.pri)
 include(deps/sqlitecipher/sqlitecipher.pri)
 

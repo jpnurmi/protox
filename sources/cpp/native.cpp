@@ -2,9 +2,7 @@
 #include "main.h"
 #include "db.h"
 
-#ifdef Q_OS_ANDROID
-#include "deps/QtMobileNotification/QtNotification.h"
-#endif
+#include "components/QtMobileNotification/QtNotification.h"
 
 extern QmlCBridge *qmlbridge;
 extern ChatDataBase *chat_db;

@@ -2,12 +2,13 @@
 
 #include "tools.h"
 
-#include "QtNotification.h"
-#include "QtStatusBar.h"
 #include "QZXing.h"
 #include "native.h"
 #include "qtutf8bytelimitvalidator.h"
 #include "settings.h"
+
+#include "components/QtMobileNotification/QtNotification.h"
+#include "components/QtStatusBar/QtStatusBar.h"
 
 QmlCBridge *qmlbridge = nullptr;
 QSettingsExt *settings = nullptr;
