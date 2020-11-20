@@ -78,7 +78,7 @@ AsyncFileManager::~AsyncFileManager()
 {
 	Tools::debug("Destroying file manager thread 0x" + 
 				 QString::number((quint64)m_file->thread(), 16) + ".");
-	QMetaObject::invokeMethod(this, "onCloseFileRequest", Qt::DirectConnection);
+	QMetaObject::invokeMethod(this, "onCloseFileRequest", Qt::BlockingQueuedConnection);
 	quit();
 	if (!wait()) {
 		terminate();

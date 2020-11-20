@@ -252,7 +252,7 @@ static void cb_file_recv(Tox *m, uint32_t friend_number, uint32_t file_number, u
 			qmlbridge->transfers.push_back(transfer);
 			TOX_ERR_FILE_CONTROL err;
 			bool result;
-			QMetaObject::invokeMethod(transfer->manager, "onFileTransferStarted", Qt::DirectConnection, 
+			QMetaObject::invokeMethod(transfer->manager, "onFileTransferStarted", Qt::BlockingQueuedConnection, 
 									  Q_RETURN_ARG(bool, result));
 			if (!result) {
 				Tools::debug("Couldn't open file " + file_path + " for saving avatar.");
@@ -1090,7 +1090,7 @@ quint32 acceptFile(quint32 friend_number, quint32 file_number, quint64 &unique_i
 	for (const auto transfer : qmlbridge->transfers) {
 		if (transfer->friend_number == friend_number && transfer->file_number == file_number) {
 			bool result;
-			QMetaObject::invokeMethod(transfer->manager, "onFileTransferStarted", Qt::DirectConnection, 
+			QMetaObject::invokeMethod(transfer->manager, "onFileTransferStarted", Qt::BlockingQueuedConnection, 
 									  Q_RETURN_ARG(bool, result));
 			if (result) {
 				result = file_control(transfer->tox, transfer->friend_number, transfer->file_number, 
@@ -1143,11 +1143,13 @@ void send_avatar_to_all_friends(Tox *m, const QString &path)
 void ToxLocalFileManager::onFileChunkReady(void *parent, const QByteArray &data, quint64 position)
 {
 	ToxFileTransfer *parent_transfer = (ToxFileTransfer*)parent;
-	if (parent_transfer->chunks_buffer.empty()) {
-		Toxcore::send_file_chunk(parent_transfer->tox, parent_transfer->friend_number, parent_transfer->file_number,
-						position, data);
-	} else {
-		parent_transfer->chunks_buffer.enqueue(ToxFileChunk(position, data));
+	if (qmlbridge->transfers.indexOf(parent_transfer) > -1) {
+		if (parent_transfer->chunks_buffer.empty()) {
+			Toxcore::send_file_chunk(parent_transfer->tox, parent_transfer->friend_number, parent_transfer->file_number,
+							position, data);
+		} else {
+			parent_transfer->chunks_buffer.enqueue(ToxFileChunk(position, data));
+		}
 	}
 }
 
