@@ -213,12 +213,12 @@ ColumnLayout {
                     var uniqueId = messagesModel.get(0).msgUniqueId
                     messages.addTransitionEnabled = false
                     bridge.retrieveChatLog(uniqueId, true)
-                    messages.addTransitionEnabled = true
+                    addTransitionEnableTimer.start()
                     // fixme: move this code to function(s) in the future
                     for (var i = 0; i < messagesModel.count; i++) {
                         if (messagesModel.get(i).msgUniqueId === uniqueId) {
-                            messages.positionViewAtIndex(i, ListView.Beginning)
-                            messages.contentY -= parent.flickable_margin
+                            //messages.positionViewAtIndex(i, ListView.Beginning)
+                            //messages.contentY -= parent.flickable_margin
                             break
                         }
                     }
@@ -1275,7 +1275,7 @@ PhotoDialog {
         for (var i = 0; i < imageUrls.length; i++) {
             sendFile(imageUrls[i])
         }
-        messages.addTransitionEnabled = true
+        addTransitionEnableTimer.start()
     }
 }
 

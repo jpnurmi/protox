@@ -162,7 +162,7 @@ MessageDialog {
                 messages.addTransitionEnabled = false
                 bridge.retrieveChatLog()
                 chatScrollToEnd()
-                messages.addTransitionEnabled = true
+                addTransitionEnableTimer.start()
             }
         }
         toast.show({ message : qsTr("Chat history deleted!"), duration : Toast.Short });
