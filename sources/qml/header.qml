@@ -64,6 +64,13 @@ ToolBar {
             rightOverlayButton.highlighted = false
         }
 
+        Connections {
+            target: window
+            onInPortraitChanged: {
+                contextMenuRight.visible = false
+            }
+        }
+
         /*
         MenuItem {
             text: qsTr("Debug: colors")
