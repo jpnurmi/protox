@@ -17,6 +17,7 @@ void QtQRCodeScanner::open()
 		"org/protox/activity/QtActivityEx",
 		"createScanQRCodeIntent",
 		"()Landroid/content/Intent;");
+
 		if (intent.object()) {
 			QtAndroid::startActivity(intent, 12051978, m_activityResultReceiver);
 		} else {
@@ -33,6 +34,7 @@ QtQRCodeScannerActivityResultReceiver::QtQRCodeScannerActivityResultReceiver(QtQ
 void QtQRCodeScannerActivityResultReceiver::handleActivityResult(int requestCode, int resultCode, const QAndroidJniObject &data)
 {
 		Q_UNUSED(requestCode)
+
 		if (resultCode == -1) {
 			QAndroidJniObject result = data.callObjectMethod(
 						"getStringExtra",

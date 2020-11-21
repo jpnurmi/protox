@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <manifest package="org.protox" xmlns:android="http://schemas.android.com/apk/res/android" android:versionName="1.6.2beta" android:versionCode="16" android:installLocation="auto">
-    <application android:resizeableActivity="false" android:extractNativeLibs="true" android:hardwareAccelerated="true" android:name="org.qtproject.qt5.android.bindings.QtApplication" android:label="Protox" android:icon="@drawable/icon">
+    <application android:requestLegacyExternalStorage="true" android:resizeableActivity="false" android:extractNativeLibs="true" android:hardwareAccelerated="true" android:name="org.qtproject.qt5.android.bindings.QtApplication" android:label="Protox" android:icon="@drawable/icon">
         <activity android:theme="@style/ProtoxTheme" android:windowSoftInputMode="adjustNothing" android:isScrollContainer="false" android:configChanges="orientation|uiMode|screenLayout|screenSize|smallestScreenSize|layoutDirection|locale|fontScale|keyboard|keyboardHidden|navigation|mcc|mnc|density" android:name="org.protox.activity.QtActivityEx" android:label="Protox" android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

@@ -24,6 +24,7 @@ public:
 		if (!m_prefix.isEmpty() && input.left(m_prefix.length()).toUpper() == m_prefix.toUpper()) {
 			prefix_length = m_prefix.toUtf8().length();
 		}
+
 		QByteArray bytes = input.toUtf8();
 		if (bytes.length() - prefix_length > m_length) {
 			parent()->setProperty("acceptableInput", false);
@@ -32,10 +33,12 @@ public:
 			}
 			return QValidator::Invalid;
 		}
+
 		if (!m_less && bytes.length() - prefix_length < m_length) {
 			parent()->setProperty("acceptableInput", false);
 			return QValidator::Intermediate;
 		}
+
 		parent()->setProperty("acceptableInput", true);
 		return QValidator::Acceptable;
 	}

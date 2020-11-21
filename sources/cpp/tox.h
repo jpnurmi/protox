@@ -23,6 +23,7 @@ struct ToxPendingMessage {
 	bool failed;
 	bool reply;
 	bool resent;
+
 	ToxPendingMessage(quint32 _message_id, quint32 _unique_id, quint32 _friend_number, bool _failed, bool _reply) {
 		message_id = _message_id;
 		unique_id = _unique_id;
@@ -31,6 +32,7 @@ struct ToxPendingMessage {
 		reply = _reply;
 		resent = false;
 	}
+
 	friend bool operator==(const ToxPendingMessage &a, const ToxPendingMessage &b) {
 		return a.message_id == b.message_id && 
 				a.unique_id == b.unique_id && 
@@ -109,6 +111,7 @@ struct ToxFileTransfer {
 		manager = _manager;
 		manager->setObjectParent(this);
 		bytesTransfered = 0;
+
 		if (_avatar) {
 			progress_update_timer = nullptr;
 		} else {
@@ -128,6 +131,7 @@ typedef QMap <ToxFileTransfer*, quint64> ToxFileMessages;
 struct ToxTextMessage {
 	QString message;
 	bool action;
+
 	ToxTextMessage() {}
 	ToxTextMessage(const QString &_message, bool _action) {
 		message = _message;
@@ -141,6 +145,7 @@ struct ToxMessage {
 	bool self;
 	bool received;
 	quint64 unique_id;
+
 	ToxMessage (ToxVariantMessage _variantMessage, quint64 _unique_id, QDateTime _dt, bool _self, bool _received) {
 		variantMessage = _variantMessage;
 		dt = _dt;
@@ -155,10 +160,12 @@ struct ToxSelfCanceledTransfer
 {
 	quint32 friend_number;
 	quint32 file_number;
+
 	ToxSelfCanceledTransfer(quint32 _friend_number, quint32 _file_number) {
 		friend_number = _friend_number;
 		file_number = _file_number;
 	}
+
 	friend bool operator==(const ToxSelfCanceledTransfer &a, const ToxSelfCanceledTransfer &b) {
 		return a.friend_number == b.friend_number && a.file_number == b.file_number;
 	}

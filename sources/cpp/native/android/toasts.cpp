@@ -6,6 +6,7 @@ bool QtToast::show(const QVariant &toastParameters)
 	QVariantMap parameters = toastParameters.toMap();
 	QString message = parameters.value("message", "").toString();
 	int duration = parameters.value("duration", 0).toInt();
+
 	QtAndroid::runOnAndroidThread([message, duration] {
 		QAndroidJniObject javaString = QAndroidJniObject::fromString(message);
 		QAndroidJniObject toast = QAndroidJniObject::callStaticObjectMethod("android/widget/Toast", "makeText",

@@ -33,5 +33,6 @@ QVariant QSettingsExt::valued(const QString &key)
 		Tools::debug("QSettingsExt: default value for key \"" + key + "\" is missing.");
 		return QVariant();
 	}
+
 	return value(key, default_values.value(key));
 }

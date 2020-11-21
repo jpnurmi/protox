@@ -14,21 +14,26 @@ JFUNC(void, keyboardHeightChanged, jint height)
 		qmlbridge->setKeyboardHeight(height);
 	}
 }
+
 JFUNC(void, transferAccepted, jint friend_number, jint file_number)
 {
 	QMetaObject::invokeMethod(qmlbridge, "acceptFile", Qt::QueuedConnection, 
 							  Q_ARG(quint32, friend_number),
 							  Q_ARG(quint32, file_number));
+
 	qmlbridge->cancelFileNotification(friend_number, file_number); // fixme: move to Qt thread?
 }
+
 JFUNC(void, transferCanceled, jint friend_number, jint file_number)
 {
 	QMetaObject::invokeMethod(qmlbridge, "controlFile", Qt::QueuedConnection, 
 							  Q_ARG(quint32, friend_number),
 							  Q_ARG(quint32, file_number),
 							  Q_ARG(quint32, TOX_FILE_CONTROL_CANCEL));
+
 	qmlbridge->cancelFileNotification(friend_number, file_number); // fixme: move to Qt thread?
 }
+
 JFUNC(jlong, getBytesTransfered, jint friend_number, jint file_number)
 {
 	for (const auto transfer : qmlbridge->transfers) {
@@ -36,8 +41,10 @@ JFUNC(jlong, getBytesTransfered, jint friend_number, jint file_number)
 			return transfer->bytesTransfered;
 		}
 	}
+
 	return 0;
 }
+
 JFUNC(jboolean, checkFileTransferInProgress, jint friend_number, jint file_number)
 {
 	for (const auto transfer : qmlbridge->transfers) {
@@ -45,8 +52,10 @@ JFUNC(jboolean, checkFileTransferInProgress, jint friend_number, jint file_numbe
 			return true;
 		}
 	}
+
 	return false;
 }
+
 JFUNC(jboolean, checkFileTransferSelfCanceled, jint friend_number, jint file_number)
 {
 	ToxSelfCanceledTransfer self_canceled_transfer((quint32)friend_number, (quint32)file_number);
@@ -54,18 +63,22 @@ JFUNC(jboolean, checkFileTransferSelfCanceled, jint friend_number, jint file_num
 	qmlbridge->self_canceled_transfers.removeOne(self_canceled_transfer);
 	return exists;
 }
+
 JFUNC(void, messageReplied, jint friend_number, jstring quote_text, jstring reply_text)
 {
 	QAndroidJniObject javaQuoteString("java/lang/String", "(Ljava/lang/String;)V", quote_text);
 	QAndroidJniObject javaReplyString("java/lang/String", "(Ljava/lang/String;)V", reply_text);
+
 	const QString finalReplyText = "> " + 
 			javaQuoteString.toString().replace("\n", "\n> ") + 
 			"\n" + 
 			javaReplyString.toString();
+
 	QMetaObject::invokeMethod(qmlbridge, "sendMessage", Qt::QueuedConnection, 
 							  Q_ARG(quint32, (quint32)friend_number),
 							  Q_ARG(QString, finalReplyText),
 							  Q_ARG(bool, true));
+	QMetaObject::invokeMethod(qmlbridge, "scrollToEnd", Qt::QueuedConnection);
 }
 #endif
 
@@ -83,6 +96,7 @@ bool requestApplicationPermissions()
 #if defined (Q_OS_ANDROID)
 	const QStringList permission_list = { "android.permission.WRITE_EXTERNAL_STORAGE", 
 										  "android.permission.READ_EXTERNAL_STORAGE" };
+
 	for (auto permission : permission_list) {
 		auto permission_result = QtAndroid::checkPermission(permission);
 		if(permission_result == QtAndroid::PermissionResult::Denied){

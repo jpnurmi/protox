@@ -121,6 +121,10 @@ function clearChatContent() {
     messagesModel.clear()
 }
 
+function scrollToEnd() {
+    messages.scrollToEndWithTypingText()
+}
+
 function getFriendsModelOrder() {
     var order = [];
     for (var i = 0; i < friendsModel.count; i++) {
