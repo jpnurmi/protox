@@ -160,6 +160,7 @@ quint64 ChatDataBase::getFriendMessagesCount(const ToxPk &public_key, quint32 li
 	query.bindValue(":limit", limit);
 	execQuery(query);
 	query.next();
+
 	return query.value(0).toULongLong();
 }
 
@@ -211,6 +212,7 @@ const ToxMessages ChatDataBase::getFriendMessages(const ToxPk &public_key, quint
 									  query.value(4).toBool(),
 									  query.value(5).toBool()));
 	}
+
 	return messages;
 }
 
@@ -222,6 +224,7 @@ quint64 ChatDataBase::getFileSize(quint64 unique_id, const ToxPk &public_key)
 	query.bindValue(":public_key", public_key);
 	execQuery(query);
 	query.next();
+
 	if (query.value(0).toInt() == ToxVariantMessageType::TOXMSG_FILE) {
 		QSqlQuery msg_query(db);
 		msg_query.prepare("SELECT size FROM FileMessages WHERE reference_id = :reference_id");
@@ -372,14 +375,16 @@ void ChatDataBase::updatePassword(const QString &password)
 bool ChatDataBase::checkEncrypted()
 {
 	QFile f(db.databaseName());
+
 	if (!f.open(QFile::ReadOnly)) {
 		return false;
 	}
+
 	QByteArray data = f.read(15);
-	f.close();
 	if (QString::fromLatin1(data) == "SQLite format 3") {
 		return false;
 	}
+
 	return true;
 }
 
@@ -395,6 +400,7 @@ void ChatDataBase::execQuery(QSqlQuery &query)
 	Tools::debug("SQL: " + query.lastQuery());
 #endif
 	const QString error = query.lastError().text();
+
 	if (!error.isEmpty()) {
 		Tools::debug("SQL error: " + query.lastError().text());
 	}
@@ -407,9 +413,11 @@ const QSqlQuery ChatDataBase::execQuery(const QString &query_string)
 	Tools::debug("SQL: " + query.lastQuery());
 #endif
 	const QString error = query.lastError().text();
+
 	if (!error.isEmpty()) {
 		Tools::debug("SQL error: " + query.lastError().text());
 	}
+
 	return query;
 }
 
