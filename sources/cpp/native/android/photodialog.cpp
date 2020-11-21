@@ -36,6 +36,7 @@ void QtPhotoDialogActivityResultReceiver::handleActivityResult(int requestCode, 
 		if (resultCode == -1) {
 			if (m_photoDialog->getSelectMultiple()) {
 				QAndroidJniObject clipData = data.callObjectMethod("getClipData", "()Landroid/content/ClipData;");
+
 				if (!clipData.object()) {
 					QAndroidJniObject imageUri = data.callObjectMethod(
 								"getData",
@@ -44,6 +45,7 @@ void QtPhotoDialogActivityResultReceiver::handleActivityResult(int requestCode, 
 				} else {
 					jint count = clipData.callMethod<jint>("getItemCount", "()I");
 					QStringList imageUrls;
+
 					// callObjectMethod is not working
 					for (jint i = 0; i < count; i++) {
 						QAndroidJniObject imageUri = QAndroidJniObject::callStaticObjectMethod(
@@ -55,6 +57,7 @@ void QtPhotoDialogActivityResultReceiver::handleActivityResult(int requestCode, 
 					}
 					m_photoDialog->setImageUrls(imageUrls);
 				}
+
 				emit m_photoDialog->accepted();
 				return;
 			}

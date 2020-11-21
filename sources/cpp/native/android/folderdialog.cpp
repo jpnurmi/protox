@@ -31,6 +31,7 @@ QtFolderDialogActivityResultReceiver::QtFolderDialogActivityResultReceiver(QtFol
 void QtFolderDialogActivityResultReceiver::handleActivityResult(int requestCode, int resultCode, const QAndroidJniObject &data)
 {
 		Q_UNUSED(requestCode)
+
 		if (resultCode == -1) {
 			QAndroidJniObject folderUri = data.callObjectMethod(
 						"getData",
