@@ -1,5 +1,8 @@
 package org.protox.service;
 
+// Qt
+import org.qtproject.qt5.android.QtNative;
+
 // android
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +13,7 @@ import android.util.Log;
 import android.app.Service;
 import android.os.IBinder;
 import android.os.Bundle;
+import android.os.Build;
 import android.graphics.Color;
 
 // java
@@ -44,6 +48,13 @@ public class ProtoxService extends Service
             .setContentTitle("Protox")
             .setContentText(bundle.getString("contentText"))
             .setAutoCancel(true);
+        Context context = QtNative.activity();
+        NotificationManager notificationManager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel chan = new NotificationChannel("Service", "Service", NotificationManager.IMPORTANCE_DEFAULT);
+            notificationManager.createNotificationChannel(chan);
+            builder.setChannelId("Service");
+        }
         Notification notification = builder.build();
         startForeground(1, notification);
 

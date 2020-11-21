@@ -176,7 +176,7 @@ class QtAndroidNotifications {
         final NotificationManager notificationManager = getManager();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel chan = new NotificationChannel(channel,
-                                                                  "Default",
+                                                                  "Application",
                                                                   NotificationManager.IMPORTANCE_DEFAULT);
             notificationManager.createNotificationChannel(chan);
             builder.setChannelId(channel);
