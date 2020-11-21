@@ -66,6 +66,7 @@ JFUNC(void, messageReplied, jint friend_number, jstring quote_text, jstring repl
 							  Q_ARG(quint32, (quint32)friend_number),
 							  Q_ARG(QString, finalReplyText),
 							  Q_ARG(bool, true));
+	QMetaObject::invokeMethod(qmlbridge, "scrollToEnd", Qt::QueuedConnection);
 }
 #endif
 

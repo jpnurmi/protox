@@ -117,6 +117,7 @@ public slots:
 	Q_INVOKABLE const QSize getImageSize(const QString &path);
 	Q_INVOKABLE const QString getCurrentCommitSha1();
 	Q_INVOKABLE void setTranslation(const QString &translation);
+	Q_INVOKABLE void scrollToEnd();
 
 public:
 	ToxBootstrapingThread bootstrapping_thread;

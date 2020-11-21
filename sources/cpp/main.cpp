@@ -980,6 +980,11 @@ void QmlCBridge::setTranslation(const QString &translation)
 	qApp->installTranslator(translator);
 }
 
+void QmlCBridge::scrollToEnd()
+{
+	QMetaObject::invokeMethod(component, "scrollToEnd");
+}
+
 /*
  * QML warnings handler
 */
