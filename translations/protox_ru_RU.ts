@@ -609,6 +609,14 @@ Click on the left button to open the friend list, then on «+» to add a new fri
         <source>Scan QR code</source>
         <translation>Сканировать QR-код</translation>
     </message>
+    <message>
+        <source>Profile import failed.</source>
+        <translation>Не удалось импортировать профиль.</translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation>Импорт</translation>
+    </message>
 </context>
 <context>
     <name>QAndroidPlatformTheme</name>

@@ -608,6 +608,14 @@ Boa sorte!</translation>
         <source>Scan QR code</source>
         <translation>Escanear código QR</translation>
     </message>
+    <message>
+        <source>Profile import failed.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>QAndroidPlatformTheme</name>

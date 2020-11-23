@@ -985,6 +985,20 @@ void QmlCBridge::scrollToEnd()
 	QMetaObject::invokeMethod(component, "scrollToEnd");
 }
 
+QString QmlCBridge::importProfile(const QString &path)
+{
+	if (!Toxcore::check_tox_file(path)) {
+		return QString();
+	}
+
+	QFileInfo info(path);
+	if (!info.exists() || info.suffix() != "tox") {
+		return QString();
+	}
+
+	return QFile::copy(path, Tools::getProgDir() + info.fileName()) ? info.fileName() : QString();
+}
+
 /*
  * QML warnings handler
 */

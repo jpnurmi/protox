@@ -223,6 +223,7 @@ namespace Toxcore {
 	quint32 acceptFile(quint32 friend_number, quint32 file_number, quint64 &unique_id);
 	void send_avatar_to_friend(Tox *m, quint32 friend_number, const QString &path);
 	void send_avatar_to_all_friends(Tox *m, const QString &path);
+	bool check_tox_file(const QString &path);
 }
 
 namespace ToxConverter {
