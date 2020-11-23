@@ -226,7 +226,7 @@ Popup {
         Text {
             text: qsTr("Import")
             visible: importProfileButton.visible
-            width: importProfileButton.width * 2
+            width: importProfileButton.width
             anchors.horizontalCenter: importProfileButton.horizontalCenter
             anchors.horizontalCenterOffset: -3
             anchors.top: importProfileButton.bottom
