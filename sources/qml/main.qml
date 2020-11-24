@@ -23,7 +23,7 @@ import "qrc:/deps/jdenticon/jdenticon.js" as Jdenticon
 ApplicationWindow {
     id: window
     visible: true
-    readonly property string applicationVersion: "1.6.2beta"
+    readonly property string applicationVersion: "1.6.3beta"
 
     /*
       Window events
