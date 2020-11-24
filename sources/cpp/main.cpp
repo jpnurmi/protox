@@ -339,7 +339,7 @@ void QmlCBridge::setConnStatus(int conn_status)
 	case TOX_CONNECTION_UDP: statusText = tr("Connected (UDP)."); break;
 	}
 
-	Native::updateProtoxServiceNotification(tr("Application is running."), statusText, conn_status > TOX_CONNECTION_NONE);
+	Native::updateProtoxServiceNotification(tr("Application is running"), statusText, conn_status > TOX_CONNECTION_NONE);
 }
 
 int QmlCBridge::getConnStatus()
@@ -561,7 +561,7 @@ int QmlCBridge::signInProfile(const QString &profile, bool create_new, const QSt
 		insertFriend(_friend.toUInt(), getFriendNickname(_friend.toUInt()));
 	}
 
-	Native::startProtoxService(tr("Application is running."), tr("Bootstrapping..."));
+	Native::startProtoxService(tr("Application is running"), tr("Bootstrapping..."));
 
 	Tools::debug("Bootstrapping...");
 	Toxcore::bootstrap_DHT(tox);

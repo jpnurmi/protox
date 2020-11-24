@@ -37,7 +37,9 @@ public class ProtoxService extends Service
     public static Notification createServiceNotification(Context context, String contentTitle, String contentText, Boolean connected) {
         Notification.Builder builder = new Notification.Builder(context)
             .setSmallIcon(connected ? org.protox.R.drawable.icon : org.protox.R.drawable.icon_disconnected)
-            .setColor(Color.parseColor("#673AB7")) // Material.DeepPurple
+            .setColor(connected 
+                                ? Color.parseColor("#673AB7") /* Material.DeepPurple */ 
+                                : Color.parseColor("#9E9E9E") /* Material.Grey */)
             .setContentTitle(contentTitle)
             .setContentText(contentText)
             .setAutoCancel(true);

@@ -666,7 +666,23 @@ Boa sorte!</translation>
         <translation>Transferência de %1 cancelada</translation>
     </message>
     <message>
-        <source>Application is running.</source>
+        <source>Connection lost.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Connected (TCP).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Connected (UDP).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Bootstrapping...</source>
+        <translation type="unfinished">Carregando...</translation>
+    </message>
+    <message>
+        <source>Application is running</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
