@@ -494,10 +494,14 @@ void QmlCBridge::createTimers()
 			Tools::debug("Reconnection timer aborted: successfully connected!");
 			return;
 		}
+
 		Tools::debug("Bootstrapping...");
+
 		if (component) {
 			QMetaObject::invokeMethod(component, "resetConnectionStatus");
 		}
+
+		Native::updateProtoxServiceNotification(tr("Application is running"), tr("Bootstrapping..."), false);
 		Toxcore::bootstrap_DHT(tox);
 	});
 	reconnection_timer->start();
