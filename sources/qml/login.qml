@@ -180,6 +180,9 @@ Popup {
         ToolButton {
             id: goBackButton
             visible: loginWindow.profileCreation
+            anchors.left: parent.left
+            anchors.top: parent.top
+
             Text {
                 text: "\uE629"
                 anchors.centerIn: parent
@@ -190,12 +193,70 @@ Popup {
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
             }
+
             onClicked: {
                 highlighted = true
                 loginWindow.goBack(true, false)
             }
-            anchors.left: parent.left
+        }
+
+        ToolButton {
+            id: importProfileButton
+            visible: !loginWindow.profileCreation
+            anchors.right: parent.right
             anchors.top: parent.top
+
+            Text {
+                text: "\uE732"
+                anchors.centerIn: parent
+                font.family: themify.name
+                font.pointSize: 28
+                font.bold: false
+                color: parent.highlighted ? getTheme().highlightedButtonColor : "white"
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+            }
+
+            onClicked: {
+                highlighted = true
+                importProfileDialog.open()
+            }
+        }
+
+        Text {
+            text: qsTr("Import")
+            visible: importProfileButton.visible
+            width: importProfileButton.width
+            anchors.horizontalCenter: importProfileButton.horizontalCenter
+            anchors.horizontalCenterOffset: -3
+            anchors.top: importProfileButton.bottom
+            anchors.topMargin: -4
+            color: importProfileButton.highlighted ? getTheme().highlightedButtonColor : "white"
+            font.pixelSize: 12
+            wrapMode: Text.Wrap
+            horizontalAlignment: Text.AlignHCenter
+        }
+
+        FileDialog {
+            id: importProfileDialog
+            title: qsTr("Select a file")
+            selectMultiple: false
+
+            onAccepted: {
+                importProfileButton.highlighted = false
+                var imported_profile = bridge.importProfile(bridge.uriToRealPath(fileUrl))
+                if (imported_profile.length === 0) {
+                    toast.show({ message : qsTr("Profile import failed."), duration : Toast.Short });
+                } else {
+                    accountSelectionButton.text = imported_profile
+                    accountMenu.profileName = imported_profile
+                    profileRepeater.updateList(false)
+                }
+            }
+
+            onRejected: {
+                importProfileButton.highlighted = false
+            }
         }
 
         Menu {
@@ -300,6 +361,7 @@ Popup {
                     accountMenu.popup(parent.x, parent.y)
                 }
             }
+
             TextField {
                 id: loginUsername
                 visible: loginWindow.profileCreation
@@ -335,6 +397,7 @@ Popup {
                     loginPassword.focus = true
                 }
             }
+
             TextField {
                 id: loginPassword
                 visible: false
@@ -380,6 +443,7 @@ Popup {
                     loginImage.focus = true
                 }
             }
+
             CheckBox {
                 id: loginCheckbox
                 visible: !loginPassword.visible && profileRepeater.count > 0

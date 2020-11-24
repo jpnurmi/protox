@@ -604,6 +604,14 @@ Click on the left button to open the friend list, then on «+» to add a new fri
         <source>Log in</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Profile import failed.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>QAndroidPlatformTheme</name>
@@ -654,7 +662,23 @@ Click on the left button to open the friend list, then on «+» to add a new fri
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Application is running.</source>
+        <source>Connection lost.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Connected (TCP).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Connected (UDP).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Bootstrapping...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Application is running</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

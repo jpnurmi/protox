@@ -331,6 +331,15 @@ long QmlCBridge::getFriendsCount()
 void QmlCBridge::setConnStatus(int conn_status)
 {
 	QMetaObject::invokeMethod(component, "setConnStatus", Q_ARG(QVariant, conn_status));
+
+	QString statusText;
+	switch (conn_status) {
+	case TOX_CONNECTION_NONE: statusText = tr("Connection lost."); break;
+	case TOX_CONNECTION_TCP: statusText = tr("Connected (TCP)."); break;
+	case TOX_CONNECTION_UDP: statusText = tr("Connected (UDP)."); break;
+	}
+
+	Native::updateProtoxServiceNotification(tr("Application is running"), statusText, conn_status > TOX_CONNECTION_NONE);
 }
 
 int QmlCBridge::getConnStatus()
@@ -485,10 +494,14 @@ void QmlCBridge::createTimers()
 			Tools::debug("Reconnection timer aborted: successfully connected!");
 			return;
 		}
+
 		Tools::debug("Bootstrapping...");
+
 		if (component) {
 			QMetaObject::invokeMethod(component, "resetConnectionStatus");
 		}
+
+		Native::updateProtoxServiceNotification(tr("Application is running"), tr("Bootstrapping..."), false);
 		Toxcore::bootstrap_DHT(tox);
 	});
 	reconnection_timer->start();
@@ -552,11 +565,11 @@ int QmlCBridge::signInProfile(const QString &profile, bool create_new, const QSt
 		insertFriend(_friend.toUInt(), getFriendNickname(_friend.toUInt()));
 	}
 
+	Native::startProtoxService(tr("Application is running"), tr("Bootstrapping..."));
+
 	Tools::debug("Bootstrapping...");
 	Toxcore::bootstrap_DHT(tox);
 	createTimers();
-
-	Native::startProtoxService(tr("Application is running."));
 
 	return error;
 }
@@ -983,6 +996,20 @@ void QmlCBridge::setTranslation(const QString &translation)
 void QmlCBridge::scrollToEnd()
 {
 	QMetaObject::invokeMethod(component, "scrollToEnd");
+}
+
+QString QmlCBridge::importProfile(const QString &path)
+{
+	if (!Toxcore::check_tox_file(path)) {
+		return QString();
+	}
+
+	QFileInfo info(path);
+	if (!info.exists() || info.suffix() != "tox") {
+		return QString();
+	}
+
+	return QFile::copy(path, Tools::getProgDir() + info.fileName()) ? info.fileName() : QString();
 }
 
 /*

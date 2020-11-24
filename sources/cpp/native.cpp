@@ -5,7 +5,6 @@
 #include "components/QtMobileNotification/QtNotification.h"
 
 extern QmlCBridge *qmlbridge;
-extern ChatDataBase *chat_db;
 
 #ifdef Q_OS_ANDROID
 JFUNC(void, keyboardHeightChanged, jint height)
@@ -149,11 +148,12 @@ void viewFile(const QString &path, const QString &type)
 #endif
 }
 
-void startProtoxService(const QString &contentText)
+void startProtoxService(const QString &contentTitle, const QString &contentText)
 {
 #if defined (Q_OS_ANDROID)
 	QtAndroid::runOnAndroidThread([=]() {
-		QtAndroid::androidActivity().callMethod<void>("startProtoxService", "(Ljava/lang/String;)V", 
+		QtAndroid::androidActivity().callMethod<void>("startProtoxService", "(Ljava/lang/String;Ljava/lang/String;)V", 
+													  QAndroidJniObject::fromString(contentTitle).object(),
 													  QAndroidJniObject::fromString(contentText).object());
 	});
 #endif
@@ -164,6 +164,22 @@ void stopProtoxService()
 #if defined (Q_OS_ANDROID)
 	QtAndroid::runOnAndroidThread([=]() {
 		QtAndroid::androidActivity().callMethod<void>("stopProtoxService", "()V");
+	});
+#endif
+}
+
+void updateProtoxServiceNotification(const QString &contentTitle, const QString &contentText, bool connected)
+{
+#if defined (Q_OS_ANDROID)
+	QtAndroid::runOnAndroidThread([=]() {
+		QAndroidJniObject::callStaticObjectMethod(
+		"org/protox/service/ProtoxService",
+		"updateServiceNotification",
+		"(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;)V", 
+					QtAndroid::androidActivity().object(),
+					QAndroidJniObject::fromString(contentTitle).object(),
+					QAndroidJniObject::fromString(contentText).object(),
+					QAndroidJniObjectTools::fromBool(connected).object());
 	});
 #endif
 }

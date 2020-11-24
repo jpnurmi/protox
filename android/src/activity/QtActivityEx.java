@@ -38,8 +38,6 @@ import org.protox.service.ProtoxService;
 // java
 import java.lang.String;
 
-
-
 public class QtActivityEx extends QtActivity
 {
     @Override
@@ -301,8 +299,9 @@ public class QtActivityEx extends QtActivity
         startActivity(intent);
     }
 
-    public void startProtoxService(String contentText) {
+    public void startProtoxService(String contentTitle, String contentText) {
         Intent serviceIntent = new Intent(this, ProtoxService.class);
+        serviceIntent.putExtra("contentTitle", contentTitle);
         serviceIntent.putExtra("contentText", contentText);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(serviceIntent);

@@ -608,6 +608,14 @@ Boa sorte!</translation>
         <source>Scan QR code</source>
         <translation>Escanear código QR</translation>
     </message>
+    <message>
+        <source>Profile import failed.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>QAndroidPlatformTheme</name>
@@ -658,7 +666,23 @@ Boa sorte!</translation>
         <translation>Transferência de %1 cancelada</translation>
     </message>
     <message>
-        <source>Application is running.</source>
+        <source>Connection lost.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Connected (TCP).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Connected (UDP).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Bootstrapping...</source>
+        <translation type="unfinished">Carregando...</translation>
+    </message>
+    <message>
+        <source>Application is running</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

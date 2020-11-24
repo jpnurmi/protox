@@ -118,6 +118,7 @@ public slots:
 	Q_INVOKABLE const QString getCurrentCommitSha1();
 	Q_INVOKABLE void setTranslation(const QString &translation);
 	Q_INVOKABLE void scrollToEnd();
+	Q_INVOKABLE QString importProfile(const QString &path);
 
 public:
 	ToxBootstrapingThread bootstrapping_thread;

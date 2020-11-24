@@ -8,6 +8,7 @@
 #include "native/android/photodialog.h"
 #include "native/android/folderdialog.h"
 #include "native/android/qrcodescanner.h"
+#include "native/android/qandroidjniobjecttools.h"
 #endif
 
 #define JFUNC(type, name, ...) extern "C" JNIEXPORT type JNICALL Java_org_protox_activity_QtActivityEx_##name (JNIEnv *, jobject, __VA_ARGS__)
@@ -18,8 +19,9 @@ namespace Native {
 	bool requestApplicationPermissions();
 	QString uriToRealPath(const QString &uriString);
 	void viewFile(const QString &path, const QString &type);
-	void startProtoxService(const QString &contentText);
+	void startProtoxService(const QString &contentTitle, const QString &contentText);
 	void stopProtoxService();
+	void updateProtoxServiceNotification(const QString &contentTitle, const QString &contentText, bool connected);
 	const QString getInternalStoragePath();
 }
 

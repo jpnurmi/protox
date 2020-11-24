@@ -609,6 +609,14 @@ Click on the left button to open the friend list, then on «+» to add a new fri
         <source>Scan QR code</source>
         <translation>Сканировать QR-код</translation>
     </message>
+    <message>
+        <source>Profile import failed.</source>
+        <translation>Не удалось импортировать профиль.</translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation>Импорт</translation>
+    </message>
 </context>
 <context>
     <name>QAndroidPlatformTheme</name>
@@ -659,8 +667,24 @@ Click on the left button to open the friend list, then on «+» to add a new fri
         <translation>Передача от %1 отменена</translation>
     </message>
     <message>
-        <source>Application is running.</source>
-        <translation>Приложение запущено.</translation>
+        <source>Connection lost.</source>
+        <translation>Соединение потеряно.</translation>
+    </message>
+    <message>
+        <source>Connected (TCP).</source>
+        <translation>Подключено (TCP).</translation>
+    </message>
+    <message>
+        <source>Connected (UDP).</source>
+        <translation>Подключено (UDP).</translation>
+    </message>
+    <message>
+        <source>Bootstrapping...</source>
+        <translation>Инициализация...</translation>
+    </message>
+    <message>
+        <source>Application is running</source>
+        <translation>Приложение запущено</translation>
     </message>
 </context>
 <context>
