@@ -22,6 +22,7 @@ SOURCES += \
 	sources/cpp/db.cpp \
 	sources/cpp/main.cpp \
 	sources/cpp/native.cpp \
+	sources/cpp/qtutf8bytelimitvalidator.cpp \
 	sources/cpp/settings.cpp \
 	sources/cpp/tools.cpp \
 	sources/cpp/tox.cpp
