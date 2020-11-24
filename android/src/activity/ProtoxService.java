@@ -1,8 +1,5 @@
 package org.protox.service;
 
-// Qt
-import org.qtproject.qt5.android.QtNative;
-
 // android
 import android.content.Context;
 import android.content.Intent;
@@ -37,25 +34,36 @@ public class ProtoxService extends Service
         Log.i(TAG, "Destroying Service");
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        super.onStartCommand(intent, flags, startId);
-
-        Bundle bundle = intent.getExtras();
-        Notification.Builder builder = new Notification.Builder(this)
-            .setSmallIcon(org.protox.R.drawable.icon)
+    public static Notification createServiceNotification(Context context, String contentTitle, String contentText, Boolean connected) {
+        Notification.Builder builder = new Notification.Builder(context)
+            .setSmallIcon(connected ? org.protox.R.drawable.icon : org.protox.R.drawable.icon_disconnected)
             .setColor(Color.parseColor("#673AB7")) // Material.DeepPurple
-            .setContentTitle("Protox")
-            .setContentText(bundle.getString("contentText"))
+            .setContentTitle(contentTitle)
+            .setContentText(contentText)
             .setAutoCancel(true);
-        Context context = QtNative.activity();
         NotificationManager notificationManager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel chan = new NotificationChannel("Service", "Service", NotificationManager.IMPORTANCE_DEFAULT);
             notificationManager.createNotificationChannel(chan);
             builder.setChannelId("Service");
         }
-        Notification notification = builder.build();
+        return builder.build();
+    }
+
+    public static void updateServiceNotification(Context context, String contentTitle, String contentText, Boolean connected) {
+        NotificationManager notificationManager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+        Notification notification = createServiceNotification(context, contentTitle, contentText, connected);
+        notificationManager.notify(1, notification);
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, flags, startId);
+
+        Bundle bundle = intent.getExtras();
+        Notification notification = createServiceNotification(this, bundle.getString("contentTitle"), 
+                                                                    bundle.getString("contentText"), 
+                                                                    false);
         startForeground(1, notification);
 
         return START_STICKY;
