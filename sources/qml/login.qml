@@ -248,9 +248,9 @@ Popup {
                 if (imported_profile.length === 0) {
                     toast.show({ message : qsTr("Profile import failed."), duration : Toast.Short });
                 } else {
-                    profileRepeater.updateList(false)
                     accountSelectionButton.text = imported_profile
                     accountMenu.profileName = imported_profile
+                    profileRepeater.updateList(false)
                 }
             }
 
