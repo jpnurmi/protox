@@ -178,7 +178,7 @@ void updateProtoxServiceNotification(const QString &contentTitle, const QString 
 {
 #if defined (Q_OS_ANDROID)
 	QtAndroid::runOnAndroidThread([=]() {
-		QAndroidJniObject::callStaticObjectMethod(
+		QAndroidJniObject::callStaticMethod<void>(
 		"org/protox/service/ProtoxService",
 		"updateServiceNotification",
 		"(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;)V", 
