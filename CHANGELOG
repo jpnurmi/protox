@@ -147,7 +147,7 @@ v1.6.2beta
 
 v1.6.3beta
 
-- Added an Android service that will keep the application alive while in background. This service is bundled with a notification that shows connection status to the Tox network. Keep in mind that Android can kill any service in low-memory situations.
+- Added a persistent notification that shows connection status to the Tox network.
 - Updated Qt version from 5.14.2 to 5.15.2. It's now possible to select multiple files in the file selection dialog.
 - Fixed crashes and various issues on Android 10, including issues with file access on Lineage OS (Android 10).
 - Added ability to import Tox profiles into the application without copying them to the application folder.
