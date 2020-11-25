@@ -156,38 +156,30 @@ bool viewFile(const QString &path, const QString &type)
 	return result;
 }
 
-void startProtoxService(const QString &contentTitle, const QString &contentText)
-{
-#if defined (Q_OS_ANDROID)
-	QtAndroid::runOnAndroidThread([=]() {
-		QtAndroid::androidActivity().callMethod<void>("startProtoxService", "(Ljava/lang/String;Ljava/lang/String;)V", 
-													  QAndroidJniObject::fromString(contentTitle).object(),
-													  QAndroidJniObject::fromString(contentText).object());
-	});
-#endif
-}
-
-void stopProtoxService()
-{
-#if defined (Q_OS_ANDROID)
-	QtAndroid::runOnAndroidThread([=]() {
-		QtAndroid::androidActivity().callMethod<void>("stopProtoxService", "()V");
-	});
-#endif
-}
-
-void updateProtoxServiceNotification(const QString &contentTitle, const QString &contentText, bool connected)
+void updatePersistentNotification(const QString &contentTitle, const QString &contentText, bool connected)
 {
 #if defined (Q_OS_ANDROID)
 	QtAndroid::runOnAndroidThread([=]() {
 		QAndroidJniObject::callStaticMethod<void>(
-		"org/protox/service/ProtoxService",
-		"updateServiceNotification",
+		"org/protox/persistent_notification/PersistentNotification",
+		"updatePersistentNotification",
 		"(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;)V", 
 					QtAndroid::androidActivity().object(),
 					QAndroidJniObject::fromString(contentTitle).object(),
 					QAndroidJniObject::fromString(contentText).object(),
 					QAndroidJniObjectTools::fromBool(connected).object());
+	});
+#endif
+}
+
+void clearPersistentNotification()
+{
+#if defined (Q_OS_ANDROID)
+	QtAndroid::runOnAndroidThread([]() {
+		QAndroidJniObject::callStaticMethod<void>(
+		"org/protox/persistent_notification/PersistentNotification",
+		"clearPersistentNotification",
+		"(Landroid/content/Context;)V", QtAndroid::androidActivity().object());
 	});
 #endif
 }
