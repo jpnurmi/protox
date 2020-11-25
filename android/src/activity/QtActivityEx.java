@@ -34,7 +34,6 @@ import android.app.RemoteInput;
 
 // project
 import KeyboardProvider.KeyboardProvider;
-import org.protox.service.ProtoxService;
 
 // java
 import java.lang.String;
@@ -306,20 +305,5 @@ public class QtActivityEx extends QtActivity
             return false;
         }
         return true;
-    }
-
-    public void startProtoxService(String contentTitle, String contentText) {
-        Intent serviceIntent = new Intent(this, ProtoxService.class);
-        serviceIntent.putExtra("contentTitle", contentTitle);
-        serviceIntent.putExtra("contentText", contentText);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(serviceIntent);
-        } else {
-            startService(serviceIntent);
-        }
-    }
-
-    public void stopProtoxService() {
-        stopService(new Intent(this, ProtoxService.class));
     }
 }
