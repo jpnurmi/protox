@@ -32,6 +32,10 @@ public class ProtoxService extends Service
     public void onDestroy() {
         super.onDestroy();
         Log.i(TAG, "Destroying Service");
+
+        // fixme: remove when startForeground is enabled
+        NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancel(1);
     }
 
     private static Notification createServiceNotification(Context context, String contentTitle, String contentText, Boolean connected) {
@@ -63,10 +67,11 @@ public class ProtoxService extends Service
         int ret = super.onStartCommand(intent, flags, startId);
 
         Bundle bundle = intent.getExtras();
-        Notification notification = createServiceNotification(this, bundle.getString("contentTitle"), 
-                                                                    bundle.getString("contentText"), 
-                                                                    false);
-        startForeground(1, notification);
+        //Notification notification = createServiceNotification(this, bundle.getString("contentTitle"), 
+        //                                                            bundle.getString("contentText"), 
+        //                                                            false);
+        //startForeground(1, notification);
+        updateServiceNotification(this, bundle.getString("contentTitle"), bundle.getString("contentText"), false);
 
         return ret;
     }
