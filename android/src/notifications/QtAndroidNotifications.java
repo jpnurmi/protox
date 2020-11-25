@@ -142,7 +142,7 @@ class QtAndroidNotifications {
                         builder.setProgress(0, 0, false);
                         builder.setOngoing(false);
                         builder.setContentText(caption);
-                        boolean transfer_succeded = new File(Uri.parse((String)parameters.get("filePath")).getPath()).length() == file_size;
+                        boolean transfer_succeded = new File((String)parameters.get("filePath")).length() == file_size;
                         if (transfer_succeded) {
                             builder.setContentTitle((String)parameters.get("transferFinishedText"));
                         } else {
