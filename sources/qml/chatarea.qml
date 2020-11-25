@@ -13,6 +13,7 @@ import QtPhotoDialog 1.0
 ColumnLayout {
     anchors.fill: parent
     spacing: 0
+
     Item {
         id: chatContent
         readonly property int chat_margin: 15
@@ -21,9 +22,11 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.fillHeight: true
         Layout.topMargin: overlayHeader.height
+
         ListModel {
             id: messagesModel
         }
+
         ListView {
             id: messages
             anchors.fill: parent
@@ -37,22 +40,24 @@ ColumnLayout {
             bottomMargin: typingText.visible 
                           ? flickable_margin + typingText.height + typingText.margin 
                           : flickable_margin
+
             onBottomMarginChanged: {
                 if (typingText.visible && wasAtYEnd) {
                     contentY += typingText.height + typingText.margin 
                 }
             }
+
             Behavior on bottomMargin {
                 NumberAnimation {
                     duration: 100
                     easing.type: Easing.OutCubic
                 }
             }
+
             Rectangle {
                 id: typingText
-                readonly property int margin: 5
-                readonly property real alpha: 0.9
                 height: 20
+                visible: false
                 opacity: alpha
                 z: z_top
                 radius: height * 0.5
@@ -63,7 +68,10 @@ ColumnLayout {
                 anchors.bottom: parent.bottom
                 anchors.bottomMargin: margin
                 color: "white"
+                readonly property int margin: 5
+                readonly property real alpha: 0.9
                 property string text
+
                 Timer {
                     id: typingTextAnimationTimer
                     running: parent.visible
@@ -71,18 +79,21 @@ ColumnLayout {
                     readonly property int timerInterval: 500
                     interval: timerInterval
                     property int symbol: 1
+
                     onTriggered: {
                         symbol++
                         if (symbol > 3) {
                             symbol = 1
                         }
                     }
+
                     onRunningChanged: {
                         if (!running) {
                             symbol = 1
                         }
                     }
                 }
+
                 Text {
                     id: typingTextReal
                     anchors.left: parent.left
@@ -93,6 +104,7 @@ ColumnLayout {
                     visible: parent.visible
                     readonly property int typingTextIndicatorSize: 6
                     readonly property int typingTextIndicatorAnimationDuration: 250
+
                     Rectangle {
                         id: typingTextIndicator1
                         width: parent.typingTextIndicatorSize
@@ -107,6 +119,7 @@ ColumnLayout {
                         anchors.leftMargin: 4
                         anchors.verticalCenter: parent.verticalCenter
                     }
+
                     Rectangle {
                         id: typingTextIndicator2
                         width: parent.typingTextIndicatorSize
@@ -121,6 +134,7 @@ ColumnLayout {
                         anchors.leftMargin: 2
                         anchors.verticalCenter: parent.verticalCenter
                     }
+
                     Rectangle {
                         id: typingTextIndicator3
                         width: parent.typingTextIndicatorSize
@@ -136,8 +150,8 @@ ColumnLayout {
                         anchors.verticalCenter: parent.verticalCenter
                     }
                 }
-                visible: false
             }
+
             DropShadow {
                 anchors.fill: typingText
                 visible: typingText.visible
@@ -147,6 +161,7 @@ ColumnLayout {
                 color: "#80000000"
                 source: typingText
             }
+
             Rectangle {
                 id: messageRemovalLine
                 x: -width
@@ -159,6 +174,7 @@ ColumnLayout {
                     from: -messageRemovalLine.width; to: 0; easing.type: Easing.OutCubic }
                 NumberAnimation { id: messageRemovalLineOut; target: messageRemovalLine; property: "x"; 
                     from: 0; to: -messageRemovalLine.width; easing.type: Easing.OutCubic; }
+
                 LinearGradient {
                     anchors.fill: parent
                     start: Qt.point(parent.width, 0)
@@ -171,14 +187,17 @@ ColumnLayout {
                     }
                 }
             }
+
             onContentYChanged: {
                 if (atYEnd) {
                     scrollToEndButton.visible = false
                 }
             }
+
             function exceedsHeight() {
                 return contentHeight > height
             }
+
             property bool wasAtYEnd
             function scrollToEnd() {
                 positionViewAtEnd()
@@ -187,25 +206,31 @@ ColumnLayout {
                 contentY += flickable_margin
                 wasAtYEnd = true
             }
+
             function scrollToEndWithTypingText() {
                 if (typingText.visible) {
                     typingText.visible = false
                 }
+
                 scrollToEnd()
+
                 if (!typingText.visible && typingText.text.length > 0) {
                     typingText.visible = true
                 }
+
                 if (typingText.visible) {
                     contentY += typingText.height + typingText.margin 
                 }
             }
+            
             onFlickStarted: {
                 wasAtYEnd = false
-                
             }
+
             onFlickEnded: {
                 wasAtYEnd = atYEnd
             }
+
             Timer {
                 id: preloadingTimer
                 interval: 1
@@ -214,6 +239,7 @@ ColumnLayout {
                     messages.addTransitionEnabled = false
                     bridge.retrieveChatLog(uniqueId, true)
                     addTransitionEnableTimer.start()
+
                     // fixme: move this code to function(s) in the future
                     for (var i = 0; i < messagesModel.count; i++) {
                         if (messagesModel.get(i).msgUniqueId === uniqueId) {
@@ -222,45 +248,56 @@ ColumnLayout {
                             break
                         }
                     }
+
                     messagesLoadingNotification.visible = false
                 }
             }
+
             function preloadHistory() {
                 if (atYBeginning && messagesModel.count > 0) {
                     var uniqueId = messagesModel.get(0).msgUniqueId
+
                     if (!bridge.checkRemainingMessages(uniqueId)) {
                         return
                     }
+
                     messagesLoadingNotification.visible = true
                     preloadingTimer.start()
                 }
             }
+
             onAtYBeginningChanged: {
                 if (atYBeginning) {
                     preloadHistory()
                 }
             }
+
             property int defaultHeight
             Component.onCompleted: {
                 defaultHeight = height
             }
+
             onHeightChanged: {
                 var cond1 = height === defaultHeight - keyboardHeight 
                         && keyboardActive 
                         && (!chatFlickable.backToDefaultHeight)
                 var cond2 = height < defaultHeight - keyboardHeight && wasAtYEnd
+
                 if (cond1 || cond2) {
                     scrollToEndWithTypingText()
                 }
             }
+
             property bool addTransitionEnabled: true
             add: Transition {
                 enabled: messages.addTransitionEnabled
                 NumberAnimation { property: "scale"; from: 0; to: 1.0; duration: 300 }
             }
+
             displaced: Transition {
                 NumberAnimation { properties: "y"; duration: 400; easing.type: Easing.OutCubic; }
             }
+
             model: messagesModel
             delegate: Rectangle {
                 id: messageCloud
@@ -269,6 +306,7 @@ ColumnLayout {
                                                             : getUserTheme().messageCloudPendingColor)
                 radius: 10
                 property int keptUniqueId
+
                 NumberAnimation on x {
                     id: cloudRemoveAnimation
                     duration: 500
@@ -280,6 +318,7 @@ ColumnLayout {
                         toast.show({ message : qsTr("Message removed!"), duration : Toast.Short })
                     }
                 }
+
                 Drag.dragType: Drag.Automatic
                 MouseArea {
                     id: messageCloudArea
@@ -287,8 +326,10 @@ ColumnLayout {
                     drag.axis: Drag.XAxis
                     drag.target: parent
                 }
+
                 property bool cloudTextAreaDragActive
                 readonly property bool dragActive: cloudTextAreaDragActive || messageCloudArea.drag.active
+
                 function getAdditionalWidth() {
                     var pos = 0
                     if (msgSelf) {
@@ -300,37 +341,45 @@ ColumnLayout {
                     }
                     return pos
                 }
+
                 onXChanged: {
                     if (dragActive) {
                         messageRemovalLine.colision = dragActive && x < getAdditionalWidth()
                     }
                 }
+
                 onDragActiveChanged: {
                     if (dragActive) {
                         var self = msgType === msgtype_file ? true : msgSelf
                         if (self && !msgReceived && bridge.getFriendConnStatus(bridge.getCurrentFriendNumber()) > 0) {
                             return
                         }
+
                         messageRemovalLine.visible = true
                         removeAnchors()
                         messageRemovalLineIn.start()
                     } else {
                         if (x < getAdditionalWidth()) {
                             var friend_number = bridge.getCurrentFriendNumber()
+
                             bridge.removeMessageFromPendingList(friend_number, msgUniqueId)
                             bridge.removeMessageFromDB(friend_number, msgUniqueId)
+
                             messageRemovalLineOut.start()
                             messageRemovalLine.colision = false
                             cloudRemoveAnimation.start() 
                         } else {
                             setDefaultAnchors()
+
                             if (messageRemovalLine.x > -messageRemovalLine.width) {
                                 messageRemovalLineOut.start()
                             }
+
                             messageRemovalLine.colision = false
                         }
                     }
                 }
+
                 Rectangle {
                     id: cloudCornerRemover
                     z: z_cloud
@@ -346,6 +395,7 @@ ColumnLayout {
                         }
                     }
                 }
+
                 Image {
                     id: cloudTailImage
                     width: 10
@@ -361,8 +411,10 @@ ColumnLayout {
                         }
                     }
                 }
+
                 property real cloudTextWidth
                 readonly property int reservedWidth: resendIndicator.width + resendIndicator.anchors.rightMargin
+
                 function calculateMaximumWidth() {
                     var cwidth = window.width 
                             - chatContent.cloud_margin * 2 
@@ -371,6 +423,7 @@ ColumnLayout {
                     if (cloudTextWidth > cwidth)
                         implicitWidth = cwidth
                 }
+
                 function setDefaultAnchors() {
                     if (msgSelf) {
                         anchors.right = parent.right
@@ -380,6 +433,7 @@ ColumnLayout {
                         anchors.leftMargin = chatContent.chat_margin
                     }
                 }
+
                 function removeAnchors() {
                     if (msgSelf) {
                         anchors.right = undefined
@@ -389,6 +443,7 @@ ColumnLayout {
                         anchors.leftMargin = 0
                     }
                 }
+
                 Connections {
                     target: window
                     onInPortraitChanged: {
@@ -400,6 +455,7 @@ ColumnLayout {
                         }
                         messageCloud.calculateMaximumWidth()
                     }
+
                     onUpdatePendingChanged: {
                         if (!msgReceived) {
                             pending = safe_bridge().checkMessageInPendingList(
@@ -408,6 +464,7 @@ ColumnLayout {
                             msgHistory = true
                         }
                     }
+
                     onEnableDragChanged: {
                         if (dragActive) {
                             setDefaultAnchors()
@@ -415,15 +472,19 @@ ColumnLayout {
                         }
                     }
                 }
+
                 Component.onCompleted: {
                     if (msgType === msgtype_text) {
                         calculateMaximumWidth()
                     }
+
                     setDefaultAnchors()
                 }
+
                 property bool pending: safe_bridge().checkMessageInPendingList(
                                            safe_bridge().getCurrentFriendNumber(), 
                                            msgUniqueId)
+
                 Image {
                     id: resendIndicator
                     source: "resources/resend.png"
@@ -434,6 +495,7 @@ ColumnLayout {
                     width: 25
                     height: width
                     mipmap: true
+
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
@@ -443,12 +505,14 @@ ColumnLayout {
                         }
                     }
                 }
+
                 Timer {
                     id: messagePendingIndicatorTimer
                     interval: 1000
                     repeat: false
                     running: !msgHistory
                 }
+
                 Image {
                     id: messagePendingIndicator
                     source: "resources/pending-spinner.png"
@@ -463,6 +527,7 @@ ColumnLayout {
                     width: 10
                     height: width
                     mipmap: true
+
                     RotationAnimator on rotation {
                         from: 0
                         to: 360
@@ -470,10 +535,13 @@ ColumnLayout {
                         loops: Animation.Infinite
                     }
                 }
+
                 Loader {
                     anchors.fill: parent
+
                     Component {
                         id: cloudTextComponent
+
                         Text {
                             id: cloudText
                             property string plainText: msgText
@@ -481,65 +549,79 @@ ColumnLayout {
                             anchors.fill: parent
                             anchors.margins: chatContent.cloud_margin
                             font.pointSize: fontMetrics.normalize(standardFontPointSize)
+                            wrapMode: Text.Wrap
+                            textFormat: Text.PlainText
+
                             MouseArea {
                                 id: cloudTextArea
                                 anchors.fill: parent
                                 drag.target: messageCloud
                                 drag.axis: Drag.XAxis
                                 readonly property bool dragActive: drag.active
+
                                 onDragActiveChanged: {
                                     messageCloud.cloudTextAreaDragActive = dragActive
                                 }
+
                                 onClicked: {
                                     var link = parent.linkAt(mouseX, mouseY)
                                     if (link.length > 0) {
                                         Qt.openUrlExternally(link)
                                         return
                                     }
+
                                     bridge.copyTextToClipboard(cloudText.plainText)
                                     toast.show({ message : qsTr("Text copied!"), duration : Toast.Short });
                                 }
+
                                 onPressAndHold: {
                                     chatMessage.forceActiveFocus()
                                     var add = cloudText.plainText.replace("\n", "\n> ")
                                     Qt.inputMethod.reset()
+
                                     if (chatMessage.text.length > 0) {
                                         chatMessage.append("\n> " + add + "\n")
                                     } else {
                                         chatMessage.append("> " + add + "\n")
                                     }
+
                                     if (chatMessage) {
                                         chatMessage.cursorPosition = chatMessage.length
                                     }
                                 }
                             }
+
                             Component.onCompleted: {
                                 messageCloud.cloudTextWidth = width
                                 textFormat = Text.StyledText
                                 wrapMode = Text.Wrap
+
                                 if (msgAction) {
                                     text = '<i><font color="' + getUserTheme().actionTextColor + '">' + text + '</font></i>'
                                 } else {
                                     text = processText(plainText)
                                 }
+
                                 messageCloud.implicitWidth = contentWidth + chatContent.cloud_margin * 2
                             }
+
                             onContentHeightChanged: {
                                 messageCloud.implicitHeight = contentHeight + chatContent.cloud_margin * 2
                                 messageCloud.implicitWidth = contentWidth + chatContent.cloud_margin * 2
                             }
-                            wrapMode: Text.Wrap
-                            textFormat: Text.PlainText
+
                             function processText(t) {
                                 String.prototype.replaceAll = function(search, replace) {
                                     return this.split(search).join(replace);
                                 }
+
                                 var str = String(t)
                                 // deHTML input
                                 str = str.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll("\"", "&quot;")
                                 var result = "";
                                 var lines = str.split("\n")
                                 // parse each line separately
+
                                 for (var i = 0; i < lines.length; i++) {
                                     var line = lines[i]
                                     // skip formatting in quote lines
@@ -550,6 +632,7 @@ ColumnLayout {
                                         if (i < lines.length - 1) { result += "\n" }
                                         continue
                                     }
+
                                     line = line.replaceAll(">", "&gt;")
                                     line = line.replace(/\*+(.*?)\*+(?=\s|$)/g, function(match, _text) {
                                         return '<b>' + _text + '</b>'
@@ -577,8 +660,10 @@ ColumnLayout {
                             }
                         }
                     }
+
                     Component {
                         id: cloudFileComponent
+
                         Column {
                             id: fileLayout
                             anchors.fill: parent
@@ -587,6 +672,7 @@ ColumnLayout {
                             spacing: 0
                             readonly property real maxWidth: messages.width * 0.5
                             readonly property real verticalMargins: chatContent.chat_margin * 0.35
+
                             Timer {
                                 id: speedCalcTimer
                                 running: msgFilestate === fstate_inprogress
@@ -598,7 +684,9 @@ ColumnLayout {
                                     lastFileSize = msgFiletsize
                                 }
                             }
+
                             Rectangle { opacity: 0; width: parent.width; height: fileLayout.verticalMargins }
+
                             Text {
                                 id: fileName
                                 text: msgFilename
@@ -606,6 +694,7 @@ ColumnLayout {
                                 wrapMode: Text.Wrap
                                 width: parent.width
                             }
+
                             Text {
                                 id: fileSize
                                 text: formatBytes(msgFilesize)
@@ -613,6 +702,7 @@ ColumnLayout {
                                 wrapMode: Text.Wrap
                                 width: parent.width
                             }
+
                             property string transferSpeed: qsTr("Transferring...")
                             function addSpeedString() {
                                 if (transferSpeed !== qsTr("Transferring...")) {
@@ -620,6 +710,7 @@ ColumnLayout {
                                 }
                                 return ""
                             }
+
                             Text {
                                 id: fileStatus
                                 visible: msgFilestate !== fstate_request && !msgRemotepaused 
@@ -633,6 +724,7 @@ ColumnLayout {
                                 wrapMode: Text.Wrap
                                 width: parent.width
                             }
+
                             Text {
                                 id: remotePausedText
                                 visible: msgRemotepaused 
@@ -644,17 +736,21 @@ ColumnLayout {
                                 wrapMode: Text.Wrap
                                 width: parent.width
                             }
+
                             Rectangle { opacity: 0; visible: fileButtonsLayout.visible; width: parent.width; height: 8 }
+
                             ProgressBar {
                                 id: fileProgress
                                 width: parent.width
                                 value: msgFiletsize / msgFilesize
                                 visible: msgFilestate === fstate_inprogress || msgFilestate == fstate_paused
+
                                 Behavior on value {
                                     SmoothedAnimation { velocity: 200 }
                                 }
                             }
                             Rectangle { opacity: 0; visible: fileButtonsLayout.visible; width: parent.width; height: 8 }
+
                             Rectangle {
                                 id: filePreviewImageRectangle
                                 readonly property int margins: 2
@@ -663,6 +759,7 @@ ColumnLayout {
                                 radius: 2
                                 color: getTheme().highlightedButtonColor
                                 visible: filePreviewImage.status !== Image.Null && reservedImageSpace.width > 0
+
                                 Item {
                                     id: reservedImageSpace
                                     anchors.centerIn: parent
@@ -674,6 +771,7 @@ ColumnLayout {
                                     height: makeMultBy(fileLayout.width * ratio, filePreviewImageAlphaLayer.magicSize)
                                     visible: filePreviewImage.status !== Image.Ready
                                 }
+
                                 Image {
                                     id: filePreviewImageAlphaLayer
                                     readonly property int magicSize: 16 // size of this image
@@ -686,6 +784,7 @@ ColumnLayout {
                                     verticalAlignment: Image.AlignTop
                                     smooth: false
                                 }
+
                                 Image {
                                     id: filePreviewImage
                                     anchors.centerIn: parent
@@ -696,6 +795,7 @@ ColumnLayout {
                                     height: makeMultBy(fileLayout.width * ratio, filePreviewImageAlphaLayer.magicSize)
                                     asynchronous: true
                                     mipmap: true
+
                                     LinearGradient {
                                         id: moreHeightGradient
                                         property bool allowRender: false
@@ -708,6 +808,7 @@ ColumnLayout {
                                             GradientStop { position: 1.0; color: getTheme().highlightedButtonColor }
                                         }
                                     }
+
                                     onHeightChanged: {
                                         var h = makeMultBy(fileLayout.width * ratio, filePreviewImageAlphaLayer.magicSize)
                                         if (height === h && height > messages.height) {
@@ -720,6 +821,7 @@ ColumnLayout {
                                             moreHeightGradient.end = Qt.point(0, requiredHeight)
                                         }
                                     }
+
                                     MouseArea {
                                         anchors.fill: parent
                                         onClicked: {
@@ -740,6 +842,7 @@ ColumnLayout {
                                     GradientStop { position: 1.0; color: "#00000000" }
                                 }
                             }
+
                             RowLayout {
                                 spacing: 0
                                 visible: filePauseButton.visible
@@ -753,11 +856,13 @@ ColumnLayout {
                                     color: "white"
                                 }
                             }
+
                             RowLayout {
                                 id: fileButtonsLayout
                                 width: parent.width
                                 spacing: 0
                                 visible: fileCancelButton.visible || filePauseButton.visible
+
                                 ToolButton {
                                     id: filePauseButton
                                     Layout.fillWidth: true
@@ -765,6 +870,7 @@ ColumnLayout {
                                     visible: msgFilestate !== fstate_request 
                                              && msgFilestate !== fstate_canceled 
                                              && msgFilestate !== fstate_finished
+
                                     Text {
                                         id: filePauseButtonText
                                         anchors.centerIn: parent
@@ -773,6 +879,7 @@ ColumnLayout {
                                         text: msgFilestate === fstate_paused ? "\uE761" : "\uE762"
                                         color: "black"
                                     }
+
                                     onClicked: {
                                         var control
                                         if (msgFilestate === fstate_inprogress) {
@@ -780,15 +887,18 @@ ColumnLayout {
                                         } else if (msgFilestate === fstate_paused) {
                                             control = fcontrol_resume
                                         }
+
                                         bridge.controlFile(bridge.getCurrentFriendNumber(), 
                                                            msgFilenumber, control)
                                     }
                                 }
+
                                 ToolButton {
                                     id: fileAcceptButton
                                     Layout.fillWidth: true
                                     Layout.fillHeight: true
                                     visible: !msgSelf && msgFilestate === fstate_request
+
                                     onClicked: {
                                         var control = bridge.acceptFile(bridge.getCurrentFriendNumber(), 
                                                                         msgFilenumber)
@@ -796,6 +906,7 @@ ColumnLayout {
                                             toast.show({ message : qsTr("Failed to open a file."), duration : Toast.Long })
                                         }
                                     }
+
                                     Text {
                                         anchors.centerIn: parent
                                         font.family: themify.name
@@ -804,6 +915,7 @@ ColumnLayout {
                                         color: getUserTheme().fileAcceptButtonColor
                                     }
                                 }
+
                                 Rectangle {
                                     width: 1
                                     Layout.fillHeight: true
@@ -814,15 +926,18 @@ ColumnLayout {
                                         GradientStop { position: 1.0; color: "#00000000" }
                                     } 
                                 }
+
                                 ToolButton {
                                     id: fileCancelButton
                                     Layout.fillWidth: true
                                     Layout.fillHeight: true
                                     visible: msgFilestate !== fstate_canceled && msgFilestate !== fstate_finished
+
                                     onClicked: {
                                         bridge.controlFile(bridge.getCurrentFriendNumber(), 
                                                            msgFilenumber, fcontrol_cancel)
                                     }
+
                                     Text {
                                         anchors.centerIn: parent
                                         font.family: themify.name
@@ -832,14 +947,17 @@ ColumnLayout {
                                     }
                                 }
                             }
+
                             ToolButton {
                                 id: viewFileButton
                                 visible: msgFilestate === fstate_finished 
                                          && safe_bridge().checkFileExists(msgFilepath) 
                                          && filePreviewImage.status === Image.Null
+
                                 onClicked: {
                                     bridge.viewFile(msgFilepath, "*")
                                 }
+
                                 Text {
                                     anchors.centerIn: parent
                                     font.family: themify.name
@@ -848,6 +966,7 @@ ColumnLayout {
                                     color: "black"
                                 }
                             }
+
                             Text {
                                 id: fileNotExistsText
                                 visible: msgFilestate === fstate_finished && !safe_bridge().checkFileExists(msgFilepath)
@@ -856,25 +975,31 @@ ColumnLayout {
                                 wrapMode: Text.Wrap
                                 width: parent.width
                             }
+
                             Rectangle { opacity: 0; width: parent.width; height: fileLayout.verticalMargins }
+
                             property real lastImplicitHeight
                             Component.onCompleted: {
                                 messageCloud.implicitWidth = maxWidth
                                 messageCloud.implicitHeight = implicitHeight
                                 lastImplicitHeight = implicitHeight
                             }
+
                             Connections {
                                 target: window
                                 onInPortraitChanged: {
                                     messageCloud.implicitWidth = fileLayout.maxWidth
                                 }
                             }
+
                             onImplicitHeightChanged: {
                                 if (implicitHeight > lastImplicitHeight && messages.atYEnd) {
                                     messages.contentY += implicitHeight - lastImplicitHeight
                                 }
+
                                 lastImplicitHeight = implicitHeight
                             }
+
                             Binding {
                                 target: messageCloud
                                 property: "implicitHeight"
@@ -882,8 +1007,10 @@ ColumnLayout {
                             }
                         }
                     }
+
                     sourceComponent: msgType ? cloudFileComponent : cloudTextComponent
                 }
+
                 Text {
                     id: timeText
                     color: getTheme().primaryTextColor
@@ -917,12 +1044,14 @@ ColumnLayout {
         Layout.alignment: Qt.AlignBottom | Qt.AlignLeft
         readonly property int margin: 5
         Layout.margins: margin
+
         onHeightChanged: {
             if (loginWindow.profileSelected) {
                 attachFileButton.addiveHeight = (height - attachFileButton.implicitHeight) * 0.5
                 attachFileButton.updateButtonsHeight()
             }
         }
+
         Button {
             id: attachFileButton
             Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
@@ -930,10 +1059,11 @@ ColumnLayout {
             visible: !cleanProfile && !littleSpace
             implicitWidth: chatMessage.defaultHeight * 0.75
             implicitHeight: implicitWidth
+            focusPolicy: Qt.NoFocus
             background: Rectangle {
                 visible: false
             }
-            focusPolicy: Qt.NoFocus
+
             Image {
                 id: attachFileButtonImage
                 anchors.fill: parent
@@ -941,14 +1071,17 @@ ColumnLayout {
                 source: "resources/attach-file-button.png"
                 mipmap: true
             }
+
             property real addiveHeight: 5.75
             property bool buttonsActivated: false
             readonly property bool littleSpace: !inPortrait && keyboardActive
+
             onLittleSpaceChanged: {
                 if (littleSpace) {
                     hideButtons()
                 }
             }
+
             Connections {
                 target: drawer
                 onOpenedChanged: {
@@ -957,6 +1090,7 @@ ColumnLayout {
                     }
                 }
             }
+
             Connections {
                 target: contextMenuRight
                 onOpenedChanged: {
@@ -965,8 +1099,10 @@ ColumnLayout {
                     }
                 }
             }
+
             readonly property int buttonsDistance: 80
             readonly property real fullOpacity: 0.9
+
             ParallelAnimation {
                 id: sendAnyFileButtonMoveInAnimation
                 NumberAnimation { target: sendAnyFileButton; property: "y"; 
@@ -976,6 +1112,7 @@ ColumnLayout {
                 NumberAnimation { target: sendAnyFileButton; property: "scale"; 
                     from: 0.0; to: 1.0; easing.type: Easing.Linear }
             }
+
             ParallelAnimation {
                 id: sendAnyFileButtonMoveOutAnimation
                 NumberAnimation { target: sendAnyFileButton; property: "y"; 
@@ -988,6 +1125,7 @@ ColumnLayout {
                     sendAnyFileButton.visible = false
                 }
             }
+
             ParallelAnimation {
                 id: sendImageButtonMoveInAnimation
                 NumberAnimation { target: sendImageButton; property: "x"; 
@@ -999,6 +1137,7 @@ ColumnLayout {
                 NumberAnimation { target: sendImageButton; property: "scale"; 
                     from: 0.0; to: 1.0; easing.type: Easing.Linear }
             }
+
             ParallelAnimation {
                 id: sendImageButtonMoveOutAnimation
                 NumberAnimation { target: sendImageButton; property: "x"; 
@@ -1013,6 +1152,7 @@ ColumnLayout {
                     sendImageButton.visible = false
                 }
             }
+
             Rectangle {
                 id: sendAnyFileButton
                 visible: false
@@ -1021,12 +1161,14 @@ ColumnLayout {
                 opacity: parent.fullOpacity
                 radius: width * 0.5
                 color: "white"
+
                 Image {
                     anchors.fill: parent
                     anchors.margins: 6
                     source: "resources/send-any-file-button.png"
                     mipmap: true
                 }
+
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
@@ -1035,6 +1177,7 @@ ColumnLayout {
                     }
                 }
             }
+
             Rectangle {
                 id: sendImageButton
                 visible: false
@@ -1043,20 +1186,24 @@ ColumnLayout {
                 opacity: parent.fullOpacity
                 radius: width * 0.5
                 color: "white"
+
                 Image {
                     anchors.fill: parent
                     anchors.margins: 6
                     source: "resources/send-image-button.png"
                     mipmap: true
                 }
+
                 MouseArea {
                     anchors.fill: parent
+
                     onClicked: {
                         attachFileButton.hideButtons()
                         chatPhotoPickerDialog.open()
                     }
                 }
             }
+
             DropShadow {
                 anchors.fill: sendAnyFileButton
                 visible: sendAnyFileButton.visible
@@ -1066,6 +1213,7 @@ ColumnLayout {
                 color: "#80000000"
                 source: sendAnyFileButton
             }
+
             DropShadow {
                 anchors.fill: sendImageButton
                 visible: sendImageButton.visible
@@ -1075,6 +1223,7 @@ ColumnLayout {
                 color: "#80000000"
                 source: sendImageButton
             }
+
             function hideButtons() {
                 if (buttonsActivated) {
                     buttonsActivated = false
@@ -1082,16 +1231,20 @@ ColumnLayout {
                     sendImageButtonMoveOutAnimation.start()
                     return true
                 }
+
                 return false
             }
+
             function updateButtonsHeight() {
                 if (buttonsActivated) {
                     sendAnyFileButton.y = -attachFileButton.buttonsDistance - attachFileButton.addiveHeight
                     sendImageButton.y = -attachFileButton.buttonsDistance * Math.sin(Math.PI * 0.25) - attachFileButton.addiveHeight
                 }
             }
+
             TapHandler {
                 acceptedButtons: Qt.LeftButton
+
                 onTapped: {
                     if (!parent.hideButtons()) {
                         sendAnyFileButton.visible = true
@@ -1101,9 +1254,11 @@ ColumnLayout {
                         parent.buttonsActivated = true
                     }
                 }
+
                 grabPermissions: PointerHandler.CanTakeOverFromHandlersOfDifferentType | PointerHandler.ApprovesTakeOverByHandlersOfDifferentType
             }
         }
+
         Flickable {
             id: chatFlickable
             readonly property real defaultHeight: 46
@@ -1119,8 +1274,10 @@ ColumnLayout {
                 visible: false
                 interactive: false
             }
+
             property bool backToDefaultHeight: false
             property real lastHeight
+
             Connections {
                 target: window
                 onKeyboardActiveChanged: {
@@ -1129,6 +1286,7 @@ ColumnLayout {
                     }
                 }
             }
+
             onHeightChanged: {
                 if (lastHeight > height && height === defaultHeight) {
                     backToDefaultHeight = true
@@ -1137,7 +1295,9 @@ ColumnLayout {
                 }
                 lastHeight = height
             }
+
             Component.onCompleted: returnToBounds()
+
             TextArea.flickable: TextArea {
                 id: chatMessage
                 selectByMouse: true
@@ -1154,38 +1314,48 @@ ColumnLayout {
                 }
                 bottomPadding: 8
                 verticalAlignment: Qt.AlignVCenter
+
                 property int maxLines: inPortrait ? 4 : 2
                 property real defaultHeight
                 property real defaultContentHeight
+
                 Component.onCompleted: {
                     defaultHeight = height
                     defaultContentHeight = contentHeight
                 }
+
                 onTextChanged: {
                     updateTyping()
                 }
+
                 function updateHeight() {
                     var atYEnd = messages.atYEnd
                     maxLines = inPortrait ? 4 : 2
+
                     if (defaultContentHeight !== 0) {
                         var lines = contentHeight / defaultContentHeight
                         var actualHeight
+
                         if (lines > 1) {
                             actualHeight = chatFlickable.defaultHeight + defaultContentHeight * (lines - 1)
                         } else {
                             actualHeight = chatFlickable.defaultHeight
                         }
+
                         var maxHeight = chatFlickable.defaultHeight + defaultContentHeight * (maxLines - 1)
                         chatFlickable.implicitHeight = Math.min(actualHeight, maxHeight)
                         chatScrollBar.visible = actualHeight > maxHeight
                     }
                 }
+
                 onContentHeightChanged: {
                     updateHeight()
                 }
+
                 Keys.onBackPressed: {
                     focus = false
                 }
+
                 Timer {
                     id: dropTypingTimer
                     interval: 2000
@@ -1194,11 +1364,14 @@ ColumnLayout {
                         bridge.setTypingFriend(bridge.getCurrentFriendNumber(), false)
                     }
                 }
+
                 function updateTyping() {
                     if (bridge.getConnStatus() < 1) {
                         return
                     }
+
                     dropTypingTimer.stop()
+
                     if (contentWidth > 0 || contentHeight > defaultContentHeight) {
                         dropTypingTimer.start()
                         bridge.setTypingFriend(bridge.getCurrentFriendNumber(), true)
@@ -1208,6 +1381,7 @@ ColumnLayout {
                 }
             }
         }
+
         Button {
             id: sendButton
             Layout.alignment: Qt.AlignVCenter
@@ -1215,12 +1389,14 @@ ColumnLayout {
             visible: !cleanProfile
             implicitWidth: chatMessage.defaultHeight * 0.75
             implicitHeight: implicitWidth
+            focusPolicy: Qt.NoFocus
             background: Rectangle {
                 visible: false
             }
-            focusPolicy: Qt.NoFocus
+
             function sendMessage() {
                 Qt.inputMethod.reset()
+
                 if (chatMessage.text.length > 0) {
                     bridge.sendMessage(bridge.getCurrentFriendNumber(), chatMessage.text)
                     chatMessage.clear()
@@ -1228,6 +1404,7 @@ ColumnLayout {
                     chatMessage.focus = false
                 }
             }
+
             Image {
                 id: sendButtomImage
                 anchors.fill: parent
@@ -1235,6 +1412,7 @@ ColumnLayout {
                 source: "resources/send-button.png"
                 mipmap: true
             }
+
             TapHandler {
                 acceptedButtons: Qt.LeftButton
                 onTapped: sendButton.sendMessage()
@@ -1242,6 +1420,7 @@ ColumnLayout {
             }
         }
     }
+
     Rectangle {
         id: keyboardSpace
         opacity: 0
@@ -1263,9 +1442,11 @@ FileDialog {
     selectMultiple: true
     onAccepted: {
         messages.addTransitionEnabled = fileUrls.length === 1
+
         for (var i = 0; i < fileUrls.length; i++) {
             sendFile(fileUrls[i])
         }
+
         messages.addTransitionEnabled = true
     }
 }
@@ -1276,9 +1457,11 @@ PhotoDialog {
     selectMultiple: true
     onAccepted: {
         messages.addTransitionEnabled = imageUrls.length === 1
+
         for (var i = 0; i < imageUrls.length; i++) {
             sendFile(imageUrls[i])
         }
+
         addTransitionEnableTimer.start()
     }
 }
@@ -1297,6 +1480,7 @@ Rectangle {
     x: (parent.width - width) * 0.5
     y: chatSeparator.y - height - bottomMargin
     visible: false
+
     Text {
         id: nextPageButtonText
         text: "\u2193 " + qsTr("You have %n new message(s)", "", new_messages) + " \u2193"
@@ -1305,11 +1489,13 @@ Rectangle {
         opacity: parent.opacity
         anchors.centerIn: parent
     }
+
     onVisibleChanged: {
         if (!visible) {
             new_messages = 0
         }
     }
+
     MouseArea {
         anchors.fill: parent
         enabled: parent.visible
@@ -1343,6 +1529,7 @@ Rectangle {
     x: (parent.width - width) * 0.5
     y: overlayHeader.height + topMargin
     visible: false
+
     Text {
         id: messagesLoadingNotificationText
         text: qsTr("Loading history...")
