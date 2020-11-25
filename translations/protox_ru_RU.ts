@@ -617,6 +617,10 @@ Click on the left button to open the friend list, then on «+» to add a new fri
         <source>Import</source>
         <translation>Импорт</translation>
     </message>
+    <message>
+        <source>No application found for this file type.</source>
+        <translation>Не найдено приложения для данного типа файлов.</translation>
+    </message>
 </context>
 <context>
     <name>QAndroidPlatformTheme</name>

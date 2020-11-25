@@ -154,6 +154,13 @@ class QtAndroidNotifications {
                         } else {
                             builder.setDefaults(Notification.DEFAULT_ALL);
                         }
+                        if (transfer_succeded) {
+                            Intent intentActionViewFile = new Intent("notificationAction");
+                            intentActionViewFile.putExtra("viewFilePath", (String)parameters.get("filePath"));
+                            PendingIntent pendingIntentViewFile = PendingIntent.getBroadcast(context, getUniquePendingIntentID(), intentActionViewFile, 
+                                                PendingIntent.FLAG_UPDATE_CURRENT);
+                            builder.setContentIntent(pendingIntentViewFile);
+                        }
                         if (transfer_succeded || (!transfer_succeded && !self_canceled)) {
                             release("FileProgress", id, type, parameters, notification_id, builder);
                         }

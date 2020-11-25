@@ -141,17 +141,19 @@ QString uriToRealPath(const QString &uriString)
 	return realPath;
 }
 
-void viewFile(const QString &path, const QString &type)
+bool viewFile(const QString &path, const QString &type)
 {
+	bool result;
 #if defined (Q_OS_ANDROID)
-	QtAndroid::runOnAndroidThread([=]() {
+	QtAndroid::runOnAndroidThreadSync([&]() {
 		QAndroidJniObject javaString = QAndroidJniObject::fromString(path);
 		QAndroidJniObject javaString2 = QAndroidJniObject::fromString(type);
-		QtAndroid::androidActivity().callMethod<void>("viewFile", 
-													  "(Ljava/lang/String;Ljava/lang/String;)V", 
+		result = QtAndroid::androidActivity().callMethod<jboolean>("viewFile", 
+													  "(Ljava/lang/String;Ljava/lang/String;)Z", 
 													  javaString.object(), javaString2.object());
 	});
 #endif
+	return result;
 }
 
 void startProtoxService(const QString &contentTitle, const QString &contentText)

@@ -616,6 +616,10 @@ Boa sorte!</translation>
         <source>Import</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>No application found for this file type.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>QAndroidPlatformTheme</name>

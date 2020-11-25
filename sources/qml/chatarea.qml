@@ -955,7 +955,9 @@ ColumnLayout {
                                          && filePreviewImage.status === Image.Null
 
                                 onClicked: {
-                                    bridge.viewFile(msgFilepath, "*")
+                                    if (!bridge.viewFile(msgFilepath, "*")) {
+                                        toast.show({ message : qsTr("No application found for this file type."), duration : Toast.Short })
+                                    }
                                 }
 
                                 Text {

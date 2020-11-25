@@ -60,7 +60,7 @@ public class ProtoxService extends Service
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        super.onStartCommand(intent, flags, startId);
+        int ret = super.onStartCommand(intent, flags, startId);
 
         Bundle bundle = intent.getExtras();
         Notification notification = createServiceNotification(this, bundle.getString("contentTitle"), 
@@ -68,7 +68,7 @@ public class ProtoxService extends Service
                                                                     false);
         startForeground(1, notification);
 
-        return START_NOT_STICKY;
+        return ret;
     }
 
     @Override

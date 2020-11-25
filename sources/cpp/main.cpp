@@ -847,9 +847,9 @@ QString QmlCBridge::checkFileImage(const QString &path)
 	return Tools::checkFileImage(path);
 }
 
-void QmlCBridge::viewFile(const QString &path, const QString &type)
+bool QmlCBridge::viewFile(const QString &path, const QString &type)
 {
-	Native::viewFile(path, type);
+	return Native::viewFile(path, type);
 }
 
 quint32 QmlCBridge::acceptFile(quint32 friend_number, quint32 file_number)

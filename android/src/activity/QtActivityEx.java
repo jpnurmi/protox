@@ -13,6 +13,7 @@ import android.content.ContentUris;
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.ActivityNotFoundException;
 import android.os.Bundle;
 import android.os.Build;
 import android.os.Environment;
@@ -69,6 +70,8 @@ public class QtActivityEx extends QtActivity
                         } else {
                             transferCanceled(bundle.getInt("friendNumber"), bundle.getInt("fileNumber"));
                         }
+                    } else if (bundle.containsKey("viewFilePath")) {
+                        viewFile(bundle.getString("viewFilePath"), "*");
                     }
                     Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
                     if (remoteInput != null) {
@@ -290,14 +293,19 @@ public class QtActivityEx extends QtActivity
         return type;
     }
 
-    public void viewFile(String path, String type) {
+    public boolean viewFile(String path, String type) {
         if (type.equals("*")) {
             type = getMimeType(path);
         }
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_VIEW);
         intent.setDataAndType(Uri.parse("file://" + path), type);
-        startActivity(intent);
+        try{
+            startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            return false;
+        }
+        return true;
     }
 
     public void startProtoxService(String contentTitle, String contentText) {
