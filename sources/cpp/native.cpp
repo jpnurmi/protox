@@ -79,6 +79,12 @@ JFUNC(void, messageReplied, jint friend_number, jstring quote_text, jstring repl
 							  Q_ARG(bool, true));
 	QMetaObject::invokeMethod(qmlbridge, "scrollToEnd", Qt::QueuedConnection);
 }
+
+JFUNC_NO_ARGS(jint, getCurrentFriendNumber)
+{
+	return jint(qmlbridge->getCurrentFriendNumber());
+}
+
 #endif
 
 namespace Native {
