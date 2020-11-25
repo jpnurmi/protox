@@ -134,22 +134,28 @@ class QtAndroidNotifications {
                         } catch (InterruptedException e) {
                             Log.d("Notifications", "Sleep failure!");
                         }
+                        boolean self_canceled = QtActivityEx.checkFileTransferSelfCanceled(id, file_number);
+                        if (self_canceled) {
+                            getManager().cancel(notification_id);
+                            return;
+                        }
                         builder.setProgress(0, 0, false);
                         builder.setOngoing(false);
-                        builder.setDefaults(Notification.DEFAULT_ALL);
                         builder.setContentText(caption);
-                        boolean self_canceled = QtActivityEx.checkFileTransferSelfCanceled(id, file_number);
                         boolean transfer_succeded = new File(Uri.parse((String)parameters.get("filePath")).getPath()).length() == file_size;
                         if (transfer_succeded) {
                             builder.setContentTitle((String)parameters.get("transferFinishedText"));
                         } else {
                             builder.setContentTitle((String)parameters.get("transferCanceledText"));
                         }
+                        if (QtActivityEx.getCurrentFriendNumber() == id) {
+                            builder.setPriority(Notification.PRIORITY_MIN);
+                            builder.setDefaults(Notification.DEFAULT_LIGHTS);
+                        } else {
+                            builder.setDefaults(Notification.DEFAULT_ALL);
+                        }
                         if (transfer_succeded || (!transfer_succeded && !self_canceled)) {
                             release("FileProgress", id, type, parameters, notification_id, builder);
-                        }
-                        if (self_canceled) {
-                            getManager().cancel(notification_id);
                         }
                     }
                 }).start();
