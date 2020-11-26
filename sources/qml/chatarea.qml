@@ -201,8 +201,6 @@ ColumnLayout {
             property bool wasAtYEnd
             function scrollToEnd() {
                 positionViewAtEnd()
-                contentY += Number.MAX_VALUE
-                positionViewAtEnd()
                 contentY += flickable_margin
                 wasAtYEnd = true
             }
