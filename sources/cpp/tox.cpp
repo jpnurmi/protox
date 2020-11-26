@@ -1264,15 +1264,15 @@ bool check_tox_file(const QString &path)
 
 	QByteArray data = f.read(8);
 
-	const char tox_profile_header[] = { 0x0, 0x0, 0x0, 0x0, 0x1f, 0x1b, 0xed, 0x15 };
-	const char tox_profile_header_encrypted[] = { 't', 'o', 'x', 'E', 's', 'a', 'v', 'e' };
+	const quint8 tox_profile_header[] = { 0x0, 0x0, 0x0, 0x0, 0x1f, 0x1b, 0xed, 0x15 };
+	const quint8 tox_profile_header_encrypted[] = { 't', 'o', 'x', 'E', 's', 'a', 'v', 'e' };
 
-	bool test1 = data == QByteArray(tox_profile_header, sizeof(tox_profile_header));
+	bool test1 = data == QByteArray((char*)tox_profile_header, sizeof(tox_profile_header));
 	if (test1) {
 		return true;
 	}
 
-	bool test2 = data == QByteArray(tox_profile_header_encrypted, sizeof(tox_profile_header_encrypted));
+	bool test2 = data == QByteArray((char*)tox_profile_header_encrypted, sizeof(tox_profile_header_encrypted));
 	if (test2) {
 		return true;
 	}
