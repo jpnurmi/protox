@@ -154,3 +154,5 @@ v1.6.3beta
 - Fixed possible crashes when canceling file transfers.
 - Message history now scrolls to the end after replying from a notification.
 - The "Enable UDP" option is now off by default for new users.
+- Fixed a possible crash in file notifications when a file transfer finishes.
+- Added ability to view the file when a user clicks on the file notification.
