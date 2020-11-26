@@ -228,8 +228,8 @@ class QtAndroidNotifications {
         return (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
-    private final static AtomicInteger unique_notification_id = new AtomicInteger(1); // 1 is reserved in ProtoxService.java
-    private final static AtomicInteger unique_pending_intent_id = new AtomicInteger(0);
+    private final static AtomicInteger unique_notification_id = new AtomicInteger(1); // 1 is reserved in PersistentNotification.java
+    private final static AtomicInteger unique_pending_intent_id = new AtomicInteger(1); // 1 is reserved in PersistentNotification.java
     private static int getUniqueNotificationID() {
         return unique_notification_id.incrementAndGet();
     }

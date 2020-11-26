@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.NotificationChannel;
+import android.app.PendingIntent;
 import android.util.Log;
 import android.os.Bundle;
 import android.os.Build;
@@ -24,13 +25,21 @@ public class PersistentNotification
             .setContentTitle(contentTitle)
             .setContentText(contentText)
             .setOngoing(true)
-            .setAutoCancel(true);
+            .setAutoCancel(false);
         NotificationManager notificationManager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel chan = new NotificationChannel("Status", "Status", NotificationManager.IMPORTANCE_DEFAULT);
             notificationManager.createNotificationChannel(chan);
             builder.setChannelId("Status");
         }
+        String packageName = context.getApplicationContext().getPackageName();
+        Intent resultIntent = context.getPackageManager().getLaunchIntentForPackage(packageName);
+        resultIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        Bundle bundle = new Bundle();
+        bundle.putInt("notificationId", -1);
+        resultIntent.putExtras(bundle);
+        PendingIntent resultPendingIntent = PendingIntent.getActivity(context, 1, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.setContentIntent(resultPendingIntent);
         return builder.build();
     }
 
