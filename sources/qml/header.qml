@@ -103,7 +103,7 @@ ToolBar {
         font.family: themify.name
         font.pointSize: 28
         
-        onPressed: {
+        onClicked: {
             if (contextMenuRight.visible) {
                 contextMenuRight.close()
                 return
