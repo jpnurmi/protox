@@ -12,7 +12,6 @@ function makeMultBy(size, value) {
     if (size <= value / 2) {
         return Math.ceil(size / value) * value
     }
-
     return Math.round(size / value) * value
 }
 
@@ -245,6 +244,18 @@ function chatScrollToEnd() {
     messages.scrollToEnd()
 }
 
+// This timer is a temporary solution.
+Timer {
+    id: scrollToEndAgainTimer
+    interval: 100
+    repeat: false
+    onTriggered: {
+        if (!messages.atYEnd) {
+            messages.scrollToEndWithTypingText()
+        }
+    }
+}
+
 Timer {
     id: addTransitionEnableTimer
     interval: 1
@@ -288,6 +299,8 @@ function selectFriend(friend_number) {
     if (each_friend_text[friend_number] !== undefined) {
         chatMessage.append(each_friend_text[friend_number])
     }
+
+    scrollToEndAgainTimer.start()
 }
 
 property int new_messages: 0
@@ -518,6 +531,7 @@ function signInProfile(profile, create, password, autoLogin) {
     settingsModel.setEnabled("auto_login_enabled", password.length === 0)
     settingsWindow.setProfileEncrypted(bridge.checkProfileEncrypted(profile))
     settingsWindow.setAvailableNodes(bridge.getToxNodesCount())
+    scrollToEndAgainTimer.start()
     return error
 }
 
