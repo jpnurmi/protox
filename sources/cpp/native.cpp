@@ -159,28 +159,25 @@ bool viewFile(const QString &path, const QString &type)
 void updatePersistentNotification(const QString &contentTitle, const QString &contentText, bool connected)
 {
 #if defined (Q_OS_ANDROID)
-	QtAndroid::runOnAndroidThread([=]() {
-		QAndroidJniObject::callStaticMethod<void>(
-		"org/protox/persistent_notification/PersistentNotification",
-		"updatePersistentNotification",
-		"(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;)V", 
-					QtAndroid::androidActivity().object(),
-					QAndroidJniObject::fromString(contentTitle).object(),
-					QAndroidJniObject::fromString(contentText).object(),
-					QAndroidJniObjectTools::fromBool(connected).object());
-	});
+	// Z (aka Boolean in JNI) is not working but Ljava/lang/Boolean; works. Why?
+	QAndroidJniObject::callStaticMethod<void>(
+	"org/protox/persistent_notification/PersistentNotification",
+	"updatePersistentNotification",
+	"(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;)V", 
+				QtAndroid::androidActivity().object(),
+				QAndroidJniObject::fromString(contentTitle).object(),
+				QAndroidJniObject::fromString(contentText).object(),
+				QAndroidJniObjectTools::fromBool(connected).object());
 #endif
 }
 
 void clearPersistentNotification()
 {
 #if defined (Q_OS_ANDROID)
-	QtAndroid::runOnAndroidThread([]() {
 		QAndroidJniObject::callStaticMethod<void>(
 		"org/protox/persistent_notification/PersistentNotification",
 		"clearPersistentNotification",
 		"(Landroid/content/Context;)V", QtAndroid::androidActivity().object());
-	});
 #endif
 }
 
