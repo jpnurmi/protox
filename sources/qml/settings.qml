@@ -335,7 +335,6 @@ Popup {
             chatScrollToEnd()
             messages.addTransitionEnabled = true
             reloadChatHistory = false
-            scrollToEndAgainTimer.start()
         }
         */
     }

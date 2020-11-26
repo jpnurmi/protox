@@ -201,8 +201,6 @@ ColumnLayout {
             property bool wasAtYEnd
             function scrollToEnd() {
                 positionViewAtEnd()
-                contentY += Number.MAX_VALUE
-                positionViewAtEnd()
                 contentY += flickable_margin
                 wasAtYEnd = true
             }
@@ -222,7 +220,7 @@ ColumnLayout {
                     contentY += typingText.height + typingText.margin 
                 }
             }
-            
+
             onFlickStarted: {
                 wasAtYEnd = false
             }
@@ -980,11 +978,11 @@ ColumnLayout {
 
                             Rectangle { opacity: 0; width: parent.width; height: fileLayout.verticalMargins }
 
-                            property real lastImplicitHeight
                             Component.onCompleted: {
                                 messageCloud.implicitWidth = maxWidth
-                                messageCloud.implicitHeight = implicitHeight
-                                lastImplicitHeight = implicitHeight
+                                for (var i = 0; i < children.length; i++) {
+                                    messageCloud.implicitHeight += children[i].height
+                                }
                             }
 
                             Connections {
@@ -992,14 +990,6 @@ ColumnLayout {
                                 onInPortraitChanged: {
                                     messageCloud.implicitWidth = fileLayout.maxWidth
                                 }
-                            }
-
-                            onImplicitHeightChanged: {
-                                if (implicitHeight > lastImplicitHeight && messages.atYEnd) {
-                                    messages.contentY += implicitHeight - lastImplicitHeight
-                                }
-
-                                lastImplicitHeight = implicitHeight
                             }
 
                             Binding {
@@ -1432,7 +1422,6 @@ ColumnLayout {
         onImplicitHeightChanged: {
             if (implicitHeight > 0) {
                 messages.scrollToEnd()
-                scrollToEndAgainTimer.start()
             }
         }
     }
