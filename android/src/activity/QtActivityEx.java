@@ -14,6 +14,7 @@ import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.ActivityNotFoundException;
+import android.app.NotificationManager;
 import android.os.Bundle;
 import android.os.Build;
 import android.os.Environment;
@@ -81,6 +82,13 @@ public class QtActivityEx extends QtActivity
             }
         };
         registerReceiver(receiver, new IntentFilter("notificationAction"));
+    }
+
+    @Override
+    protected void onDestroy() {
+        NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancelAll();
+        super.onDestroy();
     }
 
     private static native void keyboardHeightChanged(int height);
