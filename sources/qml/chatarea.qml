@@ -1272,7 +1272,7 @@ ColumnLayout {
                 width: 10
                 policy: ScrollBar.AlwaysOn
                 visible: false
-                interactive: false
+                interactive: true
             }
 
             property bool backToDefaultHeight: false
