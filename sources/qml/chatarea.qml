@@ -201,8 +201,6 @@ ColumnLayout {
             property bool wasAtYEnd
             function scrollToEnd() {
                 positionViewAtEnd()
-                contentY += Number.MAX_VALUE
-                positionViewAtEnd()
                 contentY += flickable_margin
                 wasAtYEnd = true
             }
@@ -955,7 +953,9 @@ ColumnLayout {
                                          && filePreviewImage.status === Image.Null
 
                                 onClicked: {
-                                    bridge.viewFile(msgFilepath, "*")
+                                    if (!bridge.viewFile(msgFilepath, "*")) {
+                                        toast.show({ message : qsTr("No application found for this file type."), duration : Toast.Short })
+                                    }
                                 }
 
                                 Text {

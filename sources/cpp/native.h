@@ -19,10 +19,9 @@ namespace Native {
 	void setKeyboardAdjustMode(bool adjustNothing);
 	bool requestApplicationPermissions();
 	QString uriToRealPath(const QString &uriString);
-	void viewFile(const QString &path, const QString &type);
-	void startProtoxService(const QString &contentTitle, const QString &contentText);
-	void stopProtoxService();
-	void updateProtoxServiceNotification(const QString &contentTitle, const QString &contentText, bool connected);
+	bool viewFile(const QString &path, const QString &type);
+	void updatePersistentNotification(const QString &contentTitle, const QString &contentText, bool connected);
+	void clearPersistentNotification();
 	const QString getInternalStoragePath();
 }
 

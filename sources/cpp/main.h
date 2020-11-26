@@ -107,7 +107,7 @@ public slots:
 	Q_INVOKABLE bool controlFile(quint32 friend_number, quint32 file_number, quint32 control);
 	Q_INVOKABLE QString getDefaultDownloadsDirectory();
 	Q_INVOKABLE QString checkFileImage(const QString &path);
-	Q_INVOKABLE void viewFile(const QString &path, const QString &type);
+	Q_INVOKABLE bool viewFile(const QString &path, const QString &type);
 	Q_INVOKABLE quint32 acceptFile(quint32 friend_number, quint32 file_number);
 	Q_INVOKABLE bool checkFileExists(const QString &path);
 	Q_INVOKABLE QString getFriendPublicKeyHex(quint32 friend_number);

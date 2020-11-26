@@ -612,6 +612,10 @@ Click on the left button to open the friend list, then on «+» to add a new fri
         <source>Import</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>No application found for this file type.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>QAndroidPlatformTheme</name>

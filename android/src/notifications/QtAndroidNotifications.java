@@ -142,7 +142,7 @@ class QtAndroidNotifications {
                         builder.setProgress(0, 0, false);
                         builder.setOngoing(false);
                         builder.setContentText(caption);
-                        boolean transfer_succeded = new File(Uri.parse((String)parameters.get("filePath")).getPath()).length() == file_size;
+                        boolean transfer_succeded = new File((String)parameters.get("filePath")).length() == file_size;
                         if (transfer_succeded) {
                             builder.setContentTitle((String)parameters.get("transferFinishedText"));
                         } else {
@@ -153,6 +153,13 @@ class QtAndroidNotifications {
                             builder.setDefaults(Notification.DEFAULT_LIGHTS);
                         } else {
                             builder.setDefaults(Notification.DEFAULT_ALL);
+                        }
+                        if (transfer_succeded) {
+                            Intent intentActionViewFile = new Intent("notificationAction");
+                            intentActionViewFile.putExtra("viewFilePath", (String)parameters.get("filePath"));
+                            PendingIntent pendingIntentViewFile = PendingIntent.getBroadcast(context, getUniquePendingIntentID(), intentActionViewFile, 
+                                                PendingIntent.FLAG_UPDATE_CURRENT);
+                            builder.setContentIntent(pendingIntentViewFile);
                         }
                         if (transfer_succeded || (!transfer_succeded && !self_canceled)) {
                             release("FileProgress", id, type, parameters, notification_id, builder);
@@ -221,8 +228,8 @@ class QtAndroidNotifications {
         return (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
-    private final static AtomicInteger unique_notification_id = new AtomicInteger(1); // 1 is reserved in ProtoxService.java
-    private final static AtomicInteger unique_pending_intent_id = new AtomicInteger(0);
+    private final static AtomicInteger unique_notification_id = new AtomicInteger(1); // 1 is reserved in PersistentNotification.java
+    private final static AtomicInteger unique_pending_intent_id = new AtomicInteger(1); // 1 is reserved in PersistentNotification.java
     private static int getUniqueNotificationID() {
         return unique_notification_id.incrementAndGet();
     }

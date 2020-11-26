@@ -339,7 +339,7 @@ void QmlCBridge::setConnStatus(int conn_status)
 	case TOX_CONNECTION_UDP: statusText = tr("Connected (UDP)."); break;
 	}
 
-	Native::updateProtoxServiceNotification(tr("Application is running"), statusText, conn_status > TOX_CONNECTION_NONE);
+	Native::updatePersistentNotification(tr("Application is running"), statusText, conn_status > TOX_CONNECTION_NONE);
 }
 
 int QmlCBridge::getConnStatus()
@@ -501,7 +501,7 @@ void QmlCBridge::createTimers()
 			QMetaObject::invokeMethod(component, "resetConnectionStatus");
 		}
 
-		Native::updateProtoxServiceNotification(tr("Application is running"), tr("Bootstrapping..."), false);
+		Native::updatePersistentNotification(tr("Application is running"), tr("Bootstrapping..."), false);
 		Toxcore::bootstrap_DHT(tox);
 	});
 	reconnection_timer->start();
@@ -565,7 +565,7 @@ int QmlCBridge::signInProfile(const QString &profile, bool create_new, const QSt
 		insertFriend(_friend.toUInt(), getFriendNickname(_friend.toUInt()));
 	}
 
-	Native::startProtoxService(tr("Application is running"), tr("Bootstrapping..."));
+	Native::updatePersistentNotification(tr("Application is running"), tr("Bootstrapping..."), false);
 
 	Tools::debug("Bootstrapping...");
 	Toxcore::bootstrap_DHT(tox);
@@ -646,7 +646,7 @@ void QmlCBridge::signOutProfile(bool remove)
 	file_messages.clear();
 	self_canceled_transfers.clear();
 
-	Native::stopProtoxService();
+	Native::clearPersistentNotification();
 }
 
 quint32 QmlCBridge::getToxNodesCount()
@@ -847,9 +847,9 @@ QString QmlCBridge::checkFileImage(const QString &path)
 	return Tools::checkFileImage(path);
 }
 
-void QmlCBridge::viewFile(const QString &path, const QString &type)
+bool QmlCBridge::viewFile(const QString &path, const QString &type)
 {
-	Native::viewFile(path, type);
+	return Native::viewFile(path, type);
 }
 
 quint32 QmlCBridge::acceptFile(quint32 friend_number, quint32 file_number)

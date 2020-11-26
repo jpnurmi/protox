@@ -18,6 +18,7 @@ Popup {
     bottomPadding: 0
     visible: false
     property bool dontSave: false
+
     // enable adjustTop only for this window
     Connections {
         target: window
@@ -32,6 +33,7 @@ Popup {
             }
         }
     }
+
     readonly property real shadowWidth: 32
     enter: Transition {
         NumberAnimation { property: "x"; from: settingsWindow.width + settingsWindow.shadowWidth; to: 0; easing.type: Easing.OutCubic }
@@ -39,6 +41,7 @@ Popup {
     exit: Transition {
         NumberAnimation { property: "x"; from: 0; to: settingsWindow.width + settingsWindow.shadowWidth; easing.type: Easing.OutCubic }
     }
+
     readonly property int sf_none: 0
     // slot 1 unused
     readonly property int sf_title: 1 << 1
@@ -52,25 +55,31 @@ Popup {
     readonly property int sf_password: 1 << 9
     readonly property int sf_button: 1 << 10
     readonly property int sf_acceptAction: 1 << 11
+
     FolderDialog {
         id: downloadsFolderDialog
+
         onAccepted: {
             settingsModel.setValueString("downloads_folder", bridge.uriToRealPath(folderUrl.toString()))
         }
     }
+
     MessageDialog {
         id: settingsAlertDialog
         visible: false
     }
+
     MessageDialog {
         id: settingsConfirmationDialog
         visible: false
         property string yesAction
         standardButtons: StandardButton.Yes | StandardButton.No
+
         onYes: {
             settingsModel.actions[yesAction]()
         }
     }
+
     function setProfileEncrypted (encrypted) {
         for (var i = 0; i < settingsModel.count; i++) {
             if (settingsModel.get(i).prop === "profile_encrypted") {
@@ -79,6 +88,7 @@ Popup {
             }
         }
     }
+
     function setAvailableNodes (count) {
         for (var i = 0; i < settingsModel.count; i++) {
             if (settingsModel.get(i).prop === "available_nodes") {
@@ -87,6 +97,7 @@ Popup {
             }
         }
     }
+
     RegExpValidator { id: default_validator; regExp: /.*/gm }
     RegExpValidator { id: hex_validator; regExp: /[0-9A-F]+/ }
     Utf8ByteLimitValidator { id: address_validator; length: safe_bridge().getHostnameMaxLength() }
@@ -94,6 +105,7 @@ Popup {
     IntValidator { id: absent_timer_interval_validator; bottom: 0; top: 10000 }
     IntValidator { id: proxy_port_validator; bottom: 1; top: 65535 }
     IntValidator { id: max_accept_file_size_validator; bottom: 0; top: 100 }
+
     Menu {
         id: changeProxyTypeMenu
         readonly property int margin: 25
@@ -103,6 +115,7 @@ Popup {
         y: (window.height - height) * 0.5
         z: z_menu
         modal: true
+
         ButtonGroup {
             id: proxyButtonsGroup
             buttons: proxyButtons.children
@@ -113,24 +126,29 @@ Popup {
                     }
                 }
             }
+
             onClicked: {
                 bridge.setSettingsValue("Toxcore", "proxy_type", 
                                         String(button.buttonNumber))
                 changeProxyTypeMenu.close()
             }
         }
+
         ColumnLayout {
             id: proxyButtons
+
             RadioButton {
                 Layout.fillWidth: true
                 readonly property int buttonNumber: 0
                 text: qsTr("None")
             }
+
             RadioButton {
                 Layout.fillWidth: true
                 readonly property int buttonNumber: 1
                 text: qsTr("HTTP")
             }
+
             RadioButton {
                 Layout.fillWidth: true
                 readonly property int buttonNumber: 2
@@ -138,35 +156,44 @@ Popup {
             }
         }
     }
+
     Component.onCompleted: {
         settingsModel.actions = {
             "randomize_nospam" : function () {
                 var hex_symbols = "0123456789ABCDEF"
                 var nospam = ""
+
                 for (var j = 0; j < 8; j++) {
                     nospam += hex_symbols.charAt(Math.floor(Math.random() * hex_symbols.length))
                 }
+
                 settingsModel.setValueString("no_spam_value", nospam)
             },
             "change_password" : function () {
                 var password = String(settingsModel.getValueString("password"))
                 var repeated_password = String(settingsModel.getValueString("repeated_password"))
+
                 if (password !== repeated_password) {
                     settingsAlertDialog.title = qsTr("Password change failed!")
                     settingsAlertDialog.text = qsTr("Password fields don't match.")
                     settingsAlertDialog.open()
                     return
                 }
+
                 bridge.setToxPassword(password)
                 bridge.saveProfile()
                 bridge.updateDataBasePassword(password)
+
                 toast.show({ message : qsTr("Password changed successfully!"), duration : Toast.Short })
+
                 var encrypted = password.length > 0
                 settingsWindow.setProfileEncrypted(encrypted)
+
                 if (encrypted) {
                     bridge.setSettingsValue("Profile", "auto_login_profile", String(""))
                     settingsModel.setValueNumber("auto_login_enabled", false)
                 }
+
                 settingsModel.setEnabled("auto_login_enabled", !encrypted)
                 settingsModel.setValueString("password", "")
                 settingsModel.setValueString("repeated_password", "")
@@ -195,6 +222,7 @@ Popup {
                 changeProxyTypeMenu.open()
             }
         }
+
         settingsModel.append({ flags: sf_title, name: qsTr("Tox options") })
         settingsModel.append({ flags: sf_title | sf_help | sf_warning, name: qsTr("These settings require client restart!") })
         settingsModel.append({ flags: sf_switch, name: qsTr("Enable UDP"), itemEnabled: true, prop: "udp_enabled", 
@@ -277,10 +305,12 @@ Popup {
     //property bool reloadChatHistory: false
     function _close() {
         drawer.dragEnabled = true
+
         if (dontSave) {
             dontSave = false
             return
         }
+
         bridge.setSettingsValue("Toxcore", "udp_enabled", Boolean(settingsModel.getValueNumber("udp_enabled")))
         bridge.setSettingsValue("Toxcore", "ipv6_enabled", Boolean(settingsModel.getValueNumber("ipv6_enabled")))
         bridge.setSettingsValue("Toxcore", "local_discovery_enabled", Boolean(settingsModel.getValueNumber("local_discovery_enabled")))
@@ -318,8 +348,13 @@ Popup {
         y: 0
         id: settingsOverlayHeader
         width: parent.width
+
         ToolButton {
             id: closeSettingsButton
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+
             Text {
                 text: "\uE629"
                 anchors.centerIn: parent
@@ -330,23 +365,24 @@ Popup {
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
             }
+
             onClicked: {
                 closeSettingsButton.highlighted = true
                 settingsWindow.close()
             }
-            anchors.left: parent.left
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
         }
+
         Label {
             id: settingsLabel
             anchors.centerIn: parent
             text: qsTr("Settings")
         }
     }
+
     ListModel {
         id: settingsModel
         property variant actions
+
         function getValueNumber(p) {
             for (var i = 0; i < count; i++) {
                 if (get(i).prop === p) {
@@ -354,6 +390,7 @@ Popup {
                 }
             }
         }
+
         function setValueNumber(p, v) {
             for (var i = 0; i < count; i++) {
                 if (get(i).prop === p) {
@@ -362,6 +399,7 @@ Popup {
                 }
             }
         }
+
         function getValueString(p) {
             for (var i = 0; i < count; i++) {
                 if (get(i).prop === p) {
@@ -369,6 +407,7 @@ Popup {
                 }
             }
         }
+
         function setValueString(p, sv) {
             for (var i = 0; i < count; i++) {
                 if (get(i).prop === p) {
@@ -377,6 +416,7 @@ Popup {
                 }
             }
         }
+
         function setEnabled(p, en) {
             for (var i = 0; i < count; i++) {
                 if (get(i).prop === p) {
@@ -386,6 +426,7 @@ Popup {
             }
         }
     }
+
     ListView {
         id: settingsList
         anchors.top: settingsOverlayHeader.bottom
@@ -403,6 +444,7 @@ Popup {
                                                       ? ((flags & settingsWindow.sf_warning) 
                                                       ? 12 : 14) : 24) : 56) * fontMetrics.getFontScaling()
             spacing: 0
+
             RowLayout {
                 width: parent.width
                 Text {
@@ -420,6 +462,7 @@ Popup {
                     color: (flags & settingsWindow.sf_title) ? 
                            ((flags & settingsWindow.sf_help) ? ((flags & settingsWindow.sf_warning) 
                                                              ? getUserTheme().settingsWarningColor : getTheme().primaryTextColor) : getUserTheme().settingsTitleColor) : getTheme().primaryTextColor
+
                     onContentWidthChanged: {
                         if (parent.parent.originalHeight >= contentHeight) {
                             parent.parent.height = parent.parent.originalHeight
@@ -431,14 +474,17 @@ Popup {
                         }
                     }
                 }
+
                 Loader {
                     Component { 
                         id: settingsSwitchComponent
+
                         Switch {
                             id: settingsSwitch
                             Layout.alignment: Qt.AlignRight
                             checked: nvalue
                             enabled: itemEnabled
+
                             Binding {
                                 target: settingsSwitch
                                 property: "checked"
@@ -449,11 +495,14 @@ Popup {
                             }
                         }
                     }
+
                     sourceComponent: (flags & settingsWindow.sf_switch) ? settingsSwitchComponent : undefined
                 }
+
                 Loader {
                     Component {
                         id: settingsTextInputComponent
+
                         TextField {
                             id: settingsTextInput
                             width: itemWidth
@@ -470,40 +519,50 @@ Popup {
                             passwordCharacter: "*"
                             validator: fieldValidator === undefined ? default_validator : fieldValidator
                             color: acceptableInput ? "black" : "red"
+
                             Binding {
                                 target: settingsTextInput
                                 property: "text"
                                 value: svalue
                             }
+
                             onAccepted: {
                                 if ((flags & settingsWindow.sf_mask) && !acceptableInput) {
                                     return
                                 }
+
                                 svalue = text
                                 focus = false
+
                                 if (flags & settingsWindow.sf_acceptAction) {
                                     settingsModel.actions[acceptAction]()
                                 }
                             }
+
                             onPressed: {
                                 if (!window.keyboardActive) {
                                     focus = false
                                 }
+
                                 forceActiveFocus()
                                 cursorPosition = positionAt(event.x, event.y)
+
                                 if (selectedText.length > 0) {
                                     deselect()
                                     cursorPosition = positionAt(event.x, event.y)
                                 }
+
                                 event.accepted = false
                             }
                         }
                     }
+
                     sourceComponent: (flags & settingsWindow.sf_input) ? settingsTextInputComponent : undefined
                 }
                 Loader {
                     Component {
                         id: settingsButtonComponent
+
                         Button {
                             rightInset: 15
                             rightPadding: rightInset * 1.5
@@ -511,9 +570,11 @@ Popup {
                             onClicked: settingsModel.actions[clickAction]()
                         }
                     }
+
                     sourceComponent: (flags & settingsWindow.sf_button) ? settingsButtonComponent : undefined
                 }
             }
+
             MenuSeparator { 
                 implicitWidth: parent.width
                 topPadding: 0

@@ -141,52 +141,43 @@ QString uriToRealPath(const QString &uriString)
 	return realPath;
 }
 
-void viewFile(const QString &path, const QString &type)
+bool viewFile(const QString &path, const QString &type)
 {
+	bool result;
 #if defined (Q_OS_ANDROID)
-	QtAndroid::runOnAndroidThread([=]() {
+	QtAndroid::runOnAndroidThreadSync([&]() {
 		QAndroidJniObject javaString = QAndroidJniObject::fromString(path);
 		QAndroidJniObject javaString2 = QAndroidJniObject::fromString(type);
-		QtAndroid::androidActivity().callMethod<void>("viewFile", 
-													  "(Ljava/lang/String;Ljava/lang/String;)V", 
+		result = QtAndroid::androidActivity().callMethod<jboolean>("viewFile", 
+													  "(Ljava/lang/String;Ljava/lang/String;)Z", 
 													  javaString.object(), javaString2.object());
 	});
 #endif
+	return result;
 }
 
-void startProtoxService(const QString &contentTitle, const QString &contentText)
+void updatePersistentNotification(const QString &contentTitle, const QString &contentText, bool connected)
 {
 #if defined (Q_OS_ANDROID)
-	QtAndroid::runOnAndroidThread([=]() {
-		QtAndroid::androidActivity().callMethod<void>("startProtoxService", "(Ljava/lang/String;Ljava/lang/String;)V", 
-													  QAndroidJniObject::fromString(contentTitle).object(),
-													  QAndroidJniObject::fromString(contentText).object());
-	});
+	// Z (aka Boolean in JNI) is not working but Ljava/lang/Boolean; works. Why?
+	QAndroidJniObject::callStaticMethod<void>(
+	"org/protox/persistent_notification/PersistentNotification",
+	"updatePersistentNotification",
+	"(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;)V", 
+				QtAndroid::androidActivity().object(),
+				QAndroidJniObject::fromString(contentTitle).object(),
+				QAndroidJniObject::fromString(contentText).object(),
+				QAndroidJniObjectTools::fromBool(connected).object());
 #endif
 }
 
-void stopProtoxService()
+void clearPersistentNotification()
 {
 #if defined (Q_OS_ANDROID)
-	QtAndroid::runOnAndroidThread([=]() {
-		QtAndroid::androidActivity().callMethod<void>("stopProtoxService", "()V");
-	});
-#endif
-}
-
-void updateProtoxServiceNotification(const QString &contentTitle, const QString &contentText, bool connected)
-{
-#if defined (Q_OS_ANDROID)
-	QtAndroid::runOnAndroidThread([=]() {
-		QAndroidJniObject::callStaticObjectMethod(
-		"org/protox/service/ProtoxService",
-		"updateServiceNotification",
-		"(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;)V", 
-					QtAndroid::androidActivity().object(),
-					QAndroidJniObject::fromString(contentTitle).object(),
-					QAndroidJniObject::fromString(contentText).object(),
-					QAndroidJniObjectTools::fromBool(connected).object());
-	});
+		QAndroidJniObject::callStaticMethod<void>(
+		"org/protox/persistent_notification/PersistentNotification",
+		"clearPersistentNotification",
+		"(Landroid/content/Context;)V", QtAndroid::androidActivity().object());
 #endif
 }
 

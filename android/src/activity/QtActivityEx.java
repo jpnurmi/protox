@@ -13,6 +13,7 @@ import android.content.ContentUris;
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.ActivityNotFoundException;
 import android.os.Bundle;
 import android.os.Build;
 import android.os.Environment;
@@ -33,7 +34,6 @@ import android.app.RemoteInput;
 
 // project
 import KeyboardProvider.KeyboardProvider;
-import org.protox.service.ProtoxService;
 
 // java
 import java.lang.String;
@@ -69,6 +69,8 @@ public class QtActivityEx extends QtActivity
                         } else {
                             transferCanceled(bundle.getInt("friendNumber"), bundle.getInt("fileNumber"));
                         }
+                    } else if (bundle.containsKey("viewFilePath")) {
+                        viewFile(bundle.getString("viewFilePath"), "*");
                     }
                     Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
                     if (remoteInput != null) {
@@ -290,28 +292,18 @@ public class QtActivityEx extends QtActivity
         return type;
     }
 
-    public void viewFile(String path, String type) {
+    public boolean viewFile(String path, String type) {
         if (type.equals("*")) {
             type = getMimeType(path);
         }
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_VIEW);
         intent.setDataAndType(Uri.parse("file://" + path), type);
-        startActivity(intent);
-    }
-
-    public void startProtoxService(String contentTitle, String contentText) {
-        Intent serviceIntent = new Intent(this, ProtoxService.class);
-        serviceIntent.putExtra("contentTitle", contentTitle);
-        serviceIntent.putExtra("contentText", contentText);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(serviceIntent);
-        } else {
-            startService(serviceIntent);
+        try{
+            startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            return false;
         }
-    }
-
-    public void stopProtoxService() {
-        stopService(new Intent(this, ProtoxService.class));
+        return true;
     }
 }
