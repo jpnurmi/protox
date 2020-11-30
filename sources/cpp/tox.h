@@ -176,7 +176,7 @@ typedef QFuture <void> ToxBootstrapingThread;
 namespace Toxcore {
 	struct Tox_Options *create_opts();
 	void destroy_opts(struct Tox_Options *opts);
-	QPair<Tox *, ToxProfileLoadingError> create_tox(bool create_new, const QString &password, const QString &profile, const Tox_Pass_Key *pass_key, Tox_Options *opts);
+	pair<Tox*, ToxProfileLoadingError> create_tox(bool create_new, const QString &password, const QString &profile, const Tox_Pass_Key *pass_key, Tox_Options *opts);
 	void destroy_tox(Tox *m);
 	QTimer *create_qtimer(Tox *m);
 	void bootstrap_DHT(Tox *m);
@@ -220,7 +220,7 @@ namespace Toxcore {
 	void cancel_all_file_transfers();
 	void cancel_all_file_transfers_for_friend(quint32 friend_number);
 	void iterate(Tox *m);
-	QPair<quint32, quint64> accept_file(quint32 friend_number, quint32 file_number);
+	pair<quint32, quint64> accept_file(quint32 friend_number, quint32 file_number);
 	void send_avatar_to_friend(Tox *m, quint32 friend_number, const QString &path);
 	void send_avatar_to_all_friends(Tox *m, const QString &path);
 	bool check_tox_file(const QString &path);

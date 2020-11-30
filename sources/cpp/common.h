@@ -7,8 +7,10 @@
 
 using std::unique_ptr;
 using std::make_unique;
+using std::pair;
 using std::optional;
 using std::nullopt;
+using std::tie;
 
 // Qt
 #include <QString>

@@ -106,10 +106,11 @@ void QmlCBridge::sendMessage(quint32 friend_number, const QString &message, bool
 	for (const auto &msg : splitMessage) {
 		bool failed;
 
-		ToxVariantMessage variantMessage;
-		variantMessage.insert("type", ToxVariantMessageType::TOXMSG_TEXT);
-		variantMessage.insert("message", msg);
-		variantMessage.insert("action", action);
+		ToxVariantMessage variantMessage = {
+			{ "type", ToxVariantMessageType::TOXMSG_TEXT },
+			{ "message", msg },
+			{ "action", action }
+		};
 
 		quint32 message_id = Toxcore::send_message(tox, friend_number, msg, action, failed);
 		quint64 new_unique_id = chat_db->insertMessage(variantMessage, dt, friend_pk, !keep_chat_history, true);
@@ -515,8 +516,8 @@ int QmlCBridge::signInProfile(const QString &profile, bool create_new, const QSt
 	updateToxPasswordKey();
 
 	tox_opts = Toxcore::create_opts();
-	auto [_tox, error] = Toxcore::create_tox(create_new, password, current_profile, tox_pass_key, tox_opts);
-	tox = _tox;
+	ToxProfileLoadingError error;
+	tie(tox, error) = Toxcore::create_tox(create_new, password, current_profile, tox_pass_key, tox_opts);
 
 	if (!tox) {
 		current_profile.clear();
@@ -772,29 +773,28 @@ QString QmlCBridge::uriToRealPath(const QString &uriString)
 	return Native::uriToRealPath(uriString);
 }
 
-quint32 QmlCBridge::sendFile(quint32 friend_number, const QString &filepath)
+quint32 QmlCBridge::sendFile(quint32 friend_number, const QString &file_path)
 {
 	quint64 filesize;
 	ToxFileId file_id;
 	quint32 error;
 	ToxFileTransfer *transfer = nullptr;
-	quint32 file_number = Toxcore::send_file(tox, friend_number, filepath, &transfer, filesize, file_id, error);
+	quint32 file_number = Toxcore::send_file(tox, friend_number, file_path, &transfer, filesize, file_id, error);
 
 	if (error > 0) {
 		return error;
 	}
 
 	QDateTime dt = QDateTime::currentDateTime();
-
-	ToxVariantMessage variantMessage;
-	variantMessage.insert("type", ToxVariantMessageType::TOXMSG_FILE);
-	variantMessage.insert("size", filesize);
-	variantMessage.insert("state", ToxFileState::TOX_FILE_REQUEST);
-	variantMessage.insert("file_id", file_id);
-	variantMessage.insert("file_path", filepath);
-	variantMessage.insert("file_number", file_number);
-	// ui only
-	variantMessage.insert("name", Tools::getFilenameFromPath(filepath));
+	ToxVariantMessage variantMessage = {
+		{ "type", ToxVariantMessageType::TOXMSG_FILE },
+		{ "size", filesize },
+		{ "state", ToxFileState::TOX_FILE_REQUEST },
+		{ "file_id", file_id },
+		{ "file_path", file_path },
+		{ "file_number", file_number },
+		{ "name", Tools::getFilenameFromPath(file_path) } // ui only
+	};
 
 	settings->beginGroup("Privacy");
 	bool keep_chat_history = settings->valued("keep_chat_history").toBool();
@@ -869,20 +869,23 @@ bool QmlCBridge::checkFileExists(const QString &path)
 
 void QmlCBridge::cancelFileNotification(quint32 friend_number, quint32 file_number)
 {
-	QVariantMap parameters;
-	parameters["fileNumber"] = file_number;
-	QVariantMap notificationParameters;
-	notificationParameters["type"] = QtNotification::FileRequest;
-	notificationParameters["id"] = friend_number;
-	notificationParameters["parameters"] = parameters;
+	QVariantMap parameters = {
+		{ "fileNumber", file_number }
+	};
+	QVariantMap notificationParameters = {
+		{ "type", QtNotification::FileRequest },
+		{ "id", friend_number },
+		{ "parameters", parameters }
+	};
 	notification->cancel(notificationParameters);
 }
 
 void QmlCBridge::cancelTextNotification(quint32 friend_number)
 {
-	QVariantMap notificationParameters;
-	notificationParameters["type"] = QtNotification::Text;
-	notificationParameters["id"] = friend_number;
+	QVariantMap notificationParameters = {
+		{ "type", QtNotification::Text },
+		{ "id", friend_number }
+	};
 	notification->cancel(notificationParameters);
 }
 
@@ -898,26 +901,26 @@ void QmlCBridge::createFileProgressNotification(quint32 friend_number, quint32 f
 {
 	for (const auto transfer : transfers) {
 		if (transfer->friend_number == friend_number && transfer->file_number == file_number) {
-			QVariantMap parameters;
-			parameters["fileNumber"] = file_number;
-
 			const QString file_path = transfer->manager->getFile()->fileName();
 			const QString friend_name = getFriendNickname(friend_number);
 			quint64 file_size = chat_db->getFileSize(file_messages[transfer], 
 													 Toxcore::get_friend_public_key(tox, friend_number));
 
-			parameters["filePath"] = file_path;
-			parameters["fileSize"] = file_size;
-			parameters["speedPrefix"] = tr("/s");
-			parameters["transferFinishedText"] = QString(tr("Transfer from %1 is finished")).arg(friend_name);
-			parameters["transferCanceledText"] = QString(tr("Transfer from %1 is canceled")).arg(friend_name);
-			QVariantMap notificationParameters;
-			notificationParameters["type"] = QtNotification::FileProgress;
-			notificationParameters["id"] = friend_number;
-			notificationParameters["parameters"] = parameters;
-			notificationParameters["caption"] = Tools::getFilenameFromPath(file_path) +
-					" (" + formatBytes(file_size) + ")";
-			notificationParameters["title"] = QString(tr("Transfering file from %1")).arg(friend_name);
+			QVariantMap parameters = {
+				{ "fileNumber", file_number },
+				{ "filePath", file_path },
+				{ "fileSize", file_size },
+				{ "speedPrefix", tr("/s") },
+				{ "transferFinishedText", QString(tr("Transfer from %1 is finished")).arg(friend_name) },
+				{ "transferCanceledText", QString(tr("Transfer from %1 is canceled")).arg(friend_name) }
+			};
+			QVariantMap notificationParameters = {
+				{ "type", QtNotification::FileProgress },
+				{ "id", friend_number },
+				{ "parameters", parameters },
+				{ "caption", Tools::getFilenameFromPath(file_path) + " (" + formatBytes(file_size) + ")" },
+				{ "title", QString(tr("Transfering file from %1")).arg(friend_name) }
+			};
 
 			notification->show(notificationParameters);
 			break;

@@ -607,7 +607,7 @@ bool save_data(Tox *m, const Tox_Pass_Key *pass_key, const QString &path)
 	return true;
 }
 
-static QPair<Tox *, ToxProfileLoadingError> load_tox(struct Tox_Options *options, const QString &path, const QString &password)
+static pair<Tox*, ToxProfileLoadingError> load_tox(struct Tox_Options *options, const QString &path, const QString &password)
 {
 	QFile file(path);
 	Tox *m = nullptr;
@@ -785,7 +785,7 @@ void destroy_opts(struct Tox_Options *opts)
 	tox_options_free(opts);
 }
 
-QPair<Tox *, ToxProfileLoadingError> create_tox(bool create_new, const QString &password, const QString &profile, const Tox_Pass_Key *pass_key, struct Tox_Options *opts)
+pair<Tox*, ToxProfileLoadingError> create_tox(bool create_new, const QString &password, const QString &profile, const Tox_Pass_Key *pass_key, struct Tox_Options *opts)
 {
 	QFile file(Tools::getProgDir() + profile);
 
@@ -1171,7 +1171,7 @@ void iterate(Tox *m)
 	tox_iterate(m, nullptr);
 }
 
-QPair<quint32, quint64> accept_file(quint32 friend_number, quint32 file_number)
+pair<quint32, quint64> accept_file(quint32 friend_number, quint32 file_number)
 {
 	for (const auto transfer : qmlbridge->transfers) {
 		if (transfer->friend_number == friend_number && transfer->file_number == file_number) {
