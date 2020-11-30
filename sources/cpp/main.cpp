@@ -47,47 +47,39 @@ void QmlCBridge::setComponent(QObject *_component)
 
 void QmlCBridge::insertMessage(const ToxVariantMessage &message, quint32 friend_number, const QDateTime &dt, bool self, quint64 unique_id, bool history, bool failed, bool preload)
 {
-	if (component) {
-		QMetaObject::invokeMethod(component, "insertMessage", 
-								  Q_ARG(QVariant, message), 
-								  Q_ARG(QVariant, friend_number), 
-								  Q_ARG(QVariant, self),
-								  Q_ARG(QVariant, dt.toString("d MMMM hh:mm:ss")),
-								  Q_ARG(QVariant, unique_id),
-								  Q_ARG(QVariant, failed),
-								  Q_ARG(QVariant, history),
-								  Q_ARG(QVariant, preload));
-	}
+	QMetaObject::invokeMethod(component, "insertMessage", 
+							  Q_ARG(QVariant, message), 
+							  Q_ARG(QVariant, friend_number), 
+							  Q_ARG(QVariant, self),
+							  Q_ARG(QVariant, dt.toString("d MMMM hh:mm:ss")),
+							  Q_ARG(QVariant, unique_id),
+							  Q_ARG(QVariant, failed),
+							  Q_ARG(QVariant, history),
+							  Q_ARG(QVariant, preload));
 }
 
 void QmlCBridge::insertFriend(qint32 friend_number, const QString &nickName, bool request, const QString &request_message, const ToxPk &friendToxId)
 {
-	if (component) {
-		QMetaObject::invokeMethod(component, "insertFriend",
-								  Q_ARG(QVariant, friend_number), 
-								  Q_ARG(QVariant, nickName), 
-								  Q_ARG(QVariant, request),
-								  Q_ARG(QVariant, request_message),
-								  Q_ARG(QVariant, ToxConverter::toString(friendToxId)));
-	}
+	QMetaObject::invokeMethod(component, "insertFriend",
+							  Q_ARG(QVariant, friend_number), 
+							  Q_ARG(QVariant, nickName), 
+							  Q_ARG(QVariant, request),
+							  Q_ARG(QVariant, request_message),
+							  Q_ARG(QVariant, ToxConverter::toString(friendToxId)));
 }
 
 void QmlCBridge::setMessageReceived(quint32 friend_number, quint64 unique_id)
 {
-	if (component) {
-		QMetaObject::invokeMethod(component, "setMessageReceived",
-								  Q_ARG(QVariant, friend_number), 
-								  Q_ARG(QVariant, unique_id));
-	}
+	QMetaObject::invokeMethod(component, "setMessageReceived",
+							  Q_ARG(QVariant, friend_number), 
+							  Q_ARG(QVariant, unique_id));
 }
 
 void QmlCBridge::setCurrentFriendConnStatus(quint32 friend_number, int conn_status)
 {
-	if (component) {
-		QMetaObject::invokeMethod(component, "setCurrentFriendConnStatus", 
-								  Q_ARG(QVariant, friend_number), 
-								  Q_ARG(QVariant, conn_status));
-	}
+	QMetaObject::invokeMethod(component, "setCurrentFriendConnStatus", 
+							  Q_ARG(QVariant, friend_number), 
+							  Q_ARG(QVariant, conn_status));
 }
 
 void QmlCBridge::sendMessage(quint32 friend_number, const QString &message, bool reply)
@@ -234,7 +226,7 @@ void QmlCBridge::copyTextToClipboard(QString text)
 
 void QmlCBridge::makeFriendRequest(const QString &toxId, const QString &friendMessage)
 {
-	int error = Toxcore::make_friend_request(tox, ToxConverter::toToxId(toxId), friendMessage);
+	quint32 error = Toxcore::make_friend_request(tox, ToxConverter::toToxId(toxId), friendMessage);
 	QMetaObject::invokeMethod(component, "sendFriendRequestStatus", Q_ARG(QVariant, error));
 }
 
@@ -495,9 +487,7 @@ void QmlCBridge::createTimers()
 
 		Tools::debug("Bootstrapping...");
 
-		if (component) {
-			QMetaObject::invokeMethod(component, "resetConnectionStatus");
-		}
+		QMetaObject::invokeMethod(component, "resetConnectionStatus");
 
 		Native::updatePersistentNotification(tr("Application is running"), tr("Bootstrapping..."), false);
 		Toxcore::bootstrap_DHT(tox);
@@ -1069,6 +1059,7 @@ int main(int argc, char *argv[])
 
 	QQmlContext *root = engine.rootContext();
 	root->setContextProperty("bridge", qmlbridge);
+
 	QtNotification::declareQML();
 	QtStatusBar::declareQML();
 	QtToast::declareQML();
@@ -1078,6 +1069,7 @@ int main(int argc, char *argv[])
 	QUtf8ByteLimitValidator::declareQML();
 	QZXing::registerQMLTypes();
 	QZXing::registerQMLImageProvider(engine);
+
 	qmlbridge->setTranslation(qmlbridge->getSystemLocale());
 	engine.load(url);
 	QObject *component = engine.rootObjects().first();

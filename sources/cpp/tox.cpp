@@ -459,7 +459,7 @@ pair<quint32, bool> send_message(Tox *m, quint32 friend_number, const QString &m
 	}
 }
 
-int make_friend_request(Tox *m, const ToxId &id, const QString &friendMessage)
+quint32 make_friend_request(Tox *m, const ToxId &id, const QString &friendMessage)
 {
 	TOX_ERR_FRIEND_ADD error;
 	QByteArray msgData(friendMessage.toUtf8());
