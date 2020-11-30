@@ -96,10 +96,11 @@ static void cb_friend_message(Tox *m, uint32_t friend_number, TOX_MESSAGE_TYPE t
 
 	QString message = QString::fromUtf8((char*)string, length);
 	ToxPk friend_pk = get_friend_public_key(m, friend_number);
-	ToxVariantMessage variantMessage;
-	variantMessage.insert("type", ToxVariantMessageType::TOXMSG_TEXT);
-	variantMessage.insert("message", message);
-	variantMessage.insert("action", type != TOX_MESSAGE_TYPE_NORMAL);
+	ToxVariantMessage variantMessage = {
+		{ "type", ToxVariantMessageType::TOXMSG_TEXT },
+		{ "message", message },
+		{ "action", type != TOX_MESSAGE_TYPE_NORMAL }
+	};
 	QDateTime dt = QDateTime::currentDateTime();
 
 	settings->beginGroup("Privacy");
@@ -314,14 +315,14 @@ static void cb_file_recv(Tox *m, uint32_t friend_number, uint32_t file_number, u
 			qmlbridge->transfers.push_back(transfer);
 
 			QDateTime dt = QDateTime::currentDateTime();
-			ToxVariantMessage variantMessage;
-			variantMessage.insert("type", ToxVariantMessageType::TOXMSG_FILE);
-			variantMessage.insert("size", (quint64)file_size);
-			variantMessage.insert("state", ToxFileState::TOX_FILE_REQUEST);
-			variantMessage.insert("file_path", new_path);
-			variantMessage.insert("file_number", file_number);
-			// ui only
-			variantMessage.insert("name", Tools::getFilenameFromPath(new_path));
+			ToxVariantMessage variantMessage = {
+				{ "type", ToxVariantMessageType::TOXMSG_FILE },
+				{ "size", (quint64)file_size},
+				{ "state", ToxFileState::TOX_FILE_REQUEST },
+				{ "file_path", new_path },
+				{ "file_number", file_number },
+				{ "name", Tools::getFilenameFromPath(new_path) } // ui only
+			};
 
 			settings->beginGroup("Privacy");
 			bool keep_chat_history = settings->valued("keep_chat_history").toBool();
@@ -369,7 +370,7 @@ void cb_file_recv_chunk(Tox *m, uint32_t friend_number, uint32_t file_number, ui
  * 
 */
 
-size_t get_friends_count(Tox *m)
+quint32 get_friends_count(Tox *m)
 {
 	return tox_self_get_friend_list_size(m);
 }
@@ -442,7 +443,7 @@ void set_status(Tox *m, quint32 status)
 	tox_self_set_status(m, (TOX_USER_STATUS)status);
 }
 
-quint32 send_message(Tox *m, quint32 friend_number, const QString &message, bool action, bool &failed)
+pair<quint32, bool> send_message(Tox *m, quint32 friend_number, const QString &message, bool action)
 {
 	TOX_ERR_FRIEND_SEND_MESSAGE err;
 	QByteArray encodedMessage = message.toUtf8();
@@ -451,13 +452,11 @@ quint32 send_message(Tox *m, quint32 friend_number, const QString &message, bool
 												 (uint8_t*)encodedMessage.data(), encodedMessage.size(), &err);
 
 	if (err > 0) {
-		failed = true;
 		Tools::debug("tox_friend_send_message failed with error number: " + QString::number(err));
+		return { message_id, true };
 	} else {
-		failed = false;
+		return { message_id, false };
 	}
-
-	return message_id;
 }
 
 int make_friend_request(Tox *m, const ToxId &id, const QString &friendMessage)
@@ -473,10 +472,11 @@ int make_friend_request(Tox *m, const ToxId &id, const QString &friendMessage)
 	return error;
 }
 
-quint32 add_friend(Tox *m, const ToxPk &friendPk, int *error)
+pair<quint32, quint32> add_friend(Tox *m, const ToxPk &friendPk)
 {
-	quint32 friend_number = tox_friend_add_norequest(m, (uint8_t*)friendPk.data(), (TOX_ERR_FRIEND_ADD*)error);
-	return friend_number;
+	TOX_ERR_FRIEND_ADD error;
+	quint32 friend_number = tox_friend_add_norequest(m, (uint8_t*)friendPk.data(), &error);
+	return { friend_number, error };
 }
 
 void delete_friend(Tox *m, quint32 friend_number)

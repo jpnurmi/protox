@@ -104,15 +104,13 @@ void QmlCBridge::sendMessage(quint32 friend_number, const QString &message, bool
 																Toxcore::get_message_max_length());
 
 	for (const auto &msg : splitMessage) {
-		bool failed;
-
 		ToxVariantMessage variantMessage = {
 			{ "type", ToxVariantMessageType::TOXMSG_TEXT },
 			{ "message", msg },
 			{ "action", action }
 		};
 
-		quint32 message_id = Toxcore::send_message(tox, friend_number, msg, action, failed);
+		auto [message_id, failed] = Toxcore::send_message(tox, friend_number, msg, action);
 		quint64 new_unique_id = chat_db->insertMessage(variantMessage, dt, friend_pk, !keep_chat_history, true);
 
 		insertMessage(variantMessage, friend_number, dt, true, new_unique_id, false, failed);
@@ -348,10 +346,9 @@ int QmlCBridge::getConnStatus()
 	return Toxcore::get_connection_status(tox);
 }
 
-int QmlCBridge::addFriend(const QString &friendToxIdHex)
+quint32 QmlCBridge::addFriend(const QString &friendToxIdHex)
 {
-	int error;
-	quint32 friend_number = Toxcore::add_friend(tox, ToxConverter::toToxId(friendToxIdHex), &error);
+	auto [friend_number, error] = Toxcore::add_friend(tox, ToxConverter::toToxId(friendToxIdHex));
 
 	if (error > 0) {
 		return error;
@@ -709,8 +706,7 @@ void QmlCBridge::sendPendingMessages(quint32 friend_number)
 		const ToxTextMessage msg = chat_db->getTextMessage(pending_messages[i].unique_id, 
 											  Toxcore::get_friend_public_key(tox, pending_messages[i].friend_number));
 
-		bool failed;
-		quint32 message_id = Toxcore::send_message(tox, pending_messages[i].friend_number, msg.message, msg.action, failed);
+		auto [message_id, failed] = Toxcore::send_message(tox, pending_messages[i].friend_number, msg.message, msg.action);
 
 		pending_messages[i].message_id = message_id;
 		pending_messages[i].failed = failed;
@@ -733,10 +729,9 @@ bool QmlCBridge::checkMessageInPendingList(quint32 friend_number, quint64 unique
 
 void QmlCBridge::resendMessage(quint32 friend_number, quint64 unique_id)
 {
-	bool failed;
 	const ToxTextMessage msg = chat_db->getTextMessage(unique_id, 
 										  Toxcore::get_friend_public_key(tox, friend_number));
-	quint32 message_id = Toxcore::send_message(tox, friend_number, msg.message, msg.action, failed);
+	auto [message_id, failed] = Toxcore::send_message(tox, friend_number, msg.message, msg.action);
 	pending_messages.push_back(ToxPendingMessage(message_id, unique_id, friend_number, failed, false));
 }
 

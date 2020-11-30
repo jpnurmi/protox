@@ -69,7 +69,7 @@ public slots:
 	Q_INVOKABLE void setStatus(quint32 status);
 	Q_INVOKABLE long getFriendsCount();
 	Q_INVOKABLE int getConnStatus();
-	Q_INVOKABLE int addFriend(const QString &friendToxIdHex);
+	Q_INVOKABLE quint32 addFriend(const QString &friendToxIdHex);
 	Q_INVOKABLE int getFriendStatus(quint32 friend_number);
 	Q_INVOKABLE QString getNospamValue();
 	Q_INVOKABLE void setNospamValue(const QString &nospam);
