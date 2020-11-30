@@ -607,7 +607,7 @@ bool save_data(Tox *m, const Tox_Pass_Key *pass_key, const QString &path)
 	return true;
 }
 
-static Tox *load_tox(struct Tox_Options *options, const QString &path, const QString &password, ToxProfileLoadingError &error)
+static QPair<Tox *, ToxProfileLoadingError> load_tox(struct Tox_Options *options, const QString &path, const QString &password)
 {
 	QFile file(path);
 	Tox *m = nullptr;
@@ -626,23 +626,19 @@ static Tox *load_tox(struct Tox_Options *options, const QString &path, const QSt
 
 		if (err != TOX_ERR_NEW_OK) {
 			Tools::debug("tox_new failed with error number: " + QString::number(err));
-			error = TOX_ERR_LOADING_NULL;
-			return nullptr;
+			return { nullptr, TOX_ERR_LOADING_NULL };
 		}
 
-		error = reset_proxy ? TOX_ERR_LOADING_OK_BUT_INVALID_PROXY : TOX_ERR_LOADING_OK;
-		return m;
+		return { m, reset_proxy ? TOX_ERR_LOADING_OK_BUT_INVALID_PROXY : TOX_ERR_LOADING_OK };
 	}
 
 	if (!file.size()) {
-		error = TOX_ERR_LOADING_NULL;
-		return nullptr;
+		return { nullptr, TOX_ERR_LOADING_NULL };
 	}
 
 	QByteArray data = file.readAll();
 	if (data.isEmpty()) {
-		error = TOX_ERR_LOADING_NULL;
-		return nullptr;
+		return { nullptr, TOX_ERR_LOADING_NULL };
 	}
 
 	QByteArray decrypted_data;
@@ -656,12 +652,10 @@ static Tox *load_tox(struct Tox_Options *options, const QString &path, const QSt
 			if (!tox_pass_decrypt((uint8_t*)data.data(), data.length(), 
 								  (uint8_t*)encodedPassword.data(), encodedPassword.length(), 
 								  (uint8_t*)decrypted_data.data(), nullptr)) {
-				error = TOX_ERR_LOADING_WRONG_PASSWORD;
-				return nullptr;
+				return { nullptr, TOX_ERR_LOADING_WRONG_PASSWORD };
 			}
 		} else {
-			error = TOX_ERR_LOADING_EMPTY_PASSWORD;
-			return nullptr;
+			return { nullptr, TOX_ERR_LOADING_EMPTY_PASSWORD };
 		}
 	}
 
@@ -687,12 +681,10 @@ static Tox *load_tox(struct Tox_Options *options, const QString &path, const QSt
 
 	if (err != TOX_ERR_NEW_OK) {
 		Tools::debug("tox_new failed with error number: " + QString::number(err));
-		error = TOX_ERR_LOADING_NULL;
-		return nullptr;
+		return { nullptr, TOX_ERR_LOADING_NULL };
 	}
 
-	error = reset_proxy ? TOX_ERR_LOADING_OK_BUT_INVALID_PROXY : TOX_ERR_LOADING_OK;
-	return m;
+	return { m, reset_proxy ? TOX_ERR_LOADING_OK_BUT_INVALID_PROXY : TOX_ERR_LOADING_OK };
 }
 
 quint32 get_nospam(Tox *m) 
@@ -793,25 +785,22 @@ void destroy_opts(struct Tox_Options *opts)
 	tox_options_free(opts);
 }
 
-Tox *create_tox(ToxProfileLoadingError &error, bool create_new, const QString &password, const QString &profile, const Tox_Pass_Key *pass_key, struct Tox_Options *opts)
+QPair<Tox *, ToxProfileLoadingError> create_tox(bool create_new, const QString &password, const QString &profile, const Tox_Pass_Key *pass_key, struct Tox_Options *opts)
 {
-	QFile f(Tools::getProgDir() + profile);
+	QFile file(Tools::getProgDir() + profile);
 
-	if (!create_new && !f.exists()) {
-		error = TOX_ERR_LOADING_NOT_EXISTS;
-		return nullptr;
+	if (!create_new && !file.exists()) {
+		return { nullptr, TOX_ERR_LOADING_NOT_EXISTS };
 	}
 
-	if (create_new && f.exists()) {
-		error = TOX_ERR_LOADING_ALREADY_EXISTS;
-		return nullptr;
+	if (create_new && file.exists()) {
+		return { nullptr, TOX_ERR_LOADING_ALREADY_EXISTS };
 	}
 
-	Tox *m = load_tox(opts, Tools::getProgDir() + profile, password, error);
+	auto [m, error] = load_tox(opts, Tools::getProgDir() + profile, password);
 
 	if (!m) {
-		// error is set inside load_tox
-		return nullptr;
+		return { m, error };
 	}
 
 	tox_callback_self_connection_status(m, cb_self_connection_change);
@@ -828,32 +817,32 @@ Tox *create_tox(ToxProfileLoadingError &error, bool create_new, const QString &p
 	tox_callback_file_recv(m, cb_file_recv);
 	tox_callback_file_recv_chunk(m, cb_file_recv_chunk);
 
-	if (!tox_self_get_status_message_size(m) && !f.exists()) {
+	if (!tox_self_get_status_message_size(m) && !file.exists()) {
 		const char *statusmsg = "Protox is here!";
 		tox_self_set_status_message(m, (uint8_t*)statusmsg, strlen(statusmsg), nullptr);
 	}
 
-	if (!tox_self_get_name_size(m) && !f.exists()) {
+	if (!tox_self_get_name_size(m) && !file.exists()) {
 		const char *username = "Protox";
 		tox_self_set_name(m, (uint8_t*)username, strlen(username), nullptr);
 	}
 
-	if (!f.exists()) {
+	if (!file.exists()) {
 		save_data(m, pass_key, Tools::getProgDir() + profile);
 	}
 
-	return m;
+	return { m, error };
 }
 
 bool check_profile_encrypted(const QString &profile)
 {
-	QFile f(Tools::getProgDir() + profile);
+	QFile file(Tools::getProgDir() + profile);
 
-	if (!f.open(QIODevice::ReadOnly)) {
+	if (!file.open(QIODevice::ReadOnly)) {
 		return false;
 	}
 
-	return tox_is_data_encrypted((uint8_t*)f.readAll().data());
+	return tox_is_data_encrypted((uint8_t*)file.readAll().data());
 }
 
 static void resend_all_file_chunks(Tox *m);
@@ -1130,7 +1119,7 @@ void cancel_all_file_transfers()
 	}
 }
 
-bool file_control(Tox *m, quint32 friend_number, quint32 file_number, quint32 control, quint64 &unique_id)
+optional<quint64> file_control(Tox *m, quint32 friend_number, quint32 file_number, quint32 control)
 {
 	TOX_ERR_FILE_CONTROL err;
 	tox_file_control(m, friend_number, file_number, (TOX_FILE_CONTROL)control, &err);
@@ -1140,7 +1129,7 @@ bool file_control(Tox *m, quint32 friend_number, quint32 file_number, quint32 co
 	} else {
 		for (const auto transfer : qmlbridge->transfers) {
 			if (transfer->friend_number == friend_number && transfer->file_number == file_number && !transfer->avatar) {
-				unique_id = qmlbridge->file_messages[transfer];
+				quint64 unique_id = qmlbridge->file_messages[transfer];
 
 				switch (control) {
 					case TOX_FILE_CONTROL_CANCEL: {
@@ -1155,26 +1144,26 @@ bool file_control(Tox *m, quint32 friend_number, quint32 file_number, quint32 co
 						qmlbridge->transfers.removeOne(transfer);
 
 						qmlbridge->cancelFileNotification(friend_number, file_number);
-						return true;
+						return unique_id;
 					}
 					case TOX_FILE_CONTROL_PAUSE: {
 						qmlbridge->getChatDB()->updateFileMessageState(unique_id, 
 														get_friend_public_key(m, friend_number), 
 														ToxFileState::TOX_FILE_PAUSED);
-						return true;
+						return unique_id;
 					}
 					case TOX_FILE_CONTROL_RESUME: {
 						qmlbridge->getChatDB()->updateFileMessageState(unique_id, 
 														get_friend_public_key(m, friend_number), 
 														ToxFileState::TOX_FILE_INPROGRESS);
-						return true;
+						return unique_id;
 					}
 				}
 			}
 		}
 	}
 
-	return err == 0;
+	return nullopt;
 }
 
 void iterate(Tox *m)
@@ -1182,24 +1171,24 @@ void iterate(Tox *m)
 	tox_iterate(m, nullptr);
 }
 
-quint32 acceptFile(quint32 friend_number, quint32 file_number, quint64 &unique_id)
+QPair<quint32, quint64> accept_file(quint32 friend_number, quint32 file_number)
 {
 	for (const auto transfer : qmlbridge->transfers) {
 		if (transfer->friend_number == friend_number && transfer->file_number == file_number) {
-			bool result;
+			bool success;
 			QMetaObject::invokeMethod(transfer->manager, "onFileTransferStarted", Qt::BlockingQueuedConnection, 
-									  Q_RETURN_ARG(bool, result));
+									  Q_RETURN_ARG(bool, success));
 
-			if (result) {
-				result = file_control(transfer->tox, transfer->friend_number, transfer->file_number, 
-									  TOX_FILE_CONTROL_RESUME, unique_id);
+			if (success) {
+				auto result = file_control(transfer->tox, transfer->friend_number, transfer->file_number, 
+									  TOX_FILE_CONTROL_RESUME);
 				if (result) {
-					return TOX_FILE_CONTROL_RESUME;
+					return { TOX_FILE_CONTROL_RESUME, result.value() };
 				} else {
-					return TOX_FILE_CONTROL_PAUSE;
+					return { TOX_FILE_CONTROL_PAUSE, result.value() };
 				}
 			} else {
-				unique_id = qmlbridge->file_messages[transfer];
+				quint64 unique_id = qmlbridge->file_messages[transfer];
 
 				TOX_ERR_FILE_CONTROL err;
 				tox_file_control(transfer->tox, transfer->friend_number, transfer->file_number, 
@@ -1213,12 +1202,12 @@ quint32 acceptFile(quint32 friend_number, quint32 file_number, quint64 &unique_i
 				qmlbridge->file_messages.remove(transfer);
 				qmlbridge->transfers.removeOne(transfer);
 
-				return TOX_FILE_CONTROL_CANCEL;
+				return { TOX_FILE_CONTROL_CANCEL, unique_id };
 			}
 		}
 	}
 
-	return false;
+	return { TOX_FILE_CONTROL_CANCEL, 0 };
 }
 
 void send_avatar_to_friend(Tox *m, quint32 friend_number, const QString &path)
@@ -1245,12 +1234,12 @@ void send_avatar_to_all_friends(Tox *m, const QString &path)
 
 bool check_tox_file(const QString &path)
 {
-	QFile f(path);
+	QFile file(path);
 
-	if (!f.open(QFile::ReadOnly))
+	if (!file.open(QFile::ReadOnly))
 		return false;
 
-	QByteArray data = f.read(8);
+	QByteArray data = file.read(8);
 
 	const quint8 tox_profile_header[] = { 0x0, 0x0, 0x0, 0x0, 0x1f, 0x1b, 0xed, 0x15 };
 	const quint8 tox_profile_header_encrypted[] = { 't', 'o', 'x', 'E', 's', 'a', 'v', 'e' };

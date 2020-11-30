@@ -176,7 +176,7 @@ typedef QFuture <void> ToxBootstrapingThread;
 namespace Toxcore {
 	struct Tox_Options *create_opts();
 	void destroy_opts(struct Tox_Options *opts);
-	Tox *create_tox(ToxProfileLoadingError &error, bool create_new, const QString &password, const QString &profile, const Tox_Pass_Key *pass_key, Tox_Options *opts);
+	QPair<Tox *, ToxProfileLoadingError> create_tox(bool create_new, const QString &password, const QString &profile, const Tox_Pass_Key *pass_key, Tox_Options *opts);
 	void destroy_tox(Tox *m);
 	QTimer *create_qtimer(Tox *m);
 	void bootstrap_DHT(Tox *m);
@@ -216,11 +216,11 @@ namespace Toxcore {
 	quint32 get_tox_public_key_size();
 	quint32 get_tox_max_hostname_length();
 	quint32 send_file(Tox *m, quint32 friend_number, const QString &path, ToxFileTransfer **transfer, quint64 &filesize, ToxFileId &file_id, quint32 &error, bool avatar = false);
-	bool file_control(Tox *m, quint32 friend_number, quint32 file_number, quint32 control, quint64 &unique_id);
+	optional<quint64> file_control(Tox *m, quint32 friend_number, quint32 file_number, quint32 control);
 	void cancel_all_file_transfers();
 	void cancel_all_file_transfers_for_friend(quint32 friend_number);
 	void iterate(Tox *m);
-	quint32 acceptFile(quint32 friend_number, quint32 file_number, quint64 &unique_id);
+	QPair<quint32, quint64> accept_file(quint32 friend_number, quint32 file_number);
 	void send_avatar_to_friend(Tox *m, quint32 friend_number, const QString &path);
 	void send_avatar_to_all_friends(Tox *m, const QString &path);
 	bool check_tox_file(const QString &path);

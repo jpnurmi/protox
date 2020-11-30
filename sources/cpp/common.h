@@ -3,8 +3,12 @@
 
 // C++
 #include <iostream>
+#include <optional>
+
 using std::unique_ptr;
 using std::make_unique;
+using std::optional;
+using std::nullopt;
 
 // Qt
 #include <QString>

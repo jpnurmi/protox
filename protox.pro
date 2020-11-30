@@ -1,5 +1,5 @@
 QT += quick sql androidextras
-CONFIG += c++14 qzxing_qml silent
+CONFIG += c++17 qzxing_qml silent
 
 # Generate git sha1 hash for version
 DEFINES += GIT_COMMIT_SHA1="\\\"$(shell git -C \""$$_PRO_FILE_PWD_"\" rev-parse --short HEAD)\\\""

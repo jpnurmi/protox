@@ -514,9 +514,9 @@ int QmlCBridge::signInProfile(const QString &profile, bool create_new, const QSt
 	setToxPassword(password);
 	updateToxPasswordKey();
 
-	ToxProfileLoadingError error;
 	tox_opts = Toxcore::create_opts();
-	tox = Toxcore::create_tox(error, create_new, password, current_profile, tox_pass_key, tox_opts);
+	auto [_tox, error] = Toxcore::create_tox(create_new, password, current_profile, tox_pass_key, tox_opts);
+	tox = _tox;
 
 	if (!tox) {
 		current_profile.clear();
@@ -532,7 +532,7 @@ int QmlCBridge::signInProfile(const QString &profile, bool create_new, const QSt
 	settings->endGroup();
 
 	//Tools::debug("My address: " + ToxConverter::toString(Toxcore::get_address(tox)));
-		chat_db = new ChatDataBase("chat_" + Tools::replaceFileExtension(current_profile, ".db"), profile_password);
+	chat_db = new ChatDataBase("chat_" + Tools::replaceFileExtension(current_profile, ".db"), profile_password);
 
 	// load config
 	settings->beginGroup("Client_" + current_profile);
@@ -818,14 +818,13 @@ void QmlCBridge::fileControlUpdateMessage(quint32 friend_number, quint64 unique_
 
 bool QmlCBridge::controlFile(quint32 friend_number, quint32 file_number, quint32 control)
 {
-	quint64 unique_id = 0;
-	bool success = Toxcore::file_control(tox, friend_number, file_number, control, unique_id);
+	auto result = Toxcore::file_control(tox, friend_number, file_number, control);
 
-	if (success) {
-		fileControlUpdateMessage(friend_number, unique_id, control, false);
+	if (result) {
+		fileControlUpdateMessage(friend_number, result.value(), control, false);
 	}
 
-	return success;
+	return result.has_value();
 }
 
 void QmlCBridge::changeFileProgress(quint32 friend_number, quint32 file_number, quint32 bytesTransfered, bool finished)
@@ -854,8 +853,7 @@ bool QmlCBridge::viewFile(const QString &path, const QString &type)
 
 quint32 QmlCBridge::acceptFile(quint32 friend_number, quint32 file_number)
 {
-	quint64 unique_id = 0;
-	quint32 control = Toxcore::acceptFile(friend_number, file_number, unique_id);
+	auto [control, unique_id] = Toxcore::accept_file(friend_number, file_number);
 	fileControlUpdateMessage(friend_number, unique_id, control, false);
 
 	cancelFileNotification(friend_number, file_number);
