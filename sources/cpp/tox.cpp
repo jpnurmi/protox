@@ -127,9 +127,8 @@ static void cb_friend_name(Tox *m, uint32_t friend_number, const uint8_t *name, 
 static void cb_friend_connection_change(Tox *m, uint32_t friend_number, TOX_CONNECTION connection_status, void *userdata)
 {
 	Q_UNUSED(userdata)
-	size_t size = tox_self_get_friend_list_size(m);
 
-	if (!size) {
+	if (!tox_self_get_friend_list_size(m)) {
 		return;
 	}
 
@@ -377,9 +376,7 @@ size_t get_friends_count(Tox *m)
 
 ToxFriends get_friends(Tox *m)
 {
-	size_t count = get_friends_count(m);
-
-	ToxFriends friends_list(count);
+	ToxFriends friends_list(get_friends_count(m));
 	tox_self_get_friend_list(m, &friends_list[0]);
 
 	return friends_list;
@@ -509,8 +506,7 @@ const QString get_nickname(Tox *m, bool toxPk)
 	name.resize(length);
 	tox_self_get_name(m, (uint8_t*)name.data());
 
-	QString nickname = QString::fromUtf8(name);
-	return nickname;
+	return QString::fromUtf8(name);
 }
 
 void set_nickname(Tox *m, const QString &nickname)
@@ -577,16 +573,15 @@ bool save_data(Tox *m, const Tox_Pass_Key *pass_key, const QString &path)
 	if (!file.open(QIODevice::WriteOnly))
 		return false;
 
-	size_t data_len = tox_get_savedata_size(m);
 	QByteArray data;
-	data.resize(data_len);
+	data.resize(tox_get_savedata_size(m));
 	tox_get_savedata(m, (uint8_t*)data.data());
 
 	QByteArray encryptedData;
-	encryptedData.resize(data_len + TOX_PASS_ENCRYPTION_EXTRA_LENGTH);
 
 	if (pass_key) {
-		if(!tox_pass_key_encrypt(pass_key, (uint8_t*)data.data(), data_len,
+		encryptedData.resize(data.length() + TOX_PASS_ENCRYPTION_EXTRA_LENGTH);
+		if(!tox_pass_key_encrypt(pass_key, (uint8_t*)data.data(), data.length(),
 								 (uint8_t*)encryptedData.data(), nullptr)) {
 			return false;
 		}
@@ -639,9 +634,7 @@ static Tox *load_tox(struct Tox_Options *options, const QString &path, const QSt
 		return m;
 	}
 
-	quint64 data_len = file.size();
-
-	if (data_len == 0) {
+	if (!file.size()) {
 		error = TOX_ERR_LOADING_NULL;
 		return nullptr;
 	}
@@ -653,13 +646,14 @@ static Tox *load_tox(struct Tox_Options *options, const QString &path, const QSt
 	}
 
 	QByteArray decrypted_data;
-	decrypted_data.resize(data_len - TOX_PASS_ENCRYPTION_EXTRA_LENGTH);
-	QByteArray encodedPassword = password.toUtf8();
-
 	bool encrypted = tox_is_data_encrypted((uint8_t*)data.data());
+
 	if (encrypted) {
-		if (!encodedPassword.isEmpty()) {
-			if (!tox_pass_decrypt((uint8_t*)data.data(), data_len, 
+		if (!password.isEmpty()) {
+			QByteArray encodedPassword = password.toUtf8();
+			decrypted_data.resize(data.length() - TOX_PASS_ENCRYPTION_EXTRA_LENGTH);
+
+			if (!tox_pass_decrypt((uint8_t*)data.data(), data.length(), 
 								  (uint8_t*)encodedPassword.data(), encodedPassword.length(), 
 								  (uint8_t*)decrypted_data.data(), nullptr)) {
 				error = TOX_ERR_LOADING_WRONG_PASSWORD;
@@ -802,14 +796,13 @@ void destroy_opts(struct Tox_Options *opts)
 Tox *create_tox(ToxProfileLoadingError &error, bool create_new, const QString &password, const QString &profile, const Tox_Pass_Key *pass_key, struct Tox_Options *opts)
 {
 	QFile f(Tools::getProgDir() + profile);
-	bool clean = !f.exists();
 
-	if (!create_new && clean) {
+	if (!create_new && !f.exists()) {
 		error = TOX_ERR_LOADING_NOT_EXISTS;
 		return nullptr;
 	}
 
-	if (create_new && !clean) {
+	if (create_new && f.exists()) {
 		error = TOX_ERR_LOADING_ALREADY_EXISTS;
 		return nullptr;
 	}
@@ -835,21 +828,17 @@ Tox *create_tox(ToxProfileLoadingError &error, bool create_new, const QString &p
 	tox_callback_file_recv(m, cb_file_recv);
 	tox_callback_file_recv_chunk(m, cb_file_recv_chunk);
 
-	size_t s_len = tox_self_get_status_message_size(m);
-
-	if (!s_len && clean) {
+	if (!tox_self_get_status_message_size(m) && !f.exists()) {
 		const char *statusmsg = "Protox is here!";
-		tox_self_set_status_message(m, (uint8_t*)statusmsg, strlen(statusmsg), NULL);
+		tox_self_set_status_message(m, (uint8_t*)statusmsg, strlen(statusmsg), nullptr);
 	}
 
-	size_t n_len = tox_self_get_name_size(m);
-
-	if (!n_len && clean) {
+	if (!tox_self_get_name_size(m) && !f.exists()) {
 		const char *username = "Protox";
-		tox_self_set_name(m, (uint8_t*)username, strlen(username), NULL);
+		tox_self_set_name(m, (uint8_t*)username, strlen(username), nullptr);
 	}
 
-	if (clean) {
+	if (!f.exists()) {
 		save_data(m, pass_key, Tools::getProgDir() + profile);
 	}
 
@@ -864,8 +853,7 @@ bool check_profile_encrypted(const QString &profile)
 		return false;
 	}
 
-	bool encrypted = tox_is_data_encrypted((uint8_t*)f.readAll().data());
-	return encrypted;
+	return tox_is_data_encrypted((uint8_t*)f.readAll().data());
 }
 
 static void resend_all_file_chunks(Tox *m);
@@ -996,7 +984,7 @@ static bool send_file_chunk(Tox *m, quint32 friend_number, quint32 file_number
 
 static void resend_all_file_chunks(Tox *m)
 {
-	for (const auto &transfer : qmlbridge->transfers) {
+	for (const auto transfer : qmlbridge->transfers) {
 		while (!transfer->chunks_buffer.isEmpty()) {
 			const ToxFileChunk &chunk = transfer->chunks_buffer.first();
 
