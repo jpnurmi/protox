@@ -140,9 +140,9 @@ static void cb_friend_connection_change(Tox *m, uint32_t friend_number, TOX_CONN
 
 		const QString avatar_path = qmlbridge->getSelfAvatarPath();
 		if (QFile::exists(avatar_path)) {
-			send_avatar_to_friend(m, friend_number, avatar_path);
+			send_file(m, friend_number, avatar_path, true);
 		} else {
-			send_avatar_to_friend(m, friend_number, "");
+			send_file(m, friend_number, "", true);
 		}
 	} else {
 		qmlbridge->removeNonFailedPendingMessages(friend_number);
@@ -1009,30 +1009,28 @@ static void file_transfer_end(Tox *m, quint32 friend_number, quint32 file_number
 	}
 }
 
-quint32 send_file(Tox *m, quint32 friend_number, const QString &path, ToxFileTransfer **transfer, quint64 &filesize, ToxFileId &file_id, quint32 &error, bool avatar)
+pair<ToxSentFile, ToxFileSendingError> send_file(Tox *m, quint32 friend_number, const QString &path, bool avatar)
 {
+	ToxSentFile sent_file;
 	unique_ptr<QFile> file;
-	bool remove_avatar = avatar && path.isEmpty();
-	
-	if (!remove_avatar) {
+
+	if (!(avatar && path.isEmpty())) {
 		file = make_unique<QFile>(path);
 	}
 
 	if (file && !file->open(QIODevice::ReadOnly)) {
-		error = TOX_ERR_SENDING_OPEN_FAILED;
-		return 0;
+		return { sent_file, TOX_ERR_SENDING_OPEN_FAILED };
 	}
 
 	if (file) {
-		filesize = file->size();
+		sent_file.file_size = file->size();
 	} else {
-		filesize = 0;
+		sent_file.file_size = 0;
 	}
 
-	if (file && avatar && filesize > TOX_AVATAR_MAX_CLIENT_SIZE) {
-		Tools::debug("Can't send avatar. File is too large: " + QString::number(filesize) + " > " + QString::number(TOX_AVATAR_MAX_CLIENT_SIZE));
-		error = TOX_ERR_SENDING_OTHER;
-		return 0;
+	if (file && avatar && sent_file.file_size > TOX_AVATAR_MAX_CLIENT_SIZE) {
+		Tools::debug("Can't send avatar. File is too large: " + QString::number(sent_file.file_size) + " > " + QString::number(TOX_AVATAR_MAX_CLIENT_SIZE));
+		return { sent_file, TOX_ERR_SENDING_OTHER };
 	}
 
 	QByteArray encodedFilename;
@@ -1040,21 +1038,22 @@ quint32 send_file(Tox *m, quint32 friend_number, const QString &path, ToxFileTra
 		encodedFilename = Tools::getFilenameFromPath(path).toUtf8();
 	}
 
-	file_id.resize(tox_file_id_length());
+	sent_file.file_id.resize(tox_file_id_length());
 
 	TOX_ERR_FILE_SEND err;
-	quint32 file_number = tox_file_send(m, friend_number, avatar ? TOX_FILE_KIND_AVATAR : TOX_FILE_KIND_DATA, filesize, (uint8_t*)file_id.data(), 
-				  (uint8_t*)encodedFilename.data(), encodedFilename.length(), &err);
+	quint32 file_number = tox_file_send(m, friend_number, avatar ? TOX_FILE_KIND_AVATAR : TOX_FILE_KIND_DATA, 
+										sent_file.file_size, (uint8_t*)sent_file.file_id.data(), 
+										(uint8_t*)encodedFilename.data(), encodedFilename.length(), &err);
 
 	if (err > 0) {
 		Tools::debug("tox_file_send file failed with error number: " + QString::number(err));
 	}
 
 	switch (err) {
-		case TOX_ERR_FILE_SEND_OK: error = TOX_ERR_SENDING_OK; break;
-		case TOX_ERR_FILE_SEND_FRIEND_NOT_CONNECTED: error = TOX_ERR_SENDING_FRIEND_OFFLINE; return 0;
-		case TOX_ERR_FILE_SEND_TOO_MANY: error = TOX_ERR_SENDING_TOO_MANY_REQUESTS; return 0;
-		default: error = TOX_ERR_SENDING_OTHER; return 0;
+		case TOX_ERR_FILE_SEND_OK: break;
+		case TOX_ERR_FILE_SEND_FRIEND_NOT_CONNECTED: return { sent_file, TOX_ERR_SENDING_FRIEND_OFFLINE };
+		case TOX_ERR_FILE_SEND_TOO_MANY: return { sent_file, TOX_ERR_SENDING_TOO_MANY_REQUESTS };
+		default: return { sent_file, TOX_ERR_SENDING_OTHER };
 	}
 
 	if (file) {
@@ -1064,15 +1063,15 @@ quint32 send_file(Tox *m, quint32 friend_number, const QString &path, ToxFileTra
 		QObject::connect(manager, &Tools::AsyncFileManager::fileTransferEnded, 
 						 &local_manager, &ToxLocalFileManager::onFileTransferEnded);
 
-		*transfer = new ToxFileTransfer(m, friend_number, file_number, avatar, manager);
-		qmlbridge->transfers.push_back(*transfer);
+		sent_file.transfer = new ToxFileTransfer(m, friend_number, file_number, avatar, manager);
+		qmlbridge->transfers.push_back(sent_file.transfer);
 	} 
 
-	if (remove_avatar) {
+	if (avatar && path.isEmpty()) {
 		Tools::debug("Removing avatar for friend: " + QString::number(friend_number) + ".");
 	}
 
-	return file_number;
+	return { sent_file, TOX_ERR_SENDING_OK };
 }
 
 void cancel_all_file_transfers_for_friend(quint32 friend_number)
@@ -1208,16 +1207,6 @@ pair<quint32, quint64> accept_file(quint32 friend_number, quint32 file_number)
 	return { TOX_FILE_CONTROL_CANCEL, 0 };
 }
 
-void send_avatar_to_friend(Tox *m, quint32 friend_number, const QString &path)
-{
-	ToxFileTransfer *transfer = nullptr;
-	quint64 file_size;
-	ToxFileId file_id;
-	quint32 error;
-	
-	send_file(m, friend_number, path, &transfer, file_size, file_id, error, true);
-}
-
 void send_avatar_to_all_friends(Tox *m, const QString &path)
 {
 	ToxFriends friends = get_friends(m);
@@ -1226,7 +1215,7 @@ void send_avatar_to_all_friends(Tox *m, const QString &path)
 			continue;
 		}
 
-		send_avatar_to_friend(m, _friend, path);
+		send_file(m, _friend, path, true);
 	}
 }
 

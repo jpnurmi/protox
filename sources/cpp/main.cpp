@@ -770,11 +770,7 @@ QString QmlCBridge::uriToRealPath(const QString &uriString)
 
 quint32 QmlCBridge::sendFile(quint32 friend_number, const QString &file_path)
 {
-	quint64 filesize;
-	ToxFileId file_id;
-	quint32 error;
-	ToxFileTransfer *transfer = nullptr;
-	quint32 file_number = Toxcore::send_file(tox, friend_number, file_path, &transfer, filesize, file_id, error);
+	auto [file_sent, error] = Toxcore::send_file(tox, friend_number, file_path);
 
 	if (error > 0) {
 		return error;
@@ -783,11 +779,11 @@ quint32 QmlCBridge::sendFile(quint32 friend_number, const QString &file_path)
 	QDateTime dt = QDateTime::currentDateTime();
 	ToxVariantMessage variantMessage = {
 		{ "type", ToxVariantMessageType::TOXMSG_FILE },
-		{ "size", filesize },
 		{ "state", ToxFileState::TOX_FILE_REQUEST },
-		{ "file_id", file_id },
+		{ "file_number", file_sent.file_number },
+		{ "size", file_sent.file_size },
+		{ "file_id", file_sent.file_id },
 		{ "file_path", file_path },
-		{ "file_number", file_number },
 		{ "name", Tools::getFilenameFromPath(file_path) } // ui only
 	};
 
@@ -796,7 +792,7 @@ quint32 QmlCBridge::sendFile(quint32 friend_number, const QString &file_path)
 	settings->endGroup();
 
 	quint64 unique_id = chat_db->insertMessage(variantMessage, dt, Toxcore::get_friend_public_key(tox, friend_number), !keep_chat_history, true);
-	file_messages[transfer] = unique_id;
+	file_messages[file_sent.transfer] = unique_id;
 	insertMessage(variantMessage, friend_number, dt, true, unique_id);
 
 	return 0;
