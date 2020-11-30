@@ -799,36 +799,34 @@ pair<Tox*, ToxProfileLoadingError> create_tox(bool create_new, const QString &pa
 
 	auto [m, error] = load_tox(opts, Tools::getProgDir() + profile, password);
 
-	if (!m) {
-		return { m, error };
-	}
+	if (m) {
+		tox_callback_self_connection_status(m, cb_self_connection_change);
+		tox_callback_friend_connection_status(m, cb_friend_connection_change);
+		tox_callback_friend_request(m, cb_friend_request);
+		tox_callback_friend_message(m, cb_friend_message);
+		tox_callback_friend_name(m, cb_friend_name);
+		tox_callback_friend_read_receipt(m, cb_friend_read_receipt);
+		tox_callback_friend_typing(m, cb_friend_typing);
+		tox_callback_friend_status_message(m, cb_friend_status_message);
+		tox_callback_friend_status(m, cb_friend_status);
+		tox_callback_file_chunk_request(m, cb_file_chunk_request);
+		tox_callback_file_recv_control(m, cb_file_recv_control_cb);
+		tox_callback_file_recv(m, cb_file_recv);
+		tox_callback_file_recv_chunk(m, cb_file_recv_chunk);
 
-	tox_callback_self_connection_status(m, cb_self_connection_change);
-	tox_callback_friend_connection_status(m, cb_friend_connection_change);
-	tox_callback_friend_request(m, cb_friend_request);
-	tox_callback_friend_message(m, cb_friend_message);
-	tox_callback_friend_name(m, cb_friend_name);
-	tox_callback_friend_read_receipt(m, cb_friend_read_receipt);
-	tox_callback_friend_typing(m, cb_friend_typing);
-	tox_callback_friend_status_message(m, cb_friend_status_message);
-	tox_callback_friend_status(m, cb_friend_status);
-	tox_callback_file_chunk_request(m, cb_file_chunk_request);
-	tox_callback_file_recv_control(m, cb_file_recv_control_cb);
-	tox_callback_file_recv(m, cb_file_recv);
-	tox_callback_file_recv_chunk(m, cb_file_recv_chunk);
+		if (!tox_self_get_status_message_size(m) && !file.exists()) {
+			const char *statusmsg = "Protox is here!";
+			tox_self_set_status_message(m, (uint8_t*)statusmsg, strlen(statusmsg), nullptr);
+		}
 
-	if (!tox_self_get_status_message_size(m) && !file.exists()) {
-		const char *statusmsg = "Protox is here!";
-		tox_self_set_status_message(m, (uint8_t*)statusmsg, strlen(statusmsg), nullptr);
-	}
+		if (!tox_self_get_name_size(m) && !file.exists()) {
+			const char *username = "Protox";
+			tox_self_set_name(m, (uint8_t*)username, strlen(username), nullptr);
+		}
 
-	if (!tox_self_get_name_size(m) && !file.exists()) {
-		const char *username = "Protox";
-		tox_self_set_name(m, (uint8_t*)username, strlen(username), nullptr);
-	}
-
-	if (!file.exists()) {
-		save_data(m, pass_key, Tools::getProgDir() + profile);
+		if (!file.exists()) {
+			save_data(m, pass_key, Tools::getProgDir() + profile);
+		}
 	}
 
 	return { m, error };
@@ -1263,7 +1261,7 @@ void ToxLocalFileManager::onFileChunkReady(void *parent, const QByteArray &data,
 {
 	ToxFileTransfer *parent_transfer = (ToxFileTransfer*)parent;
 
-	if (qmlbridge->transfers.indexOf(parent_transfer) > -1) {
+	if (qmlbridge->transfers.contains(parent_transfer)) {
 		if (parent_transfer->chunks_buffer.empty()) {
 			Toxcore::send_file_chunk(parent_transfer->tox, parent_transfer->friend_number, parent_transfer->file_number,
 							position, data);
