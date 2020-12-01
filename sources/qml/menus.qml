@@ -174,7 +174,11 @@ MessageDialog {
     property string friendPkHex: ""
 
     onYes: {
-        bridge.clearFriendChatHistory(currentFriendNumber, friendPkHex, keepActiveFileTransfers)
+        if (friendPkHex.length > 0) {
+            bridge.clearFriendChatHistory(friendPkHex, keepActiveFileTransfers)
+        } else if (currentFriendNumber !== -1) {
+            bridge.clearFriendChatHistory(currentFriendNumber, keepActiveFileTransfers)
+        }
 
         if (bridge.getCurrentFriendNumber() === currentFriendNumber) {
             messagesModel.clear()
