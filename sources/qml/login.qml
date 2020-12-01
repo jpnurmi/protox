@@ -207,7 +207,7 @@ Popup {
             anchors.top: parent.top
 
             Text {
-                text: "\uE732"
+                text: "\uE699"
                 anchors.centerIn: parent
                 font.family: themify.name
                 font.pointSize: 28
@@ -228,7 +228,7 @@ Popup {
             visible: importProfileButton.visible
             width: importProfileButton.width
             anchors.horizontalCenter: importProfileButton.horizontalCenter
-            anchors.horizontalCenterOffset: -3
+            anchors.horizontalCenterOffset: -2
             anchors.top: importProfileButton.bottom
             anchors.topMargin: -4
             color: importProfileButton.highlighted ? getTheme().highlightedButtonColor : "white"
