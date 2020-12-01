@@ -620,6 +620,10 @@ Boa sorte!</translation>
         <source>No application found for this file type.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Failed to resume a transfer.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>QAndroidPlatformTheme</name>

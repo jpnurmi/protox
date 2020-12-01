@@ -621,6 +621,10 @@ Click on the left button to open the friend list, then on «+» to add a new fri
         <source>No application found for this file type.</source>
         <translation>Не найдено приложения для данного типа файлов.</translation>
     </message>
+    <message>
+        <source>Failed to resume a transfer.</source>
+        <translation>Неудалось возобновить передачу.</translation>
+    </message>
 </context>
 <context>
     <name>QAndroidPlatformTheme</name>
