@@ -171,12 +171,9 @@ MessageDialog {
     visible: false
     property int currentFriendNumber: -1
     property bool keepActiveFileTransfers: false
-    property string friendPkHex: ""
 
     onYes: {
-        if (friendPkHex.length > 0) {
-            bridge.clearFriendChatHistory(friendPkHex, keepActiveFileTransfers)
-        } else if (currentFriendNumber !== -1) {
+        if (currentFriendNumber !== -1) {
             bridge.clearFriendChatHistory(currentFriendNumber, keepActiveFileTransfers)
         }
 
@@ -209,8 +206,7 @@ MessageDialog {
         var selected_friend_number = bridge.getCurrentFriendNumber()
 
         if (bridge.checkFriendHistoryExists(currentFriendNumber)) {
-            clearFriendHistoryDialog.currentFriendNumber = -1
-            clearFriendHistoryDialog.friendPkHex = bridge.getFriendPublicKeyHex(currentFriendNumber)
+            clearFriendHistoryDialog.currentFriendNumber = currentFriendNumber
             clearFriendHistoryDialog.keepActiveFileTransfers = false
             clearFriendHistoryDialog.open()
         }
@@ -439,7 +435,6 @@ Menu {
                 return
             }
 
-            clearFriendHistoryDialog.friendPkHex = ""
             clearFriendHistoryDialog.currentFriendNumber = friendInfoMenu.currentFriendNumber
             clearFriendHistoryDialog.keepActiveFileTransfers = true
             clearFriendHistoryDialog.open()
