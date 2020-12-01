@@ -62,9 +62,9 @@ static void cb_friend_request(Tox *m, const uint8_t *public_key, const uint8_t *
 	Q_UNUSED(m)
 	Q_UNUSED(userdata);
 
-	ToxPk pk((char*)public_key, tox_public_key_size());
+	ToxPk pk((char*)public_key);
 	// hint: friend_number is fake here
-	qmlbridge->insertFriend(0, ToxConverter::toString(pk), 
+	qmlbridge->insertFriend(0, pk.toToxString(), 
 							true, QString::fromUtf8((char*)data, length), pk);
 }
 
@@ -118,7 +118,7 @@ static void cb_friend_name(Tox *m, uint32_t friend_number, const uint8_t *name, 
 		// I replace newlines with spaces to not make a mess in UI
 		QString nickName = QString::fromUtf8((char*)name, length).replace("\n", " ");
 		if (nickName.isEmpty()) {
-			nickName = ToxConverter::toString(get_friend_public_key(m, friend_number));
+			nickName = get_friend_public_key(m, friend_number).toToxString();
 		}
 
 		qmlbridge->updateFriendNickName(friend_number, nickName);
@@ -230,7 +230,7 @@ static void cb_file_recv(Tox *m, uint32_t friend_number, uint32_t file_number, u
 	switch (kind) {
 		case TOX_FILE_KIND_AVATAR: {
 			const QString file_path = Tools::getAvatarsDir() + 
-					ToxConverter::toString(get_friend_public_key(m, friend_number));
+					get_friend_public_key(m, friend_number).toToxString();
 
 			auto file = make_unique<QFile>(file_path);
 			if (file->exists()) {
@@ -240,11 +240,11 @@ static void cb_file_recv(Tox *m, uint32_t friend_number, uint32_t file_number, u
 				}
 				QByteArray data = file->readAll();
 				
-				ToxFileId hash_local;
+				QByteArray hash_local;
 				hash_local.resize(tox_hash_length());
 				tox_hash((uint8_t*)hash_local.data(), (uint8_t*)data.data(), data.length());
 
-				ToxFileId hash;
+				QByteArray hash;
 				hash.resize(tox_file_id_length());
 
 				TOX_ERR_FILE_GET err;
@@ -386,7 +386,6 @@ ToxFriends get_friends(Tox *m)
 ToxPk get_friend_public_key(Tox *m, quint32 friend_number)
 {
 	ToxPk public_key;
-	public_key.resize(tox_public_key_size());
 
 	if(tox_friend_get_public_key(m, friend_number, (uint8_t*)public_key.data(), nullptr))
 		return public_key;
@@ -416,7 +415,7 @@ const QString get_friend_name(Tox *m, quint32 friend_number, bool publicKey)
 
 	if (!length) {
 		if (publicKey) {
-			return ToxConverter::toString(get_friend_public_key(m, friend_number));
+			return get_friend_public_key(m, friend_number).toToxString();
 		} else {
 			return QString();
 		}
@@ -459,14 +458,14 @@ pair<quint32, bool> send_message(Tox *m, quint32 friend_number, const QString &m
 	}
 }
 
-quint32 make_friend_request(Tox *m, const ToxId &id, const QString &friendMessage)
+quint32 make_friend_request(Tox *m, const ToxIdData &id, const QString &friendMessage)
 {
 	TOX_ERR_FRIEND_ADD error;
 	QByteArray msgData(friendMessage.toUtf8());
 	quint32 friend_number = tox_friend_add(m, (uint8_t*)id.data(), (uint8_t*)msgData.data(), msgData.length(), &error);
 
 	if (!error) {
-		qmlbridge->insertFriend(friend_number, ToxConverter::toString(get_friend_public_key(m, friend_number)));
+		qmlbridge->insertFriend(friend_number, get_friend_public_key(m, friend_number).toToxString());
 	}
 
 	return error;
@@ -493,13 +492,8 @@ const QString get_nickname(Tox *m, bool toxPk)
 {
 	size_t length = tox_self_get_name_size(m);
 
-	if (!length) {
-		QString result;
-		if (toxPk) {
-			result = ToxConverter::toString(get_address(m));
-			result.truncate(get_tox_public_key_size() * 2);
-		}
-		return result;
+	if (!length && toxPk) {
+		return ToxPk(get_address(m)).toToxString();
 	}
 
 	QByteArray name;
@@ -732,22 +726,22 @@ void bootstrap_DHT(Tox *m)
 
 			TOX_ERR_BOOTSTRAP err, err2;
 			tox_bootstrap_abort_checkpoint();
-			tox_bootstrap(m, ipv4.toUtf8().data(), (uint16_t)port, (uint8_t*)ToxConverter::toToxId(public_key).data(), &err);
+			tox_bootstrap(m, ipv4.toUtf8().data(), (uint16_t)port, (uint8_t*)ToxIdData::fromToxString(public_key).data(), &err);
 
 			if (use_ipv6 && ipv6 != "-") {
 				tox_bootstrap_abort_checkpoint();
-				tox_bootstrap(m, ipv6.toUtf8().data(), (uint16_t)port, (uint8_t*)ToxConverter::toToxId(public_key).data(), &err2);
+				tox_bootstrap(m, ipv6.toUtf8().data(), (uint16_t)port, (uint8_t*)ToxIdData::fromToxString(public_key).data(), &err2);
 			}
 
 			if (!tcp_ports.isEmpty()) {
 				for (const auto tcp_port : tcp_ports) {
 					TOX_ERR_BOOTSTRAP err3, err4;
 					tox_bootstrap_abort_checkpoint();
-					tox_add_tcp_relay(m, ipv4.toUtf8().data(), (uint16_t)tcp_port.toInt(), (uint8_t*)ToxConverter::toToxId(public_key).data(), &err3);
+					tox_add_tcp_relay(m, ipv4.toUtf8().data(), (uint16_t)tcp_port.toInt(), (uint8_t*)ToxIdData::fromToxString(public_key).data(), &err3);
 
 					if (use_ipv6 && ipv6 != "-") {
 						tox_bootstrap_abort_checkpoint();
-						tox_add_tcp_relay(m, ipv6.toUtf8().data(), (uint16_t)tcp_port.toInt(), (uint8_t*)ToxConverter::toToxId(public_key).data(), &err4);
+						tox_add_tcp_relay(m, ipv6.toUtf8().data(), (uint16_t)tcp_port.toInt(), (uint8_t*)ToxIdData::fromToxString(public_key).data(), &err4);
 					}
 				}
 			}
@@ -858,13 +852,10 @@ QTimer *create_qtimer(Tox *m)
 	return timer;
 }
 
-ToxId get_address(Tox *m)
+ToxIdData get_address(Tox *m)
 {
-	ToxId address;
-
-	address.resize(get_tox_address_size());
+	ToxIdData address(get_tox_address_size());
 	tox_self_get_address(m, (uint8_t*)address.data());
-
 	return address;
 }
 
@@ -1247,6 +1238,10 @@ bool check_tox_file(const QString &path)
 
 }
 
+/*
+ * Classes & Structures
+*/
+
 void ToxLocalFileManager::onFileChunkReady(void *parent, const QByteArray &data, quint64 position)
 {
 	ToxFileTransfer *parent_transfer = (ToxFileTransfer*)parent;
@@ -1267,17 +1262,33 @@ void ToxLocalFileManager::onFileTransferEnded(void *parent)
 	Toxcore::file_transfer_end(parent_transfer->tox, parent_transfer->friend_number, parent_transfer->file_number);
 }
 
-/*
- * String <-> ToxId converter
-*/
+ToxIdData::ToxIdData(int size) : QByteArray()
+{
+	resize(size);
+}
 
-namespace ToxConverter {
-	const ToxId toToxId(const QString &str)
-	{
-		return ToxId::fromHex(str.toLatin1().toUpper());
+QString ToxIdData::toToxString() const
+{
+	return toHex().toUpper();
+}
+
+ToxIdData ToxIdData::fromToxString(const QString &str)
+{
+	return fromHex(str.toLatin1().toUpper());
+}
+
+ToxPk::ToxPk() : ToxIdData(tox_public_key_size()) {}
+
+ToxPk::ToxPk(const ToxIdData &data) : ToxIdData(data) 
+{
+	if (data.length() > (int)tox_public_key_size()) {
+		truncate(tox_public_key_size());
 	}
-	const QString toString(const ToxId &user_id)
-	{
-		return QString(user_id.toHex().toUpper());
+}
+
+ToxPk::ToxPk(const QByteArray &data) : ToxIdData(data) 
+{
+	if (data.length() > (int)tox_public_key_size()) {
+		truncate(tox_public_key_size());
 	}
 }

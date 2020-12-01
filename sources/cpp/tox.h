@@ -10,9 +10,28 @@
 #include "deps/tox/toxencryptsave.h"
 
 typedef QVector <quint32> ToxFriends; 
-typedef QByteArray ToxPk;
-typedef QByteArray ToxId;
-typedef QByteArray ToxFileId;
+
+class ToxIdData : public QByteArray
+{
+public:
+	ToxIdData(int size);
+
+	QString toToxString() const;
+	static ToxIdData fromToxString(const QString &str);
+
+protected:
+	ToxIdData(const QByteArray &data) : QByteArray(data) {}
+	ToxIdData(const char *data, int size) : QByteArray(data, size) {}
+};
+
+class ToxPk : public ToxIdData
+{
+public:
+	ToxPk();
+	ToxPk(const ToxIdData &data);
+	ToxPk(const QByteArray &data);
+	ToxPk(const char *data) : ToxIdData(data, tox_public_key_size()) {}
+};
 
 #define TOX_AVATAR_MAX_CLIENT_SIZE 65536
 
@@ -178,8 +197,8 @@ struct ToxSentFile
 	quint32 file_number;
 	ToxFileTransfer *transfer;
 	quint64 file_size;
-	ToxFileId file_id; 
-};	
+	QByteArray file_id; 
+};
 
 namespace Toxcore {
 	struct Tox_Options *create_opts();
@@ -188,13 +207,13 @@ namespace Toxcore {
 	void destroy_tox(Tox *m);
 	QTimer *create_qtimer(Tox *m);
 	void bootstrap_DHT(Tox *m);
-	ToxId get_address(Tox *m);
+	ToxIdData get_address(Tox *m);
 	pair<quint32, bool> send_message(Tox *m, quint32 friend_number, const QString &message, bool action);
 	ToxPk get_friend_public_key(Tox *m, quint32 friend_number);
 	const QString get_friend_name(Tox *m, quint32 friend_number, bool publicKey = true);
 	quint32 get_friends_count(Tox *m);
 	ToxFriends get_friends(Tox *m);
-	quint32 make_friend_request(Tox *m, const ToxId &id, const QString &friendMessage);
+	quint32 make_friend_request(Tox *m, const ToxIdData &id, const QString &friendMessage);
 	int get_friend_status(Tox *m, quint32 friend_number);
 	quint32 get_friend_connection_status(Tox *m, quint32 friend_number);
 	pair<quint32, quint32> add_friend(Tox *m, const ToxPk &friendPk);
@@ -232,11 +251,6 @@ namespace Toxcore {
 	AcceptFileResult accept_file(quint32 friend_number, quint32 file_number);
 	void send_avatar_to_all_friends(Tox *m, const QString &path);
 	bool check_tox_file(const QString &path);
-}
-
-namespace ToxConverter {
-	const ToxId toToxId(const QString &str);
-	const QString toString(const ToxId &user_id);
 }
 
 #endif // TOX_H
