@@ -244,15 +244,16 @@ function chatScrollToEnd() {
     messages.scrollToEnd()
 }
 
-// This timer is a temporary solution.
 Timer {
-    id: scrollToEndAgainTimer
-    interval: 100
+    id: scrollToEndTimer
+    interval: 1
     repeat: false
     onTriggered: {
         if (!messages.atYEnd) {
             messages.scrollToEndWithTypingText()
         }
+        loadingBackground.visible = false
+        addTransitionEnableTimer.start()
     }
 }
 
@@ -292,15 +293,13 @@ function selectFriend(friend_number) {
 
     messages.addTransitionEnabled = false
     bridge.retrieveChatLog()
-    chatScrollToEnd()
-    addTransitionEnableTimer.start()
+    loadingBackground.visible = true
+    scrollToEndTimer.start()
     chatMessage.clear()
 
     if (each_friend_text[friend_number] !== undefined) {
         chatMessage.append(each_friend_text[friend_number])
     }
-
-    scrollToEndAgainTimer.start()
 }
 
 property int new_messages: 0
@@ -520,8 +519,8 @@ function signInProfile(profile, create, password, autoLogin) {
     // chat log
     messages.addTransitionEnabled = false
     bridge.retrieveChatLog()
-    messages.scrollToEnd()
-    addTransitionEnableTimer.start()
+    loadingBackground.visible = true
+    scrollToEndTimer.start()
     // menus
     myNickname.text = bridge.getNickname(false)
     myStatusMessage.text = bridge.getStatusMessage()
@@ -531,7 +530,6 @@ function signInProfile(profile, create, password, autoLogin) {
     settingsModel.setEnabled("auto_login_enabled", password.length === 0)
     settingsWindow.setProfileEncrypted(bridge.checkProfileEncrypted(profile))
     settingsWindow.setAvailableNodes(bridge.getToxNodesCount())
-    scrollToEndAgainTimer.start()
     return error
 }
 

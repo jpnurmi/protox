@@ -55,6 +55,13 @@ ColumnLayout {
             }
 
             Rectangle {
+                id: loadingBackground
+                anchors.fill: parent
+                visible: false
+                color: "white"
+            }
+
+            Rectangle {
                 id: typingText
                 height: 20
                 visible: false
@@ -1432,7 +1439,7 @@ ColumnLayout {
         onImplicitHeightChanged: {
             if (implicitHeight > 0) {
                 messages.scrollToEnd()
-                scrollToEndAgainTimer.start()
+                scrollToEndTimer.start()
             }
         }
     }

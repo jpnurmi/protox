@@ -328,16 +328,6 @@ Popup {
         bridge.setSettingsValue("Profile", "auto_login_profile", settingsModel.getValueNumber("auto_login_enabled") ? bridge.getCurrentProfile() : "")
         bridge.setNospamValue(settingsModel.getValueString("no_spam_value"))
         updateQRcode()
-        /*
-        if (reloadChatHistory) {
-            messages.addTransitionEnabled = false
-            bridge.retrieveChatLog()
-            chatScrollToEnd()
-            messages.addTransitionEnabled = true
-            reloadChatHistory = false
-            scrollToEndAgainTimer.start()
-        }
-        */
     }
 
     onClosed: {
