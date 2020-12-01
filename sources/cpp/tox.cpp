@@ -1041,7 +1041,7 @@ pair<ToxSentFile, ToxFileSendingError> send_file(Tox *m, quint32 friend_number, 
 	sent_file.file_id.resize(tox_file_id_length());
 
 	TOX_ERR_FILE_SEND err;
-	quint32 file_number = tox_file_send(m, friend_number, avatar ? TOX_FILE_KIND_AVATAR : TOX_FILE_KIND_DATA, 
+	sent_file.file_number = tox_file_send(m, friend_number, avatar ? TOX_FILE_KIND_AVATAR : TOX_FILE_KIND_DATA, 
 										sent_file.file_size, (uint8_t*)sent_file.file_id.data(), 
 										(uint8_t*)encodedFilename.data(), encodedFilename.length(), &err);
 
@@ -1063,7 +1063,7 @@ pair<ToxSentFile, ToxFileSendingError> send_file(Tox *m, quint32 friend_number, 
 		QObject::connect(manager, &Tools::AsyncFileManager::fileTransferEnded, 
 						 &local_manager, &ToxLocalFileManager::onFileTransferEnded);
 
-		sent_file.transfer = new ToxFileTransfer(m, friend_number, file_number, avatar, manager);
+		sent_file.transfer = new ToxFileTransfer(m, friend_number, sent_file.file_number, avatar, manager);
 		qmlbridge->transfers.push_back(sent_file.transfer);
 	} 
 
@@ -1168,7 +1168,7 @@ void iterate(Tox *m)
 	tox_iterate(m, nullptr);
 }
 
-pair<quint32, quint64> accept_file(quint32 friend_number, quint32 file_number)
+AcceptFileResult accept_file(quint32 friend_number, quint32 file_number)
 {
 	for (const auto transfer : qmlbridge->transfers) {
 		if (transfer->friend_number == friend_number && transfer->file_number == file_number) {
@@ -1179,10 +1179,11 @@ pair<quint32, quint64> accept_file(quint32 friend_number, quint32 file_number)
 			if (success) {
 				auto result = file_control(transfer->tox, transfer->friend_number, transfer->file_number, 
 									  TOX_FILE_CONTROL_RESUME);
+
 				if (result) {
-					return { TOX_FILE_CONTROL_RESUME, result.value() };
+					return AcceptFileResult({ TOX_FILE_CONTROL_RESUME, result.value() });
 				} else {
-					return { TOX_FILE_CONTROL_PAUSE, result.value() };
+					return nullopt;
 				}
 			} else {
 				quint64 unique_id = qmlbridge->file_messages[transfer];
@@ -1199,12 +1200,12 @@ pair<quint32, quint64> accept_file(quint32 friend_number, quint32 file_number)
 				qmlbridge->file_messages.remove(transfer);
 				qmlbridge->transfers.removeOne(transfer);
 
-				return { TOX_FILE_CONTROL_CANCEL, unique_id };
+				return AcceptFileResult({ TOX_FILE_CONTROL_CANCEL, unique_id });
 			}
 		}
 	}
 
-	return { TOX_FILE_CONTROL_CANCEL, 0 };
+	return nullopt;
 }
 
 void send_avatar_to_all_friends(Tox *m, const QString &path)

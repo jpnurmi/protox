@@ -900,7 +900,9 @@ ColumnLayout {
                                     onClicked: {
                                         var control = bridge.acceptFile(bridge.getCurrentFriendNumber(), 
                                                                         msgFilenumber)
-                                        if (control === fcontrol_pause) {
+                                        if (control === -1) {
+                                            toast.show({ message : qsTr("Failed to resume a transfer."), duration : Toast.Long })
+                                        } else if (control === fcontrol_cancel) {
                                             toast.show({ message : qsTr("Failed to open a file."), duration : Toast.Long })
                                         }
                                     }

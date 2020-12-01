@@ -228,7 +228,8 @@ namespace Toxcore {
 	void cancel_all_file_transfers();
 	void cancel_all_file_transfers_for_friend(quint32 friend_number);
 	void iterate(Tox *m);
-	pair<quint32, quint64> accept_file(quint32 friend_number, quint32 file_number);
+	typedef optional<pair<quint32, quint64>> AcceptFileResult;
+	AcceptFileResult accept_file(quint32 friend_number, quint32 file_number);
 	void send_avatar_to_all_friends(Tox *m, const QString &path);
 	bool check_tox_file(const QString &path);
 }

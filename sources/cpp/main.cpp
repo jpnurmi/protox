@@ -832,15 +832,22 @@ bool QmlCBridge::viewFile(const QString &path, const QString &type)
 	return Native::viewFile(path, type);
 }
 
-quint32 QmlCBridge::acceptFile(quint32 friend_number, quint32 file_number)
+int QmlCBridge::acceptFile(quint32 friend_number, quint32 file_number)
 {
-	auto [control, unique_id] = Toxcore::accept_file(friend_number, file_number);
-	fileControlUpdateMessage(friend_number, unique_id, control, false);
+	auto result = Toxcore::accept_file(friend_number, file_number);
+	
+	if (result) {
+		const auto &[control, unique_id] = result.value();
 
-	cancelFileNotification(friend_number, file_number);
-	createFileProgressNotification(friend_number, file_number);
+		fileControlUpdateMessage(friend_number, unique_id, control, false);
 
-	return control;
+		cancelFileNotification(friend_number, file_number);
+		createFileProgressNotification(friend_number, file_number);
+
+		return control;
+	}
+
+	return -1;
 }
 
 bool QmlCBridge::checkFileExists(const QString &path)
