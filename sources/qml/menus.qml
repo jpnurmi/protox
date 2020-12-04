@@ -183,8 +183,7 @@ MessageDialog {
             if (keepActiveFileTransfers) {
                 messages.addTransitionEnabled = false
                 bridge.retrieveChatLog()
-                chatScrollToEnd()
-                addTransitionEnableTimer.start()
+                scrollToEndTimer.start()
             }
         }
 

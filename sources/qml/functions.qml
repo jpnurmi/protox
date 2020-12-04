@@ -247,13 +247,12 @@ function chatScrollToEnd() {
 Timer {
     id: scrollToEndTimer
     interval: 1
-    repeat: false
+    repeat: !messages.atYEnd
     onTriggered: {
-        if (!messages.atYEnd) {
-            messages.scrollToEndWithTypingText()
+        messages.scrollToEndWithTypingText()
+        if (!messages.addTransitionEnabled) {
+            addTransitionEnableTimer.start()
         }
-        loadingBackground.visible = false
-        addTransitionEnableTimer.start()
     }
 }
 
@@ -293,7 +292,6 @@ function selectFriend(friend_number) {
 
     messages.addTransitionEnabled = false
     bridge.retrieveChatLog()
-    loadingBackground.visible = true
     scrollToEndTimer.start()
     chatMessage.clear()
 
@@ -519,7 +517,6 @@ function signInProfile(profile, create, password, autoLogin) {
     // chat log
     messages.addTransitionEnabled = false
     bridge.retrieveChatLog()
-    loadingBackground.visible = true
     scrollToEndTimer.start()
     // menus
     myNickname.text = bridge.getNickname(false)

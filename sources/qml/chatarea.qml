@@ -55,13 +55,6 @@ ColumnLayout {
             }
 
             Rectangle {
-                id: loadingBackground
-                anchors.fill: parent
-                visible: false
-                color: "white"
-            }
-
-            Rectangle {
                 id: typingText
                 height: 20
                 visible: false
