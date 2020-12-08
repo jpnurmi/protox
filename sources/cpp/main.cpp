@@ -84,7 +84,7 @@ void QmlCBridge::setCurrentFriendConnStatus(quint32 friend_number, int conn_stat
 
 void QmlCBridge::sendMessage(quint32 friend_number, const QString &message, bool reply)
 {
-	ToxPk friend_pk = Toxcore::get_friend_public_key(tox, friend_number);
+	ToxPk friend_pk = Toxcore::getFriendPublicKey(tox, friend_number);
 
 	settings->beginGroup("Privacy");
 	bool keep_chat_history = settings->valued("keep_chat_history").toBool();
@@ -93,7 +93,7 @@ void QmlCBridge::sendMessage(quint32 friend_number, const QString &message, bool
 	QDateTime dt = QDateTime::currentDateTime();
 	bool action = message.left(4).toLower() == "/me ";
 	const QStringList splitMessage = Tools::qstringSplitUnicode(action ? QString(message).remove(0, 4) : message, 
-																Toxcore::get_message_max_length());
+																Toxcore::getMessageMaxLength());
 
 	for (const auto &msg : splitMessage) {
 		ToxVariantMessage variantMessage = {
@@ -102,7 +102,7 @@ void QmlCBridge::sendMessage(quint32 friend_number, const QString &message, bool
 			{ "action", action }
 		};
 
-		auto [message_id, failed] = Toxcore::send_message(tox, friend_number, msg, action);
+		auto [message_id, failed] = Toxcore::sendMessage(tox, friend_number, msg, action);
 		quint64 new_unique_id = chat_db->insertMessage(variantMessage, dt, friend_pk, !keep_chat_history, true);
 
 		insertMessage(variantMessage, friend_number, dt, true, new_unique_id, false, failed);
@@ -117,7 +117,7 @@ quint32 QmlCBridge::getCurrentFriendNumber()
 
 int QmlCBridge::getFriendConnStatus(quint32 friend_number)
 {
-	return Toxcore::get_friend_connection_status(tox, friend_number);
+	return Toxcore::getFriendConnectionStatus(tox, friend_number);
 }
 
 const QString QmlCBridge::getFriendNickname(quint32 friend_number, bool publicKey)
@@ -125,14 +125,14 @@ const QString QmlCBridge::getFriendNickname(quint32 friend_number, bool publicKe
 	QString nickname;
 
 	settings->beginGroup("Client_" + current_profile);
-	nickname = settings->value("name_" + Toxcore::get_friend_public_key(tox, friend_number).toToxString(), "").toString();
+	nickname = settings->value("name_" + Toxcore::getFriendPublicKey(tox, friend_number).toToxString(), "").toString();
 	settings->endGroup();
 
 	if (!nickname.isEmpty()) {
 		return nickname;
 	}
 
-	return Toxcore::get_friend_name(tox, friend_number, publicKey);
+	return Toxcore::getFriendName(tox, friend_number, publicKey);
 }
 
 bool QmlCBridge::checkFriendCustomNickname(quint32 friend_number)
@@ -140,7 +140,7 @@ bool QmlCBridge::checkFriendCustomNickname(quint32 friend_number)
 	QString nickname;
 
 	settings->beginGroup("Client_" + current_profile);
-	nickname = settings->value("name_" + Toxcore::get_friend_public_key(tox, friend_number).toToxString(), "").toString();
+	nickname = settings->value("name_" + Toxcore::getFriendPublicKey(tox, friend_number).toToxString(), "").toString();
 	settings->endGroup();
 
 	return !nickname.isEmpty();
@@ -153,12 +153,12 @@ void QmlCBridge::setCurrentFriend(quint32 newFriend)
 
 const QString QmlCBridge::getFriendStatusMessage(quint32 friend_number)
 {
-	return Toxcore::get_friend_status_message(tox, friend_number);
+	return Toxcore::getFriendStatusMessage(tox, friend_number);
 }
 
 int QmlCBridge::getFriendStatus(quint32 friend_number)
 {
-	return Toxcore::get_friend_status(tox, friend_number);
+	return Toxcore::getFriendStatus(tox, friend_number);
 }
 
 bool QmlCBridge::checkRemainingMessages(quint32 start)
@@ -167,7 +167,7 @@ bool QmlCBridge::checkRemainingMessages(quint32 start)
 	quint32 limit = settings->valued("load_messages_limit").toUInt();
 	settings->endGroup();
 
-	quint64 count = chat_db->getFriendMessagesCount(Toxcore::get_friend_public_key(tox, current_friend_number), limit, start, true);
+	quint64 count = chat_db->getFriendMessagesCount(Toxcore::getFriendPublicKey(tox, current_friend_number), limit, start, true);
 	return count > 0;
 }
 
@@ -178,7 +178,7 @@ void QmlCBridge::retrieveChatLog(quint32 start, bool preload)
 							: settings->valued("last_messages_limit").toUInt();
 	settings->endGroup();
 
-	ToxMessages messages = chat_db->getFriendMessages(Toxcore::get_friend_public_key(tox, current_friend_number), 
+	ToxMessages messages = chat_db->getFriendMessages(Toxcore::getFriendPublicKey(tox, current_friend_number), 
 													  limit, start, preload);
 
 	if (!preload) {
@@ -226,20 +226,20 @@ void QmlCBridge::copyTextToClipboard(QString text)
 
 void QmlCBridge::makeFriendRequest(const QString &toxId, const QString &friendMessage)
 {
-	quint32 error = Toxcore::make_friend_request(tox, ToxIdData::fromToxString(toxId), friendMessage);
+	quint32 error = Toxcore::makeFriendRequest(tox, ToxIdData::fromToxString(toxId), friendMessage);
 	QMetaObject::invokeMethod(component, "sendFriendRequestStatus", Q_ARG(QVariant, error));
 }
 
 void QmlCBridge::deleteFriend(quint32 friend_number)
 {
-	Toxcore::cancel_all_file_transfers_for_friend(friend_number);
+	Toxcore::cancelAllFileTransfersForFriend(friend_number);
 	Toxcore::iterate(tox);
-	Toxcore::delete_friend(tox, friend_number);
+	Toxcore::deleteFriend(tox, friend_number);
 }
 
 void QmlCBridge::clearFriendChatHistory(quint32 friend_number, bool keep_active_file_transfers)
 {
-	chat_db->clearFriendChatHistory(Toxcore::get_friend_public_key(tox, friend_number), keep_active_file_transfers);
+	chat_db->clearFriendChatHistory(Toxcore::getFriendPublicKey(tox, friend_number), keep_active_file_transfers);
 }
 
 void QmlCBridge::updateFriendNickName(quint32 friend_number, const QString &nickname)
@@ -258,7 +258,7 @@ void QmlCBridge::setFriendTyping(quint32 friend_number, bool typing)
 
 void QmlCBridge::setTypingFriend(quint32 friend_number, bool typing)
 {
-	Toxcore::set_typing_friend(tox, friend_number, typing);
+	Toxcore::setFriendTyping(tox, friend_number, typing);
 }
 
 void QmlCBridge::setFriendStatusMessage(quint32 friend_number, const QString &message)
@@ -277,47 +277,47 @@ void QmlCBridge::setFriendStatus(quint32 friend_number, quint32 status)
 
 const QString QmlCBridge::getNickname(bool toxPk)
 {
-	return Toxcore::get_nickname(tox, toxPk);
+	return Toxcore::getNickname(tox, toxPk);
 }
 
 void QmlCBridge::setNickname(const QString &nickname)
 {
-	Toxcore::set_nickname(tox, nickname);
+	Toxcore::setNickname(tox, nickname);
 }
 
 const QString QmlCBridge::getStatusMessage()
 {
-	return Toxcore::get_status_message(tox);
+	return Toxcore::getStatusMessage(tox);
 }
 
 void QmlCBridge::setStatusMessage(const QString &statusMessage)
 {
-	Toxcore::set_status_message(tox, statusMessage);
+	Toxcore::setStatusMessage(tox, statusMessage);
 }
 
 int QmlCBridge::getStatus()
 {
-	return Toxcore::get_status(tox);
+	return Toxcore::getStatus(tox);
 }
 
 void QmlCBridge::setStatus(quint32 status)
 {
-	Toxcore::set_status(tox, status);
+	Toxcore::setStatus(tox, status);
 }
 
 QString QmlCBridge::getToxId()
 {
-	return Toxcore::get_address(tox).toToxString();
+	return Toxcore::getAddress(tox).toToxString();
 }
 
 long QmlCBridge::getFriendsCount()
 {
-	return Toxcore::get_friends_count(tox);
+	return Toxcore::getFriendsCount(tox);
 }
 
-void QmlCBridge::setConnStatus(int conn_status)
+void QmlCBridge::setConnectionStatus(int conn_status)
 {
-	QMetaObject::invokeMethod(component, "setConnStatus", Q_ARG(QVariant, conn_status));
+	QMetaObject::invokeMethod(component, "setConnectionStatus", Q_ARG(QVariant, conn_status));
 
 	QString statusText;
 	switch (conn_status) {
@@ -329,20 +329,20 @@ void QmlCBridge::setConnStatus(int conn_status)
 	Native::updatePersistentNotification(tr("Application is running"), statusText, conn_status > TOX_CONNECTION_NONE);
 }
 
-int QmlCBridge::getConnStatus()
+int QmlCBridge::getConnectionStatus()
 {
-	return Toxcore::get_connection_status(tox);
+	return Toxcore::getConnectionStatus(tox);
 }
 
 quint32 QmlCBridge::addFriend(const QString &friendToxIdHex)
 {
-	auto [friend_number, error] = Toxcore::add_friend(tox, ToxIdData::fromToxString(friendToxIdHex));
+	auto [friend_number, error] = Toxcore::addFriend(tox, ToxIdData::fromToxString(friendToxIdHex));
 
 	if (error > 0) {
 		return error;
 	}
 
-	insertFriend(friend_number, Toxcore::get_friend_name(tox, friend_number));
+	insertFriend(friend_number, Toxcore::getFriendName(tox, friend_number));
 	return 0;
 }
 
@@ -405,12 +405,12 @@ void QmlCBridge::setKeyboardAdjustMode(bool adjustNothing)
 
 bool QmlCBridge::checkProfileEncrypted(const QString &profile)
 {
-	return Toxcore::check_profile_encrypted(profile);
+	return Toxcore::checkProfileEncrypted(profile);
 }
 
 QString QmlCBridge::getNospamValue()
 {
-	quint32 nospam = Toxcore::get_nospam(tox);
+	quint32 nospam = Toxcore::getNospam(tox);
 	ToxIdData nospam_bytes(sizeof(quint32));
 	nospam_bytes[0] = (nospam >> 24) & 0xFF;
 	nospam_bytes[1] = (nospam >> 16) & 0xFF;
@@ -422,7 +422,7 @@ QString QmlCBridge::getNospamValue()
 void QmlCBridge::setNospamValue(const QString &nospam)
 {
 	ToxIdData bytes = ToxIdData::fromToxString(nospam);
-	Toxcore::set_nospam(tox, (quint8)bytes[0] << 24 | (quint8)bytes[1] << 16 | (quint8)bytes[2] << 8 | (quint8)bytes[3]);
+	Toxcore::setNospam(tox, (quint8)bytes[0] << 24 | (quint8)bytes[1] << 16 | (quint8)bytes[2] << 8 | (quint8)bytes[3]);
 }
 
 void QmlCBridge::setToxPassword(const QString &password)
@@ -433,18 +433,18 @@ void QmlCBridge::setToxPassword(const QString &password)
 void QmlCBridge::saveProfile()
 {
 	updateToxPasswordKey();
-	Toxcore::save_data(tox, tox_pass_key, Tools::getProgDir() + current_profile);
+	Toxcore::saveData(tox, tox_pass_key, Tools::getProgDir() + current_profile);
 }
 
 void QmlCBridge::updateToxPasswordKey()
 {
-	Toxcore::reset_pass_key(&tox_pass_key);
-	tox_pass_key = Toxcore::generate_pass_key(profile_password);
+	Toxcore::resetPasswordKey(&tox_pass_key);
+	tox_pass_key = Toxcore::generatePassKey(profile_password);
 }
 
 bool QmlCBridge::checkFriendHistoryExists(quint32 friend_number)
 {
-	return chat_db->getMessagesCountFriend(Toxcore::get_friend_public_key(tox, friend_number)) > 0;
+	return chat_db->getMessagesCountFriend(Toxcore::getFriendPublicKey(tox, friend_number)) > 0;
 }
 
 void QmlCBridge::updateDataBasePassword(const QString &password)
@@ -454,7 +454,7 @@ void QmlCBridge::updateDataBasePassword(const QString &password)
 
 const QString QmlCBridge::getToxcoreVersion()
 {
-	return Toxcore::get_version_string();
+	return Toxcore::getVersionString();
 }
 
 void QmlCBridge::tryReconnect()
@@ -464,7 +464,7 @@ void QmlCBridge::tryReconnect()
 
 void QmlCBridge::createTimers()
 {
-	toxcore_timer = Toxcore::create_qtimer(tox);
+	toxcore_timer = Toxcore::createQTimer(tox);
 	toxcore_timer->start();
 
 	settings->beginGroup("Client");
@@ -475,7 +475,7 @@ void QmlCBridge::createTimers()
 	reconnection_timer->setInterval(reconnection_interval);
 	reconnection_timer->setSingleShot(false);
 	QObject::connect(reconnection_timer, &QTimer::timeout, [=]() {
-		if (Toxcore::get_connection_status(tox) > 0) {
+		if (Toxcore::getConnectionStatus(tox) > 0) {
 			reconnection_timer->stop();
 			Tools::debug("Reconnection timer aborted: successfully connected!");
 			return;
@@ -483,10 +483,10 @@ void QmlCBridge::createTimers()
 
 		Tools::debug("Bootstrapping...");
 
-		QMetaObject::invokeMethod(component, "resetConnectionStatus");
+		QMetaObject::invokeMethod(component, "setConnectionStatus", Q_ARG(QVariant, -1));
 
 		Native::updatePersistentNotification(tr("Application is running"), tr("Bootstrapping..."), false);
-		Toxcore::bootstrap_DHT(tox);
+		Toxcore::bootstrapDHT(tox);
 	});
 	reconnection_timer->start();
 }
@@ -498,9 +498,9 @@ int QmlCBridge::signInProfile(const QString &profile, bool create_new, const QSt
 	setToxPassword(password);
 	updateToxPasswordKey();
 
-	tox_opts = Toxcore::create_opts();
+	tox_opts = Toxcore::createOptions();
 	ToxProfileLoadingError error;
-	tie(tox, error) = Toxcore::create_tox(create_new, password, current_profile, tox_pass_key, tox_opts);
+	tie(tox, error) = Toxcore::createTox(create_new, password, current_profile, tox_pass_key, tox_opts);
 
 	if (!tox) {
 		current_profile.clear();
@@ -523,11 +523,11 @@ int QmlCBridge::signInProfile(const QString &profile, bool create_new, const QSt
 
 	// load config
 	settings->beginGroup("Client_" + current_profile);
-	ToxPk friendPk = settings->value("last_friend", Toxcore::get_friend_public_key(tox, 0)).toByteArray();
+	ToxPk friendPk = settings->value("last_friend", Toxcore::getFriendPublicKey(tox, 0)).toByteArray();
 	QList <QVariant> friend_list = settings->value("friend_list", QList <QVariant>()).toList();
 	settings->endGroup();
 
-	ToxFriends friends = Toxcore::get_friends(tox);
+	ToxFriends friends = Toxcore::getFriends(tox);
 	for (auto _friend : friends) {
 		if (friend_list.lastIndexOf(_friend) < 0) {
 			friend_list.append(_friend);
@@ -541,7 +541,7 @@ int QmlCBridge::signInProfile(const QString &profile, bool create_new, const QSt
 
 	if (!friendPk.isEmpty()) {
 		for (auto _friend : friend_list) {
-			if (Toxcore::get_friend_public_key(tox, _friend.toUInt()) == friendPk) {
+			if (Toxcore::getFriendPublicKey(tox, _friend.toUInt()) == friendPk) {
 				current_friend_number = _friend.toUInt();
 				break;
 			}
@@ -555,7 +555,7 @@ int QmlCBridge::signInProfile(const QString &profile, bool create_new, const QSt
 	Native::updatePersistentNotification(tr("Application is running"), tr("Bootstrapping..."), false);
 
 	Tools::debug("Bootstrapping...");
-	Toxcore::bootstrap_DHT(tox);
+	Toxcore::bootstrapDHT(tox);
 	createTimers();
 
 	return error;
@@ -585,7 +585,7 @@ void QmlCBridge::signOutProfile(bool remove)
 	if (remove) {
 		settings->remove("");
 	} else {
-		settings->setValue("last_friend", Toxcore::get_friend_public_key(tox, current_friend_number));
+		settings->setValue("last_friend", Toxcore::getFriendPublicKey(tox, current_friend_number));
 		settings->setValue("friend_list", getFriendsModelOrder());
 	}
 	settings->endGroup();
@@ -600,14 +600,14 @@ void QmlCBridge::signOutProfile(bool remove)
 	}
 	settings->sync();
 
-	Toxcore::cancel_all_file_transfers();
+	Toxcore::cancelAllFileTransfers();
 	Toxcore::iterate(tox);
 
 	delete toxcore_timer;
 	delete reconnection_timer;
 
 	if (!remove) {
-		Toxcore::save_data(tox, tox_pass_key, Tools::getProgDir() + current_profile);
+		Toxcore::saveData(tox, tox_pass_key, Tools::getProgDir() + current_profile);
 	}
 
 	if (bootstrapping_thread.isRunning()) {
@@ -615,9 +615,9 @@ void QmlCBridge::signOutProfile(bool remove)
 		bootstrapping_thread.waitForFinished();
 	}
 
-	Toxcore::destroy_tox(tox);
-	Toxcore::reset_pass_key(&tox_pass_key);
-	Toxcore::destroy_opts(tox_opts);
+	Toxcore::destroyTox(tox);
+	Toxcore::resetPasswordKey(&tox_pass_key);
+	Toxcore::destroyOptions(tox_opts);
 
 	delete chat_db;
 	profile_password.clear();
@@ -638,37 +638,37 @@ void QmlCBridge::signOutProfile(bool remove)
 
 quint32 QmlCBridge::getToxNodesCount()
 {
-	return Toxcore::get_available_nodes();
+	return Toxcore::getAvailableNodes();
 }
 
 quint32 QmlCBridge::getFriendRequestMessageMaxLength()
 {
-	return Toxcore::get_friend_request_message_max_length();
+	return Toxcore::getFriendRequestMaxLength();
 }
 
 quint32 QmlCBridge::getNicknameMaxLength()
 {
-	return Toxcore::get_nickname_max_length();
+	return Toxcore::getNicknameMaxLength();
 }
 
 quint32 QmlCBridge::getStatusMessageMaxLength()
 {
-	return Toxcore::get_status_message_max_length();
+	return Toxcore::getStatusMessageMaxLength();
 }
 
 quint32 QmlCBridge::getToxAddressSizeHex()
 {
-	return Toxcore::get_tox_address_size() * 2;
+	return Toxcore::getToxAddressSize() * 2;
 }
 
 quint32 QmlCBridge::getToxPublicKeySizeHex()
 {
-	return Toxcore::get_tox_public_key_size() * 2;
+	return Toxcore::getToxPublicKeySize() * 2;
 }
 
 quint32 QmlCBridge::getHostnameMaxLength()
 {
-	return Toxcore::get_tox_max_hostname_length();
+	return Toxcore::getToxMaxHostnameLength();
 }
 
 QString QmlCBridge::getSystemLocale()
@@ -693,9 +693,9 @@ void QmlCBridge::sendPendingMessages(quint32 friend_number)
 		}
 	
 		const ToxTextMessage msg = chat_db->getTextMessage(pending_messages[i].unique_id, 
-											  Toxcore::get_friend_public_key(tox, pending_messages[i].friend_number));
+											  Toxcore::getFriendPublicKey(tox, pending_messages[i].friend_number));
 
-		auto [message_id, failed] = Toxcore::send_message(tox, pending_messages[i].friend_number, msg.message, msg.action);
+		auto [message_id, failed] = Toxcore::sendMessage(tox, pending_messages[i].friend_number, msg.message, msg.action);
 
 		pending_messages[i].message_id = message_id;
 		pending_messages[i].failed = failed;
@@ -719,8 +719,8 @@ bool QmlCBridge::checkMessageInPendingList(quint32 friend_number, quint64 unique
 void QmlCBridge::resendMessage(quint32 friend_number, quint64 unique_id)
 {
 	const ToxTextMessage msg = chat_db->getTextMessage(unique_id, 
-										  Toxcore::get_friend_public_key(tox, friend_number));
-	auto [message_id, failed] = Toxcore::send_message(tox, friend_number, msg.message, msg.action);
+										  Toxcore::getFriendPublicKey(tox, friend_number));
+	auto [message_id, failed] = Toxcore::sendMessage(tox, friend_number, msg.message, msg.action);
 	pending_messages.push_back(ToxPendingMessage(message_id, unique_id, friend_number, failed, false));
 }
 
@@ -749,7 +749,7 @@ void QmlCBridge::removeNonFailedPendingMessages(quint32 friend_number)
 
 void QmlCBridge::removeMessageFromDB(quint32 friend_number, quint64 unique_id)
 {
-	chat_db->removeMessage(unique_id, Toxcore::get_friend_public_key(tox, friend_number));
+	chat_db->removeMessage(unique_id, Toxcore::getFriendPublicKey(tox, friend_number));
 }
 
 QString QmlCBridge::uriToRealPath(const QString &uriString)
@@ -759,7 +759,7 @@ QString QmlCBridge::uriToRealPath(const QString &uriString)
 
 quint32 QmlCBridge::sendFile(quint32 friend_number, const QString &file_path)
 {
-	auto [file_sent, error] = Toxcore::send_file(tox, friend_number, file_path);
+	auto [file_sent, error] = Toxcore::sendFile(tox, friend_number, file_path);
 
 	if (error > 0) {
 		return error;
@@ -780,7 +780,7 @@ quint32 QmlCBridge::sendFile(quint32 friend_number, const QString &file_path)
 	bool keep_chat_history = settings->valued("keep_chat_history").toBool();
 	settings->endGroup();
 
-	quint64 unique_id = chat_db->insertMessage(variantMessage, dt, Toxcore::get_friend_public_key(tox, friend_number), !keep_chat_history, true);
+	quint64 unique_id = chat_db->insertMessage(variantMessage, dt, Toxcore::getFriendPublicKey(tox, friend_number), !keep_chat_history, true);
 	file_messages[file_sent.transfer] = unique_id;
 	insertMessage(variantMessage, friend_number, dt, true, unique_id);
 
@@ -798,7 +798,7 @@ void QmlCBridge::fileControlUpdateMessage(quint32 friend_number, quint64 unique_
 
 bool QmlCBridge::controlFile(quint32 friend_number, quint32 file_number, quint32 control)
 {
-	auto result = Toxcore::file_control(tox, friend_number, file_number, control);
+	auto result = Toxcore::fileControl(tox, friend_number, file_number, control);
 
 	if (result) {
 		fileControlUpdateMessage(friend_number, result.value(), control, false);
@@ -833,7 +833,7 @@ bool QmlCBridge::viewFile(const QString &path, const QString &type)
 
 int QmlCBridge::acceptFile(quint32 friend_number, quint32 file_number)
 {
-	auto result = Toxcore::accept_file(friend_number, file_number);
+	auto result = Toxcore::acceptFile(friend_number, file_number);
 	
 	if (result) {
 		const auto &[control, unique_id] = result.value();
@@ -891,7 +891,7 @@ void QmlCBridge::createFileProgressNotification(quint32 friend_number, quint32 f
 			const QString file_path = transfer->manager->getFile()->fileName();
 			const QString friend_name = getFriendNickname(friend_number);
 			quint64 file_size = chat_db->getFileSize(file_messages[transfer], 
-													 Toxcore::get_friend_public_key(tox, friend_number));
+													 Toxcore::getFriendPublicKey(tox, friend_number));
 
 			QVariantMap parameters = {
 				{ "fileNumber", file_number },
@@ -917,17 +917,17 @@ void QmlCBridge::createFileProgressNotification(quint32 friend_number, quint32 f
 
 QString QmlCBridge::getFriendPublicKeyHex(quint32 friend_number)
 {
-	return Toxcore::get_friend_public_key(tox, friend_number).toToxString();
+	return Toxcore::getFriendPublicKey(tox, friend_number).toToxString();
 }
 
 const QString QmlCBridge::getFriendAvatarPath(quint32 friend_number)
 {
-	return Tools::getAvatarsDir() + Toxcore::get_friend_public_key(tox, friend_number).toToxString();
+	return Tools::getAvatarsDir() + Toxcore::getFriendPublicKey(tox, friend_number).toToxString();
 }
 
 const QString QmlCBridge::getSelfAvatarPath()
 {
-	QString publicKey = ToxPk(Toxcore::get_address(tox)).toToxString();
+	QString publicKey = ToxPk(Toxcore::getAddress(tox)).toToxString();
 	return Tools::getAvatarsDir() + publicKey;
 }
 
@@ -952,7 +952,7 @@ void QmlCBridge::changeSelfAvatar(const QString &path)
 		scaledAvatar.save(avatarPath, "PNG");
 	}
 
-	Toxcore::send_avatar_to_all_friends(tox, avatarPath);
+	Toxcore::sendAvatarToAllFriends(tox, avatarPath);
 }
 
 const QSize QmlCBridge::getImageSize(const QString &path)
@@ -987,7 +987,7 @@ void QmlCBridge::scrollToEnd()
 
 QString QmlCBridge::importProfile(const QString &path)
 {
-	if (!Toxcore::check_tox_file(path)) {
+	if (!Toxcore::checkToxFile(path)) {
 		return QString();
 	}
 

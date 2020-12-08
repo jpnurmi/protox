@@ -27,7 +27,7 @@ public:
 	void setFriendTyping(quint32 friend_number, bool typing);
 	void setFriendStatusMessage(quint32 friend_number, const QString &message);
 	void setFriendStatus(quint32 friend_number, quint32 status);
-	void setConnStatus(int conn_status);
+	void setConnectionStatus(int conn_status);
 	QList<QVariant> getFriendsModelOrder();
 	void setKeyboardHeight(int height);
 	bool getAppInactive() { return app_inactive; }
@@ -68,7 +68,7 @@ public slots:
 	Q_INVOKABLE int getStatus();
 	Q_INVOKABLE void setStatus(quint32 status);
 	Q_INVOKABLE long getFriendsCount();
-	Q_INVOKABLE int getConnStatus();
+	Q_INVOKABLE int getConnectionStatus();
 	Q_INVOKABLE quint32 addFriend(const QString &friendToxIdHex);
 	Q_INVOKABLE int getFriendStatus(quint32 friend_number);
 	Q_INVOKABLE QString getNospamValue();

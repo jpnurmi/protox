@@ -460,10 +460,11 @@ function setCurrentFriendConnStatus(friend_number, conn_status) {
     }
 }
 
-function setConnStatus(conn_status) {
+function setConnectionStatus(status) {
     var text, color;
 
-    switch (conn_status) {
+    switch (status) {
+    case -1: text = qsTr("Bootstrapping..."); color = "orange"; break;
     case 0: text = qsTr("Connection lost"); color = "red"; break;
     case 1: text = qsTr("Connected (TCP)"); color = "green"; break;
     case 2: text = qsTr("Connected (UDP)"); color = "green"; break;
@@ -530,18 +531,12 @@ function signInProfile(profile, create, password, autoLogin) {
     return error
 }
 
-function resetConnectionStatus()
-{
-    connectionStatus.text = qsTr("Bootstrapping...")
-    connectionStatus.color = "orange"
-}
-
 function resetUI() {
     // the rest in signInProfile will be overwritten on login
     chatMessage.clear()
     each_friend_text = []
     friendsModel.clear()
-    resetConnectionStatus()
+    setConnectionStatus(-1)
     friendStatusIndicator.color = getUserTheme().offlineStatusColor
     new_messages = 0
     identiconModel.clear()

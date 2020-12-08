@@ -1368,7 +1368,7 @@ ColumnLayout {
                 }
 
                 function updateTyping() {
-                    if (bridge.getConnStatus() < 1) {
+                    if (bridge.getConnectionStatus() < 1) {
                         return
                     }
 
