@@ -374,13 +374,13 @@ void ChatDataBase::updatePassword(const QString &password)
 
 bool ChatDataBase::checkEncrypted()
 {
-	QFile f(db.databaseName());
+	QFile file(db.databaseName());
 
-	if (!f.open(QFile::ReadOnly)) {
+	if (!file.open(QFile::ReadOnly)) {
 		return false;
 	}
 
-	QByteArray data = f.read(15);
+	QByteArray data = file.read(15);
 	if (QString::fromLatin1(data) == "SQLite format 3") {
 		return false;
 	}
