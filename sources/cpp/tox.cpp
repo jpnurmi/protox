@@ -458,7 +458,7 @@ pair<quint32, bool> sendMessage(Tox *m, quint32 friend_number, const QString &me
 	}
 }
 
-quint32 makeFriendRequest(Tox *m, const ToxIdData &id, const QString &friendMessage)
+ToxResult makeFriendRequest(Tox *m, const ToxIdData &id, const QString &friendMessage)
 {
 	TOX_ERR_FRIEND_ADD error;
 	QByteArray msgData(friendMessage.toUtf8());
@@ -471,7 +471,7 @@ quint32 makeFriendRequest(Tox *m, const ToxIdData &id, const QString &friendMess
 	return error;
 }
 
-pair<quint32, quint32> addFriend(Tox *m, const ToxPk &friendPk)
+pair<quint32, ToxResult> addFriend(Tox *m, const ToxPk &friendPk)
 {
 	TOX_ERR_FRIEND_ADD error;
 	quint32 friend_number = tox_friend_add_norequest(m, (uint8_t*)friendPk.data(), &error);
@@ -564,8 +564,9 @@ bool saveData(Tox *m, const Tox_Pass_Key *pass_key, const QString &path)
 	}
 
 	QFile file(path);
-	if (!file.open(QIODevice::WriteOnly))
+	if (!file.open(QIODevice::WriteOnly)) {
 		return false;
+	}
 
 	QByteArray data;
 	data.resize(tox_get_savedata_size(m));

@@ -9,6 +9,7 @@
 #include "deps/tox/tox.h"
 #include "deps/tox/toxencryptsave.h"
 
+typedef quint32 ToxResult;
 typedef QVector <quint32> ToxFriends; 
 
 class ToxIdData : public QByteArray
@@ -213,10 +214,10 @@ namespace Toxcore {
 	const QString getFriendName(Tox *m, quint32 friend_number, bool publicKey = true);
 	quint32 getFriendsCount(Tox *m);
 	ToxFriends getFriends(Tox *m);
-	quint32 makeFriendRequest(Tox *m, const ToxIdData &id, const QString &friendMessage);
+	ToxResult makeFriendRequest(Tox *m, const ToxIdData &id, const QString &friendMessage);
 	int getFriendStatus(Tox *m, quint32 friend_number);
 	quint32 getFriendConnectionStatus(Tox *m, quint32 friend_number);
-	pair<quint32, quint32> addFriend(Tox *m, const ToxPk &friendPk);
+	pair<quint32, ToxResult> addFriend(Tox *m, const ToxPk &friendPk);
 	void deleteFriend(Tox *m, quint32 friend_number);
 	void setFriendTyping(Tox *m, quint32 friend_number, bool typing);
 	const QString getFriendStatusMessage(Tox *m, quint32 friend_number);
