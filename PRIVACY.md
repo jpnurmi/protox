@@ -1,3 +1,5 @@
+**Protox privacy policy**
+
 1. Protox uses libtoxcore (https://github.com/TokTok/c-toxcore) to provide instant messaging and audio/video conference functionality.
 
 2. Protox stores your Tox profile only on your device, it's not stored on any other server.
