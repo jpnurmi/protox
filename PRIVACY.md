@@ -8,9 +8,9 @@
 3. Protox stores the message and audio/video call logs only on your device, they are not stored on any other server.
 4. All the data sent over the network, including messages and audio/video calls, are sent encrypted in such a way that only the intended recepient can decrypt them.
 5. All the data sent over the network, including messages and audio/video calls, are sent directly to the intended recepient without use of any central server, with a few exceptions as follows.
-    5.1 Tox tries to establish a direct, peer-to-peer, connection with the recepients. In some cases it's not possible due to the network restrictions (restrictive NATs), in which case libtoxcore uses a relay node to relay all your conversations with a recepient. Note that by #4 the relay node can't decrypt contents of messages and audio/video calls, as the relay node is not the intended recepient of those.
+    5.1 Tox tries to establish a direct, peer-to-peer, connection with the recepients. In some cases it's not possible due to the network restrictions (restrictive NATs), in which case libtoxcore uses a relay node to relay all your conversations with a recepient. Note that by №4 the relay node can't decrypt contents of messages and audio/video calls, as the relay node is not the intended recepient of those.
 
-    5.2 If you have TCP mode enabled, your traffic is rounter though a relay node. Note that by #4 the relay node can't decrypt contents of messages and audio/video calls, as the relay node is not the intended recepient of those.
+    5.2 If you have TCP mode enabled, your traffic is rounter though a relay node. Note that by №4 the relay node can't decrypt contents of messages and audio/video calls, as the relay node is not the intended recepient of those.
 
     5.3 If you have specified a HTTP or SOCKS5 proxy, libtoxcore would relay the traffic using that proxy. Note that by #4 the proxy can't decrypt contents of messages and audio/video calls, as the proxy is not the intended recepient of those.
 6. libtoxcore doesn't route DNS traffic though a proxy.
