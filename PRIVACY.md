@@ -1,12 +1,10 @@
-Protox privacy policy:
-
 1. Protox uses libtoxcore (https://github.com/TokTok/c-toxcore) to provide instant messaging and audio/video conference functionality.
 
 2. Protox stores your Tox profile only on your device, it's not stored on any other server.
 
-    2.2 If someone gains an access to the Tox profile stored on your device, they can claim your identity on Tox. If you have selected a password for your Tox profile, the Tox profile would be stored encrypted with your password, which would mitigate the issue of someone claiming your identity on Tox by stealing the Tox profile file, assuming the attacker can't easily guess the password.
+    2.1 If someone gains an access to the Tox profile stored on your device, they can claim your identity on Tox. If you have selected a password for your Tox profile, the Tox profile would be stored encrypted with your password, which would mitigate the issue of someone claiming your identity on Tox by stealing the Tox profile file, assuming the attacker can't easily guess the password.
 
-    2.3 As a consequence of storing the profile only on the device, you can't restore your Tox profile if you lose it.
+    2.2 As a consequence of storing the profile only on the device, you can't restore your Tox profile if you lose it.
 3. Protox stores the message and audio/video call logs only on your device, they are not stored on any other server.
 4. All the data sent over the network, including messages and audio/video calls, are sent encrypted in such a way that only the intended recepient can decrypt them.
 5. All the data sent over the network, including messages and audio/video calls, are sent directly to the intended recepient without use of any central server, with a few exceptions as follows.
