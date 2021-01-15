@@ -1049,6 +1049,12 @@ int main(int argc, char *argv[])
 	Tools::debug("App started.");
 
 	QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+
+	// fixme: added workaround for qt bug https://bugreports.qt.io/browse/QTBUG-85577
+#ifdef Q_OS_ANDROID
+	QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::Round);
+#endif
+
 	QGuiApplication app(argc, argv);
 	// eleminate QML warnings
 	app.setOrganizationName("protox");
