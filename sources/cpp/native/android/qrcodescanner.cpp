@@ -10,9 +10,11 @@ QtQRCodeScanner::~QtQRCodeScanner()
 	delete m_activityResultReceiver;
 }
 
-void QtQRCodeScanner::open()
+bool QtQRCodeScanner::open()
 {
-	QtAndroid::runOnAndroidThread([=]() {
+	bool result;
+
+	QtAndroid::runOnAndroidThreadSync([&]() {
 		QAndroidJniObject intent = QAndroidJniObject::callStaticObjectMethod(
 		"org/protox/activity/QtActivityEx",
 		"createScanQRCodeIntent",
@@ -20,10 +22,13 @@ void QtQRCodeScanner::open()
 
 		if (intent.object()) {
 			QtAndroid::startActivity(intent, 12051978, m_activityResultReceiver);
+			result = true;
 		} else {
-			QtAndroid::androidActivity().callMethod<void>("browseForQRCodeScanner", "()V");
+			result = QtAndroid::androidActivity().callMethod<jboolean>("browseForQRCodeScanner", "()Z");
 		}
 	});
+
+	return result;
 }
 
 QtQRCodeScannerActivityResultReceiver::QtQRCodeScannerActivityResultReceiver(QtQRCodeScanner *qRCodeDialog)

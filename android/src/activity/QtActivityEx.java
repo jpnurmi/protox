@@ -154,10 +154,15 @@ public class QtActivityEx extends QtActivity
         }
     }
 
-    public void browseForQRCodeScanner() {
-        Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
-        Intent marketIntent = new Intent(Intent.ACTION_VIEW, marketUri);
-        startActivity(marketIntent);
+    public boolean browseForQRCodeScanner() {
+        try {
+            Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
+            Intent marketIntent = new Intent(Intent.ACTION_VIEW, marketUri);
+            startActivity(marketIntent);
+            return true;
+        } catch (ActivityNotFoundException e) {
+            return false;
+        }
     }
 
     public static Intent createChooseFolderIntent() {

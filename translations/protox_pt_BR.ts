@@ -624,6 +624,10 @@ Boa sorte!</translation>
         <source>Failed to resume a transfer.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Your device doesn&apos;t have any app store installed (e.g. Google Play, F-Droid).</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>QAndroidPlatformTheme</name>

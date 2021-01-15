@@ -78,7 +78,10 @@ Menu {
         rightInset: leftInset
         text: qsTr("Scan QR code")
         onClicked: {
-            toxIDCodeScanner.open()
+            if (!toxIDCodeScanner.open()) {
+                toast.show({ message : qsTr("Your device doesn't have any app store installed (e.g. Google Play, F-Droid)."), duration : Toast.Long })
+                Qt.openUrlExternally("https://play.google.com/store/apps/details?id=com.google.zxing.client.android")
+            }
         }
     }
 

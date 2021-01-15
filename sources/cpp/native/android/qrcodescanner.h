@@ -13,7 +13,7 @@ class QtQRCodeScanner : public QObject
 public:
 	explicit QtQRCodeScanner();
 	~QtQRCodeScanner();
-	Q_INVOKABLE void open();
+	Q_INVOKABLE bool open();
 
 	QString getResult() { return m_result; }
 	void setResult(const QString &result) { m_result = result; }

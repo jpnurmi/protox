@@ -625,6 +625,10 @@ Click on the left button to open the friend list, then on «+» to add a new fri
         <source>Failed to resume a transfer.</source>
         <translation>Неудалось возобновить передачу.</translation>
     </message>
+    <message>
+        <source>Your device doesn&apos;t have any app store installed (e.g. Google Play, F-Droid).</source>
+        <translation>На вашем устройстве не установлено ни одного магазина приложений (например: Google Play, F-Droid).</translation>
+    </message>
 </context>
 <context>
     <name>QAndroidPlatformTheme</name>
