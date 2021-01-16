@@ -58,13 +58,6 @@
             <meta-data android:name="android.app.extract_android_style" android:value="full"/>
             <!-- extract android style -->
     </activity>
-    <service android:name=".service.ProtoxService" android:stopWithTask="false">
-        <!-- Background running -->
-        <meta-data android:name="android.app.background_running" android:value="true"/>
-        <!-- Background running -->
-        <meta-data android:name="android.app.lib_name" android:value="-- %%INSERT_APP_LIB_NAME%% --"/>
-    </service>
-
     </application>
 
 
@@ -78,7 +71,5 @@
     <!-- The following comment will be replaced upon deployment with default features based on the dependencies of the application.
          Remove the comment if you do not require these default features. -->
     <!-- %%INSERT_FEATURES -->
-
-<uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
 </manifest>
