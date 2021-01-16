@@ -65,6 +65,10 @@ JFUNC(jboolean, checkFileTransferSelfCanceled, jint friend_number, jint file_num
 
 JFUNC(void, messageReplied, jint friend_number, jstring quote_text, jstring reply_text)
 {
+	if (!qmlbridge) {
+		return;
+	}
+
 	QAndroidJniObject javaQuoteString("java/lang/String", "(Ljava/lang/String;)V", quote_text);
 	QAndroidJniObject javaReplyString("java/lang/String", "(Ljava/lang/String;)V", reply_text);
 
