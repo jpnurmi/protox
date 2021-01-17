@@ -398,8 +398,9 @@ const QString getFriendStatusMessage(Tox *m, quint32 friend_number)
 	TOX_ERR_FRIEND_QUERY query_error;
 	size_t length = tox_friend_get_status_message_size(m, friend_number, &query_error);
 
-	if (!length || query_error > 0)
+	if (!length || query_error > 0) {
 		return QString();
+	}
 
 	QByteArray message;
 	message.resize(length);
@@ -531,8 +532,9 @@ const QString getStatusMessage(Tox *m)
 {
 	size_t length = tox_self_get_status_message_size(m);
 
-	if (!length)
+	if (!length) {
 		return QString();
+	}
 
 	QByteArray name;
 	name.resize(length);
