@@ -156,3 +156,10 @@ v1.6.3beta
 - The "Enable UDP" option is now off by default for new users.
 - Fixed a possible crash in file notifications when a file transfer finishes.
 - Added ability to view the file when a user clicks on the file notification.
+
+v1.6.4beta
+
+- Added workaround for Qt bug: application window does not cover entire screen on some android devices.
+- Fixed application crash when no app store for downloading barcode scanner is found, in that case, the application opens a link in web browser instead.
+- Reworked the algorithm for scrolling messages to end.
+- Changed profile import icon.
