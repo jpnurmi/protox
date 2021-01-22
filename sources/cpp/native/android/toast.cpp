@@ -1,4 +1,4 @@
-#include "toasts.h"
+#include "toast.h"
 
 bool QtToast::show(const QVariant &toastParameters)
 {

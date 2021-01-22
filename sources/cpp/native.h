@@ -4,7 +4,7 @@
 #include "common.h"
 
 #if defined (Q_OS_ANDROID)
-#include "native/android/toasts.h"
+#include "native/android/toast.h"
 #include "native/android/photodialog.h"
 #include "native/android/folderdialog.h"
 #include "native/android/qrcodescanner.h"
