@@ -2,7 +2,7 @@
 
 #include "sources/cpp/native/android/qandroidjniobjecttools.h"
 
-bool QtNotification::show(const QVariant &notificationParameters)
+void QtNotification::show(const QVariant &notificationParameters)
 {
 	QVariantMap parameters = notificationParameters.toMap();
 	QString caption = parameters.value("caption").toString();
@@ -23,10 +23,9 @@ bool QtNotification::show(const QVariant &notificationParameters)
 											  (jint)id,
 											  (jint)type,
 											  javaParameters.object());
-	return true;
 }
 
-bool QtNotification::cancel(const QVariant &notificationParameters)
+void QtNotification::cancel(const QVariant &notificationParameters)
 {
 	QVariantMap parameters = notificationParameters.toMap();
 	int id = parameters.value("id").toInt();
@@ -41,15 +40,12 @@ bool QtNotification::cancel(const QVariant &notificationParameters)
 											  (jint)id,
 											  javaParamteres.object());
 
-	return true;
 }
 
-bool QtNotification::cancelAll()
+void QtNotification::cancelAll()
 {
 	QAndroidJniObject::callStaticMethod<void>("notifications/QtAndroidNotifications",
 											  "cancelAll");
-
-	return true;
 }
 
 int QtNotification::getNotificationId(bool cancel)

@@ -10,9 +10,9 @@ class QtNotification : public QObject
 public:
 	explicit QtNotification() {}
 
-	Q_INVOKABLE bool show(const QVariant &notificationParameters);
-	Q_INVOKABLE bool cancel(const QVariant &notificationParameters);
-	Q_INVOKABLE bool cancelAll();
+	Q_INVOKABLE void show(const QVariant &notificationParameters);
+	Q_INVOKABLE void cancel(const QVariant &notificationParameters);
+	Q_INVOKABLE void cancelAll();
 	Q_INVOKABLE int getNotificationId(bool cancel = false);
 
 	static void declareQML() ;
