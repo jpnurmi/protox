@@ -44,18 +44,18 @@ HEADERS += \
 android {
 SOURCES += sources/cpp/native/android/photodialog.cpp \
 	sources/cpp/native/android/folderdialog.cpp \
-	sources/cpp/native/android/toasts.cpp \
 	sources/cpp/native/android/qrcodescanner.cpp \
 	sources/cpp/native/android/statusbar.cpp \
 	sources/cpp/native/android/notification.cpp \
-	sources/cpp/native/android/qandroidjniobjecttools.cpp
+	sources/cpp/native/android/qandroidjniobjecttools.cpp \
+	sources/cpp/native/android/toast.cpp
 HEADERS += sources/cpp/native/android/photodialog.h \
 	sources/cpp/native/android/folderdialog.h \
-	sources/cpp/native/android/toasts.h \
 	sources/cpp/native/android/qrcodescanner.h \
 	sources/cpp/native/android/statusbar.h \
 	sources/cpp/native/android/notification.h \
-	sources/cpp/native/android/qandroidjniobjecttools.h
+	sources/cpp/native/android/qandroidjniobjecttools.h \
+	sources/cpp/native/android/toast.h
 }
 
 LIBS += -ltoxcore -ltoxencryptsave
