@@ -7,9 +7,6 @@
 #include "qtutf8bytelimitvalidator.h"
 #include "settings.h"
 
-#include "components/QtMobileNotification/QtNotification.h"
-#include "components/QtStatusBar/QtStatusBar.h"
-
 QmlCBridge *qmlbridge = nullptr;
 QSettingsExt *settings = nullptr;
 QtNotification *notification = nullptr;

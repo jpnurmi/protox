@@ -24,12 +24,12 @@ Popup {
     onProfileCreationChanged: {
         if (profileCreation) {
             if (inPortrait) {
-                statusBar.color = getApplicationTheme().loginProfileCreationPrimaryColor
+                statusBar.setColor(getApplicationTheme().loginProfileCreationPrimaryColor)
             } else {
-                statusBar.color = getApplicationTheme().loginProfileCreationPrimaryLandscapeColor
+                statusBar.setColor(getApplicationTheme().loginProfileCreationPrimaryLandscapeColor)
             }
         } else {
-            statusBar.color = getApplicationTheme().loginPrimaryColor
+            statusBar.setColor(getApplicationTheme().loginPrimaryColor)
         }
     }
     property bool instantFadeOut: false
@@ -49,9 +49,9 @@ Popup {
         onInPortraitChanged: {
             if (loginWindow.profileCreation) {
                 if (inPortrait) {
-                    statusBar.color = getApplicationTheme().loginProfileCreationPrimaryColor
+                    statusBar.setColor(getApplicationTheme().loginProfileCreationPrimaryColor)
                 } else {
-                    statusBar.color = getApplicationTheme().loginProfileCreationPrimaryLandscapeColor
+                    statusBar.setColor(getApplicationTheme().loginProfileCreationPrimaryLandscapeColor)
                 }
             }
         }
@@ -67,7 +67,7 @@ Popup {
         enabled = true
         notification.cancelAll()
         profileSelected = false
-        statusBar.color = getApplicationTheme().loginPrimaryColor
+        statusBar.setColor(getApplicationTheme().loginPrimaryColor)
         open()
         if (instant) {
             opacity = 1.0
@@ -135,7 +135,7 @@ Popup {
         if (doAutoLogin) {
             instantFadeOut = true
         }
-        statusBar.color = getTheme().primaryColor
+        statusBar.setColor(getTheme().primaryColor)
         loginWindow.close()
         loginPassword.clear()
         loginUsername.clear()

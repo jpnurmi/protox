@@ -8,6 +8,8 @@
 #include "native/android/photodialog.h"
 #include "native/android/folderdialog.h"
 #include "native/android/qrcodescanner.h"
+#include "native/android/notification.h"
+#include "native/android/statusbar.h"
 #include "native/android/qandroidjniobjecttools.h"
 #endif
 

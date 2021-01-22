@@ -1,14 +1,12 @@
-#include "QtStatusBar_p.h"
+#include "statusbar.h"
 
-#include <QtAndroid>
+// fixme: move this code somewhere else?
 
 // WindowManager.LayoutParams
 #define FLAG_TRANSLUCENT_STATUS 0x04000000
 #define FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS 0x80000000
-// View
-#define SYSTEM_UI_FLAG_LIGHT_STATUS_BAR 0x00002000
 
-static QAndroidJniObject getAndroidWindow()
+QAndroidJniObject QtStatusBar::getAndroidWindow()
 {
 	QAndroidJniObject window = QtAndroid::androidActivity().callObjectMethod("getWindow", "()Landroid/view/Window;");
 	window.callMethod<void>("addFlags", "(I)V", FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
@@ -16,23 +14,15 @@ static QAndroidJniObject getAndroidWindow()
 	return window;
 }
 
-bool QtStatusBarPrivate::isAvailable_sys()
+void QtStatusBar::setColor(const QColor &color)
 {
-	return QtAndroid::androidSdkVersion() >= 21;
-}
-
-void QtStatusBarPrivate::setColor_sys(const QColor &color)
-{
-	if (QtAndroid::androidSdkVersion() < 21)
-		return;
-
 	QtAndroid::runOnAndroidThread([=]() {
 		QAndroidJniObject window = getAndroidWindow();
 		window.callMethod<void>("setStatusBarColor", "(I)V", color.rgba());
 	});
 }
 
-void QtStatusBarPrivate::setTheme_sys(QtStatusBar::Theme theme)
+void QtStatusBar::setTheme(Theme theme)
 {
 	if (QtAndroid::androidSdkVersion() < 23)
 		return;
@@ -40,11 +30,19 @@ void QtStatusBarPrivate::setTheme_sys(QtStatusBar::Theme theme)
 	QtAndroid::runOnAndroidThread([=]() {
 		QAndroidJniObject window = getAndroidWindow();
 		QAndroidJniObject view = window.callObjectMethod("getDecorView", "()Landroid/view/View;");
-		int visibility = view.callMethod<int>("getSystemUiVisibility", "()I");
-		if (theme == QtStatusBar::Theme::Light)
+		int visibility = view.callMethod<jint>("getSystemUiVisibility", "()I");
+
+		if (theme == QtStatusBar::Theme::Light) {
 			visibility |= SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-		else
+		} else {
 			visibility &= ~SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+		}
+		
 		view.callMethod<void>("setSystemUiVisibility", "(I)V", visibility);
 	});
+}
+
+void QtStatusBar::declareQML()
+{
+	qmlRegisterType<QtStatusBar>("QtStatusBar", 1, 0, "StatusBar");
 }

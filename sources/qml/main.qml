@@ -95,7 +95,7 @@ ApplicationWindow {
                 return
             }
             loginWindow.open()
-            statusBar.color = getApplicationTheme().loginPrimaryColor
+            statusBar.setColor(getApplicationTheme().loginPrimaryColor)
             bridge.hideSplashScreen()
         }
     }

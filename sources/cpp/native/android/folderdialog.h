@@ -5,7 +5,8 @@
 
 class QtFolderDialogActivityResultReceiver;
 
-class QtFolderDialog : public QObject{
+class QtFolderDialog : public QObject
+{
 	Q_OBJECT
 	Q_PROPERTY(QString folderUrl READ getFolderUrl)
 

@@ -17,7 +17,7 @@ bool QtFolderDialog::open()
 		"org/protox/activity/QtActivityEx",
 		"createChooseFolderIntent",
 		"()Landroid/content/Intent;");
-		QtAndroid::startActivity(intent, 12051978, m_activityResultReceiver);
+		QtAndroid::startActivity(intent, 1, m_activityResultReceiver);
 	});
 
 	return true;

@@ -19,7 +19,7 @@ bool QtPhotoDialog::open()
 		"createChoosePhotoIntent",
 		"(Ljava/lang/String;Z)Landroid/content/Intent;", 
 		javaString.object(), jboolean(m_selectMultiple));
-		QtAndroid::startActivity(intent, 12051978, m_activityResultReceiver);
+		QtAndroid::startActivity(intent, 1, m_activityResultReceiver);
 	});
 
 	return true;

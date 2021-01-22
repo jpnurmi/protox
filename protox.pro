@@ -46,38 +46,16 @@ SOURCES += sources/cpp/native/android/photodialog.cpp \
 	sources/cpp/native/android/folderdialog.cpp \
 	sources/cpp/native/android/toasts.cpp \
 	sources/cpp/native/android/qrcodescanner.cpp \
+	sources/cpp/native/android/statusbar.cpp \
+	sources/cpp/native/android/notification.cpp \
 	sources/cpp/native/android/qandroidjniobjecttools.cpp
 HEADERS += sources/cpp/native/android/photodialog.h \
 	sources/cpp/native/android/folderdialog.h \
 	sources/cpp/native/android/toasts.h \
 	sources/cpp/native/android/qrcodescanner.h \
+	sources/cpp/native/android/statusbar.h \
+	sources/cpp/native/android/notification.h \
 	sources/cpp/native/android/qandroidjniobjecttools.h
-}
-
-# Components 
-
-SOURCES += \ 
-	# Notifications
-	sources/cpp/components/QtMobileNotification/QtNotification.cpp \
-	sources/cpp/components/QtMobileNotification/QtNotifierFactory.cpp \
-	# StatusBar
-	sources/cpp/components/QtStatusBar/QtStatusBar.cpp
-HEADERS += \ 
-	# Notifications
-	sources/cpp/components/QtMobileNotification/QtNotification.h \
-	sources/cpp/components/QtMobileNotification/QtAbstractNotifier.h \
-	sources/cpp/components/QtMobileNotification/QtNotifierFactory.h \
-	# StatusBar
-	sources/cpp/components/QtStatusBar/QtStatusBar.h \
-	sources/cpp/components/QtStatusBar/QtStatusBar_p.h
-
-android {
-SOURCES += \
-	# Notifications
-	sources/cpp/components/QtMobileNotification/QtAndroidNotifier.cpp \
-	# StatusBar
-	sources/cpp/components/QtStatusBar/QtAndroidStatusBar.cpp
-HEADERS += sources/cpp/components/QtMobileNotification/QtAndroidNotifier.h
 }
 
 LIBS += -ltoxcore -ltoxencryptsave

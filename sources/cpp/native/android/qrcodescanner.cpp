@@ -21,7 +21,7 @@ bool QtQRCodeScanner::open()
 		"()Landroid/content/Intent;");
 
 		if (intent.object()) {
-			QtAndroid::startActivity(intent, 12051978, m_activityResultReceiver);
+			QtAndroid::startActivity(intent, 1, m_activityResultReceiver);
 			result = true;
 		} else {
 			result = QtAndroid::androidActivity().callMethod<jboolean>("browseForQRCodeScanner", "()Z");

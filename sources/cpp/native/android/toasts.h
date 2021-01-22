@@ -3,7 +3,8 @@
 
 #include "sources/cpp/common.h"
 
-class QtToast : public QObject{
+class QtToast : public QObject
+{
 	Q_OBJECT
 
 public:

@@ -5,7 +5,8 @@
 
 class QtPhotoDialogActivityResultReceiver;
 
-class QtPhotoDialog : public QObject{
+class QtPhotoDialog : public QObject
+{
 	Q_OBJECT
 	Q_PROPERTY(QString imageUrl READ getImageUrl)
 	Q_PROPERTY(QStringList imageUrls READ getImageUrls)

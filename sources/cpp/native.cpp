@@ -2,8 +2,6 @@
 #include "main.h"
 #include "db.h"
 
-#include "components/QtMobileNotification/QtNotification.h"
-
 extern QmlCBridge *qmlbridge;
 
 #ifdef Q_OS_ANDROID
