@@ -16,7 +16,7 @@ class QtPhotoDialog : public QObject
 public:
 	explicit QtPhotoDialog();
 	~QtPhotoDialog();
-	Q_INVOKABLE bool open();
+	Q_INVOKABLE void open();
 
 	QString getImageUrl() { return m_imageUrl; }
 	void setImageUrl(const QString &imageUrl) { m_imageUrl = imageUrl; }

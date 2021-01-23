@@ -10,7 +10,7 @@ QtPhotoDialog::~QtPhotoDialog()
 	delete m_activityResultReceiver;
 }
 
-bool QtPhotoDialog::open()
+void QtPhotoDialog::open()
 {
 	QtAndroid::runOnAndroidThread([=]() {
 		QAndroidJniObject javaString = QAndroidJniObject::fromString(m_title);
@@ -21,8 +21,6 @@ bool QtPhotoDialog::open()
 		javaString.object(), jboolean(m_selectMultiple));
 		QtAndroid::startActivity(intent, 1, m_activityResultReceiver);
 	});
-
-	return true;
 }
 
 QtPhotoDialogActivityResultReceiver::QtPhotoDialogActivityResultReceiver(QtPhotoDialog *photoPickerDialog)

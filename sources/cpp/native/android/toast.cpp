@@ -1,8 +1,7 @@
 #include "toast.h"
 
-bool QtToast::show(const QVariant &toastParameters)
+void QtToast::show(const QVariant &toastParameters)
 {
-#if defined (Q_OS_ANDROID)
 	QVariantMap parameters = toastParameters.toMap();
 	QString message = parameters.value("message").toString();
 	int duration = parameters.value("duration").toInt();
@@ -16,9 +15,6 @@ bool QtToast::show(const QVariant &toastParameters)
 																			(jint)duration);
 		toast.callMethod<void>("show");
 	});
-#endif
-
-	return true;
 }
 
 void QtToast::declareQML()

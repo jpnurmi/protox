@@ -13,7 +13,7 @@ class QtFolderDialog : public QObject
 public:
 	explicit QtFolderDialog();
 	~QtFolderDialog();
-	Q_INVOKABLE bool open();
+	Q_INVOKABLE void open();
 
 	void setFolderUrl(const QString &folderUrl) { m_folderUrl = folderUrl; }
 	QString getFolderUrl() { return m_folderUrl; }

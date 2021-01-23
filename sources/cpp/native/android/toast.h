@@ -9,7 +9,7 @@ class QtToast : public QObject
 
 public:
 	QtToast() {}
-	Q_INVOKABLE bool show(const QVariant &toastParameters);
+	Q_INVOKABLE void show(const QVariant &toastParameters);
 
 	enum Duration {
 		Short = 0,

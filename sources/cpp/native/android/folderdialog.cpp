@@ -10,7 +10,7 @@ QtFolderDialog::~QtFolderDialog()
 	delete m_activityResultReceiver;
 }
 
-bool QtFolderDialog::open()
+void QtFolderDialog::open()
 {
 	QtAndroid::runOnAndroidThread([=]() {
 		QAndroidJniObject intent = QAndroidJniObject::callStaticObjectMethod(
@@ -19,8 +19,6 @@ bool QtFolderDialog::open()
 		"()Landroid/content/Intent;");
 		QtAndroid::startActivity(intent, 1, m_activityResultReceiver);
 	});
-
-	return true;
 }
 
 QtFolderDialogActivityResultReceiver::QtFolderDialogActivityResultReceiver(QtFolderDialog *folderPickerDialog)
