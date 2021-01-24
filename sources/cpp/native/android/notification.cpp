@@ -31,14 +31,14 @@ void QtNotification::cancel(const QVariant &notificationParameters)
 	int id = parameters.value("id").toInt();
 	int type = parameters.value("type").toInt();
 	QVariantMap additionalParameters = parameters.value("parameters").toMap();
-	QAndroidJniObject javaParamteres = QAndroidJniObjectTools::fromVariantMap(additionalParameters);
+	QAndroidJniObject javaParameters = QAndroidJniObjectTools::fromVariantMap(additionalParameters);
 
 	QAndroidJniObject::callStaticMethod<void>("notifications/QtAndroidNotifications",
 											  "cancel",
 											  "(IILjava/util/HashMap;)V",
 											  (jint)type,
 											  (jint)id,
-											  javaParamteres.object());
+											  javaParameters.object());
 
 }
 
